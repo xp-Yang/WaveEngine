@@ -4,6 +4,8 @@ opengl.sln
 
 x64/
 
+opengl/x64/
+
 # Compiled Object files
 *.slo
 *.lo
