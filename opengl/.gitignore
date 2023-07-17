@@ -4,4 +4,15 @@ opengl.sln
 
 x64/
 
+# Compiled Object files
+*.slo
+*.lo
+*.o
+*.obj
 
+# Executables
+*.exe
+*.out
+*.app
+
+.env
