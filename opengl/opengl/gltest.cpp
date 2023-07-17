@@ -73,7 +73,7 @@ void set_view_port(int width, int height) {
 }
 
 void init_shaders() {
-    MyShader shader("D:/Code/opengl/shader/vshader.vs", "D:/Code/opengl/shader/fshader.fs");
+    MyShader shader("../shader/vshader.vs", "../shader/fshader.fs");
 
     //const GLchar* vertexShaderSource2 = "#version 330 core\n"
     //    "layout (location = 0) in vec3 position;\n"
