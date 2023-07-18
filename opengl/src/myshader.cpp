@@ -61,7 +61,8 @@ MyShader::MyShader(const char* vertexPath, const char* fragmentPath)
     glGetShaderiv(fragment, GL_COMPILE_STATUS, &success);
     if (!success)
     {
-        std::cout << "ERROR::SHADER::FRAGMENT::COMPILATION_FAILED\n"<< std::endl;
+        glGetShaderInfoLog(fragment, 512, NULL, infoLog);
+        std::cout << "ERROR::SHADER::FRAGMENT::COMPILATION_FAILED\n"<< infoLog << std::endl;
     };
 
     // ×ÅÉ«Æ÷³ÌÐò
@@ -93,4 +94,14 @@ void MyShader::setInt(const std::string& name, int value) const
 void MyShader::setFloat(const std::string& name, float value) const
 {
     glUniform1f(glGetUniformLocation(m_id, name.c_str()), value);
+}
+void MyShader::setFloat4(const std::string& name, float value1, float value2, float value3, float value4) const
+{
+    GLint location = glGetUniformLocation(m_id, "name");
+    glUniform4f(location, value1, value2, value3, value4);
+}
+void MyShader::setMatrix(const std::string& name, int count, const glm::mat4& mat_value) const
+{
+    GLuint transformLoc = glGetUniformLocation(m_id, name.c_str());
+    glUniformMatrix4fv(transformLoc, count, GL_FALSE, glm::value_ptr(mat_value));
 }

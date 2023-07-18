@@ -4,6 +4,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include "myshader.hpp"
+#include "stb_image.h"
 
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode)
 {
@@ -28,7 +29,8 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
         break;
     case GLFW_KEY_4:
         break;
-    case GLFW_KEY_5:
+    case GLFW_KEY_SPACE:
+
         break;
     default:
         break;
@@ -72,27 +74,6 @@ void set_view_port(int width, int height) {
     glViewport(0, 0, width, height);
 }
 
-void init_shaders() {
-    MyShader shader("../shader/vshader.vs", "../shader/fshader.fs");
-
-    //const GLchar* vertexShaderSource2 = "#version 330 core\n"
-    //    "layout (location = 0) in vec3 position;\n"
-    //    "layout (location = 1) in vec3 position2;\n"
-    //    "layout (location = 2) in vec3 position3;\n"
-    //    "void main()\n"
-    //    "{\n"
-    //    "gl_Position = vec4(position2.x, position2.y, position2.z, 1.0);\n"
-    //    "}\0";
-    //const GLchar* fragmentShaderSource2 = "#version 330 core\n"
-    //    "uniform vec4 vari_color;\n"
-    //    "out vec4 color\n"
-    //    "void main()\n"
-    //    "{\n"
-    //    //"color = vari_color;\n"
-    //    "color = vec4(0.0f, 1.0f, 1.0f, 1.0f);\n"
-    //    "}\n\0";
-}
-
 int main()
 {
     GLFWwindow* window = create_window(1080, 720);
@@ -112,10 +93,10 @@ int main()
 
     GLfloat cubeVertex[] =
     {
-        -0.5f, -0.5f,  0.5f,     0.0f, 1.0f,     1.0f, 0.0f, 1.0f, 1.0f, // 0
-         0.5f, -0.5f,  0.5f,     0.0f, 1.0f,     0.0f, 1.0f, 1.0f, 1.0f, // 1
-         0.5f,  0.5f,  0.5f,     1.0f, 1.0f,     1.0f, 1.0f, 0.0f, 1.0f, // 2
-        -0.5f,  0.5f,  0.5f,     1.0f, 1.0f,     1.0f, 0.5f, 1.0f, 1.0f, // 3
+        -0.5f, -0.5f,  0.5f,     0.0f, 1.0f,     1.0f, 0.0f, 1.0f, 1.0f, // 0 左下
+         0.5f, -0.5f,  0.5f,     0.0f, 1.0f,     0.0f, 1.0f, 1.0f, 1.0f, // 1 右下
+         0.5f,  0.5f,  0.5f,     1.0f, 1.0f,     1.0f, 1.0f, 0.0f, 1.0f, // 2 右上
+        -0.5f,  0.5f,  0.5f,     1.0f, 1.0f,     1.0f, 0.5f, 1.0f, 1.0f, // 3 左上
         -0.5f, -0.5f, -0.5f,     0.0f, 1.0f,     0.5f, 1.0f, 1.0f, 1.0f, // 4
         -0.5f,  0.5f, -0.5f,     1.0f, 1.0f,     1.0f, 1.0f, 0.5f, 1.0f, // 5
          0.5f,  0.5f, -0.5f,     1.0f, 1.0f,     1.0f, 1.0f, 1.0f, 1.0f, // 6
@@ -129,6 +110,8 @@ int main()
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 9 * sizeof(GLfloat), (GLvoid*)(5 * sizeof(float)));
     glEnableVertexAttribArray(1);
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 9 * sizeof(float), (GLvoid*)(3 * sizeof(float)));
+    glEnableVertexAttribArray(2);
 
     GLubyte cubeIndices[] =
     {
@@ -144,6 +127,27 @@ int main()
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, cube_ibo);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(cubeIndices), cubeIndices, GL_STATIC_DRAW);
 
+    int width, height, nrChannels;
+    unsigned char* data = stbi_load("../images/desert.jpg", &width, &height, &nrChannels, 0);
+    GLuint cube_tex;
+    glGenTextures(1, &cube_tex);
+    glBindTexture(GL_TEXTURE_2D, cube_tex);
+    // 为当前绑定的纹理对象设置环绕、过滤方式
+    //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+    //第一个参数指定了纹理目标(Target)。设置为GL_TEXTURE_2D意味着会生成与当前绑定的纹理对象在同一个目标上的纹理（任何绑定到GL_TEXTURE_1D和GL_TEXTURE_3D的纹理不会受到影响）。
+    //第二个参数为纹理指定多级渐远纹理的级别，如果你希望单独手动设置每个多级渐远纹理的级别的话。这里我们填0，也就是基本级别。
+    //第三个参数告诉OpenGL我们希望把纹理储存为何种格式。我们的图像只有RGB值，因此我们也把纹理储存为RGB值。
+    //第四个和第五个参数设置最终的纹理的宽度和高度。我们之前加载图像的时候储存了它们，所以我们使用对应的变量。
+    //下个参数应该总是被设为0（历史遗留的问题）。
+    //第七第八个参数定义了源图的格式和数据类型。我们使用RGB值加载这个图像，并把它们储存为char(byte)数组，我们将会传入对应值。
+    //最后一个参数是真正的图像数据。
+    glGenerateMipmap(GL_TEXTURE_2D);
+    //释放图像的内存
+    stbi_image_free(data);
 
 
     GLuint VAO2;//一个id，vertext array object 句柄
@@ -181,23 +185,6 @@ int main()
 
 
 
-	//GLfloat test_vertices[] = {
-	//	0.0f, 0.5f, 0.0f,
-	//	0.0f, -0.5f, 0.0f,
-	//	0.5f, 0.0f, 0.0f,
-	//	0.5f, 0.5f, 0.0f,
-	//};
- //   //绑定第二个顶点缓冲对象VBO2
- //   GLuint VBO2;
- //   glGenBuffers(1, &VBO2);
- //   glBindBuffer(GL_ARRAY_BUFFER, VBO2);
- //   glBufferData(GL_ARRAY_BUFFER, sizeof(test_vertices), test_vertices, GL_STATIC_DRAW);
-	//glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (GLvoid*)0);
-	//glEnableVertexAttribArray(2);
- //   //解绑
- //   glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-
     glfwSetKeyCallback(window, key_callback);
     //Game Loop
     while (!glfwWindowShouldClose(window))
@@ -207,10 +194,14 @@ int main()
         glClear(GL_COLOR_BUFFER_BIT);
 
         shader.start_using();
-        GLuint transformLoc = glGetUniformLocation(shader.get_id(), "transform");
+        GLfloat timeValue = glfwGetTime();
         glm::mat4 trans = glm::mat4(1.0f);
-        trans = glm::rotate(trans, (GLfloat)glfwGetTime() / 5.0f, glm::vec3(0.5f, 0.3f, 0.5f));
-        glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(trans));
+        trans = glm::rotate(trans, timeValue / 5.0f, glm::vec3(0.5f, 0.3f, 0.5f));
+        shader.setMatrix("transform", 1, trans);
+
+        GLfloat normalization_time = (sin(timeValue) / 3) + 0.6;
+        shader.setFloat("time_var", normalization_time);
+
         glBindVertexArray(VAO1);
         glDrawElements(GL_TRIANGLES, sizeof(cubeIndices), GL_UNSIGNED_BYTE, 0); // 使用_ibo指定的36个索引来绘制。 
         glBindVertexArray(0);
@@ -219,13 +210,6 @@ int main()
         //glDrawArrays(GL_TRIANGLES, 0, 3);
         //glBindVertexArray(0);
 
-        //glUseProgram(shaderProgram2);
-        //GLfloat timeValue = glfwGetTime();
-        //GLfloat vari_value1 = (sin(timeValue) / 2) + 0.5;
-        //GLfloat vari_value2 = (cos(timeValue) / 2) + 0.5;
-        //GLfloat vari_value3 = (sin(2 * timeValue) / 2) + 0.5;
-        //GLint vertextColorLocation = glGetUniformLocation(shaderProgram2, "vari_color");
-        //glUniform4f(vertextColorLocation, vari_value1, vari_value2, vari_value3, 1.0f);
 
         glfwSwapBuffers(window);//函数会交换颜色缓冲（它是一个储存着GLFW窗口每一个像素颜色的大缓冲），它在这一迭代中被用来绘制，并输出显示在屏幕上。
     }

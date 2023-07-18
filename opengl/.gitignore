@@ -8,6 +8,8 @@ lib/*.lib
 
 x64/
 
+Debug/
+
 opengl/x64/
 
 # Compiled Object files
