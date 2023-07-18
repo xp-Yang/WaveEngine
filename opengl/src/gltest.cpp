@@ -101,7 +101,7 @@ int main()
     //glfwGetFramebufferSize(window, &width, &height);
     set_view_port(720, 720);
 
-    MyShader shader("D:/Code/opengl/shader/vshader.vs", "D:/Code/opengl/shader/fshader.fs");
+    MyShader shader("../shader/vshader.vs", "../shader/fshader.fs");
 
     //创建VAO
     //VAO是一个保存了所有顶点数据属性的状态结合，它存储了顶点数据的格式以及顶点数据所需的VBO对象的引用。
