@@ -2,7 +2,7 @@
 
 opengl.sln
 
-*.lib
+lib/*.lib
 
 *.vcxproj
 
