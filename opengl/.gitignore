@@ -4,6 +4,8 @@ opengl.sln
 
 *.lib
 
+*.vcxproj
+
 x64/
 
 opengl/x64/
