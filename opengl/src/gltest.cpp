@@ -19,23 +19,42 @@ glm::mat4 project = glm::perspective(glm::radians(45.0f), /*1.0f*/WINDOW_WIDTH /
 
 MyCamera camera({ 0.0f, 0.5f, 2.0f }, glm::vec3(0.0f));
 
+float deltaTime = 0.0f; // 当前帧与上一帧的时间差
+float lastFrame = 0.0f; // 上一帧的时间
+float lastFrameX = WINDOW_WIDTH / 2;
+float lastFrameY = WINDOW_HEIGHT / 2;
+
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode)
 {
-    auto view = camera.get_view();
     if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
         glfwSetWindowShouldClose(window, GL_TRUE);
-    camera.key_process(key);
+    camera.key_process(key, deltaTime);
 }
 
 void mouse_callback(GLFWwindow* window, double xpos, double ypos) 
 { 
+    static bool firstMouse = true;
+    if (firstMouse)
+    {
+        lastFrameX = xpos;
+        lastFrameY = ypos;
+        firstMouse = false;
+        return;
+    }
 
+    float delta_x = xpos - lastFrameX;
+    float delta_y = -(ypos - lastFrameY); // 注意这里是相反的，因为glfwSetCursorPosCallback返回给mouse_callback函数的 (x,y) 是鼠标相对于窗口左上角的位置，所以需要将 (ypos - lastY) 取反
+    lastFrameX = xpos;
+    lastFrameY = ypos;
+
+    camera.mouse_process(delta_x, delta_y);
 }
 
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 {
 
 }
+
 
 GLFWwindow* create_window(int size_x, int size_y) {
     //glfwInit函数来初始化GLFW，glfwWindowHint函数来配置GLFW
@@ -78,6 +97,8 @@ int main()
 {
     GLFWwindow* window = create_window(WINDOW_WIDTH, WINDOW_HEIGHT);
 
+    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+
     glfwSetKeyCallback(window, key_callback);
     glfwSetCursorPosCallback(window, mouse_callback);
     glfwSetScrollCallback(window, scroll_callback);
@@ -112,6 +133,9 @@ int main()
         shader.start_using();
 
         GLfloat timeValue = glfwGetTime();
+        deltaTime = timeValue - lastFrame;
+        lastFrame = timeValue;
+
         GLfloat normalization_time = (sin(timeValue) / 3) + 0.6;
         shader.setFloat("time_var", normalization_time);
 

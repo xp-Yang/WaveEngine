@@ -34,8 +34,8 @@ public:
 
     void surround_with_target(const float radius);
 
-    void key_process(int key);
-    void mouse_process(double xpos, double ypos);
+    void key_process(int key, float frame_time);
+    void mouse_process(double delta_x, double delta_y);
     void mouse_scroll_process(double yoffset);
 
 private:
@@ -46,9 +46,12 @@ private:
     glm::vec3 m_direction;
     glm::mat4 m_view_matrix;
 
+    float m_pitch = 0.0f;
+    float m_yaw = -90.0f;
+    float m_roll = 0.0f;
+
     float zoom;
 
-    void set_view(const glm::mat4& view_matrix);
 };
 
 
