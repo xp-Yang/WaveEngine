@@ -1,5 +1,4 @@
-#include "myshader.hpp"
-
+#include "MyShader.hpp"
 #include <string>
 #include <fstream>
 #include <sstream>

@@ -3,65 +3,38 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
-#include "myshader.hpp"
-#include "stb_image.h"
+#include "MyShader.hpp"
 #include "MyCube.hpp"
+#include "MyCamera.hpp"
+#include "stb_image.h"
 
 #define WINDOW_WIDTH 1080.0f
 #define WINDOW_HEIGHT 720.0f
-#define STEP 0.1f
 
 glm::mat4 model = glm::mat4(1.0f);
-glm::mat4 view = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, -15 * STEP));
 glm::mat4 project = glm::perspective(glm::radians(45.0f), /*1.0f*/WINDOW_WIDTH / WINDOW_HEIGHT, 0.1f, 100.0f);
 //它的第一个参数定义了fov的值。如果想要一个真实的观察效果，它的值通常设置为45.0f，但想要一个末日风格的结果你可以将其设置一个更大的值。
 //第二个参数设置了宽高比，由视口的宽除以高所得。宽高比为1的话，视口的宽高比影响了渲染出来的立方体的宽高比。
 //第三和第四个参数设置了平截头体的近和远平面。我们通常设置近距离为0.1f，而远距离设为100.0f。所有在近平面和远平面内且处于平截头体内的顶点都会被渲染。
 
+MyCamera camera({ 0.0f, 0.5f, 2.0f }, glm::vec3(0.0f));
+
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode)
 {
+    auto view = camera.get_view();
     if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
         glfwSetWindowShouldClose(window, GL_TRUE);
-    switch (key) {
-    case GLFW_KEY_UP:
-        view = glm::translate(view, glm::vec3(0.0f, STEP, 0.0f));
-        break;
-    case GLFW_KEY_LEFT:
-        view = glm::translate(view, glm::vec3(-STEP, 0.0f, 0.0f));
-        break;
-    case GLFW_KEY_RIGHT:
-        view = glm::translate(view, glm::vec3(STEP, 0.0f, 0.0f));
-        break;
-    case GLFW_KEY_DOWN:
-        view = glm::translate(view, glm::vec3(0.0f, -STEP, 0.0f));
-        break;
-    case GLFW_KEY_HOME:
-        view = glm::translate(view, glm::vec3(0.0f, 0.0f, STEP));
-        break;
-    case GLFW_KEY_END:
-        view = glm::translate(view, glm::vec3(0.0f, 0.0f, -STEP));
-        break;
-    case GLFW_KEY_1:
-        break;
-    case GLFW_KEY_2:
-        break;
-    case GLFW_KEY_3:
-        break;
-    case GLFW_KEY_4:
-        break;
-    case GLFW_KEY_SPACE:
+    camera.key_process(key);
+}
 
-        break;
-    default:
-        break;
-    }
+void mouse_callback(GLFWwindow* window, double xpos, double ypos) 
+{ 
 
-    std::cout << key << std::endl;
-    std::cout << view[0].x << " " << view[1].x << " " << view[2].x << " " << view[3].x << " " << std::endl;
-    std::cout << view[0].y << " " << view[1].y << " " << view[2].y << " " << view[3].y << " " << std::endl;
-    std::cout << view[0].z << " " << view[1].z << " " << view[2].z << " " << view[3].z << " " << std::endl;
-    std::cout << view[0].w << " " << view[1].w << " " << view[2].w << " " << view[3].w << " " << std::endl;
-    std::cout << std::endl;
+}
+
+void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
+{
+
 }
 
 GLFWwindow* create_window(int size_x, int size_y) {
@@ -104,7 +77,11 @@ void set_view_port(int width, int height) {
 int main()
 {
     GLFWwindow* window = create_window(WINDOW_WIDTH, WINDOW_HEIGHT);
+
     glfwSetKeyCallback(window, key_callback);
+    glfwSetCursorPosCallback(window, mouse_callback);
+    glfwSetScrollCallback(window, scroll_callback);
+
     glEnable(GL_DEPTH_TEST);
 
     //int width, height;
@@ -116,7 +93,7 @@ int main()
     MyCube cube("../images/desert.jpg");
 
     shader.start_using();
-    shader.setMatrix("view", 1, view);
+    shader.setMatrix("view", 1, camera.get_view());
     shader.setMatrix("projection", 1, project);
 
     glm::vec3 cubePositions[] = {
@@ -138,13 +115,13 @@ int main()
         GLfloat normalization_time = (sin(timeValue) / 3) + 0.6;
         shader.setFloat("time_var", normalization_time);
 
-        shader.setMatrix("view", 1, view);
+        shader.setMatrix("view", 1, camera.get_view());
         shader.setMatrix("projection", 1, project);
 
         glBindVertexArray(cube.get_vao_id());
         for (int i = 0; i < 3; i++) {
             model = glm::mat4(1.0f);
-            model = glm::rotate(model, normalization_time * 20.0f, glm::vec3(0.5f, 0.3f, 0.5f));
+            //model = glm::rotate(model, normalization_time * 20.0f, glm::vec3(0.5f, 0.3f, 0.5f));
             model = glm::translate(model, cubePositions[i]);
             shader.setMatrix("model", 1, model);
             glDrawElements(GL_TRIANGLES, cube.get_elements_count(), GL_UNSIGNED_BYTE, 0); // 使用cube.ibo指定的36个索引来绘制。 
