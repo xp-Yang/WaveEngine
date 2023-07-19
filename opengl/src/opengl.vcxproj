@@ -21,11 +21,15 @@
   <ItemGroup>
     <ClCompile Include="glad.c" />
     <ClCompile Include="gltest.cpp" />
-    <ClCompile Include="myshader.cpp" />
+    <ClCompile Include="MyCamera.cpp" />
+    <ClCompile Include="MyCube.cpp" />
+    <ClCompile Include="MyShader.cpp" />
     <ClCompile Include="stb_image.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="myshader.hpp" />
+    <ClInclude Include="MyCamera.hpp" />
+    <ClInclude Include="MyCube.hpp" />
+    <ClInclude Include="MyShader.hpp" />
     <ClInclude Include="stb_image.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
