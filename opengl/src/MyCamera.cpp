@@ -60,9 +60,7 @@ void MyCamera::key_process(int key, float frame_time)
         break;
     }
 
-
     m_view_matrix = glm::lookAt(m_pos, m_pos + m_direction, up);
-
 
     std::cout << key << std::endl;
     printf("%.3f %.3f %.3f %.3f \n", m_view_matrix[0].x, m_view_matrix[1].x, m_view_matrix[2].x, m_view_matrix[3].x);
@@ -93,6 +91,11 @@ void MyCamera::mouse_process(double delta_x, double delta_y)
     m_direction = glm::normalize(m_direction);
 
     m_view_matrix = glm::lookAt(m_pos, m_pos + m_direction, up);
+}
+
+void MyCamera::mouse_scroll_process(double yoffset)
+{
+    // adjust fov by zoom
 }
 
 const glm::vec3& MyCamera::get_position() {
