@@ -4,8 +4,6 @@ opengl.sln
 
 lib/*.lib
 
-*.vcxproj
-
 x64/
 
 Debug/

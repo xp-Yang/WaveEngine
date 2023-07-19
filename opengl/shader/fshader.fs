@@ -9,5 +9,5 @@ out vec4 color;
 void main()
 {
     //color = pass_color;
-	color = texture(Texture, pass_texCoord);
+	color = texture(Texture, pass_texCoord) * pass_color;
 }
