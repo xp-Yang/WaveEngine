@@ -13,9 +13,9 @@
 
 glm::mat4 model = glm::mat4(1.0f);
 glm::mat4 view = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, -15 * STEP));
-glm::mat4 project = glm::perspective(glm::radians(45.0f), WINDOW_WIDTH / WINDOW_HEIGHT, 0.1f, 100.0f);
+glm::mat4 project = glm::perspective(glm::radians(45.0f), /*1.0f*/WINDOW_WIDTH / WINDOW_HEIGHT, 0.1f, 100.0f);
 //它的第一个参数定义了fov的值。如果想要一个真实的观察效果，它的值通常设置为45.0f，但想要一个末日风格的结果你可以将其设置一个更大的值。
-//第二个参数设置了宽高比，由视口的宽除以高所得。
+//第二个参数设置了宽高比，由视口的宽除以高所得。宽高比为1的话，视口的宽高比影响了渲染出来的立方体的宽高比。
 //第三和第四个参数设置了平截头体的近和远平面。我们通常设置近距离为0.1f，而远距离设为100.0f。所有在近平面和远平面内且处于平截头体内的顶点都会被渲染。
 
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode)
@@ -104,58 +104,27 @@ void set_view_port(int width, int height) {
 int main()
 {
     GLFWwindow* window = create_window(WINDOW_WIDTH, WINDOW_HEIGHT);
+    glfwSetKeyCallback(window, key_callback);
+    glEnable(GL_DEPTH_TEST);
 
     //int width, height;
     //glfwGetFramebufferSize(window, &width, &height);
-    set_view_port(WINDOW_HEIGHT, WINDOW_HEIGHT);
+    set_view_port(WINDOW_WIDTH, WINDOW_HEIGHT);
 
     MyShader shader("../shader/vshader.vs", "../shader/fshader.fs");
 
     MyCube cube("../images/desert.jpg");
 
-
- //   GLuint VAO2;//一个id，vertext array object 句柄
- //   glGenVertexArrays(1, &VAO2);
- //   glBindVertexArray(VAO2);
- //   GLfloat triVertex[] =
- //   {
- //       -1.0f, -1.0f, 0.0f,
- //       -0.5f, -0.5f, 0.0f,
- //       -0.5f, -1.0f, 0.0f,
- //   };
- //   //绑定第一个顶点缓冲对象VBO1
- //   GLuint tri_vbo;//一个名称（vertex buffer object 句柄）
-	//glGenBuffers(1, &tri_vbo);
- //   //第一个参数是要生成的缓冲对象的名称的数量，第二个是用来存储缓冲对象名称的数组
- //   //该函数会返回n个缓冲对象的名称到数组里。(它实际上并没有创建任何东西。它只返回当前未用作缓冲区名称的整数列表。)
- //   //glGenBuffers实际上根本不需要，它只是作为一个方便的函数来给你一个未使用的整数。
- //   //生成的名称由 GL 标记为已使用，仅用于名称生成。以这种方式标记的对象名称不会被其他调用返回以生成相同类型的名称，直到通过删除这些名称再次将其标记为未使用
-	//glBindBuffer(GL_ARRAY_BUFFER, tri_vbo);
- //   //第一个参数指定缓冲对象的类型，第二个参数指定缓冲对象的名称，也就是我们在glGenBuffers()里生成的名称
- //   //该函数创建 0 size 的缓冲对象，其具有默认状态 GL_READ_WRITE 和 GL_STATIC_DRAW
- //   //该函数将缓冲对象绑定到OpenGL上下文环境中。
-	//glBufferData(GL_ARRAY_BUFFER, sizeof(triVertex), triVertex, GL_STATIC_DRAW);
- //   //分配显存，真正生成缓冲对象，该缓冲对象具有名称(glGenBuffers)、类型(glBindBuffer);
- //   //它会把之前定义的顶点数据传输到当前绑定的显存缓冲区中，（顶点数据传入GPU）
-	//glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (GLvoid*)0);
- //   //通知OpenGL如何解释这些顶点数据
- //   //第一个参数指定顶点属性位置，与顶点着色器中layout(location=0)对应。
- //   //第二个参数指定顶点属性大小。
- //   //第三个参数指定数据类型。
- //   //第四个参数定义是否希望数据被标准化。
- //   //第五个参数是步长（Stride），指定在连续的顶点属性之间的间隔。
- //   //第六个参数表示我们的位置数据在缓冲区起始位置的偏移量。
-	//glEnableVertexAttribArray(0);
-
+    shader.start_using();
+    shader.setMatrix("view", 1, view);
+    shader.setMatrix("projection", 1, project);
 
     glm::vec3 cubePositions[] = {
         glm::vec3(0.0f,  0.0f,  0.0f),
-        glm::vec3(2.0f,  5.0f, -15.0f),
-        glm::vec3(-3.8f, -2.0f, -12.3f),
+        glm::vec3(0.6f,  0.3f, -0.4f),
+        glm::vec3(-0.3f, -0.2f, -0.3f),
     };
 
-    glfwSetKeyCallback(window, key_callback);
-    glEnable(GL_DEPTH_TEST);
     //Game Loop
     while (!glfwWindowShouldClose(window))
     {
@@ -169,16 +138,16 @@ int main()
         GLfloat normalization_time = (sin(timeValue) / 3) + 0.6;
         shader.setFloat("time_var", normalization_time);
 
-        model = glm::rotate(glm::mat4(1.0f), normalization_time * 20.0f, glm::vec3(0.5f, 0.3f, 0.5f));
-
-        shader.setMatrix("model", 1, model);
         shader.setMatrix("view", 1, view);
         shader.setMatrix("projection", 1, project);
 
         glBindVertexArray(cube.get_vao_id());
         for (int i = 0; i < 3; i++) {
+            model = glm::mat4(1.0f);
+            model = glm::rotate(model, normalization_time * 20.0f, glm::vec3(0.5f, 0.3f, 0.5f));
             model = glm::translate(model, cubePositions[i]);
-            glDrawElements(GL_TRIANGLES, /*sizeof(cubeIndices)*/36, GL_UNSIGNED_BYTE, 0); // 使用_ibo指定的36个索引来绘制。 
+            shader.setMatrix("model", 1, model);
+            glDrawElements(GL_TRIANGLES, cube.get_elements_count(), GL_UNSIGNED_BYTE, 0); // 使用cube.ibo指定的36个索引来绘制。 
         }
         glBindVertexArray(0);
 
@@ -189,8 +158,43 @@ int main()
         glfwSwapBuffers(window);//函数会交换颜色缓冲（它是一个储存着GLFW窗口每一个像素颜色的大缓冲），它在这一迭代中被用来绘制，并输出显示在屏幕上。
     }
 
-    //glDeleteVertexArrays(1, &VAO2);
-
     glfwTerminate();//调用glfwTerminate函数来释放GLFW分配的内存
     return 0;
+}
+
+GLuint test_vao()
+{
+    GLuint test_vao;//一个id，vertext array object 句柄
+    glGenVertexArrays(1, &test_vao);
+    glBindVertexArray(test_vao);
+    //   GLfloat triVertex[] =
+    //   {
+    //       -1.0f, -1.0f, 0.0f,
+    //       -0.5f, -0.5f, 0.0f,
+    //       -0.5f, -1.0f, 0.0f,
+    //   };
+    //   //绑定第一个顶点缓冲对象VBO1
+    //   GLuint tri_vbo;//一个名称（vertex buffer object 句柄）
+    //   glGenBuffers(1, &tri_vbo);
+    //   //第一个参数是要生成的缓冲对象的名称的数量，第二个是用来存储缓冲对象名称的数组
+    //   //该函数会返回n个缓冲对象的名称到数组里。(它实际上并没有创建任何东西。它只返回当前未用作缓冲区名称的整数列表。)
+    //   //glGenBuffers实际上根本不需要，它只是作为一个方便的函数来给你一个未使用的整数。
+    //   //生成的名称由 GL 标记为已使用，仅用于名称生成。以这种方式标记的对象名称不会被其他调用返回以生成相同类型的名称，直到通过删除这些名称再次将其标记为未使用
+    //   glBindBuffer(GL_ARRAY_BUFFER, tri_vbo);
+    //   //第一个参数指定缓冲对象的类型，第二个参数指定缓冲对象的名称，也就是我们在glGenBuffers()里生成的名称
+    //   //该函数创建 0 size 的缓冲对象，其具有默认状态 GL_READ_WRITE 和 GL_STATIC_DRAW
+    //   //该函数将缓冲对象绑定到OpenGL上下文环境中。
+    //   glBufferData(GL_ARRAY_BUFFER, sizeof(triVertex), triVertex, GL_STATIC_DRAW);
+    //   //分配显存，真正生成缓冲对象，该缓冲对象具有名称(glGenBuffers)、类型(glBindBuffer);
+    //   //它会把之前定义的顶点数据传输到当前绑定的显存缓冲区中，（顶点数据传入GPU）
+    //   glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (GLvoid*)0);
+    //   //通知OpenGL如何解释这些顶点数据
+    //   //第一个参数指定顶点属性位置，与顶点着色器中layout(location=0)对应。
+    //   //第二个参数指定顶点属性大小。
+    //   //第三个参数指定数据类型。
+    //   //第四个参数定义是否希望数据被标准化。
+    //   //第五个参数是步长（Stride），指定在连续的顶点属性之间的间隔。
+    //   //第六个参数表示我们的位置数据在缓冲区起始位置的偏移量。
+    //   glEnableVertexAttribArray(0);
+    return test_vao;
 }

@@ -13,7 +13,7 @@ out vec2 pass_texCoord;
 
 void main()
 {
-    gl_Position = projection * view * model * vec4(in_pos.x, in_pos.y, in_pos.z, 1.0);
+    gl_Position = projection * view * model * vec4(in_pos, 1.0);
     pass_color = vec4(in_clr.x * time_var, in_clr.y * time_var, in_clr.z * time_var, 1.0);
 	pass_texCoord = in_texCoord;
 }

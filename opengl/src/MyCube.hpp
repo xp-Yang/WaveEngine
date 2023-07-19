@@ -18,6 +18,8 @@ public:
     GLuint get_ibo_id() { return m_ibo_id; }
     GLuint get_uv_id() { return m_uv_id; }
 
+    int get_elements_count() { return 36; }
+
 private:
     GLuint m_vao_id;
     GLuint m_texuture_id;
