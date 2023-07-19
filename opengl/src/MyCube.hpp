@@ -9,13 +9,25 @@
 
 class MyCube {
 public:
-    MyCube();
+    MyCube(const char* texture_path);
+    ~MyCube();
 
-    void generate_texture();
-    
+    GLuint get_vao_id() { return m_vao_id; }
+    GLuint get_texture_id() { return m_texuture_id; }
+    GLuint get_vbo_id() { return m_vbo_id; }
+    GLuint get_ibo_id() { return m_ibo_id; }
+    GLuint get_uv_id() { return m_uv_id; }
+
 private:
+    GLuint m_vao_id;
     GLuint m_texuture_id;
+    GLuint m_vbo_id;
+    GLuint m_ibo_id;
+    GLuint m_uv_id;
 
+    void create_vbo();
+    void generate_texture(int width, int height, unsigned char* data);
+    void create_vao();
 };
 
 #endif
