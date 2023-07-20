@@ -144,10 +144,9 @@ int main()
 
         glBindVertexArray(cube.get_vao_id());
         for (int i = 0; i < 3; i++) {
-            model = glm::mat4(1.0f);
             auto rotate = glm::rotate(glm::mat4(1.0f), normalization_time * 20.0f, glm::vec3(0.5f, 0.3f, 0.5f));
             auto translate = glm::translate(glm::mat4(1.0f), cubePositions[i]);
-            model = rotate * translate * model;
+            model = rotate * translate * glm::mat4(1.0f);
             shader.setMatrix("model", 1, model);
             glDrawElements(GL_TRIANGLES, cube.get_elements_count(), GL_UNSIGNED_BYTE, 0); // 使用cube.ibo指定的36个索引来绘制。 
         }
