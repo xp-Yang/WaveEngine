@@ -46,8 +46,8 @@ private:
     glm::vec3 m_direction;
     glm::mat4 m_view_matrix;
 
-    float m_pitch = 0.0f;
-    float m_yaw = -90.0f;
+    float m_pitch = 0.0f; // 方向向量与 x-z 平面的夹角
+    float m_yaw = 0.0f; // 方向向量在 x-z 平面的投影矢量相对 -z 轴的夹角
     float m_roll = 0.0f;
 
     float zoom;

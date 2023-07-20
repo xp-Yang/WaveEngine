@@ -85,9 +85,9 @@ void MyCamera::mouse_process(double delta_x, double delta_y)
         m_pitch = -89.0f;
 
     // update direction
-    m_direction.x = cos(glm::radians(m_pitch)) * cos(glm::radians(m_yaw));
+    m_direction.x = cos(glm::radians(m_pitch)) * sin(glm::radians(m_yaw));
     m_direction.y = sin(glm::radians(m_pitch));
-    m_direction.z = cos(glm::radians(m_pitch)) * sin(glm::radians(m_yaw));
+    m_direction.z = -cos(glm::radians(m_pitch)) * cos(glm::radians(m_yaw));
     m_direction = glm::normalize(m_direction);
 
     m_view_matrix = glm::lookAt(m_pos, m_pos + m_direction, up);
