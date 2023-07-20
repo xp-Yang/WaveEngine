@@ -67,6 +67,10 @@ void MyCamera::key_process(int key, float frame_time)
     printf("%.3f %.3f %.3f %.3f \n", m_view_matrix[0].y, m_view_matrix[1].y, m_view_matrix[2].y, m_view_matrix[3].y);
     printf("%.3f %.3f %.3f %.3f \n", m_view_matrix[0].z, m_view_matrix[1].z, m_view_matrix[2].z, m_view_matrix[3].z);
     printf("%.3f %.3f %.3f %.3f \n", m_view_matrix[0].w, m_view_matrix[1].w, m_view_matrix[2].w, m_view_matrix[3].w);
+ //   printf("%.3f %.3f %.3f %.3f \n", m_view_matrix[0][0], m_view_matrix[1][0], m_view_matrix[2][0], m_view_matrix[3][0]);
+	//printf("%.3f %.3f %.3f %.3f \n", m_view_matrix[0][1], m_view_matrix[1][1], m_view_matrix[2][1], m_view_matrix[3][1]);
+	//printf("%.3f %.3f %.3f %.3f \n", m_view_matrix[0][2], m_view_matrix[1][2], m_view_matrix[2][2], m_view_matrix[3][2]);
+	//printf("%.3f %.3f %.3f %.3f \n", m_view_matrix[0][3], m_view_matrix[1][3], m_view_matrix[2][3], m_view_matrix[3][3]);
     std::cout << std::endl;
 }
 
