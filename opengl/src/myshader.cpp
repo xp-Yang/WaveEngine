@@ -82,6 +82,10 @@ void MyShader::start_using() const {
     glUseProgram(m_id);
 }
 
+void MyShader::stop_using() const {
+    glUseProgram(0);
+}
+
 void MyShader::setBool(const std::string& name, bool value) const
 {
     glUniform1i(glGetUniformLocation(m_id, name.c_str()), (int)value);

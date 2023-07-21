@@ -4,6 +4,19 @@ static glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f);
 static const float CameraMovementSpeed = 1.0f;
 static const float Sensitivity = 0.01f;
 
+static void matrix_log(const glm::mat4 mat) 
+{
+    printf("%.3f %.3f %.3f %.3f \n", mat[0].x, mat[1].x, mat[2].x, mat[3].x);
+    printf("%.3f %.3f %.3f %.3f \n", mat[0].y, mat[1].y, mat[2].y, mat[3].y);
+    printf("%.3f %.3f %.3f %.3f \n", mat[0].z, mat[1].z, mat[2].z, mat[3].z);
+    printf("%.3f %.3f %.3f %.3f \n", mat[0].w, mat[1].w, mat[2].w, mat[3].w);
+   //printf("%.3f %.3f %.3f %.3f \n", mat[0][0], mat[1][0], mat[2][0], mat[3][0]);
+   //printf("%.3f %.3f %.3f %.3f \n", mat[0][1], mat[1][1], mat[2][1], mat[3][1]);
+   //printf("%.3f %.3f %.3f %.3f \n", mat[0][2], mat[1][2], mat[2][2], mat[3][2]);
+   //printf("%.3f %.3f %.3f %.3f \n", mat[0][3], mat[1][3], mat[2][3], mat[3][3]);
+    std::cout << std::endl;
+}
+
 MyCamera::MyCamera(const glm::vec3& position, const glm::vec3& target)
     : m_pos (position)
     , m_target (target)
@@ -63,15 +76,7 @@ void MyCamera::key_process(int key, float frame_time)
     m_view_matrix = glm::lookAt(m_pos, m_pos + m_direction, up);
 
     std::cout << key << std::endl;
-    printf("%.3f %.3f %.3f %.3f \n", m_view_matrix[0].x, m_view_matrix[1].x, m_view_matrix[2].x, m_view_matrix[3].x);
-    printf("%.3f %.3f %.3f %.3f \n", m_view_matrix[0].y, m_view_matrix[1].y, m_view_matrix[2].y, m_view_matrix[3].y);
-    printf("%.3f %.3f %.3f %.3f \n", m_view_matrix[0].z, m_view_matrix[1].z, m_view_matrix[2].z, m_view_matrix[3].z);
-    printf("%.3f %.3f %.3f %.3f \n", m_view_matrix[0].w, m_view_matrix[1].w, m_view_matrix[2].w, m_view_matrix[3].w);
- //   printf("%.3f %.3f %.3f %.3f \n", m_view_matrix[0][0], m_view_matrix[1][0], m_view_matrix[2][0], m_view_matrix[3][0]);
-	//printf("%.3f %.3f %.3f %.3f \n", m_view_matrix[0][1], m_view_matrix[1][1], m_view_matrix[2][1], m_view_matrix[3][1]);
-	//printf("%.3f %.3f %.3f %.3f \n", m_view_matrix[0][2], m_view_matrix[1][2], m_view_matrix[2][2], m_view_matrix[3][2]);
-	//printf("%.3f %.3f %.3f %.3f \n", m_view_matrix[0][3], m_view_matrix[1][3], m_view_matrix[2][3], m_view_matrix[3][3]);
-    std::cout << std::endl;
+    matrix_log(m_view_matrix);
 }
 
 

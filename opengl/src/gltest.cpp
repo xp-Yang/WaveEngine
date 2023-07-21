@@ -20,8 +20,7 @@ glm::mat4 project = glm::perspective(glm::radians(45.0f), /*1.0f*/WINDOW_WIDTH /
 
 MyCamera camera({ 0.0f, 0.5f, 2.0f }, glm::vec3(0.0f));
 
-float deltaTime = 0.0f; // 当前帧与上一帧的时间差
-float lastFrame = 0.0f; // 上一帧的时间
+static float delta_time = 0.0f; // 当前帧与上一帧的时间差
 float lastFrameX = WINDOW_WIDTH / 2;
 float lastFrameY = WINDOW_HEIGHT / 2;
 
@@ -29,7 +28,7 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 {
     if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
         glfwSetWindowShouldClose(window, GL_TRUE);
-    camera.key_process(key, deltaTime);
+    camera.key_process(key, delta_time);
 }
 
 void mouse_callback(GLFWwindow* window, double xpos, double ypos) 
@@ -129,11 +128,13 @@ int main()
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // also clear the depth buffer
 
-        GLfloat timeValue = glfwGetTime();
-        deltaTime = timeValue - lastFrame;
-        lastFrame = timeValue;
+        static float last_time = 0.0f; // 上一帧的时间
+        GLfloat curr_time = glfwGetTime();
 
-        GLfloat normalization_time = (sin(timeValue) / 3) + 0.6;
+        delta_time = curr_time - last_time;
+        last_time = curr_time;
+
+        GLfloat normalization_time = (sin(curr_time) / 3) + 0.6;
 
         shader.start_using();
         shader.setFloat("time_var", normalization_time);
@@ -145,10 +146,9 @@ int main()
             auto translate = glm::translate(glm::mat4(1.0f), cubePositions[i]);
             model = rotate * translate * glm::mat4(1.0f);
             shader.setMatrix("model", 1, model);
-            renderer.draw(window, shader, cube.get_vao_id());
+            renderer.draw(window, shader, cube.get_vao_id(), cube.get_elements_count());
         }
         glfwSwapBuffers(window);//函数会交换颜色缓冲（它是一个储存着GLFW窗口每一个像素颜色的大缓冲），它在这一迭代中被用来绘制，并输出显示在屏幕上。
-
     }
 
     glfwTerminate();//调用glfwTerminate函数来释放GLFW分配的内存

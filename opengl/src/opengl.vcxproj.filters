@@ -54,4 +54,12 @@
       <Filter>源文件</Filter>
     </ClInclude>
   </ItemGroup>
+  <ItemGroup>
+    <None Include="..\shader\fshader.fs">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="..\shader\vshader.vs">
+      <Filter>资源文件</Filter>
+    </None>
+  </ItemGroup>
 </Project>

@@ -34,6 +34,10 @@
     <ClInclude Include="MyShader.hpp" />
     <ClInclude Include="stb_image.h" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="..\shader\fshader.fs" />
+    <None Include="..\shader\vshader.vs" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>
