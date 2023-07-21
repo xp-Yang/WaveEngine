@@ -33,6 +33,9 @@
     <ClCompile Include="MyCube.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="MyRenderer.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="MyShader.hpp">
@@ -45,6 +48,9 @@
       <Filter>源文件</Filter>
     </ClInclude>
     <ClInclude Include="MyCube.hpp">
+      <Filter>源文件</Filter>
+    </ClInclude>
+    <ClInclude Include="MyRenderer.hpp">
       <Filter>源文件</Filter>
     </ClInclude>
   </ItemGroup>

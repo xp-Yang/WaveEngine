@@ -10,8 +10,8 @@ class MyShader{
 public:
 	MyShader(const char* vertexPath, const char* fragmentPath);
 
-	void start_using();
-	void stop_using();
+	void start_using() const;
+	void stop_using() const;
 	GLuint get_id() { return m_id; }
 	// uniform ¹¤¾ßº¯Êý
 	void setBool(const std::string& name, bool value) const;

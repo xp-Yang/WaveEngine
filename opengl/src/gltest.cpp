@@ -6,6 +6,7 @@
 #include "MyShader.hpp"
 #include "MyCube.hpp"
 #include "MyCamera.hpp"
+#include "MyRenderer.hpp"
 #include "stb_image.h"
 
 #define WINDOW_WIDTH 1080.0f
@@ -113,50 +114,41 @@ int main()
 
     MyCube cube("../images/desert.jpg");
 
-    shader.start_using();
-    shader.setMatrix("view", 1, camera.get_view());
-    shader.setMatrix("projection", 1, project);
-
     glm::vec3 cubePositions[] = {
         glm::vec3(0.0f,  0.0f,  0.0f),
         glm::vec3(0.6f,  0.3f, -0.4f),
         glm::vec3(-0.3f, -0.2f, -0.3f),
     };
 
+    MyRenderer renderer;
     //Game Loop
     while (!glfwWindowShouldClose(window))
     {
         glfwPollEvents();//检查触发事件（比如键盘输入、鼠标移动等），然后调用对应的回调函数
+
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // also clear the depth buffer
-
-        shader.start_using();
 
         GLfloat timeValue = glfwGetTime();
         deltaTime = timeValue - lastFrame;
         lastFrame = timeValue;
 
         GLfloat normalization_time = (sin(timeValue) / 3) + 0.6;
-        shader.setFloat("time_var", normalization_time);
 
+        shader.start_using();
+        shader.setFloat("time_var", normalization_time);
         shader.setMatrix("view", 1, camera.get_view());
         shader.setMatrix("projection", 1, project);
 
-        glBindVertexArray(cube.get_vao_id());
         for (int i = 0; i < 3; i++) {
             auto rotate = glm::rotate(glm::mat4(1.0f), normalization_time * 20.0f, glm::vec3(0.5f, 0.3f, 0.5f));
             auto translate = glm::translate(glm::mat4(1.0f), cubePositions[i]);
             model = rotate * translate * glm::mat4(1.0f);
             shader.setMatrix("model", 1, model);
-            glDrawElements(GL_TRIANGLES, cube.get_elements_count(), GL_UNSIGNED_BYTE, 0); // 使用cube.ibo指定的36个索引来绘制。 
+            renderer.draw(window, shader, cube.get_vao_id());
         }
-        glBindVertexArray(0);
-
-        //glBindVertexArray(VAO2);
-        //glDrawArrays(GL_TRIANGLES, 0, 3);
-        //glBindVertexArray(0);
-
         glfwSwapBuffers(window);//函数会交换颜色缓冲（它是一个储存着GLFW窗口每一个像素颜色的大缓冲），它在这一迭代中被用来绘制，并输出显示在屏幕上。
+
     }
 
     glfwTerminate();//调用glfwTerminate函数来释放GLFW分配的内存

@@ -78,7 +78,7 @@ MyShader::MyShader(const char* vertexPath, const char* fragmentPath)
     }
 }
 
-void MyShader::start_using() {
+void MyShader::start_using() const {
     glUseProgram(m_id);
 }
 
