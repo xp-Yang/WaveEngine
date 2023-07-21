@@ -1,7 +1,8 @@
 #include "MyCube.hpp"
 #include "stb_image.h"
 
-MyCube::MyCube(const char* texture_path) //"../images/desert.jpg"
+MyCube::MyCube(const char* texture_path)
+    : m_model_matrix(glm::mat4(1.0f))
 {
     create_vbo();
 

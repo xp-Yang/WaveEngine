@@ -1,8 +1,12 @@
 #include "MyCamera.hpp"
 
+#define WINDOW_WIDTH 1080.0f
+#define WINDOW_HEIGHT 720.0f
+
 static glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f);
 static const float CameraMovementSpeed = 1.0f;
 static const float Sensitivity = 0.01f;
+static const float ZoomUnit = 0.1f;
 
 static void matrix_log(const glm::mat4 mat) 
 {
@@ -20,12 +24,17 @@ static void matrix_log(const glm::mat4 mat)
 MyCamera::MyCamera(const glm::vec3& position, const glm::vec3& target)
     : m_pos (position)
     , m_target (target)
+    , m_direction (glm::vec3(0.0f, 0.0f, -1.0f))
 {
     //m_direction = m_pos - m_target;
     //m_view_matrix = glm::lookAt(m_pos, m_target, up);
-
-    m_direction = glm::vec3(0.0f, 0.0f, -1.0f);
+    
     m_view_matrix = glm::lookAt(m_pos, m_pos + m_direction, up);
+
+    m_projection_matrix = glm::perspective(glm::radians(45.0f), /*1.0f*/WINDOW_WIDTH / WINDOW_HEIGHT, 0.1f, 100.0f);
+    //它的第一个参数定义了fov的值。如果想要一个真实的观察效果，它的值通常设置为45.0f，但想要一个末日风格的结果你可以将其设置一个更大的值。
+    //第二个参数设置了宽高比，由视口的宽除以高所得。宽高比为1的话，视口的宽高比影响了渲染出来的立方体的宽高比。
+    //第三和第四个参数设置了平截头体的近和远平面。我们通常设置近距离为0.1f，而远距离设为100.0f。所有在近平面和远平面内且处于平截头体内的顶点都会被渲染。
 }
 
 void MyCamera::surround_with_target(const float radius) {
@@ -104,7 +113,17 @@ void MyCamera::mouse_process(double delta_x, double delta_y)
 
 void MyCamera::mouse_scroll_process(double yoffset)
 {
-    // adjust fov by zoom
+    m_zoom += ZoomUnit * yoffset;
+    if (m_zoom < 0.1f)
+        m_zoom = 0.1f;
+
+    float fov = 45.0f;
+    fov /= m_zoom;
+    if (fov <= 1.0f)
+        fov = 1.0f;
+    if (fov >= 179.0f)
+        fov = 179.0f;
+    m_projection_matrix = glm::perspective(glm::radians(fov), WINDOW_WIDTH / WINDOW_HEIGHT, 0.1f, 100.0f);
 }
 
 const glm::vec3& MyCamera::get_position() {
@@ -131,4 +150,8 @@ const glm::vec3& MyCamera::get_up_direction() {
 
 const glm::mat4& MyCamera::get_view() {
     return m_view_matrix;
+}
+
+const glm::mat4& MyCamera::get_projection() {
+    return m_projection_matrix;
 }

@@ -12,17 +12,9 @@
 #define WINDOW_WIDTH 1080.0f
 #define WINDOW_HEIGHT 720.0f
 
-glm::mat4 model = glm::mat4(1.0f);
-glm::mat4 project = glm::perspective(glm::radians(45.0f), /*1.0f*/WINDOW_WIDTH / WINDOW_HEIGHT, 0.1f, 100.0f);
-//它的第一个参数定义了fov的值。如果想要一个真实的观察效果，它的值通常设置为45.0f，但想要一个末日风格的结果你可以将其设置一个更大的值。
-//第二个参数设置了宽高比，由视口的宽除以高所得。宽高比为1的话，视口的宽高比影响了渲染出来的立方体的宽高比。
-//第三和第四个参数设置了平截头体的近和远平面。我们通常设置近距离为0.1f，而远距离设为100.0f。所有在近平面和远平面内且处于平截头体内的顶点都会被渲染。
-
 MyCamera camera({ 0.0f, 0.5f, 2.0f }, glm::vec3(0.0f));
 
 static float delta_time = 0.0f; // 当前帧与上一帧的时间差
-float lastFrameX = WINDOW_WIDTH / 2;
-float lastFrameY = WINDOW_HEIGHT / 2;
 
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode)
 {
@@ -33,19 +25,22 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 
 void mouse_callback(GLFWwindow* window, double xpos, double ypos) 
 { 
-    static bool firstMouse = true;
-    if (firstMouse)
+    static float last_xpos = WINDOW_WIDTH / 2;
+    static float last_ypos = WINDOW_HEIGHT / 2;
+
+    static bool first_enter = true;
+    if (first_enter)
     {
-        lastFrameX = xpos;
-        lastFrameY = ypos;
-        firstMouse = false;
+        last_xpos = xpos;
+        last_ypos = ypos;
+        first_enter = false;
         return;
     }
 
-    float delta_x = xpos - lastFrameX;
-    float delta_y = -(ypos - lastFrameY); // 注意这里是相反的，因为glfwSetCursorPosCallback返回给mouse_callback函数的 (x,y) 是鼠标相对于窗口左上角的位置，所以需要将 (ypos - lastY) 取反
-    lastFrameX = xpos;
-    lastFrameY = ypos;
+    float delta_x = xpos - last_xpos;
+    float delta_y = -(ypos - last_ypos); // 注意这里是相反的，因为glfwSetCursorPosCallback返回给mouse_callback函数的 (x,y) 是鼠标相对于窗口左上角的位置，所以需要将 (ypos - lastY) 取反
+    last_xpos = xpos;
+    last_ypos = ypos;
 
     camera.mouse_process(delta_x, delta_y);
 }
@@ -139,13 +134,13 @@ int main()
         shader.start_using();
         shader.setFloat("time_var", normalization_time);
         shader.setMatrix("view", 1, camera.get_view());
-        shader.setMatrix("projection", 1, project);
+        shader.setMatrix("projection", 1, camera.get_projection());
 
         for (int i = 0; i < 3; i++) {
             auto rotate = glm::rotate(glm::mat4(1.0f), normalization_time * 20.0f, glm::vec3(0.5f, 0.3f, 0.5f));
             auto translate = glm::translate(glm::mat4(1.0f), cubePositions[i]);
-            model = rotate * translate * glm::mat4(1.0f);
-            shader.setMatrix("model", 1, model);
+            cube.set_model_matrix(rotate * translate * glm::mat4(1.0f));
+            shader.setMatrix("model", 1, cube.get_model_matrix());
             renderer.draw(window, shader, cube.get_vao_id(), cube.get_elements_count());
         }
         glfwSwapBuffers(window);//函数会交换颜色缓冲（它是一个储存着GLFW窗口每一个像素颜色的大缓冲），它在这一迭代中被用来绘制，并输出显示在屏幕上。

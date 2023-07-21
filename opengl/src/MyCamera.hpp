@@ -31,6 +31,7 @@ public:
     const glm::vec3& get_right_direction();
     const glm::vec3& get_up_direction();
     const glm::mat4& get_view();
+    const glm::mat4& get_projection();
 
     void surround_with_target(const float radius);
 
@@ -45,12 +46,13 @@ private:
     glm::vec3 m_target;
     glm::vec3 m_direction;
     glm::mat4 m_view_matrix;
+    glm::mat4 m_projection_matrix;
 
     float m_pitch = 0.0f; // 方向向量与 x-z 平面的夹角
     float m_yaw = 0.0f; // 方向向量在 x-z 平面的投影矢量相对 -z 轴的夹角
     float m_roll = 0.0f;
 
-    float zoom;
+    float m_zoom = 1.0f;
 
 };
 
