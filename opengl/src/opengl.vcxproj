@@ -38,6 +38,9 @@
     <None Include="..\shader\fshader.fs" />
     <None Include="..\shader\vshader.vs" />
   </ItemGroup>
+  <ItemGroup>
+    <Image Include="..\images\desert.jpg" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>
