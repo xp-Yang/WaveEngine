@@ -104,9 +104,9 @@ int main()
     //glfwGetFramebufferSize(window, &width, &height);
     set_view_port(WINDOW_WIDTH, WINDOW_HEIGHT);
 
-    MyShader shader("../shader/vshader.vs", "../shader/fshader.fs");
+    MyShader shader("resource/shader/vshader.vs", "resource/shader/fshader.fs");
 
-    MyCube cube("../images/desert.jpg");
+    MyCube cube("resource/images/desert.jpg");
 
     glm::vec3 cubePositions[] = {
         glm::vec3(0.0f,  0.0f,  0.0f),

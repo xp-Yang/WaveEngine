@@ -13,57 +13,57 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="源文件\src">
+      <UniqueIdentifier>{54ca613e-c1aa-4735-bb8d-1b25d6663d10}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="gltest.cpp">
-      <Filter>源文件</Filter>
+    <ClCompile Include="src\glad.c">
+      <Filter>源文件\src</Filter>
     </ClCompile>
-    <ClCompile Include="MyShader.cpp">
-      <Filter>源文件</Filter>
+    <ClCompile Include="src\gltest.cpp">
+      <Filter>源文件\src</Filter>
     </ClCompile>
-    <ClCompile Include="glad.c">
-      <Filter>源文件</Filter>
+    <ClCompile Include="src\MyCamera.cpp">
+      <Filter>源文件\src</Filter>
     </ClCompile>
-    <ClCompile Include="stb_image.cpp">
-      <Filter>源文件</Filter>
+    <ClCompile Include="src\MyCube.cpp">
+      <Filter>源文件\src</Filter>
     </ClCompile>
-    <ClCompile Include="MyCamera.cpp">
-      <Filter>源文件</Filter>
+    <ClCompile Include="src\MyRenderer.cpp">
+      <Filter>源文件\src</Filter>
     </ClCompile>
-    <ClCompile Include="MyCube.cpp">
-      <Filter>源文件</Filter>
+    <ClCompile Include="src\MyShader.cpp">
+      <Filter>源文件\src</Filter>
     </ClCompile>
-    <ClCompile Include="MyRenderer.cpp">
-      <Filter>源文件</Filter>
+    <ClCompile Include="src\stb_image.cpp">
+      <Filter>源文件\src</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="MyShader.hpp">
-      <Filter>源文件</Filter>
+    <ClInclude Include="src\MyCamera.hpp">
+      <Filter>源文件\src</Filter>
     </ClInclude>
-    <ClInclude Include="stb_image.h">
-      <Filter>源文件</Filter>
+    <ClInclude Include="src\MyCube.hpp">
+      <Filter>源文件\src</Filter>
     </ClInclude>
-    <ClInclude Include="MyCamera.hpp">
-      <Filter>源文件</Filter>
+    <ClInclude Include="src\MyRenderer.hpp">
+      <Filter>源文件\src</Filter>
     </ClInclude>
-    <ClInclude Include="MyCube.hpp">
-      <Filter>源文件</Filter>
-    </ClInclude>
-    <ClInclude Include="MyRenderer.hpp">
-      <Filter>源文件</Filter>
+    <ClInclude Include="src\MyShader.hpp">
+      <Filter>源文件\src</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\shader\fshader.fs">
+    <None Include="resource\shader\fshader.fs">
       <Filter>资源文件</Filter>
     </None>
-    <None Include="..\shader\vshader.vs">
+    <None Include="resource\shader\vshader.vs">
       <Filter>资源文件</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>
-    <Image Include="..\images\desert.jpg">
+    <Image Include="resource\images\desert.jpg">
       <Filter>资源文件</Filter>
     </Image>
   </ItemGroup>
