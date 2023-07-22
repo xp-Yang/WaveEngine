@@ -1,3 +1,9 @@
+#include "../imgui/imgui.h"
+#include "../imgui/imgui_impl_glfw.h"
+#include "../imgui/imgui_impl_opengl3.h"
+#include <stdio.h>
+#define GL_SILENCE_DEPRECATION
+
 #include <glad/glad.h> 
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
@@ -88,6 +94,12 @@ void set_view_port(int width, int height) {
     glViewport(0, 0, width, height);
 }
 
+static glm::vec3 cubePositions[] = {
+    glm::vec3(0.0f,  0.0f,  0.0f),
+    glm::vec3(0.6f,  0.3f, -0.4f),
+    glm::vec3(-0.3f, -0.2f, -0.3f),
+};
+
 int main()
 {
     GLFWwindow* window = create_window(WINDOW_WIDTH, WINDOW_HEIGHT);
@@ -105,16 +117,23 @@ int main()
     set_view_port(WINDOW_WIDTH, WINDOW_HEIGHT);
 
     MyShader shader("resource/shader/vshader.vs", "resource/shader/fshader.fs");
-
     MyCube cube("resource/images/desert.jpg");
-
-    glm::vec3 cubePositions[] = {
-        glm::vec3(0.0f,  0.0f,  0.0f),
-        glm::vec3(0.6f,  0.3f, -0.4f),
-        glm::vec3(-0.3f, -0.2f, -0.3f),
-    };
-
     MyRenderer renderer;
+
+    IMGUI_CHECKVERSION();
+    ImGui::CreateContext();
+    ImGuiIO& io = ImGui::GetIO(); (void)io;
+    io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
+    io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
+
+    // Setup Dear ImGui style
+    ImGui::StyleColorsDark();
+    //ImGui::StyleColorsLight();
+
+    // Setup Platform/Renderer backends
+    ImGui_ImplGlfw_InitForOpenGL(window, true);
+    ImGui_ImplOpenGL3_Init("#version 330");
+
     //Game Loop
     while (!glfwWindowShouldClose(window))
     {
@@ -122,6 +141,10 @@ int main()
 
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // also clear the depth buffer
+
+        ImGui_ImplOpenGL3_NewFrame();
+        ImGui_ImplGlfw_NewFrame();
+        ImGui::NewFrame();
 
         static float last_time = 0.0f; // 上一帧的时间
         GLfloat curr_time = glfwGetTime();
@@ -136,16 +159,33 @@ int main()
         shader.setMatrix("view", 1, camera.get_view());
         shader.setMatrix("projection", 1, camera.get_projection());
 
-        for (int i = 0; i < 3; i++) {
-            auto rotate = glm::rotate(glm::mat4(1.0f), normalization_time * 20.0f, glm::vec3(0.5f, 0.3f, 0.5f));
-            auto translate = glm::translate(glm::mat4(1.0f), cubePositions[i]);
-            cube.set_model_matrix(rotate * translate * glm::mat4(1.0f));
-            shader.setMatrix("model", 1, cube.get_model_matrix());
-            renderer.draw(window, shader, cube.get_vao_id(), cube.get_elements_count());
+        auto rotate = glm::rotate(glm::mat4(1.0f), normalization_time * 20.0f, glm::vec3(0.5f, 0.3f, 0.5f));
+        auto translate = glm::translate(glm::mat4(1.0f), {0.0f, 0.0f, 0.0f});
+        cube.set_model_matrix(rotate * translate * glm::mat4(1.0f));
+        shader.setMatrix("model", 1, cube.get_model_matrix());
+        renderer.draw(window, shader, cube.get_vao_id(), cube.get_elements_count());
+
+        // Show another simple window.
+        {
+            ImGui::Begin("Another Window");   // Pass a pointer to our bool variable (the window will have a closing button that will clear the bool when clicked)
+            ImGui::Text("Hello from another window!");
+            if (ImGui::Button("Close Me"))
+                ;
+            ImGui::End();
         }
+
+        ImGui::Render();
+        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+
         glfwSwapBuffers(window);//函数会交换颜色缓冲（它是一个储存着GLFW窗口每一个像素颜色的大缓冲），它在这一迭代中被用来绘制，并输出显示在屏幕上。
     }
 
+    // Cleanup
+    ImGui_ImplOpenGL3_Shutdown();
+    ImGui_ImplGlfw_Shutdown();
+    ImGui::DestroyContext();
+
+    glfwDestroyWindow(window);
     glfwTerminate();//调用glfwTerminate函数来释放GLFW分配的内存
     return 0;
 }
