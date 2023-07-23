@@ -20,7 +20,7 @@ void main()
     pass_color = color;
 	pass_uv = vertex_uv;
     pass_pos = vec3(model * vec4(vertex_pos, 1.0));
-    pass_normal = vertex_normal;
+    pass_normal = vec3(model * vec4(vertex_normal, 1.0));
 
     gl_Position = projection * view * model * vec4(vertex_pos, 1.0);
 }

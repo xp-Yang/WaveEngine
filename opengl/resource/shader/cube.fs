@@ -23,6 +23,8 @@ void main()
 
     fragment_color = vec4(pass_color * (ambient_light + diffuse_light), 1.0);
 	
-    fragment_color = texture(Texture, pass_uv);
-    //fragment_color = vec4(pass_normal, 1.0f);
+    //fragment_color = texture(Texture, pass_uv);
+
+    //debug
+    //fragment_color = vec4(pass_pos, 1.0f);
 }

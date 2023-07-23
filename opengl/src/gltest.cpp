@@ -16,7 +16,7 @@
 #include "MyRenderer.hpp"
 #include "stb_image.h"
 
-MyCamera camera({ 0.0f, 0.0f, 2.0f }, glm::vec3(0.0f));
+MyCamera camera({ 0.0f, 0.0f, 10.0f }, glm::vec3(0.0f));
 
 static float delta_time = 0.0f; // 当前帧与上一帧的时间差
 
@@ -201,15 +201,21 @@ int main()
             ImGui::Begin("Hello, world!");                          // Create a window called "Hello, world!" and append into it.
 
             ImGui::SliderFloat("ambient strength", &ambient_strength, 0.0f, 1.0f);
-            ImGui::SliderFloat("cube x", &cube_translate_x, -1.0f, 1.0f);
+            ImGui::SliderFloat("cube x", &cube_translate_x, -10.0f, 10.0f);
             ImGui::ColorEdit3("light color", (float*)&light_color);
             ImGui::ColorEdit3("cube color", (float*)&cube_color);
 
             if (ImGui::Checkbox("stop rotate", &stop_rotate));
             
             ImGui::NewLine();
-            std::string test = matrix_log(cube.get_model_matrix());
-            ImGui::Text(test.c_str());
+            ImGui::Text("light matrix:");
+            std::string test_light = matrix_log(light.get_model_matrix());
+            ImGui::Text(test_light.c_str());
+
+            ImGui::NewLine();
+            ImGui::Text("cube matrix:");
+            std::string test_cube = matrix_log(cube.get_model_matrix());
+            ImGui::Text(test_cube.c_str());
 
             ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / io.Framerate, io.Framerate);
             ImGui::End();

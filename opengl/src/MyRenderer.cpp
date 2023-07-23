@@ -8,7 +8,8 @@ void MyRenderer::draw(GLFWwindow* window, const MyShader& shader, GLuint vao_id,
 
     glBindVertexArray(vao_id);
 
-    glDrawElements(GL_TRIANGLES, indices_count, GL_UNSIGNED_BYTE, 0);
+    glDrawArrays(GL_TRIANGLES, 0, 36);
+    //glDrawElements(GL_TRIANGLES, indices_count, GL_UNSIGNED_BYTE, 0);
 
     glBindVertexArray(0);
 }

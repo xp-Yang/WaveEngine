@@ -29,99 +29,116 @@ MyCube::~MyCube(){
 
 void MyCube::create_vbo()
 {
-    GLfloat cubeVertex[] =
-    {
-        // vertex                  // color                   // normal                                    // uv         
-        -0.2f, -0.2f,  0.2f,       1.0f, 0.0f, 0.0f,                                 // 0 左下              0.0f, 0.0f,   
-         0.2f, -0.2f,  0.2f,       0.0f, 1.0f, 0.0f,                                 // 1 右下              1.0f, 0.0f,   
-         0.2f,  0.2f,  0.2f,       0.0f, 0.0f, 1.0f,                                 // 2 右上              1.0f, 1.0f,   
-        -0.2f,  0.2f,  0.2f,       1.0f, 0.0f, 1.0f,                                 // 3 左上              0.0f, 1.0f,   
-        -0.2f, -0.2f, -0.2f,       1.0f, 0.0f, 0.0f,                                 // 4 后：左下           0.0f, 0.0f,   
-        -0.2f,  0.2f, -0.2f,       0.0f, 1.0f, 0.0f,                                 // 5 后：左上           0.0f, 1.0f,   
-         0.2f,  0.2f, -0.2f,       0.0f, 0.0f, 1.0f,                                 // 6 后：右上           1.0f, 1.0f,   
-         0.2f, -0.2f, -0.2f,       1.0f, 0.0f, 1.0f,                                 // 7 后：右下           1.0f, 0.0f,   
+    //GLfloat cubeVertex[] =
+    //{
+    //    // pos                     // color                   // normal                                    // uv         
+    //    -0.2f, -0.2f,  0.2f,       1.0f, 0.0f, 0.0f,                                 // 0 左下              0.0f, 0.0f,   
+    //     0.2f, -0.2f,  0.2f,       0.0f, 1.0f, 0.0f,                                 // 1 右下              1.0f, 0.0f,   
+    //     0.2f,  0.2f,  0.2f,       0.0f, 0.0f, 1.0f,                                 // 2 右上              1.0f, 1.0f,   
+    //    -0.2f,  0.2f,  0.2f,       1.0f, 0.0f, 1.0f,                                 // 3 左上              0.0f, 1.0f,   
+    //    -0.2f, -0.2f, -0.2f,       1.0f, 0.0f, 0.0f,                                 // 4 后：左下           0.0f, 0.0f,   
+    //    -0.2f,  0.2f, -0.2f,       0.0f, 1.0f, 0.0f,                                 // 5 后：左上           0.0f, 1.0f,   
+    //     0.2f,  0.2f, -0.2f,       0.0f, 0.0f, 1.0f,                                 // 6 后：右上           1.0f, 1.0f,   
+    //     0.2f, -0.2f, -0.2f,       1.0f, 0.0f, 1.0f,                                 // 7 后：右下           1.0f, 0.0f,   
+    //};
+    //glGenBuffers(1, &m_vbo_id);
+    //glBindBuffer(GL_ARRAY_BUFFER, m_vbo_id);
+    //glBufferData(GL_ARRAY_BUFFER, sizeof(cubeVertex), cubeVertex, GL_STATIC_DRAW);
+    //glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+    //GLubyte cubeIndices[] =
+    //{
+    //    0, 1, 2, 0, 2, 3, // Quad 0 前面
+    //    4, 5, 6, 4, 6, 7, // Quad 1 后面
+    //    5, 3, 2, 5, 2, 6, // Quad 2 上面
+    //    4, 7, 1, 4, 1, 0, // Quad 3 下面
+    //    7, 6, 2, 7, 2, 1, // Quad 4 右面
+    //    4, 0, 3, 4, 3, 5, // Quad 5 左面
+    //};
+    //glGenBuffers(1, &m_ibo_id);
+    //glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_ibo_id);
+    //glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(cubeIndices), cubeIndices, GL_STATIC_DRAW);
+    //glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+    //GLfloat texCoord[] =
+    //{
+    //    0.0f, 0.0f, // 0
+    //    1.0f, 0.0f, // 1
+    //    1.0f, 1.0f, // 2
+    //    0.0f, 1.0f, // 3
+    //    0.0f, 0.0f, // 4
+    //    0.0f, 1.0f, // 5
+    //    1.0f, 1.0f, // 6
+    //    1.0f, 0.0f, // 7
+    //};
+    //glGenBuffers(1, &m_uv_id);
+    //glBindBuffer(GL_ARRAY_BUFFER, m_uv_id);
+    //glBufferData(GL_ARRAY_BUFFER, sizeof(texCoord), texCoord, GL_STATIC_DRAW);
+    //glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+    //GLfloat cubeNormal[] = {
+    //   -1.0f,  -1.0f, 1.0f,
+    //   1.0f,  -1.0f, 1.0f,
+    //   1.0f,  1.0f, 1.0f,
+    //   -1.0f,  1.0f, 1.0f,
+    //   -1.0f,  -1.0f, -1.0f,
+    //   -1.0f,  1.0f, -1.0f,
+    //   1.0f,  1.0f, -1.0f,
+    //   1.0f,  -1.0f, -1.0f,
+    //};
+    //glGenBuffers(1, &m_normal_id);
+    //glBindBuffer(GL_ARRAY_BUFFER, m_normal_id);
+    //glBufferData(GL_ARRAY_BUFFER, sizeof(cubeNormal), cubeNormal, GL_STATIC_DRAW);
+    //glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+    float cube_vertices[] = {
+    // pos                   // normal              // uv           
+    -0.5f, -0.5f, -0.5f,     0.0f,  0.0f, -1.0f,                    // 0 后面 左下   
+     0.5f, -0.5f, -0.5f,     0.0f,  0.0f, -1.0f,                    // 1 后面 右下   
+     0.5f,  0.5f, -0.5f,     0.0f,  0.0f, -1.0f,                    // 2 后面 右上   
+     0.5f,  0.5f, -0.5f,     0.0f,  0.0f, -1.0f,                    // 3 后面 右上   
+    -0.5f,  0.5f, -0.5f,     0.0f,  0.0f, -1.0f,                    // 4 后面 左上
+    -0.5f, -0.5f, -0.5f,     0.0f,  0.0f, -1.0f,                    // 5 后面 左下
+
+    -0.5f, -0.5f,  0.5f,     0.0f,  0.0f,  1.0f,                    // 6 前面
+     0.5f, -0.5f,  0.5f,     0.0f,  0.0f,  1.0f,                    // 7 前面
+     0.5f,  0.5f,  0.5f,     0.0f,  0.0f,  1.0f,                    // 8 前面
+     0.5f,  0.5f,  0.5f,     0.0f,  0.0f,  1.0f,                    // 9 前面
+    -0.5f,  0.5f,  0.5f,     0.0f,  0.0f,  1.0f,                    // 10前面
+    -0.5f, -0.5f,  0.5f,     0.0f,  0.0f,  1.0f,                    // 11前面
+
+    -0.5f,  0.5f,  0.5f,    -1.0f,  0.0f,  0.0f,                    // 12左面
+    -0.5f,  0.5f, -0.5f,    -1.0f,  0.0f,  0.0f,                    // 13左面
+    -0.5f, -0.5f, -0.5f,    -1.0f,  0.0f,  0.0f,                    // 14左面
+    -0.5f, -0.5f, -0.5f,    -1.0f,  0.0f,  0.0f,                    // 15左面
+    -0.5f, -0.5f,  0.5f,    -1.0f,  0.0f,  0.0f,                    // 16左面
+    -0.5f,  0.5f,  0.5f,    -1.0f,  0.0f,  0.0f,                    // 17左面
+
+     0.5f,  0.5f,  0.5f,     1.0f,  0.0f,  0.0f,                    // 18右面
+     0.5f,  0.5f, -0.5f,     1.0f,  0.0f,  0.0f,                    // 19右面
+     0.5f, -0.5f, -0.5f,     1.0f,  0.0f,  0.0f,                    // 20右面
+     0.5f, -0.5f, -0.5f,     1.0f,  0.0f,  0.0f,                    // 21右面
+     0.5f, -0.5f,  0.5f,     1.0f,  0.0f,  0.0f,                    // 22右面
+     0.5f,  0.5f,  0.5f,     1.0f,  0.0f,  0.0f,                    // 23右面
+
+    -0.5f, -0.5f, -0.5f,     0.0f, -1.0f,  0.0f,                    // 24下面
+     0.5f, -0.5f, -0.5f,     0.0f, -1.0f,  0.0f,                    // 25下面
+     0.5f, -0.5f,  0.5f,     0.0f, -1.0f,  0.0f,                    // 26下面
+     0.5f, -0.5f,  0.5f,     0.0f, -1.0f,  0.0f,                    // 27下面
+    -0.5f, -0.5f,  0.5f,     0.0f, -1.0f,  0.0f,                    // 28下面
+    -0.5f, -0.5f, -0.5f,     0.0f, -1.0f,  0.0f,                    // 29下面
+
+    -0.5f,  0.5f, -0.5f,     0.0f,  1.0f,  0.0f,                    // 30上面
+     0.5f,  0.5f, -0.5f,     0.0f,  1.0f,  0.0f,                    // 31上面
+     0.5f,  0.5f,  0.5f,     0.0f,  1.0f,  0.0f,                    // 32上面
+     0.5f,  0.5f,  0.5f,     0.0f,  1.0f,  0.0f,                    // 33上面
+    -0.5f,  0.5f,  0.5f,     0.0f,  1.0f,  0.0f,                    // 34上面
+    -0.5f,  0.5f, -0.5f,     0.0f,  1.0f,  0.0f,                    // 35上面
     };
+
     glGenBuffers(1, &m_vbo_id);
     glBindBuffer(GL_ARRAY_BUFFER, m_vbo_id);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(cubeVertex), cubeVertex, GL_STATIC_DRAW);
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-    GLubyte cubeIndices[] =
-    {
-        0, 1, 2, 0, 2, 3, // Quad 0 前面
-        4, 5, 6, 4, 6, 7, // Quad 1 后面
-        5, 3, 2, 5, 2, 6, // Quad 2 上面
-        4, 7, 1, 4, 1, 0, // Quad 3 下面
-        7, 6, 2, 7, 2, 1, // Quad 4 右面
-        4, 0, 3, 4, 3, 5, // Quad 5 左面
-    };
-    glGenBuffers(1, &m_ibo_id);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_ibo_id);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(cubeIndices), cubeIndices, GL_STATIC_DRAW);
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-    GLfloat texCoord[] =
-    {
-        0.0f, 0.0f,
-        1.0f, 0.0f,
-        1.0f, 1.0f,
-        0.0f, 0.0f,
-        1.0f, 1.0f,
-        0.0f, 1.0f,
-        0.0f, 0.0f,
-        0.0f, 1.0f,
-    };
-    glGenBuffers(1, &m_uv_id);
-    glBindBuffer(GL_ARRAY_BUFFER, m_uv_id);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(texCoord), texCoord, GL_STATIC_DRAW);
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-    GLfloat cubeNormal[] = {
-       0.0f,  0.0f, 1.0f,
-       0.0f,  0.0f, 1.0f,
-       0.0f,  0.0f, 1.0f,
-       0.0f,  0.0f, 1.0f,
-       0.0f,  0.0f, 1.0f,
-       0.0f,  0.0f, 1.0f,
-
-       0.0f,  0.0f, -1.0f,
-       0.0f,  0.0f, -1.0f,
-       0.0f,  0.0f, -1.0f,
-       0.0f,  0.0f, -1.0f,
-       0.0f,  0.0f, -1.0f,
-       0.0f,  0.0f, -1.0f,
-
-       0.0f,  1.0f,  0.0f,
-       0.0f,  1.0f,  0.0f,
-       0.0f,  1.0f,  0.0f,
-       0.0f,  1.0f,  0.0f,
-       0.0f,  1.0f,  0.0f,
-       0.0f,  1.0f,  0.0f,
-
-       0.0f,  -1.0f,  0.0f,
-       0.0f,  -1.0f,  0.0f,
-       0.0f,  -1.0f,  0.0f,
-       0.0f,  -1.0f,  0.0f,
-       0.0f,  -1.0f,  0.0f,
-       0.0f,  -1.0f,  0.0f,
-
-       1.0f,  0.0f,  0.0f,
-       1.0f,  0.0f,  0.0f,
-       1.0f,  0.0f,  0.0f,
-       1.0f,  0.0f,  0.0f,
-       1.0f,  0.0f,  0.0f,
-       1.0f,  0.0f,  0.0f,
-
-       -1.0f,  0.0f,  0.0f,
-       -1.0f,  0.0f,  0.0f,
-       -1.0f,  0.0f,  0.0f,
-       -1.0f,  0.0f,  0.0f,
-       -1.0f,  0.0f,  0.0f,
-       -1.0f,  0.0f,  0.0f,
-    };
-    glGenBuffers(1, &m_normal_id);
-    glBindBuffer(GL_ARRAY_BUFFER, m_normal_id);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(cubeNormal), cubeNormal, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(cube_vertices), cube_vertices, GL_STATIC_DRAW);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 
@@ -152,29 +169,28 @@ void MyCube::create_vao() {
     glGenVertexArrays(1, &m_vao_id);
     glBindVertexArray(m_vao_id);
 
-    // 顶点数据和顶点颜色数据
+    // 顶点位置数据
     glBindBuffer(GL_ARRAY_BUFFER, get_vbo_id());
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (GLvoid*)0);
     glEnableVertexAttribArray(0);
-    // 顶点颜色数据
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (GLvoid*)(3 * sizeof(float)));
-    glEnableVertexAttribArray(1);
-
+    //// 顶点颜色数据
+    //glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (GLvoid*)(3 * sizeof(float)));
+    //glEnableVertexAttribArray(1);
     // 顶点法向量数据
     glBindBuffer(GL_ARRAY_BUFFER, get_normal_id());
-    glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (GLvoid*)(0));
+    glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (GLvoid*)(3 * sizeof(float)));
     glEnableVertexAttribArray(3);
 
     // 索引数据
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, get_ibo_id());
+    //glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, get_ibo_id());
 
     if (m_texture_type == TextureType::Normal) {
         // 纹理数据
         glBindTexture(GL_TEXTURE_2D, get_texture_id());
 
         // uv 坐标数据
-        glBindBuffer(GL_ARRAY_BUFFER, get_uv_id());
-        glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (GLvoid*)(0 * sizeof(float)));
-        glEnableVertexAttribArray(2);
+        //glBindBuffer(GL_ARRAY_BUFFER, get_uv_id());
+        //glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (GLvoid*)(0 * sizeof(float)));
+        //glEnableVertexAttribArray(2);
     }
 }
