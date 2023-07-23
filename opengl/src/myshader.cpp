@@ -100,8 +100,18 @@ void MyShader::setFloat(const std::string& name, float value) const
 }
 void MyShader::setFloat4(const std::string& name, float value1, float value2, float value3, float value4) const
 {
-    GLint location = glGetUniformLocation(m_id, "name");
+    GLint location = glGetUniformLocation(m_id, name.c_str());
     glUniform4f(location, value1, value2, value3, value4);
+}
+void MyShader::setFloat4(const std::string& name, const glm::vec4& value) const
+{
+    GLint location = glGetUniformLocation(m_id, name.c_str());
+    glUniform4f(location, value.x, value.y, value.z, value.w);
+}
+void MyShader::setFloat3(const std::string& name, const glm::vec3& value) const
+{
+    GLint location = glGetUniformLocation(m_id, name.c_str());
+    glUniform3f(location, value.x, value.y, value.z);
 }
 void MyShader::setMatrix(const std::string& name, int count, const glm::mat4& mat_value) const
 {

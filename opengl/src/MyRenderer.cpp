@@ -8,7 +8,7 @@ void MyRenderer::draw(GLFWwindow* window, const MyShader& shader, GLuint vao_id,
 
     glBindVertexArray(vao_id);
 
-    glDrawElements(GL_TRIANGLES, indices_count, GL_UNSIGNED_BYTE, 0); // 使用cube.ibo指定的36个索引来绘制。 
+    glDrawElements(GL_TRIANGLES, indices_count, GL_UNSIGNED_BYTE, 0);
 
     glBindVertexArray(0);
 }

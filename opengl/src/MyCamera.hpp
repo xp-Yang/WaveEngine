@@ -7,6 +7,11 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <iostream>
 
+#define WINDOW_WIDTH 1600.0f
+#define WINDOW_HEIGHT 900.0f
+
+std::string matrix_log(const glm::mat4 mat);
+
 class CameraStyle {
     virtual void behavior() = 0;
 };

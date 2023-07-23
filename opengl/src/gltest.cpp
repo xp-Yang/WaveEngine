@@ -11,14 +11,12 @@
 #include <glm/gtc/type_ptr.hpp>
 #include "MyShader.hpp"
 #include "MyCube.hpp"
+#include "MyLight.hpp"
 #include "MyCamera.hpp"
 #include "MyRenderer.hpp"
 #include "stb_image.h"
 
-#define WINDOW_WIDTH 1080.0f
-#define WINDOW_HEIGHT 720.0f
-
-MyCamera camera({ 0.0f, 0.5f, 2.0f }, glm::vec3(0.0f));
+MyCamera camera({ 0.0f, 0.0f, 2.0f }, glm::vec3(0.0f));
 
 static float delta_time = 0.0f; // 当前帧与上一帧的时间差
 
@@ -116,8 +114,10 @@ int main()
     //glfwGetFramebufferSize(window, &width, &height);
     set_view_port(WINDOW_WIDTH, WINDOW_HEIGHT);
 
-    MyShader shader("resource/shader/vshader.vs", "resource/shader/fshader.fs");
-    MyCube cube("resource/images/desert.jpg");
+    MyShader cube_shader("resource/shader/cube.vs", "resource/shader/cube.fs");
+    MyShader light_shader("resource/shader/light.vs", "resource/shader/light.fs");
+    MyCube cube("resource/images/desert.jpg", glm::vec4(0.0f, 0.0f, 1.0f, 1.0f));
+    MyLight light(glm::vec4(1.0f));
     MyRenderer renderer;
 
     IMGUI_CHECKVERSION();
@@ -134,14 +134,15 @@ int main()
     ImGui_ImplGlfw_InitForOpenGL(window, true);
     ImGui_ImplOpenGL3_Init("#version 330");
 
-    ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
+    static float ambient_strength = 0.3f;
 
     //Game Loop
     while (!glfwWindowShouldClose(window))
     {
         glfwPollEvents();//检查触发事件（比如键盘输入、鼠标移动等），然后调用对应的回调函数
 
-        glClearColor(clear_color.x * clear_color.w, clear_color.y * clear_color.w, clear_color.z * clear_color.w, clear_color.w);
+        glm::vec4 light_bg = glm::vec4(light.get_color() * ambient_strength * 0.8f, 1.0f);
+        glClearColor(light_bg.x, light_bg.y, light_bg.z, light_bg.w);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // also clear the depth buffer
 
         ImGui_ImplOpenGL3_NewFrame();
@@ -154,35 +155,61 @@ int main()
         delta_time = curr_time - last_time;
         last_time = curr_time;
 
-        GLfloat normalization_time = (sin(curr_time) / 3) + 0.6;
+        float normalization_time = (sin(curr_time) / 3) + 0.6;
+        
+        // render light
+            light_shader.start_using();
+            light_shader.setMatrix("view", 1, camera.get_view());
+            light_shader.setMatrix("projection", 1, camera.get_projection());
 
-        shader.start_using();
-        shader.setFloat("time_var", normalization_time);
-        shader.setMatrix("view", 1, camera.get_view());
-        shader.setMatrix("projection", 1, camera.get_projection());
+            light_shader.setMatrix("model", 1, light.get_model_matrix());
+            static ImVec4 light_color = { light.get_color().x, light.get_color().y, light.get_color().z, 1.0f };
+            light.set_color({ light_color.x, light_color.y, light_color.z });
+            light_shader.setFloat3("color", light.get_color());
+            renderer.draw(window, light_shader, light.get_vao_id(), light.get_elements_count());
+        
 
-        auto rotate = glm::rotate(glm::mat4(1.0f), normalization_time * 20.0f, glm::vec3(0.5f, 0.3f, 0.5f));
-        auto translate = glm::translate(glm::mat4(1.0f), {0.0f, 0.0f, 0.0f});
-        cube.set_model_matrix(rotate * translate * glm::mat4(1.0f));
-        shader.setMatrix("model", 1, cube.get_model_matrix());
-        renderer.draw(window, shader, cube.get_vao_id(), cube.get_elements_count());
+        // render cube
+            cube_shader.start_using();
+            cube_shader.setMatrix("view", 1, camera.get_view());
+            cube_shader.setMatrix("projection", 1, camera.get_projection());
+            cube_shader.setFloat("ambient_strength", ambient_strength);
+            cube_shader.setFloat3("light_color", light.get_color());
+            cube_shader.setFloat3("light_pos", light.get_model_matrix()[3]);
+            static bool stop_rotate = false;
+            static float time_value = normalization_time;
+            if (stop_rotate) {
+                ;
+            }
+            if (!stop_rotate) {
+                time_value = normalization_time;
+            }
+            static float cube_translate_x = 0.0f;
+            auto translate = glm::translate(glm::mat4(1.0f), { cube_translate_x, 0.0f, 0.0f });
+            auto rotate = glm::rotate(glm::mat4(1.0f), time_value * 20.0f, glm::vec3(1.0f, 1.0f, 1.0f));
+            cube.set_model_matrix(translate * rotate * glm::mat4(1.0f));
+            cube_shader.setMatrix("model", 1, cube.get_model_matrix());
+            static ImVec4 cube_color = { cube.get_color().x, cube.get_color().y, cube.get_color().z, 1.0f };
+            cube.set_color({ cube_color.x, cube_color.y, cube_color.z });
+            //shader.setFloat3("color", ambient_light * cube.get_color());
+            cube_shader.setFloat3("color", cube.get_color());
+            renderer.draw(window, cube_shader, cube.get_vao_id(), cube.get_elements_count());
 
-        // Show another simple window.
+
+        // imgui window.
         {
-            static float f = 0.0f;
-            static int counter = 0;
-
             ImGui::Begin("Hello, world!");                          // Create a window called "Hello, world!" and append into it.
 
-            ImGui::Text("This is some useful text.");               // Display some text (you can use a format strings too)
+            ImGui::SliderFloat("ambient strength", &ambient_strength, 0.0f, 1.0f);
+            ImGui::SliderFloat("cube x", &cube_translate_x, -1.0f, 1.0f);
+            ImGui::ColorEdit3("light color", (float*)&light_color);
+            ImGui::ColorEdit3("cube color", (float*)&cube_color);
 
-            ImGui::SliderFloat("float", &f, 0.0f, 1.0f);            // Edit 1 float using a slider from 0.0f to 1.0f
-            ImGui::ColorEdit3("clear color", (float*)&clear_color); // Edit 3 floats representing a color
-
-            if (ImGui::Button("Button"))                            // Buttons return true when clicked (most widgets return true when edited/activated)
-                counter++;
-            ImGui::SameLine();
-            ImGui::Text("counter = %d", counter);
+            if (ImGui::Checkbox("stop rotate", &stop_rotate));
+            
+            ImGui::NewLine();
+            std::string test = matrix_log(cube.get_model_matrix());
+            ImGui::Text(test.c_str());
 
             ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / io.Framerate, io.Framerate);
             ImGui::End();
@@ -227,7 +254,7 @@ GLuint test_vao()
     //   //该函数创建 0 size 的缓冲对象，其具有默认状态 GL_READ_WRITE 和 GL_STATIC_DRAW
     //   //该函数将缓冲对象绑定到OpenGL上下文环境中。
     //   glBufferData(GL_ARRAY_BUFFER, sizeof(triVertex), triVertex, GL_STATIC_DRAW);
-    //   //分配显存，真正生成缓冲对象，该缓冲对象具有名称(glGenBuffers)、类型(glBindBuffer);
+    //   //分配显存，使缓冲对象真正有数据，该缓冲对象具有名称(glGenBuffers)、类型(glBindBuffer);
     //   //它会把之前定义的顶点数据传输到当前绑定的显存缓冲区中，（顶点数据传入GPU）
     //   glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (GLvoid*)0);
     //   //通知OpenGL如何解释这些顶点数据
