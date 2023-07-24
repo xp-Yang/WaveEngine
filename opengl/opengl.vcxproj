@@ -27,7 +27,7 @@
     <ClCompile Include="imgui\imgui_tables.cpp" />
     <ClCompile Include="imgui\imgui_widgets.cpp" />
     <ClCompile Include="src\glad.c" />
-    <ClCompile Include="src\gltest.cpp" />
+    <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\MyCamera.cpp" />
     <ClCompile Include="src\MyCube.cpp" />
     <ClCompile Include="src\MyGround.cpp" />
@@ -35,6 +35,7 @@
     <ClCompile Include="src\MyRenderer.cpp" />
     <ClCompile Include="src\MyShader.cpp" />
     <ClCompile Include="src\stb_image.cpp" />
+    <ClCompile Include="src\test.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="imgui\imconfig.h" />

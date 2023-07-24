@@ -10,6 +10,13 @@ enum class TextureType {
     Normal,
 };
 
+struct Material {
+    glm::vec3 ambient;
+    glm::vec3 diffuse;
+    glm::vec3 specular;
+    float shininess;
+};
+
 class MyCube {
 public:
     MyCube(const char* texture_path = nullptr, const glm::vec3& color = glm::vec3(1.0f));
@@ -26,6 +33,8 @@ public:
     void set_color(const glm::vec3& color) { m_color = color; }
     const glm::mat4& get_model_matrix() { return m_model_matrix; }
     void set_model_matrix(const glm::mat4& mat) { m_model_matrix = mat; }
+    const Material& get_material() { return m_material; }
+    void set_material(const Material& material) { m_material = material; }
 
 protected:
     TextureType m_texture_type;
@@ -39,6 +48,8 @@ protected:
 
     glm::vec3 m_color;
     glm::mat4 m_model_matrix;
+
+    Material m_material;
 
     virtual void create_vbo();
     virtual void generate_texture(int width, int height, unsigned char* data);

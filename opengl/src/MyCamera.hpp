@@ -24,7 +24,7 @@ class FreeStyle : CameraStyle {
 
 };
 
-class StareStyle : CameraStyle {};
+class ObserveStyle : CameraStyle {};
 
 class MyCamera {
 public:
