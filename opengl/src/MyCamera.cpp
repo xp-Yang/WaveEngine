@@ -29,7 +29,7 @@ std::string matrix_log(const glm::mat4 mat)
 MyCamera::MyCamera(const glm::vec3& position, const glm::vec3& target)
     : m_pos (position)
     , m_target (target)
-    , m_direction (glm::vec3(0.0f, 0.0f, -1.0f))
+    , m_direction (glm::normalize(glm::vec3(0.0f, -0.6f, -1.0f)))
 {
     //m_direction = m_pos - m_target;
     //m_view_matrix = glm::lookAt(m_pos, m_target, up);

@@ -13,6 +13,7 @@ out vec3 pass_color;
 out vec2 pass_uv;
 out vec3 pass_pos;
 out vec3 pass_normal;
+out vec3 pass_view_pos;
 
 void main()
 {
@@ -21,6 +22,7 @@ void main()
 	pass_uv = vertex_uv;
     pass_pos = vec3(model * vec4(vertex_pos, 1.0));
     pass_normal = vec3(model * vec4(vertex_normal, 1.0));
+    pass_view_pos = view[3].xyz;
 
     gl_Position = projection * view * model * vec4(vertex_pos, 1.0);
 }

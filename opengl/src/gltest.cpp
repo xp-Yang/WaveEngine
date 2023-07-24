@@ -12,11 +12,12 @@
 #include "MyShader.hpp"
 #include "MyCube.hpp"
 #include "MyLight.hpp"
+#include "MyGround.hpp"
 #include "MyCamera.hpp"
 #include "MyRenderer.hpp"
 #include "stb_image.h"
 
-MyCamera camera({ 0.0f, 0.0f, 10.0f }, glm::vec3(0.0f));
+MyCamera camera({ 0.0f, 6.0f, 10.0f }, glm::vec3(0.0f));
 
 static float delta_time = 0.0f; // 当前帧与上一帧的时间差
 
@@ -46,7 +47,7 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos)
     last_xpos = xpos;
     last_ypos = ypos;
 
-    camera.mouse_process(delta_x, delta_y);
+    //camera.mouse_process(delta_x, delta_y);
 }
 
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
@@ -116,6 +117,7 @@ int main()
 
     MyShader cube_shader("resource/shader/cube.vs", "resource/shader/cube.fs");
     MyShader light_shader("resource/shader/light.vs", "resource/shader/light.fs");
+    MyGround ground(glm::vec4(0.6f, 0.7f, 1.0f, 1.0f));
     MyCube cube("resource/images/desert.jpg", glm::vec4(0.0f, 0.0f, 1.0f, 1.0f));
     MyLight light(glm::vec4(1.0f));
     MyRenderer renderer;
@@ -135,6 +137,10 @@ int main()
     ImGui_ImplOpenGL3_Init("#version 330");
 
     static float ambient_strength = 0.3f;
+    static float diffuse_strength = 1.0f;
+    static float specular_strength = 0.5f;
+    static int cube_shininess = 32;
+    static int ground_shininess = 32;
 
     //Game Loop
     while (!glfwWindowShouldClose(window))
@@ -166,7 +172,7 @@ int main()
             static ImVec4 light_color = { light.get_color().x, light.get_color().y, light.get_color().z, 1.0f };
             light.set_color({ light_color.x, light_color.y, light_color.z });
             light_shader.setFloat3("color", light.get_color());
-            renderer.draw(window, light_shader, light.get_vao_id(), light.get_elements_count());
+            renderer.draw(window, light_shader, light.get_vao_id(), DrawMode::Indices, light.get_elements_count());
         
 
         // render cube
@@ -174,8 +180,11 @@ int main()
             cube_shader.setMatrix("view", 1, camera.get_view());
             cube_shader.setMatrix("projection", 1, camera.get_projection());
             cube_shader.setFloat("ambient_strength", ambient_strength);
+            cube_shader.setFloat("diffuse_strength", diffuse_strength);
+            cube_shader.setFloat("specular_strength", specular_strength);
             cube_shader.setFloat3("light_color", light.get_color());
             cube_shader.setFloat3("light_pos", light.get_model_matrix()[3]);
+            cube_shader.setInt("shininess", cube_shininess);
             static bool stop_rotate = false;
             static float time_value = normalization_time;
             if (stop_rotate) {
@@ -185,7 +194,9 @@ int main()
                 time_value = normalization_time;
             }
             static float cube_translate_x = 0.0f;
-            auto translate = glm::translate(glm::mat4(1.0f), { cube_translate_x, 0.0f, 0.0f });
+            static float cube_translate_y = 0.0f;
+            static float cube_translate_z = 0.0f;
+            auto translate = glm::translate(glm::mat4(1.0f), { cube_translate_x, cube_translate_y, cube_translate_z });
             auto rotate = glm::rotate(glm::mat4(1.0f), time_value * 20.0f, glm::vec3(1.0f, 1.0f, 1.0f));
             cube.set_model_matrix(translate * rotate * glm::mat4(1.0f));
             cube_shader.setMatrix("model", 1, cube.get_model_matrix());
@@ -193,17 +204,35 @@ int main()
             cube.set_color({ cube_color.x, cube_color.y, cube_color.z });
             //shader.setFloat3("color", ambient_light * cube.get_color());
             cube_shader.setFloat3("color", cube.get_color());
-            renderer.draw(window, cube_shader, cube.get_vao_id(), cube.get_elements_count());
+            renderer.draw(window, cube_shader, cube.get_vao_id(), DrawMode::Arrays, cube.get_elements_count());
 
+        // render ground
+            cube_shader.setInt("shininess", ground_shininess);
+            cube_shader.setMatrix("model", 1, ground.get_model_matrix());
+            static ImVec4 ground_color = { ground.get_color().x, ground.get_color().y, ground.get_color().z, 1.0f };
+            ground.set_color({ ground_color.x, ground_color.y, ground_color.z });
+            cube_shader.setFloat3("color", ground.get_color());
+            renderer.draw(window, cube_shader, ground.get_vao_id(), DrawMode::Indices, ground.get_elements_count());
 
         // imgui window.
         {
             ImGui::Begin("Hello, world!");                          // Create a window called "Hello, world!" and append into it.
 
             ImGui::SliderFloat("ambient strength", &ambient_strength, 0.0f, 1.0f);
+            ImGui::SliderFloat("diffuse strength", &diffuse_strength, 0.0f, 1.0f);
+            ImGui::SliderFloat("specular strength", &specular_strength, 0.0f, 1.0f);
+            ImGui::SliderInt("cube shininess", &cube_shininess, 0, 256);
+            ImGui::SliderInt("ground shininess", &ground_shininess, 0, 256);
+            ImGui::PushItemWidth(85.0f);
             ImGui::SliderFloat("cube x", &cube_translate_x, -10.0f, 10.0f);
+            ImGui::SameLine();
+            ImGui::SliderFloat("cube y", &cube_translate_y, -10.0f, 10.0f);
+            ImGui::SameLine();
+            ImGui::SliderFloat("cube z", &cube_translate_z, -10.0f, 10.0f);
+            ImGui::PopItemWidth();
             ImGui::ColorEdit3("light color", (float*)&light_color);
             ImGui::ColorEdit3("cube color", (float*)&cube_color);
+            ImGui::ColorEdit3("ground color", (float*)&ground_color);
 
             if (ImGui::Checkbox("stop rotate", &stop_rotate));
             
@@ -216,6 +245,11 @@ int main()
             ImGui::Text("cube matrix:");
             std::string test_cube = matrix_log(cube.get_model_matrix());
             ImGui::Text(test_cube.c_str());
+
+            ImGui::NewLine();
+            ImGui::Text("ground matrix:");
+            std::string test_ground = matrix_log(ground.get_model_matrix());
+            ImGui::Text(test_ground.c_str());
 
             ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / io.Framerate, io.Framerate);
             ImGui::End();

@@ -30,6 +30,7 @@
     <ClCompile Include="src\gltest.cpp" />
     <ClCompile Include="src\MyCamera.cpp" />
     <ClCompile Include="src\MyCube.cpp" />
+    <ClCompile Include="src\MyGround.cpp" />
     <ClCompile Include="src\MyLight.cpp" />
     <ClCompile Include="src\MyRenderer.cpp" />
     <ClCompile Include="src\MyShader.cpp" />
@@ -48,6 +49,7 @@
     <ClInclude Include="resource\shader\light.vs" />
     <ClInclude Include="src\MyCamera.hpp" />
     <ClInclude Include="src\MyCube.hpp" />
+    <ClInclude Include="src\MyGround.hpp" />
     <ClInclude Include="src\MyLight.hpp" />
     <ClInclude Include="src\MyRenderer.hpp" />
     <ClInclude Include="src\MyShader.hpp" />
@@ -85,7 +87,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v142</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
