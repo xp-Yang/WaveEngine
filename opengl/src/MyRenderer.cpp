@@ -1,8 +1,6 @@
 #include "MyRenderer.hpp"
 
-MyRenderer::MyRenderer() {}
-
-void MyRenderer::draw(GLFWwindow* window, const MyShader& shader, GLuint vao_id, DrawMode mode, int indices_count, int array_count)
+void MyRenderer::draw(const MyShader& shader, GLuint vao_id, DrawMode mode, int indices_count, int array_count)
 {
     shader.start_using();
 
@@ -12,7 +10,7 @@ void MyRenderer::draw(GLFWwindow* window, const MyShader& shader, GLuint vao_id,
         glDrawArrays(GL_TRIANGLES, 0, 36);
     }
     else if (mode == DrawMode::Indices) {
-        glDrawElements(GL_TRIANGLES, indices_count, GL_UNSIGNED_BYTE, 0);
+        glDrawElements(GL_TRIANGLES, indices_count, GL_UNSIGNED_INT, 0);
     }
 
     glBindVertexArray(0);

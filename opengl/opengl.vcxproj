@@ -32,6 +32,8 @@
     <ClCompile Include="src\MyCube.cpp" />
     <ClCompile Include="src\MyGround.cpp" />
     <ClCompile Include="src\MyLight.cpp" />
+    <ClCompile Include="src\MyMesh.cpp" />
+    <ClCompile Include="src\MyModel.cpp" />
     <ClCompile Include="src\MyRenderer.cpp" />
     <ClCompile Include="src\MyShader.cpp" />
     <ClCompile Include="src\stb_image.cpp" />
@@ -52,6 +54,8 @@
     <ClInclude Include="src\MyCube.hpp" />
     <ClInclude Include="src\MyGround.hpp" />
     <ClInclude Include="src\MyLight.hpp" />
+    <ClInclude Include="src\MyMesh.hpp" />
+    <ClInclude Include="src\MyModel.hpp" />
     <ClInclude Include="src\MyRenderer.hpp" />
     <ClInclude Include="src\MyShader.hpp" />
     <ClInclude Include="src\标头.h" />
@@ -163,7 +167,7 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>glfw3.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>glfw3.lib;assimp-vc143-mt.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">

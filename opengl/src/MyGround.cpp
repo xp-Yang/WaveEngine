@@ -30,7 +30,7 @@ void MyGround::create_vbo()
     glBufferData(GL_ARRAY_BUFFER, sizeof(cubeVertex), cubeVertex, GL_STATIC_DRAW);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-    GLubyte cubeIndices[] =
+    GLuint cubeIndices[] =
     {
         0, 1, 2,
         0, 2, 3,

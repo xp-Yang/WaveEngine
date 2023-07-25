@@ -13,6 +13,7 @@
 #include "MyCube.hpp"
 #include "MyLight.hpp"
 #include "MyGround.hpp"
+#include "MyModel.hpp"
 #include "MyCamera.hpp"
 #include "MyRenderer.hpp"
 #include "stb_image.h"
@@ -111,6 +112,7 @@ int main()
 
     MyShader cube_shader("resource/shader/cube.vs", "resource/shader/cube.fs");
     MyShader light_shader("resource/shader/light.vs", "resource/shader/light.fs");
+    Model model("resource/model/nanosuit/nanosuit.obj");
     MyGround ground(glm::vec4(0.6f, 0.7f, 1.0f, 1.0f));
     MyCube cube("resource/images/desert.jpg", glm::vec4(0.0f, 0.0f, 1.0f, 1.0f));
     MyLight light(glm::vec4(1.0f));
@@ -166,7 +168,7 @@ int main()
             static ImVec4 light_color = { light.get_color().x, light.get_color().y, light.get_color().z, 1.0f };
             light.set_color({ light_color.x, light_color.y, light_color.z });
             light_shader.setFloat3("color", light.get_color());
-            renderer.draw(window, light_shader, light.get_vao_id(), DrawMode::Indices, light.get_elements_count());
+            renderer.draw(light_shader, light.get_vao_id(), DrawMode::Indices, light.get_elements_count());
         
 
         // render cube
@@ -179,8 +181,8 @@ int main()
             cube_shader.setFloat3("light_color", light.get_color());
             cube_shader.setFloat3("light_pos", light.get_model_matrix()[3]);
             cube_shader.setFloat("material.shininess", cube_shininess);
-            static bool stop_rotate = false;
-            static float time_value = normalization_time;
+            static bool stop_rotate = true;
+            static float time_value = 0.0f;
             if (stop_rotate) {
                 ;
             }
@@ -196,9 +198,12 @@ int main()
             cube_shader.setMatrix("model", 1, cube.get_model_matrix());
             static ImVec4 cube_color = { cube.get_color().x, cube.get_color().y, cube.get_color().z, 1.0f };
             cube.set_color({ cube_color.x, cube_color.y, cube_color.z });
-            //shader.setFloat3("color", ambient_light * cube.get_color());
             cube_shader.setFloat3("color", cube.get_color());
-            renderer.draw(window, cube_shader, cube.get_vao_id(), DrawMode::Arrays, cube.get_elements_count());
+            //renderer.draw(cube_shader, cube.get_vao_id(), DrawMode::Arrays, cube.get_elements_count());
+
+            auto scale = glm::scale(glm::mat4(1.0f), glm::vec3(0.1f));
+            cube_shader.setMatrix("model", 1, scale * cube.get_model_matrix());
+            model.draw(cube_shader);
 
         // render ground
             cube_shader.setFloat("material.shininess", ground_shininess);
@@ -206,7 +211,7 @@ int main()
             static ImVec4 ground_color = { ground.get_color().x, ground.get_color().y, ground.get_color().z, 1.0f };
             ground.set_color({ ground_color.x, ground_color.y, ground_color.z });
             cube_shader.setFloat3("color", ground.get_color());
-            renderer.draw(window, cube_shader, ground.get_vao_id(), DrawMode::Indices, ground.get_elements_count());
+            renderer.draw(cube_shader, ground.get_vao_id(), DrawMode::Indices, ground.get_elements_count());
 
         // imgui window.
         {

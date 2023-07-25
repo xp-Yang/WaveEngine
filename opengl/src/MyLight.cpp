@@ -33,7 +33,7 @@ void MyLight::create_vbo()
     glBufferData(GL_ARRAY_BUFFER, sizeof(cubeVertex), cubeVertex, GL_STATIC_DRAW);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-    GLubyte cubeIndices[] =
+    GLuint cubeIndices[] =
     {
         0, 1, 2, 0, 2, 3, // Quad 0 前面
         4, 5, 6, 4, 6, 7, // Quad 1 后面

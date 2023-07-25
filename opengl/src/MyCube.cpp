@@ -177,7 +177,7 @@ void MyCube::create_vao() {
     //glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (GLvoid*)(3 * sizeof(float)));
     //glEnableVertexAttribArray(1);
     // 顶点法向量数据
-    glBindBuffer(GL_ARRAY_BUFFER, get_normal_id());
+    glBindBuffer(GL_ARRAY_BUFFER, get_vbo_id());
     glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*)(3 * sizeof(float)));
     glEnableVertexAttribArray(3);
 
