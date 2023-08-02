@@ -2,7 +2,7 @@
 
 static glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f);
 static const float CameraMovementSpeed = 1.0f;
-static const float Sensitivity = 0.01f;
+static const float Sensitivity = 0.1f;
 static const float ZoomUnit = 0.1f;
 
 std::string matrix_log(const glm::mat4 mat)

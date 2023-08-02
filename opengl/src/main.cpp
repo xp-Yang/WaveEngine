@@ -21,6 +21,7 @@
 MyCamera camera({ 0.0f, 6.0f, 10.0f }, glm::vec3(0.0f));
 
 static float delta_time = 0.0f; // 当前帧与上一帧的时间差
+static int mouse_left_status;
 
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode)
 {
@@ -29,26 +30,37 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
     camera.key_process(key, delta_time);
 }
 
+void mouse_button_callback(GLFWwindow* window, int button, int action, int mods) {
+    if (button == 0) {
+        if (action == GLFW_PRESS)
+            mouse_left_status = 1;
+        if (action == GLFW_RELEASE)
+            mouse_left_status = 0;
+    }
+}
+
 void mouse_callback(GLFWwindow* window, double xpos, double ypos) 
 { 
-    static float last_xpos = WINDOW_WIDTH / 2;
-    static float last_ypos = WINDOW_HEIGHT / 2;
+    if (mouse_left_status) {
+        static float last_xpos = WINDOW_WIDTH / 2;
+        static float last_ypos = WINDOW_HEIGHT / 2;
 
-    static bool first_enter = true;
-    if (first_enter)
-    {
+        static bool first_enter = true;
+        if (first_enter)
+        {
+            last_xpos = xpos;
+            last_ypos = ypos;
+            first_enter = false;
+            return;
+        }
+
+        float delta_x = xpos - last_xpos;
+        float delta_y = -(ypos - last_ypos); // 注意这里是相反的，因为glfwSetCursorPosCallback返回给mouse_callback函数的 (x,y) 是鼠标相对于窗口左上角的位置，所以需要将 (ypos - lastY) 取反
         last_xpos = xpos;
         last_ypos = ypos;
-        first_enter = false;
-        return;
+
+        camera.mouse_process(delta_x, delta_y);
     }
-
-    float delta_x = xpos - last_xpos;
-    float delta_y = -(ypos - last_ypos); // 注意这里是相反的，因为glfwSetCursorPosCallback返回给mouse_callback函数的 (x,y) 是鼠标相对于窗口左上角的位置，所以需要将 (ypos - lastY) 取反
-    last_xpos = xpos;
-    last_ypos = ypos;
-
-    //camera.mouse_process(delta_x, delta_y);
 }
 
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
@@ -102,6 +114,7 @@ int main()
 
     glfwSetKeyCallback(window, key_callback);
     glfwSetCursorPosCallback(window, mouse_callback);
+    glfwSetMouseButtonCallback(window, mouse_button_callback);
     glfwSetScrollCallback(window, scroll_callback);
 
     glEnable(GL_DEPTH_TEST);

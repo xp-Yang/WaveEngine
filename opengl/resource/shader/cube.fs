@@ -47,5 +47,5 @@ void main()
     //fragment_color = texture(Texture, pass_uv);
 
     //debug
-    //fragment_color = vec4(pass_pos, 1.0f);
+    //fragment_color = vec4(normal, 1.0f);
 }
