@@ -199,11 +199,11 @@ int main()
             static ImVec4 cube_color = { cube.get_color().x, cube.get_color().y, cube.get_color().z, 1.0f };
             cube.set_color({ cube_color.x, cube_color.y, cube_color.z });
             cube_shader.setFloat3("color", cube.get_color());
-            //renderer.draw(cube_shader, cube.get_vao_id(), DrawMode::Arrays, cube.get_elements_count());
+            renderer.draw(cube_shader, cube.get_vao_id(), DrawMode::Indices, cube.get_elements_count());
 
-            auto scale = glm::scale(glm::mat4(1.0f), glm::vec3(0.1f));
-            cube_shader.setMatrix("model", 1, scale * cube.get_model_matrix());
-            model.draw(cube_shader);
+            //auto scale = glm::scale(glm::mat4(1.0f), glm::vec3(0.1f));
+            //cube_shader.setMatrix("model", 1, scale * cube.get_model_matrix());
+            //model.draw(cube_shader);
 
         // render ground
             cube_shader.setFloat("material.shininess", ground_shininess);

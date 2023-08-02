@@ -26,8 +26,6 @@ public:
     GLuint get_texture_id() { return m_texuture_id; }
     GLuint get_vbo_id() { return m_vbo_id; }
     GLuint get_ibo_id() { return m_ibo_id; }
-    GLuint get_uv_id() { return m_uv_id; }
-    GLuint get_normal_id() { return m_normal_id; }
     int get_elements_count() { return 36; }
     glm::vec3 get_color() { return m_color; }
     void set_color(const glm::vec3& color) { m_color = color; }
@@ -43,8 +41,6 @@ protected:
     GLuint m_texuture_id;
     GLuint m_vbo_id;
     GLuint m_ibo_id;
-    GLuint m_uv_id;
-    GLuint m_normal_id;
 
     glm::vec3 m_color;
     glm::mat4 m_model_matrix;
