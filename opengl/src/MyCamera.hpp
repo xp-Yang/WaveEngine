@@ -48,7 +48,7 @@ public:
     void surround_with_target(const float radius);
 
     void key_process(int key, float frame_time);
-    void mouse_process(double delta_x, double delta_y);
+    void mouse_process(double delta_x, double delta_y, int mouse_button);
     void mouse_scroll_process(double yoffset);
 
 private:

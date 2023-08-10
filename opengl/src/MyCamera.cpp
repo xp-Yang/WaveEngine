@@ -2,7 +2,7 @@
 
 static glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f);
 static const float CameraMovementSpeed = 1.0f;
-static const float Sensitivity = 0.02f;
+static const float Sensitivity = 0.03f;
 static const float ZoomUnit = 0.1f;
 
 std::string matrix_log(const glm::mat4 mat)
@@ -102,26 +102,33 @@ void MyCamera::key_process(int key, float frame_time)
 }
 
 
-void MyCamera::mouse_process(double delta_x, double delta_y)
+void MyCamera::mouse_process(double delta_x, double delta_y, int mouse_button)
 {
-    // get pitch
-    m_direction.pitch += delta_y * Sensitivity;
-    // get yaw
-    m_direction.yaw += delta_x * Sensitivity;
+    if (mouse_button == 0) {
+        // get pitch
+        m_direction.pitch += delta_y * Sensitivity;
+        // get yaw
+        m_direction.yaw += delta_x * Sensitivity;
 
-    // make sure that when pitch is out of bounds, screen doesn't get flipped
-    if (m_direction.pitch > 89.0f)
-        m_direction.pitch = 89.0f;
-    if (m_direction.pitch < -89.0f)
-        m_direction.pitch = -89.0f;
+        // make sure that when pitch is out of bounds, screen doesn't get flipped
+        if (m_direction.pitch > 89.0f)
+            m_direction.pitch = 89.0f;
+        if (m_direction.pitch < -89.0f)
+            m_direction.pitch = -89.0f;
 
-    // update direction
-    m_direction.dir.x = cos(glm::radians(m_direction.pitch)) * sin(glm::radians(m_direction.yaw));
-    m_direction.dir.y = sin(glm::radians(m_direction.pitch));
-    m_direction.dir.z = -cos(glm::radians(m_direction.pitch)) * cos(glm::radians(m_direction.yaw));
-    m_direction.dir = glm::normalize(m_direction.dir);
+        // update direction
+        m_direction.dir.x = cos(glm::radians(m_direction.pitch)) * sin(glm::radians(m_direction.yaw));
+        m_direction.dir.y = sin(glm::radians(m_direction.pitch));
+        m_direction.dir.z = -cos(glm::radians(m_direction.pitch)) * cos(glm::radians(m_direction.yaw));
+        m_direction.dir = glm::normalize(m_direction.dir);
 
-    m_view_matrix = glm::lookAt(m_pos, m_pos + m_direction.dir, up);
+        m_view_matrix = glm::lookAt(m_pos, m_pos + m_direction.dir, up);
+    }
+    else if (mouse_button == 1) {
+        m_pos += glm::vec3(-delta_x * Sensitivity * 0.1f, -delta_y * Sensitivity * 0.1f, 0.0f);
+
+        m_view_matrix = glm::lookAt(m_pos, m_pos + m_direction.dir, up);
+    }
 }
 
 void MyCamera::mouse_scroll_process(double yoffset)

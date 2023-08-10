@@ -22,6 +22,7 @@ MyCamera camera({ 0.0f, 6.0f, 10.0f }, glm::vec3(0.0f));
 
 static float delta_time = 0.0f; // 当前帧与上一帧的时间差
 static int mouse_left_status;
+static int mouse_right_status;
 
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode)
 {
@@ -37,25 +38,45 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
         if (action == GLFW_RELEASE)
             mouse_left_status = 0;
     }
+    if (button == 1) {
+        if (action == GLFW_PRESS)
+            mouse_right_status = 1;
+        if (action == GLFW_RELEASE)
+            mouse_right_status = 0;
+    }
 }
 
 void mouse_callback(GLFWwindow* window, double xpos, double ypos) 
 { 
-    static int last_mouse_status = mouse_left_status;
+    static int last_left_mouse_status = mouse_left_status;
+    static int last_right_mouse_status = mouse_right_status;
 
     static float last_pos_x = WINDOW_WIDTH / 2;
     static float last_pos_y = WINDOW_HEIGHT / 2;
-    if (last_mouse_status != mouse_left_status) {
+    if (last_left_mouse_status != mouse_left_status) {
         last_pos_x = xpos;
         last_pos_y = ypos;
-        last_mouse_status = mouse_left_status;
+        last_left_mouse_status = mouse_left_status;
     }
     if (mouse_left_status) {
         float delta_x = xpos - last_pos_x;
         float delta_y = -(ypos - last_pos_y); // 注意这里是相反的，因为glfwSetCursorPosCallback返回给mouse_callback函数的 (x,y) 是鼠标相对于窗口左上角的位置，所以需要将 (ypos - lastY) 取反
         last_pos_x = xpos;
         last_pos_y = ypos;
-        camera.mouse_process(delta_x, delta_y);
+        camera.mouse_process(delta_x, delta_y, 0);
+    }
+
+    if (last_right_mouse_status != mouse_right_status) {
+        last_pos_x = xpos;
+        last_pos_y = ypos;
+        last_right_mouse_status = mouse_right_status;
+    }
+    if (mouse_right_status) {
+        float delta_x = xpos - last_pos_x;
+        float delta_y = -(ypos - last_pos_y);
+        last_pos_x = xpos;
+        last_pos_y = ypos;
+        camera.mouse_process(delta_x, delta_y, 1);
     }
 }
 
