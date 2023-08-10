@@ -11,6 +11,7 @@
 #define WINDOW_HEIGHT 900.0f
 
 std::string matrix_log(const glm::mat4 mat);
+static glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f);
 
 class CameraStyle {
     virtual void behavior() = 0;
@@ -27,10 +28,21 @@ class FreeStyle : CameraStyle {
 class ObserveStyle : CameraStyle {};
 
 struct Direction {
-    glm::vec3 dir;
-    float pitch = 0.0f; // 方向向量与 x-z 平面的夹角
-    float yaw = 0.0f; // 方向向量在 x-z 平面的投影矢量相对 -z 轴的夹角
+    glm::vec3 dir; // 方向向量, 即camera的 -z 轴
+    float pitch = 0.0f; // 方向向量与世界坐标系 x-z 平面的夹角
+    float yaw = 0.0f; // 方向向量在世界坐标系 x-z 平面的投影矢量相对世界坐标系 -z 轴的夹角
     float roll = 0.0f;
+
+    const glm::vec3& get_right_direction() { // camera 的 x 轴
+        glm::vec3 cameraRight = glm::normalize(glm::cross(dir, up));
+        return cameraRight;
+    }
+
+    const glm::vec3& get_up_direction() { // camera 的 y 轴
+        glm::vec3 right_dir = get_right_direction();
+        glm::vec3 cameraUp = glm::cross(right_dir, dir);
+        return cameraUp;
+    }
 };
 
 class MyCamera {
@@ -40,8 +52,6 @@ public:
     const glm::vec3& get_position();
     const glm::vec3& get_target();
     const Direction& get_direction();
-    const glm::vec3& get_right_direction();
-    const glm::vec3& get_up_direction();
     const glm::mat4& get_view();
     const glm::mat4& get_projection();
 

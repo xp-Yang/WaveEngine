@@ -1,8 +1,7 @@
 #include "MyCamera.hpp"
 
-static glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f);
 static const float CameraMovementSpeed = 1.0f;
-static const float Sensitivity = 0.03f;
+static const float Sensitivity = 0.1f;
 static const float ZoomUnit = 0.1f;
 
 std::string matrix_log(const glm::mat4 mat)
@@ -39,9 +38,6 @@ MyCamera::MyCamera(const glm::vec3& position, const glm::vec3& target)
     m_direction.dir.z = -cos(glm::radians(m_direction.pitch)) * cos(glm::radians(m_direction.yaw));
     m_direction.dir = glm::normalize(m_direction.dir);
 
-    //m_direction = m_pos - m_target;
-    //m_view_matrix = glm::lookAt(m_pos, m_target, up);
-    
     m_view_matrix = glm::lookAt(m_pos, m_pos + m_direction.dir, up);
 
     m_projection_matrix = glm::perspective(glm::radians(45.0f), /*1.0f*/WINDOW_WIDTH / WINDOW_HEIGHT, 0.1f, 100.0f);
@@ -125,7 +121,8 @@ void MyCamera::mouse_process(double delta_x, double delta_y, int mouse_button)
         m_view_matrix = glm::lookAt(m_pos, m_pos + m_direction.dir, up);
     }
     else if (mouse_button == 1) {
-        m_pos += glm::vec3(-delta_x * Sensitivity * 0.1f, -delta_y * Sensitivity * 0.1f, 0.0f);
+        m_pos += -(float)(delta_x * Sensitivity * 0.1f) * m_direction.get_right_direction();
+        m_pos += -(float)(delta_y * Sensitivity * 0.1f) * m_direction.get_up_direction();
 
         m_view_matrix = glm::lookAt(m_pos, m_pos + m_direction.dir, up);
     }
@@ -156,16 +153,6 @@ const glm::vec3& MyCamera::get_target() {
 
 const Direction& MyCamera::get_direction() {
     return m_direction;
-}
-
-const glm::vec3& MyCamera::get_right_direction() {
-    glm::vec3 cameraRight = glm::normalize(glm::cross(up, get_direction().dir));
-    return cameraRight;
-}
-
-const glm::vec3& MyCamera::get_up_direction() {
-    glm::vec3 cameraUp = glm::cross(m_direction.dir, get_right_direction());
-    return cameraUp;
 }
 
 const glm::mat4& MyCamera::get_view() {
