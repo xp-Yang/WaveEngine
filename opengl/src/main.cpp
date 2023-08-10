@@ -41,24 +41,20 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
 
 void mouse_callback(GLFWwindow* window, double xpos, double ypos) 
 { 
+    static int last_mouse_status = mouse_left_status;
+
+    static float last_pos_x = WINDOW_WIDTH / 2;
+    static float last_pos_y = WINDOW_HEIGHT / 2;
+    if (last_mouse_status != mouse_left_status) {
+        last_pos_x = xpos;
+        last_pos_y = ypos;
+        last_mouse_status = mouse_left_status;
+    }
     if (mouse_left_status) {
-        static float last_xpos = WINDOW_WIDTH / 2;
-        static float last_ypos = WINDOW_HEIGHT / 2;
-
-        static bool first_enter = true;
-        if (first_enter)
-        {
-            last_xpos = xpos;
-            last_ypos = ypos;
-            first_enter = false;
-            return;
-        }
-
-        float delta_x = xpos - last_xpos;
-        float delta_y = -(ypos - last_ypos); // 注意这里是相反的，因为glfwSetCursorPosCallback返回给mouse_callback函数的 (x,y) 是鼠标相对于窗口左上角的位置，所以需要将 (ypos - lastY) 取反
-        last_xpos = xpos;
-        last_ypos = ypos;
-
+        float delta_x = xpos - last_pos_x;
+        float delta_y = -(ypos - last_pos_y); // 注意这里是相反的，因为glfwSetCursorPosCallback返回给mouse_callback函数的 (x,y) 是鼠标相对于窗口左上角的位置，所以需要将 (ypos - lastY) 取反
+        last_pos_x = xpos;
+        last_pos_y = ypos;
         camera.mouse_process(delta_x, delta_y);
     }
 }

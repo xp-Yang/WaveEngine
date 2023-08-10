@@ -26,13 +26,20 @@ class FreeStyle : CameraStyle {
 
 class ObserveStyle : CameraStyle {};
 
+struct Direction {
+    glm::vec3 dir;
+    float pitch = 0.0f; // 方向向量与 x-z 平面的夹角
+    float yaw = 0.0f; // 方向向量在 x-z 平面的投影矢量相对 -z 轴的夹角
+    float roll = 0.0f;
+};
+
 class MyCamera {
 public:
     MyCamera(const glm::vec3& position, const glm::vec3& target);
 
     const glm::vec3& get_position();
     const glm::vec3& get_target();
-    const glm::vec3& get_direction();
+    const Direction& get_direction();
     const glm::vec3& get_right_direction();
     const glm::vec3& get_up_direction();
     const glm::mat4& get_view();
@@ -49,13 +56,9 @@ private:
 
     glm::vec3 m_pos;
     glm::vec3 m_target;
-    glm::vec3 m_direction;
     glm::mat4 m_view_matrix;
     glm::mat4 m_projection_matrix;
-
-    float m_pitch = 0.0f; // 方向向量与 x-z 平面的夹角
-    float m_yaw = 0.0f; // 方向向量在 x-z 平面的投影矢量相对 -z 轴的夹角
-    float m_roll = 0.0f;
+    Direction m_direction;
 
     float m_zoom = 1.0f;
 

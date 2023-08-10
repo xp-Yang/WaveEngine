@@ -2,7 +2,7 @@
 
 static glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f);
 static const float CameraMovementSpeed = 1.0f;
-static const float Sensitivity = 0.1f;
+static const float Sensitivity = 0.02f;
 static const float ZoomUnit = 0.1f;
 
 std::string matrix_log(const glm::mat4 mat)
@@ -29,12 +29,20 @@ std::string matrix_log(const glm::mat4 mat)
 MyCamera::MyCamera(const glm::vec3& position, const glm::vec3& target)
     : m_pos (position)
     , m_target (target)
-    , m_direction (glm::normalize(glm::vec3(0.0f, -0.6f, -1.0f)))
 {
+    m_direction.pitch = -20.0f;
+    m_direction.yaw = 0.0f;
+    m_direction.roll = 0.0f;
+
+    m_direction.dir.x = cos(glm::radians(m_direction.pitch)) * sin(glm::radians(m_direction.yaw));
+    m_direction.dir.y = sin(glm::radians(m_direction.pitch));
+    m_direction.dir.z = -cos(glm::radians(m_direction.pitch)) * cos(glm::radians(m_direction.yaw));
+    m_direction.dir = glm::normalize(m_direction.dir);
+
     //m_direction = m_pos - m_target;
     //m_view_matrix = glm::lookAt(m_pos, m_target, up);
     
-    m_view_matrix = glm::lookAt(m_pos, m_pos + m_direction, up);
+    m_view_matrix = glm::lookAt(m_pos, m_pos + m_direction.dir, up);
 
     m_projection_matrix = glm::perspective(glm::radians(45.0f), /*1.0f*/WINDOW_WIDTH / WINDOW_HEIGHT, 0.1f, 100.0f);
     //它的第一个参数定义了fov的值。如果想要一个真实的观察效果，它的值通常设置为45.0f，但想要一个末日风格的结果你可以将其设置一个更大的值。
@@ -87,7 +95,7 @@ void MyCamera::key_process(int key, float frame_time)
         break;
     }
 
-    m_view_matrix = glm::lookAt(m_pos, m_pos + m_direction, up);
+    m_view_matrix = glm::lookAt(m_pos, m_pos + m_direction.dir, up);
 
     std::cout << key << std::endl;
     matrix_log(m_view_matrix);
@@ -97,23 +105,23 @@ void MyCamera::key_process(int key, float frame_time)
 void MyCamera::mouse_process(double delta_x, double delta_y)
 {
     // get pitch
-    m_pitch += delta_y * Sensitivity;
+    m_direction.pitch += delta_y * Sensitivity;
     // get yaw
-    m_yaw += delta_x * Sensitivity;
+    m_direction.yaw += delta_x * Sensitivity;
 
     // make sure that when pitch is out of bounds, screen doesn't get flipped
-    if (m_pitch > 89.0f)
-        m_pitch = 89.0f;
-    if (m_pitch < -89.0f)
-        m_pitch = -89.0f;
+    if (m_direction.pitch > 89.0f)
+        m_direction.pitch = 89.0f;
+    if (m_direction.pitch < -89.0f)
+        m_direction.pitch = -89.0f;
 
     // update direction
-    m_direction.x = cos(glm::radians(m_pitch)) * sin(glm::radians(m_yaw));
-    m_direction.y = sin(glm::radians(m_pitch));
-    m_direction.z = -cos(glm::radians(m_pitch)) * cos(glm::radians(m_yaw));
-    m_direction = glm::normalize(m_direction);
+    m_direction.dir.x = cos(glm::radians(m_direction.pitch)) * sin(glm::radians(m_direction.yaw));
+    m_direction.dir.y = sin(glm::radians(m_direction.pitch));
+    m_direction.dir.z = -cos(glm::radians(m_direction.pitch)) * cos(glm::radians(m_direction.yaw));
+    m_direction.dir = glm::normalize(m_direction.dir);
 
-    m_view_matrix = glm::lookAt(m_pos, m_pos + m_direction, up);
+    m_view_matrix = glm::lookAt(m_pos, m_pos + m_direction.dir, up);
 }
 
 void MyCamera::mouse_scroll_process(double yoffset)
@@ -139,17 +147,17 @@ const glm::vec3& MyCamera::get_target() {
     return m_target;
 }
 
-const glm::vec3& MyCamera::get_direction() {
+const Direction& MyCamera::get_direction() {
     return m_direction;
 }
 
 const glm::vec3& MyCamera::get_right_direction() {
-    glm::vec3 cameraRight = glm::normalize(glm::cross(up, get_direction()));
+    glm::vec3 cameraRight = glm::normalize(glm::cross(up, get_direction().dir));
     return cameraRight;
 }
 
 const glm::vec3& MyCamera::get_up_direction() {
-    glm::vec3 cameraUp = glm::cross(m_direction, get_right_direction());
+    glm::vec3 cameraUp = glm::cross(m_direction.dir, get_right_direction());
     return cameraUp;
 }
 
