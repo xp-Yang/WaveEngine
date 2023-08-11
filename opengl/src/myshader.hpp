@@ -13,7 +13,7 @@ public:
 
 	void start_using() const;
 	void stop_using() const;
-	GLuint get_id() { return m_id; }
+	GLuint get_id() const { return m_id; }
 	// uniform ¹¤¾ßº¯Êý
 	void setBool(const std::string& name, bool value) const;
 	void setInt(const std::string& name, int value) const;

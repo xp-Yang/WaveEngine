@@ -146,6 +146,8 @@
       <Filter>资源文件</Filter>
     </None>
     <None Include="resource\shader\light.fs" />
+    <None Include="resource\shader\model.fs" />
+    <None Include="resource\shader\model.vs" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="resource\images\desert.jpg">

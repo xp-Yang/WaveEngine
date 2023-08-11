@@ -155,6 +155,6 @@ unsigned int TextureFromFile(const char* path, const std::string& directory, boo
 void Model::draw(const MyShader& shader)
 {
     for (unsigned int i = 0; i < m_meshes.size(); i++) {
-        m_renderer.draw(shader, m_meshes[i].get_VAO(), DrawMode::Indices, m_meshes[i].get_indices_count());
+        m_renderer.draw(shader, m_meshes[i].get_VAO(), DrawMode::Indices, m_meshes[i].get_indices_count(), 0, m_meshes[i].get_texures());
     }
 }

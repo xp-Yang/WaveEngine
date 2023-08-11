@@ -64,6 +64,8 @@
     <None Include="resource\shader\cube.fs" />
     <None Include="resource\shader\cube.vs" />
     <None Include="resource\shader\light.fs" />
+    <None Include="resource\shader\model.fs" />
+    <None Include="resource\shader\model.vs" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="resource\images\desert.jpg" />

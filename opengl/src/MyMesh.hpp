@@ -28,6 +28,7 @@ public:
 
 	unsigned int get_VAO() { return m_VAO; }
 	int get_indices_count() { return m_indices.size(); }
+	const std::vector<Texture>& get_texures() { return m_textures; }
 
 protected:
 	unsigned int m_VAO;

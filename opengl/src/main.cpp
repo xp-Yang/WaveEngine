@@ -142,6 +142,7 @@ int main()
 
     MyShader cube_shader("resource/shader/cube.vs", "resource/shader/cube.fs");
     MyShader light_shader("resource/shader/light.vs", "resource/shader/light.fs");
+    MyShader model_shader("resource/shader/model.vs", "resource/shader/model.fs");
     Model model("resource/model/nanosuit/nanosuit.obj");
     MyGround ground(glm::vec4(0.6f, 0.7f, 1.0f, 1.0f));
     MyCube cube("resource/images/desert.jpg", glm::vec4(0.0f, 0.0f, 1.0f, 1.0f));
@@ -231,12 +232,17 @@ int main()
             cube_shader.setFloat3("color", cube.get_color());
             renderer.draw(cube_shader, cube.get_vao_id(), DrawMode::Indices, cube.get_elements_count());
 
+        // render model
+            model_shader.start_using();
+            model_shader.setMatrix("view", 1, camera.get_view());
+            model_shader.setMatrix("projection", 1, camera.get_projection());
             auto nanosuit_scale = glm::scale(glm::mat4(1.0f), glm::vec3(0.5f));
             auto nanosuit_translate = glm::translate(glm::mat4(1.0f), glm::vec3(2.0f, 0.0f, 0.0f));
-            cube_shader.setMatrix("model", 1, nanosuit_translate * nanosuit_scale * cube.get_model_matrix());
-            model.draw(cube_shader);
+            model_shader.setMatrix("model", 1, nanosuit_translate * nanosuit_scale * cube.get_model_matrix());
+            model.draw(model_shader);
 
         // render ground
+            cube_shader.start_using();
             cube_shader.setFloat("material.shininess", ground_shininess);
             cube_shader.setMatrix("model", 1, ground.get_model_matrix());
             static ImVec4 ground_color = { ground.get_color().x, ground.get_color().y, ground.get_color().z, 1.0f };
