@@ -21,15 +21,15 @@ void MyRenderer::draw(const MyShader& shader, GLuint vao_id, DrawMode mode, int 
         }
         else if (type == aiTextureType_SPECULAR) {
             name = "texture_specular";
-            name += std::to_string(specularNr++); // transfer unsigned int to string
+            name += std::to_string(specularNr++);
         }
         else if (type == aiTextureType_NORMALS) {
             name = "texture_normal";
-            name += std::to_string(normalNr++); // transfer unsigned int to string
+            name += std::to_string(normalNr++);
         }
         else if (type == aiTextureType_HEIGHT) {
             name = "texture_height";
-            name += std::to_string(heightNr++); // transfer unsigned int to string
+            name += std::to_string(heightNr++);
         }
 
         // now set the sampler to the correct texture unit
