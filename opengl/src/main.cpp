@@ -18,7 +18,7 @@
 #include "MyRenderer.hpp"
 #include "stb_image.h"
 
-MyCamera camera({ 0.0f, 6.0f, 10.0f }, glm::vec3(0.0f));
+MyCamera camera({ 0.0f, 6.0f, 10.0f });
 
 static float delta_time = 0.0f; // 当前帧与上一帧的时间差
 static int mouse_left_status;
@@ -231,9 +231,10 @@ int main()
             cube_shader.setFloat3("color", cube.get_color());
             renderer.draw(cube_shader, cube.get_vao_id(), DrawMode::Indices, cube.get_elements_count());
 
-            //auto scale = glm::scale(glm::mat4(1.0f), glm::vec3(0.1f));
-            //cube_shader.setMatrix("model", 1, scale * cube.get_model_matrix());
-            //model.draw(cube_shader);
+            auto nanosuit_scale = glm::scale(glm::mat4(1.0f), glm::vec3(0.5f));
+            auto nanosuit_translate = glm::translate(glm::mat4(1.0f), glm::vec3(2.0f, 0.0f, 0.0f));
+            cube_shader.setMatrix("model", 1, nanosuit_translate * nanosuit_scale * cube.get_model_matrix());
+            model.draw(cube_shader);
 
         // render ground
             cube_shader.setFloat("material.shininess", ground_shininess);

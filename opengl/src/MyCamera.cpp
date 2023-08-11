@@ -25,9 +25,8 @@ std::string matrix_log(const glm::mat4 mat)
     return result;
 }
 
-MyCamera::MyCamera(const glm::vec3& position, const glm::vec3& target)
+MyCamera::MyCamera(const glm::vec3& position)
     : m_pos (position)
-    , m_target (target)
 {
     m_direction.pitch = -20.0f;
     m_direction.yaw = 0.0f;

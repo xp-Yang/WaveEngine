@@ -47,7 +47,9 @@ struct Direction {
 
 class MyCamera {
 public:
-    MyCamera(const glm::vec3& position, const glm::vec3& target);
+    MyCamera(const glm::vec3& position);
+    MyCamera(const glm::vec3& position, float pitch, float yaw, float roll);
+    MyCamera(const glm::vec3& position, glm::vec3 dir);
 
     const glm::vec3& get_position();
     const glm::vec3& get_target();
