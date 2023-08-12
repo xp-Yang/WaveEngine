@@ -22,6 +22,7 @@ public:
 	void setFloat4(const std::string& name, const glm::vec4& value) const;
 	void setFloat3(const std::string& name, const glm::vec3& value) const;
 	void setMatrix(const std::string& name, int count, const glm::mat4& mat_value) const;
+	void setTexture(const std::string& name, int texture_unit) const;
 
 private:
 	GLuint m_id;

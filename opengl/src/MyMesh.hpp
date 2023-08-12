@@ -17,7 +17,7 @@ struct Vertex {
 struct Texture {
 	unsigned int id;
 	aiTextureType type;
-	aiString path;
+	//aiString path;
 };
 
 class Mesh {
@@ -33,7 +33,7 @@ public:
 protected:
 	unsigned int m_VAO;
 	unsigned int m_VBO;
-	unsigned int m_EBO;
+	unsigned int m_IBO;
 
 	std::vector<Vertex> m_vertices;
 	std::vector<unsigned int> m_indices;

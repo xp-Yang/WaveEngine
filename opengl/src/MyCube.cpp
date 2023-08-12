@@ -178,6 +178,7 @@ void MyCube::create_vao() {
 
     if (m_texture_type == TextureType::Normal) {
         // 纹理数据
+        glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, get_texture_id());
 
         // uv 坐标数据

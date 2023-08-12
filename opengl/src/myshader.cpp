@@ -118,3 +118,7 @@ void MyShader::setMatrix(const std::string& name, int count, const glm::mat4& ma
     GLuint transformLoc = glGetUniformLocation(m_id, name.c_str());
     glUniformMatrix4fv(transformLoc, count, GL_FALSE, glm::value_ptr(mat_value));
 }
+void MyShader::setTexture(const std::string& name, int texture_unit) const
+{
+    setInt(name, texture_unit);
+}

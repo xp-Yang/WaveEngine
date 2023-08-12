@@ -80,6 +80,10 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene)
         textures.insert(textures.end(), diffuseMaps.begin(), diffuseMaps.end());
         std::vector<Texture> specularMaps = loadMaterialTextures(material, aiTextureType_SPECULAR);
         textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
+        std::vector<Texture> normalMaps = loadMaterialTextures(material, aiTextureType_NORMALS);
+        textures.insert(textures.end(), normalMaps.begin(), normalMaps.end());
+        std::vector<Texture> heightMaps = loadMaterialTextures(material, aiTextureType_HEIGHT);
+        textures.insert(textures.end(), heightMaps.begin(), heightMaps.end());
     }
 
     // ´¦ÀíË÷Òý
@@ -91,10 +95,9 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene)
     }
 
     return Mesh(vertices, indices, textures);
-    //return Mesh(vertices, indices);
 }
 
-unsigned int TextureFromFile(const char* path, const std::string& directory, bool gamma);
+unsigned int generate_texture_from_file(const char* path, const std::string& directory, bool gamma);
 
 std::vector<Texture> Model::loadMaterialTextures(aiMaterial* mat, aiTextureType type)
 {
@@ -104,15 +107,15 @@ std::vector<Texture> Model::loadMaterialTextures(aiMaterial* mat, aiTextureType 
         aiString str;
         mat->GetTexture(type, i, &str);
         Texture texture;
-        texture.id = TextureFromFile(str.C_Str(), directory, false);
+        texture.id = generate_texture_from_file(str.C_Str(), directory, false);
         texture.type = type;
-        texture.path = str;
+        //texture.path = str;
         textures.push_back(texture);
     }
     return textures;
 }
 
-unsigned int TextureFromFile(const char* path, const std::string& directory, bool gamma)
+unsigned int generate_texture_from_file(const char* path, const std::string& directory, bool gamma)
 {
     std::string filename = std::string(path);
     filename = directory + '/' + filename;
@@ -154,7 +157,43 @@ unsigned int TextureFromFile(const char* path, const std::string& directory, boo
 
 void Model::draw(const MyShader& shader)
 {
+    shader.start_using();
     for (unsigned int i = 0; i < m_meshes.size(); i++) {
-        m_renderer.draw(shader, m_meshes[i].get_VAO(), DrawMode::Indices, m_meshes[i].get_indices_count(), 0, m_meshes[i].get_texures());
+        auto& textures = m_meshes[i].get_texures();
+        // bind appropriate textures
+        unsigned int diffuseNr = 1;
+        unsigned int specularNr = 1;
+        unsigned int normalNr = 1;
+        unsigned int heightNr = 1;
+        for (unsigned int i = 0; i < textures.size(); i++)
+        {
+            glActiveTexture(GL_TEXTURE0 + i); // active proper texture unit before binding
+            glBindTexture(GL_TEXTURE_2D, textures[i].id);
+
+            std::string name;
+            aiTextureType type = textures[i].type;
+            if (type == aiTextureType_DIFFUSE) {
+                name = "texture_diffuse";
+                name += std::to_string(diffuseNr++);
+            }
+            else if (type == aiTextureType_SPECULAR) {
+                name = "texture_specular";
+                name += std::to_string(specularNr++);
+            }
+            else if (type == aiTextureType_NORMALS) {
+                name = "texture_normal";
+                name += std::to_string(normalNr++);
+            }
+            else if (type == aiTextureType_HEIGHT) {
+                name = "texture_height";
+                name += std::to_string(heightNr++);
+            }
+            // now set the sampler to the correct texture unit
+            shader.setTexture(name, i);
+        }
+        // always good practice to set everything back to defaults once configured.
+        glActiveTexture(GL_TEXTURE0);
+
+        m_renderer.draw(shader, m_meshes[i].get_VAO(), DrawMode::Indices, m_meshes[i].get_indices_count(), 0);
     }
 }

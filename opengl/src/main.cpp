@@ -236,8 +236,8 @@ int main()
             model_shader.start_using();
             model_shader.setMatrix("view", 1, camera.get_view());
             model_shader.setMatrix("projection", 1, camera.get_projection());
-            auto nanosuit_scale = glm::scale(glm::mat4(1.0f), glm::vec3(0.5f));
-            auto nanosuit_translate = glm::translate(glm::mat4(1.0f), glm::vec3(2.0f, 0.0f, 0.0f));
+            auto nanosuit_scale = glm::scale(glm::mat4(1.0f), glm::vec3(0.4f));
+            auto nanosuit_translate = glm::translate(glm::mat4(1.0f), glm::vec3(5.0f, 0.0f, 0.0f));
             model_shader.setMatrix("model", 1, nanosuit_translate * nanosuit_scale * cube.get_model_matrix());
             model.draw(model_shader);
 

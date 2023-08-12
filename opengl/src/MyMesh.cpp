@@ -41,18 +41,13 @@ void Mesh::create_vao()
     glBindBuffer(GL_ARRAY_BUFFER, m_VBO);
     glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, normal));
     glEnableVertexAttribArray(1);
-    //// 纹理数据
-    //glBindTexture(GL_TEXTURE_2D, get_texture_id());
-    //for (unsigned int i = 0; i < m_textures.size(); i++) {
-    //    glBindTexture(GL_TEXTURE_2D, m_textures[i].id);
-    //}
     // 纹理 uv 坐标数据
     glBindBuffer(GL_ARRAY_BUFFER, m_VBO);
     glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, texture_uv));
     glEnableVertexAttribArray(2);
 
     // 索引数据
-    glGenBuffers(1, &m_EBO);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_EBO);
+    glGenBuffers(1, &m_IBO);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_IBO);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_indices.size() * sizeof(unsigned int), &m_indices[0], GL_STATIC_DRAW);
 }
