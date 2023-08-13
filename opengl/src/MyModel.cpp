@@ -76,13 +76,13 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene)
     if (mesh->mMaterialIndex >= 0)
     {
         aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
-        std::vector<Texture> diffuseMaps = loadMaterialTextures(material, aiTextureType_DIFFUSE);
+        std::vector<Texture> diffuseMaps = load_textures(material, aiTextureType_DIFFUSE);
         textures.insert(textures.end(), diffuseMaps.begin(), diffuseMaps.end());
-        std::vector<Texture> specularMaps = loadMaterialTextures(material, aiTextureType_SPECULAR);
+        std::vector<Texture> specularMaps = load_textures(material, aiTextureType_SPECULAR);
         textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
-        std::vector<Texture> normalMaps = loadMaterialTextures(material, aiTextureType_NORMALS);
+        std::vector<Texture> normalMaps = load_textures(material, aiTextureType_NORMALS);
         textures.insert(textures.end(), normalMaps.begin(), normalMaps.end());
-        std::vector<Texture> heightMaps = loadMaterialTextures(material, aiTextureType_HEIGHT);
+        std::vector<Texture> heightMaps = load_textures(material, aiTextureType_HEIGHT);
         textures.insert(textures.end(), heightMaps.begin(), heightMaps.end());
     }
 
@@ -99,13 +99,13 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene)
 
 unsigned int generate_texture_from_file(const char* path, const std::string& directory, bool gamma);
 
-std::vector<Texture> Model::loadMaterialTextures(aiMaterial* mat, aiTextureType type)
+std::vector<Texture> Model::load_textures(aiMaterial* material, aiTextureType type)
 {
     std::vector<Texture> textures;
-    for (unsigned int i = 0; i < mat->GetTextureCount(type); i++)
+    for (unsigned int i = 0; i < material->GetTextureCount(type); i++)
     {
         aiString str;
-        mat->GetTexture(type, i, &str);
+        material->GetTexture(type, i, &str);
         Texture texture;
         texture.id = generate_texture_from_file(str.C_Str(), directory, false);
         texture.type = type;

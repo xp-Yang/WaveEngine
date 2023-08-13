@@ -20,7 +20,7 @@ private:
 
 	void processNode(aiNode* node, const aiScene* scene);
 	Mesh processMesh(aiMesh* mesh, const aiScene* scene);
-	std::vector<Texture> loadMaterialTextures(aiMaterial* mat, aiTextureType type);
+	std::vector<Texture> load_textures(aiMaterial* material, aiTextureType type);
 
 	MyRenderer m_renderer;
 };
