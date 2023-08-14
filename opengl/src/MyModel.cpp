@@ -4,7 +4,7 @@
 Model::Model(const std::string& file_path)
 {
 	load_model(file_path);
-    m_renderer = MyRenderer();
+    m_renderer = Renderer();
 }
 
 std::string directory;
@@ -155,7 +155,7 @@ unsigned int generate_texture_from_file(const char* path, const std::string& dir
     return textureID;
 }
 
-void Model::draw(const MyShader& shader)
+void Model::draw(const Shader& shader)
 {
     shader.start_using();
     for (unsigned int i = 0; i < m_meshes.size(); i++) {

@@ -1,5 +1,5 @@
-#ifndef MyCamera_hpp
-#define MyCamera_hpp
+#ifndef Camera_hpp
+#define Camera_hpp
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
@@ -45,11 +45,11 @@ struct Direction {
     }
 };
 
-class MyCamera {
+class Camera {
 public:
-    MyCamera(const glm::vec3& position);
-    MyCamera(const glm::vec3& position, float pitch, float yaw, float roll);
-    MyCamera(const glm::vec3& position, glm::vec3 dir);
+    Camera(const glm::vec3& position);
+    Camera(const glm::vec3& position, float pitch, float yaw, float roll);
+    Camera(const glm::vec3& position, glm::vec3 dir);
 
     const glm::vec3& get_position();
     const glm::vec3& get_target();

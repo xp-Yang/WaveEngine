@@ -1,9 +1,9 @@
-#include "MyShader.hpp"
+#include "Shader.hpp"
 #include <string>
 #include <fstream>
 #include <sstream>
 
-MyShader::MyShader(const char* vertexPath, const char* fragmentPath)
+Shader::Shader(const char* vertexPath, const char* fragmentPath)
 {
     // 1. 从文件路径中获取顶点/片段着色器
     std::string vertexCode;
@@ -78,47 +78,47 @@ MyShader::MyShader(const char* vertexPath, const char* fragmentPath)
     }
 }
 
-void MyShader::start_using() const {
+void Shader::start_using() const {
     glUseProgram(m_id);
 }
 
-void MyShader::stop_using() const {
+void Shader::stop_using() const {
     glUseProgram(0);
 }
 
-void MyShader::setBool(const std::string& name, bool value) const
+void Shader::setBool(const std::string& name, bool value) const
 {
     glUniform1i(glGetUniformLocation(m_id, name.c_str()), (int)value);
 }
-void MyShader::setInt(const std::string& name, int value) const
+void Shader::setInt(const std::string& name, int value) const
 {
     glUniform1i(glGetUniformLocation(m_id, name.c_str()), value);
 }
-void MyShader::setFloat(const std::string& name, float value) const
+void Shader::setFloat(const std::string& name, float value) const
 {
     glUniform1f(glGetUniformLocation(m_id, name.c_str()), value);
 }
-void MyShader::setFloat4(const std::string& name, float value1, float value2, float value3, float value4) const
+void Shader::setFloat4(const std::string& name, float value1, float value2, float value3, float value4) const
 {
     GLint location = glGetUniformLocation(m_id, name.c_str());
     glUniform4f(location, value1, value2, value3, value4);
 }
-void MyShader::setFloat4(const std::string& name, const glm::vec4& value) const
+void Shader::setFloat4(const std::string& name, const glm::vec4& value) const
 {
     GLint location = glGetUniformLocation(m_id, name.c_str());
     glUniform4f(location, value.x, value.y, value.z, value.w);
 }
-void MyShader::setFloat3(const std::string& name, const glm::vec3& value) const
+void Shader::setFloat3(const std::string& name, const glm::vec3& value) const
 {
     GLint location = glGetUniformLocation(m_id, name.c_str());
     glUniform3f(location, value.x, value.y, value.z);
 }
-void MyShader::setMatrix(const std::string& name, int count, const glm::mat4& mat_value) const
+void Shader::setMatrix(const std::string& name, int count, const glm::mat4& mat_value) const
 {
     GLuint transformLoc = glGetUniformLocation(m_id, name.c_str());
     glUniformMatrix4fv(transformLoc, count, GL_FALSE, glm::value_ptr(mat_value));
 }
-void MyShader::setTexture(const std::string& name, int texture_unit) const
+void Shader::setTexture(const std::string& name, int texture_unit) const
 {
     setInt(name, texture_unit);
 }

@@ -1,5 +1,5 @@
-#ifndef MyShader_hpp
-#define MyShader_hpp
+#ifndef Shader_hpp
+#define Shader_hpp
 #include <glad/glad.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -7,9 +7,9 @@
 #include "../imgui/imgui.h"
 #include <iostream>
 
-class MyShader{
+class Shader{
 public:
-	MyShader(const char* vertexPath, const char* fragmentPath);
+	Shader(const char* vertexPath, const char* fragmentPath);
 
 	void start_using() const;
 	void stop_using() const;

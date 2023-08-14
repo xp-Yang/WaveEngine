@@ -1,4 +1,4 @@
-#include "MyCamera.hpp"
+#include "Camera.hpp"
 
 static const float CameraMovementSpeed = 1.0f;
 static const float Sensitivity = 0.1f;
@@ -25,7 +25,7 @@ std::string matrix_log(const glm::mat4 mat)
     return result;
 }
 
-MyCamera::MyCamera(const glm::vec3& position)
+Camera::Camera(const glm::vec3& position)
     : m_pos (position)
 {
     m_direction.pitch = -20.0f;
@@ -45,13 +45,13 @@ MyCamera::MyCamera(const glm::vec3& position)
     //第三和第四个参数设置了平截头体的近和远平面。我们通常设置近距离为0.1f，而远距离设为100.0f。所有在近平面和远平面内且处于平截头体内的顶点都会被渲染。
 }
 
-void MyCamera::surround_with_target(const float radius) {
+void Camera::surround_with_target(const float radius) {
     //float camX = sin(glfwGetTime()) * radius;
     //float camZ = cos(glfwGetTime()) * radius;
     //m_view_matrix = glm::lookAt(glm::vec3(camX, 0.0, camZ), glm::vec3(0.0, 0.0, 0.0), glm::vec3(0.0, 1.0, 0.0));
 }
 
-void MyCamera::key_process(int key, float frame_time)
+void Camera::key_process(int key, float frame_time)
 {
     // 每一帧持续时间越长，意味着上一帧的渲染花费了越多时间，所以这一帧的速度应该越大，来平衡渲染所花去的时间
     float frame_speed = CameraMovementSpeed * frame_time;
@@ -97,7 +97,7 @@ void MyCamera::key_process(int key, float frame_time)
 }
 
 
-void MyCamera::mouse_process(double delta_x, double delta_y, int mouse_button)
+void Camera::mouse_process(double delta_x, double delta_y, int mouse_button)
 {
     if (mouse_button == 0) {
         // get pitch
@@ -127,7 +127,7 @@ void MyCamera::mouse_process(double delta_x, double delta_y, int mouse_button)
     }
 }
 
-void MyCamera::mouse_scroll_process(double yoffset)
+void Camera::mouse_scroll_process(double yoffset)
 {
     m_zoom += ZoomUnit * yoffset;
     if (m_zoom < 0.1f)
@@ -142,22 +142,22 @@ void MyCamera::mouse_scroll_process(double yoffset)
     m_projection_matrix = glm::perspective(glm::radians(fov), WINDOW_WIDTH / WINDOW_HEIGHT, 0.1f, 100.0f);
 }
 
-const glm::vec3& MyCamera::get_position() {
+const glm::vec3& Camera::get_position() {
     return m_pos;
 }
 
-const glm::vec3& MyCamera::get_target() {
+const glm::vec3& Camera::get_target() {
     return m_target;
 }
 
-const Direction& MyCamera::get_direction() {
+const Direction& Camera::get_direction() {
     return m_direction;
 }
 
-const glm::mat4& MyCamera::get_view() {
+const glm::mat4& Camera::get_view() {
     return m_view_matrix;
 }
 
-const glm::mat4& MyCamera::get_projection() {
+const glm::mat4& Camera::get_projection() {
     return m_projection_matrix;
 }

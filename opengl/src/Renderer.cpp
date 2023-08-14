@@ -1,6 +1,6 @@
-#include "MyRenderer.hpp"
+#include "Renderer.hpp"
 
-void MyRenderer::draw(const Shader& shader, GLuint vao_id, DrawMode mode, int indices_count, int array_count)
+void Renderer::draw(const Shader& shader, GLuint vao_id, DrawMode mode, int indices_count, int array_count)
 {
     shader.start_using();
 

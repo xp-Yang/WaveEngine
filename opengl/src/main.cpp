@@ -9,16 +9,16 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
-#include "MyShader.hpp"
+#include "Shader.hpp"
 #include "MyCube.hpp"
 #include "MyLight.hpp"
 #include "MyGround.hpp"
 #include "MyModel.hpp"
-#include "MyCamera.hpp"
-#include "MyRenderer.hpp"
+#include "Camera.hpp"
+#include "Renderer.hpp"
 #include "stb_image.h"
 
-MyCamera camera({ 0.0f, 6.0f, 10.0f });
+Camera camera({ 0.0f, 6.0f, 10.0f });
 
 static float delta_time = 0.0f; // 当前帧与上一帧的时间差
 static int mouse_left_status;
@@ -140,14 +140,14 @@ int main()
     //glfwGetFramebufferSize(window, &width, &height);
     set_view_port(WINDOW_WIDTH, WINDOW_HEIGHT);
 
-    MyShader cube_shader("resource/shader/cube.vs", "resource/shader/cube.fs");
-    MyShader light_shader("resource/shader/light.vs", "resource/shader/light.fs");
-    MyShader model_shader("resource/shader/model.vs", "resource/shader/model.fs");
+    Shader cube_shader("resource/shader/cube.vs", "resource/shader/cube.fs");
+    Shader light_shader("resource/shader/light.vs", "resource/shader/light.fs");
+    Shader model_shader("resource/shader/model.vs", "resource/shader/model.fs");
     Model model("resource/model/nanosuit/nanosuit.obj");
     MyGround ground(glm::vec4(0.6f, 0.7f, 1.0f, 1.0f));
     MyCube cube("resource/images/desert.jpg", glm::vec4(0.0f, 0.0f, 1.0f, 1.0f));
     MyLight light(glm::vec4(1.0f));
-    MyRenderer renderer;
+    Renderer renderer;
 
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();

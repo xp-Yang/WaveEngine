@@ -24,16 +24,16 @@
     <ClCompile Include="src\glad.c">
       <Filter>源文件\src</Filter>
     </ClCompile>
-    <ClCompile Include="src\MyCamera.cpp">
+    <ClCompile Include="src\Camera.cpp">
       <Filter>源文件\src</Filter>
     </ClCompile>
     <ClCompile Include="src\MyCube.cpp">
       <Filter>源文件\src</Filter>
     </ClCompile>
-    <ClCompile Include="src\MyRenderer.cpp">
+    <ClCompile Include="src\Renderer.cpp">
       <Filter>源文件\src</Filter>
     </ClCompile>
-    <ClCompile Include="src\MyShader.cpp">
+    <ClCompile Include="src\Shader.cpp">
       <Filter>源文件\src</Filter>
     </ClCompile>
     <ClCompile Include="src\stb_image.cpp">
@@ -78,18 +78,24 @@
     <ClCompile Include="src\test.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="src\View.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Scene.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\MyCamera.hpp">
+    <ClInclude Include="src\Camera.hpp">
       <Filter>源文件\src</Filter>
     </ClInclude>
     <ClInclude Include="src\MyCube.hpp">
       <Filter>源文件\src</Filter>
     </ClInclude>
-    <ClInclude Include="src\MyRenderer.hpp">
+    <ClInclude Include="src\Renderer.hpp">
       <Filter>源文件\src</Filter>
     </ClInclude>
-    <ClInclude Include="src\MyShader.hpp">
+    <ClInclude Include="src\Shader.hpp">
       <Filter>源文件\src</Filter>
     </ClInclude>
     <ClInclude Include="imgui\imconfig.h">
@@ -135,6 +141,12 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="src\MyModel.hpp">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\View.hpp">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Scene.hpp">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>
