@@ -9,16 +9,18 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
-#include "Shader.hpp"
 #include "MyCube.hpp"
 #include "MyLight.hpp"
 #include "MyGround.hpp"
 #include "MyModel.hpp"
+#include "Shader.hpp"
 #include "Camera.hpp"
 #include "Renderer.hpp"
+#include "View.hpp"
+#include "Scene.hpp"
 #include "stb_image.h"
 
-Camera camera({ 0.0f, 6.0f, 10.0f });
+Camera camera({ 0.0f, 5.0f, 5.0f }, -45.0f, 0.0f, 0.0f);
 
 static float delta_time = 0.0f; // 当前帧与上一帧的时间差
 static int mouse_left_status;
@@ -141,11 +143,12 @@ int main()
     set_view_port(WINDOW_WIDTH, WINDOW_HEIGHT);
 
     Shader cube_shader("resource/shader/cube.vs", "resource/shader/cube.fs");
+    Shader ground_shader("resource/shader/ground.vs", "resource/shader/ground.fs");
     Shader light_shader("resource/shader/light.vs", "resource/shader/light.fs");
     Shader model_shader("resource/shader/model.vs", "resource/shader/model.fs");
     Model model("resource/model/nanosuit/nanosuit.obj");
-    MyGround ground(glm::vec4(0.6f, 0.7f, 1.0f, 1.0f));
-    MyCube cube("resource/images/desert.jpg", glm::vec4(0.0f, 0.0f, 1.0f, 1.0f));
+    MyGround ground(glm::vec4(255.0f / 255.0f, 255.0f / 255.0f, 216.0f / 255.0f, 1.0f));
+    MyCube cube("resource/images/desert.jpg", glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
     MyLight light(glm::vec4(1.0f));
     Renderer renderer;
 
@@ -164,10 +167,10 @@ int main()
     ImGui_ImplOpenGL3_Init("#version 330");
 
     static float ambient_strength = 0.3f;
-    static float diffuse_strength = 1.0f;
-    static float specular_strength = 0.5f;
-    static float cube_shininess = 32.0f;
-    static float ground_shininess = 32.0f;
+    static float cube_shininess = 1.0f;
+    static float ground_diffuse = 0.5f;
+    static float ground_spec = 0.5f;
+    static float ground_shininess = 1.0f;
 
     //Game Loop
     while (!glfwWindowShouldClose(window))
@@ -205,12 +208,20 @@ int main()
         // render cube
             cube_shader.start_using();
             cube_shader.setMatrix("view", 1, camera.get_view());
+            cube_shader.setFloat3("viewpos", camera.get_position());
             cube_shader.setMatrix("projection", 1, camera.get_projection());
             cube_shader.setFloat("material.ambient", ambient_strength);
-            cube_shader.setFloat("material.diffuse", diffuse_strength);
-            cube_shader.setFloat("material.specular", specular_strength);
-            cube_shader.setFloat3("light_color", light.get_color());
-            cube_shader.setFloat3("light_pos", light.get_model_matrix()[3]);
+
+            glActiveTexture(GL_TEXTURE0);
+            glBindTexture(GL_TEXTURE_2D, cube.get_texture_id());
+            cube_shader.setTexture("material.diffuse_map", 0);
+
+            glActiveTexture(GL_TEXTURE1);
+            glBindTexture(GL_TEXTURE_2D, cube.get_specular_map_id());
+            cube_shader.setTexture("material.specular_map", 1);
+
+            cube_shader.setFloat3("light.color", light.get_color());
+            cube_shader.setFloat3("light.position", light.get_model_matrix()[3]);
             cube_shader.setFloat("material.shininess", cube_shininess);
             static bool stop_rotate = true;
             static float time_value = 0.0f;
@@ -221,7 +232,7 @@ int main()
                 time_value = normalization_time;
             }
             static float cube_translate_x = 0.0f;
-            static float cube_translate_y = 0.0f;
+            static float cube_translate_y = 1.0f;
             static float cube_translate_z = 0.0f;
             auto translate = glm::translate(glm::mat4(1.0f), { cube_translate_x, cube_translate_y, cube_translate_z });
             auto rotate = glm::rotate(glm::mat4(1.0f), time_value * 20.0f, glm::vec3(1.0f, 1.0f, 1.0f));
@@ -242,23 +253,31 @@ int main()
             model.draw(model_shader);
 
         // render ground
-            cube_shader.start_using();
-            cube_shader.setFloat("material.shininess", ground_shininess);
-            cube_shader.setMatrix("model", 1, ground.get_model_matrix());
+            ground_shader.start_using();
+            ground_shader.setMatrix("view", 1, camera.get_view());
+            ground_shader.setFloat3("viewpos", camera.get_position());
+            ground_shader.setMatrix("projection", 1, camera.get_projection());
+            ground_shader.setFloat("material.ambient", ambient_strength);
+            ground_shader.setFloat("material.diffuse", ground_diffuse);
+            ground_shader.setFloat("material.specular", ground_spec);
+            ground_shader.setFloat("material.shininess", ground_shininess);
+            ground_shader.setFloat3("light.color", light.get_color());
+            ground_shader.setFloat3("light.position", light.get_model_matrix()[3]);
+            ground_shader.setMatrix("model", 1, ground.get_model_matrix());
             static ImVec4 ground_color = { ground.get_color().x, ground.get_color().y, ground.get_color().z, 1.0f };
             ground.set_color({ ground_color.x, ground_color.y, ground_color.z });
-            cube_shader.setFloat3("color", ground.get_color());
-            renderer.draw(cube_shader, ground.get_vao_id(), DrawMode::Indices, ground.get_elements_count());
+            ground_shader.setFloat3("color", ground.get_color());
+            renderer.draw(ground_shader, ground.get_vao_id(), DrawMode::Indices, ground.get_elements_count());
 
         // imgui window.
         {
             ImGui::Begin("Hello, world!");                          // Create a window called "Hello, world!" and append into it.
 
             ImGui::SliderFloat("ambient strength", &ambient_strength, 0.0f, 1.0f);
-            ImGui::SliderFloat("diffuse strength", &diffuse_strength, 0.0f, 1.0f);
-            ImGui::SliderFloat("specular strength", &specular_strength, 0.0f, 1.0f);
-            ImGui::SliderFloat("cube shininess", &cube_shininess, 0, 256);
+            ImGui::SliderFloat("cube shininess", &cube_shininess, 0, 1.5f);
             ImGui::SliderFloat("ground shininess", &ground_shininess, 0, 256);
+            ImGui::SliderFloat("ground diffuse strength", &ground_diffuse, 0, 1);
+            ImGui::SliderFloat("ground specular strength", &ground_spec, 0, 1);
             ImGui::PushItemWidth(85.0f);
             ImGui::SliderFloat("cube x", &cube_translate_x, -10.0f, 10.0f);
             ImGui::SameLine();
@@ -282,10 +301,25 @@ int main()
             std::string test_cube = matrix_log(cube.get_model_matrix());
             ImGui::Text(test_cube.c_str());
 
+            //ImGui::NewLine();
+            //ImGui::Text("ground matrix:");
+            //std::string test_ground = matrix_log(ground.get_model_matrix());
+            //ImGui::Text(test_ground.c_str());
+
             ImGui::NewLine();
-            ImGui::Text("ground matrix:");
-            std::string test_ground = matrix_log(ground.get_model_matrix());
-            ImGui::Text(test_ground.c_str());
+            ImGui::Text("view matrix:");
+            std::string test_view = matrix_log(camera.get_view());
+            ImGui::Text(test_view.c_str());
+
+            ImGui::NewLine();
+            ImGui::Text("camera position:");
+            std::string test_camera_pos = vec3_log(camera.get_position());
+            ImGui::Text(test_camera_pos.c_str());
+
+            ImGui::NewLine();
+            ImGui::Text("camera direction:");
+            std::string test_camera_dir = vec3_log(camera.get_direction().dir);
+            ImGui::Text(test_camera_dir.c_str());
 
             ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / io.Framerate, io.Framerate);
             ImGui::End();

@@ -6,10 +6,7 @@ MyGround::MyGround(const glm::vec4& color)
     m_color = color;
 
     auto scale = glm::scale(glm::mat4(1.0f), glm::vec3(10000.0f));
-    m_model_matrix = scale * m_model_matrix;
-
-    auto translate = glm::translate(glm::mat4(1.0f), { 0.0f, -1.0f, 0.0f });
-    m_model_matrix = translate * m_model_matrix;
+    m_model_matrix = scale * glm::mat4(1.0f);
 
     create_vbo();
     create_vao();

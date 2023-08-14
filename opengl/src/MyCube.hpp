@@ -23,7 +23,8 @@ public:
     virtual ~MyCube();
 
     GLuint get_vao_id() { return m_vao_id; }
-    GLuint get_texture_id() { return m_texuture_id; }
+    GLuint get_texture_id() { return m_texture_id; }
+    GLuint get_specular_map_id() { return m_specular_map_id; }
     GLuint get_vbo_id() { return m_vbo_id; }
     GLuint get_ibo_id() { return m_ibo_id; }
     int get_elements_count() { return 36; }
@@ -38,7 +39,8 @@ protected:
     TextureType m_texture_type;
 
     GLuint m_vao_id;
-    GLuint m_texuture_id;
+    GLuint m_texture_id;
+    GLuint m_specular_map_id;
     GLuint m_vbo_id;
     GLuint m_ibo_id;
 
@@ -48,7 +50,7 @@ protected:
     Material m_material;
 
     virtual void create_vbo();
-    virtual void generate_texture(int width, int height, unsigned char* data);
+    virtual unsigned int generate_texture(int width, int height, unsigned char* data);
     virtual void create_vao();
 };
 

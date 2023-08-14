@@ -84,6 +84,9 @@
     <ClCompile Include="src\Scene.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="src\Material.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Camera.hpp">
@@ -149,6 +152,9 @@
     <ClInclude Include="src\Scene.hpp">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="src\Material.hpp">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="resource\shader\cube.fs">
@@ -160,6 +166,8 @@
     <None Include="resource\shader\light.fs" />
     <None Include="resource\shader\model.fs" />
     <None Include="resource\shader\model.vs" />
+    <None Include="resource\shader\ground.fs" />
+    <None Include="resource\shader\ground.vs" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="resource\images\desert.jpg">

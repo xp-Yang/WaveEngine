@@ -11,6 +11,7 @@
 #define WINDOW_HEIGHT 900.0f
 
 std::string matrix_log(const glm::mat4 mat);
+std::string vec3_log(const glm::vec3 vec);
 static glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f);
 
 class CameraStyle {

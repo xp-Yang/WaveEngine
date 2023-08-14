@@ -25,10 +25,20 @@ std::string matrix_log(const glm::mat4 mat)
     return result;
 }
 
+std::string vec3_log(const glm::vec3 vec) {
+    std::string result;
+    char buf[1024];
+    sprintf_s(buf, "%.3f %.3f %.3f \n", vec.x, vec.y, vec.z);
+    result += buf;
+    sprintf_s(buf, "\n");
+    result += buf;
+    return result;
+}
+
 Camera::Camera(const glm::vec3& position)
     : m_pos (position)
 {
-    m_direction.pitch = -20.0f;
+    m_direction.pitch = -45.0f;
     m_direction.yaw = 0.0f;
     m_direction.roll = 0.0f;
 
@@ -44,6 +54,24 @@ Camera::Camera(const glm::vec3& position)
     //第二个参数设置了宽高比，由视口的宽除以高所得。宽高比为1的话，视口的宽高比影响了渲染出来的立方体的宽高比。
     //第三和第四个参数设置了平截头体的近和远平面。我们通常设置近距离为0.1f，而远距离设为100.0f。所有在近平面和远平面内且处于平截头体内的顶点都会被渲染。
 }
+
+Camera::Camera(const glm::vec3& position, float pitch, float yaw, float roll)
+    : m_pos(position)
+{
+    m_direction.pitch = pitch;
+    m_direction.yaw = yaw;
+    m_direction.roll = roll;
+
+    m_direction.dir.x = cos(glm::radians(m_direction.pitch)) * sin(glm::radians(m_direction.yaw));
+    m_direction.dir.y = sin(glm::radians(m_direction.pitch));
+    m_direction.dir.z = -cos(glm::radians(m_direction.pitch)) * cos(glm::radians(m_direction.yaw));
+    m_direction.dir = glm::normalize(m_direction.dir);
+
+    m_view_matrix = glm::lookAt(m_pos, m_pos + m_direction.dir, up);
+
+    m_projection_matrix = glm::perspective(glm::radians(45.0f), /*1.0f*/WINDOW_WIDTH / WINDOW_HEIGHT, 0.1f, 100.0f);
+}
+
 
 void Camera::surround_with_target(const float radius) {
     //float camX = sin(glfwGetTime()) * radius;
@@ -137,8 +165,8 @@ void Camera::mouse_scroll_process(double yoffset)
     fov /= m_zoom;
     if (fov <= 1.0f)
         fov = 1.0f;
-    if (fov >= 179.0f)
-        fov = 179.0f;
+    if (fov >= 135.0f)
+        fov = 135.0f;
     m_projection_matrix = glm::perspective(glm::radians(fov), WINDOW_WIDTH / WINDOW_HEIGHT, 0.1f, 100.0f);
 }
 

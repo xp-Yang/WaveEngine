@@ -5,9 +5,9 @@ MyLight::MyLight(const glm::vec4& color)
 	m_color = color;
 
     auto scale = glm::scale(glm::mat4(1.0f), glm::vec3(0.2f));
-    m_model_matrix = scale * m_model_matrix;
+    m_model_matrix = scale * glm::mat4(1.0f);
 
-	auto translate = glm::translate(glm::mat4(1.0f), { 0.0f, 4.0f, 0.0f });
+	auto translate = glm::translate(glm::mat4(1.0f), { 0.0f, 5.0f, 0.0f });
 	m_model_matrix = translate * m_model_matrix;
 
     create_vbo();

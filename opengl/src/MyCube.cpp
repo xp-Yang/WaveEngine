@@ -11,7 +11,7 @@ MyCube::MyCube(const char* texture_path, const glm::vec3& color)
         m_texture_type = TextureType::Normal;
         int width, height, nrChannels;
         unsigned char* data = stbi_load(texture_path, &width, &height, &nrChannels, 4);
-        generate_texture(width, height, data);
+        m_texture_id = generate_texture(width, height, data);
         //释放图像的内存
         stbi_image_free(data);
     }
@@ -19,11 +19,17 @@ MyCube::MyCube(const char* texture_path, const glm::vec3& color)
         m_texture_type = TextureType::None;
     }
 
+    int width, height, nrChannels;
+    unsigned char* data = stbi_load("resource/images/cube_specular.png", &width, &height, &nrChannels, 4);
+    m_specular_map_id = generate_texture(width, height, data);
+    //释放图像的内存
+    stbi_image_free(data);
+
     create_vao();
 }
 
 MyCube::~MyCube(){
-    glDeleteTextures(1, &m_texuture_id);
+    glDeleteTextures(1, &m_texture_id);
     glDeleteVertexArrays(1, &m_vao_id);
 }
 
@@ -134,9 +140,10 @@ void MyCube::create_vbo()
     //glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 
-void MyCube::generate_texture(int width, int height, unsigned char* data) {
-    glGenTextures(1, &m_texuture_id);
-    glBindTexture(GL_TEXTURE_2D, m_texuture_id);
+unsigned int MyCube::generate_texture(int width, int height, unsigned char* data) {
+    unsigned int texture_id;
+    glGenTextures(1, &texture_id);
+    glBindTexture(GL_TEXTURE_2D, texture_id);
     // 为当前绑定的纹理对象设置环绕、过滤方式
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
@@ -152,6 +159,7 @@ void MyCube::generate_texture(int width, int height, unsigned char* data) {
     //最后一个参数是真正的图像数据。
     glGenerateMipmap(GL_TEXTURE_2D);
     glBindTexture(GL_TEXTURE_2D, 0);
+    return texture_id;
 }
 
 void MyCube::create_vao() {
