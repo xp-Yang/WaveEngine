@@ -1,7 +1,6 @@
 #ifndef MyLight_hpp
 #define MyLight_hpp
 #include "MyCube.hpp"
-#include "../imgui/imgui.h"
 
 struct Light {
     glm::vec3 position;

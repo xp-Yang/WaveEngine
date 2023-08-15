@@ -3,7 +3,6 @@
 
 MyCube::MyCube(const char* texture_path, const glm::vec3& color)
     : m_model_matrix(glm::mat4(1.0f))
-    , m_color(color)
 {
     create_vbo();
 

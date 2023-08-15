@@ -1,7 +1,6 @@
 #ifndef MyGround_hpp
 #define MyGround_hpp
 #include "MyCube.hpp"
-#include "../imgui/imgui.h"
 
 class MyGround : public MyCube {
 public:

@@ -34,9 +34,6 @@ void Mesh::create_vao()
     glBindBuffer(GL_ARRAY_BUFFER, m_VBO);
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)0);
     glEnableVertexAttribArray(0);
-    //// 顶点颜色数据
-    //glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (GLvoid*)(3 * sizeof(float)));
-    //glEnableVertexAttribArray(1);
     // 顶点法向量数据
     glBindBuffer(GL_ARRAY_BUFFER, m_VBO);
     glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, normal));
