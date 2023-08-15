@@ -4,7 +4,8 @@
 
 class MyGround : public MyCube {
 public:
-	MyGround(const glm::vec4& color);
+	MyGround();
+
 protected:
 	virtual void create_vbo() override;
 	virtual void create_vao() override;

@@ -1,6 +1,6 @@
 #include "MyGround.hpp"
 
-MyGround::MyGround(const glm::vec4& color)
+MyGround::MyGround()
     : MyCube()
 {
     auto scale = glm::scale(glm::mat4(1.0f), glm::vec3(10000.0f));
@@ -34,6 +34,7 @@ void MyGround::create_vbo()
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_ibo_id);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(cubeIndices), cubeIndices, GL_STATIC_DRAW);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
+    m_indices_count = sizeof(cubeIndices) / sizeof(cubeIndices[0]);
 }
 
 void MyGround::create_vao() {

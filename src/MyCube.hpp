@@ -4,40 +4,34 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
+#include <string>
 #include "Material.hpp"
-
-enum class TextureType {
-    None,
-    Normal,
-};
 
 class MyCube {
 public:
-    MyCube(const char* texture_path = nullptr, const glm::vec3& color = glm::vec3(1.0f));
+    MyCube();
+    MyCube(const Material& material);
     virtual ~MyCube();
 
-    GLuint get_vao_id() { return m_vao_id; }
-    GLuint get_texture_id() { return m_texture_id; }
-    GLuint get_specular_map_id() { return m_specular_map_id; }
-    GLuint get_vbo_id() { return m_vbo_id; }
-    GLuint get_ibo_id() { return m_ibo_id; }
-    int get_elements_count() { return 36; }
-    const glm::mat4& get_model_matrix() { return m_model_matrix; }
+    GLuint get_vao_id() const { return m_vao_id; }
+    GLuint get_vbo_id() const { return m_vbo_id; }
+    GLuint get_ibo_id() const { return m_ibo_id; }
+    int get_elements_count() const { return m_indices_count; }
+    const glm::mat4& get_model_matrix() const { return m_model_matrix; }
     void set_model_matrix(const glm::mat4& mat) { m_model_matrix = mat; }
     const Material& get_material() const { return m_material; }
-    Material& get_material() { return m_material; }
+    Material& material() { return m_material; }
     void set_material(const Material& material) { m_material = material; }
+    void set_material_diffuse_map(std::string map_path);
+    void set_material_specular_map(std::string map_path);
 
 protected:
-    TextureType m_texture_type;
-
     GLuint m_vao_id;
-    GLuint m_texture_id;
-    GLuint m_specular_map_id;
     GLuint m_vbo_id;
     GLuint m_ibo_id;
 
     glm::mat4 m_model_matrix;
+    int m_indices_count;
 
     Material m_material;
 

@@ -1,8 +1,6 @@
 #version 330 core
 in vec3 pass_color;
 
-uniform sampler2D Texture;
-
 out vec4 fragment_color;
 
 void main()

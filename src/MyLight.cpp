@@ -1,6 +1,7 @@
 #include "MyLight.hpp"
 
-MyLight::MyLight(const glm::vec4& color)
+MyLight::MyLight()
+    : MyCube()
 {
     auto scale = glm::scale(glm::mat4(1.0f), glm::vec3(0.2f));
     m_model_matrix = scale * glm::mat4(1.0f);
@@ -44,6 +45,7 @@ void MyLight::create_vbo()
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_ibo_id);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(cubeIndices), cubeIndices, GL_STATIC_DRAW);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
+    m_indices_count = sizeof(cubeIndices) / sizeof(cubeIndices[0]);
 }
 
 void MyLight::create_vao() {

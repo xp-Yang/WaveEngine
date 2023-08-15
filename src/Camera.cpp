@@ -72,6 +72,19 @@ Camera::Camera(const glm::vec3& position, float pitch, float yaw, float roll)
     m_projection_matrix = glm::perspective(glm::radians(45.0f), /*1.0f*/WINDOW_WIDTH / WINDOW_HEIGHT, 0.1f, 100.0f);
 }
 
+Camera::Camera(const glm::vec3& position, glm::vec3 dir)
+{
+    //m_direction.pitch = pitch;
+    //m_direction.yaw = yaw;
+    //m_direction.roll = roll;
+
+    m_direction.dir = dir;
+
+    m_view_matrix = glm::lookAt(m_pos, m_pos + m_direction.dir, up);
+
+    m_projection_matrix = glm::perspective(glm::radians(45.0f), /*1.0f*/WINDOW_WIDTH / WINDOW_HEIGHT, 0.1f, 100.0f);
+}
+
 
 void Camera::surround_with_target(const float radius) {
     //float camX = sin(glfwGetTime()) * radius;

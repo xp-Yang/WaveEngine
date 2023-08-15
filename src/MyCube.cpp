@@ -1,35 +1,41 @@
 #include "MyCube.hpp"
 #include "stb_image.h"
 
-MyCube::MyCube(const char* texture_path, const glm::vec3& color)
+MyCube::MyCube()
     : m_model_matrix(glm::mat4(1.0f))
 {
     create_vbo();
-
-    if (texture_path) {
-        m_texture_type = TextureType::Normal;
-        int width, height, nrChannels;
-        unsigned char* data = stbi_load(texture_path, &width, &height, &nrChannels, 4);
-        m_texture_id = generate_texture(width, height, data);
-        //释放图像的内存
-        stbi_image_free(data);
-    }
-    else {
-        m_texture_type = TextureType::None;
-    }
-
-    int width, height, nrChannels;
-    unsigned char* data = stbi_load("resource/images/cube_specular.png", &width, &height, &nrChannels, 4);
-    m_specular_map_id = generate_texture(width, height, data);
-    //释放图像的内存
-    stbi_image_free(data);
-
     create_vao();
 }
 
+MyCube::MyCube(const Material& material)
+{
+    MyCube();
+    m_material = material;
+}
+
 MyCube::~MyCube(){
-    glDeleteTextures(1, &m_texture_id);
+    //glDeleteTextures(1, &m_texture_id);
     glDeleteVertexArrays(1, &m_vao_id);
+}
+
+void MyCube::set_material_diffuse_map(std::string map_path)
+{
+    int width, height, nrChannels;
+    unsigned char* data = stbi_load(map_path.c_str(), &width, &height, &nrChannels, 4);
+    m_material.diffuse_map = generate_texture(width, height, data);
+    m_material.diffuse_map_path = map_path;
+    //释放图像的内存
+    stbi_image_free(data);
+}
+
+void MyCube::set_material_specular_map(std::string map_path)
+{
+    int width, height, nrChannels;
+    unsigned char* data = stbi_load(map_path.c_str(), &width, &height, &nrChannels, 4);
+    m_material.specular_map = generate_texture(width, height, data);
+    m_material.specular_map_path = map_path;
+    stbi_image_free(data);
 }
 
 void MyCube::create_vbo()
@@ -86,7 +92,7 @@ void MyCube::create_vbo()
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_ibo_id);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(cubeIndices), cubeIndices, GL_STATIC_DRAW);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
-
+    m_indices_count = sizeof(cubeIndices) / sizeof(cubeIndices[0]);
 
     // 不使用ibo的方式
     //float cube_vertices[] = {
@@ -183,14 +189,8 @@ void MyCube::create_vao() {
     // 索引数据
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, get_ibo_id());
 
-    if (m_texture_type == TextureType::Normal) {
-        // 纹理数据
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, get_texture_id());
-
-        // uv 坐标数据
-        glBindBuffer(GL_ARRAY_BUFFER, get_vbo_id());
-        glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (GLvoid*)(6 * sizeof(float)));
-        glEnableVertexAttribArray(2);
-    }
+    // uv 坐标数据
+    glBindBuffer(GL_ARRAY_BUFFER, get_vbo_id());
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (GLvoid*)(6 * sizeof(float)));
+    glEnableVertexAttribArray(2);
 }

@@ -1,5 +1,5 @@
-#ifndef Camera_hpp
-#define Camera_hpp
+#ifndef View_hpp
+#define View_hpp
 
 #include "Camera.hpp"
 #include "Scene.hpp"
