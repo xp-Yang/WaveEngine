@@ -64,7 +64,6 @@
     <ClInclude Include="src\Shader.hpp" />
     <ClInclude Include="src\Scene.hpp" />
     <ClInclude Include="src\View.hpp" />
-    <ClInclude Include="src\标头.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="resource\shader\cube.fs" />
@@ -76,6 +75,7 @@
     <None Include="resource\shader\model.vs" />
   </ItemGroup>
   <ItemGroup>
+    <Image Include="resource\images\cube_specular.png" />
     <Image Include="resource\images\desert.jpg" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
