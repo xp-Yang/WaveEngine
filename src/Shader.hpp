@@ -9,7 +9,7 @@
 
 class Shader{
 public:
-	Shader(const char* vertexPath, const char* fragmentPath);
+	Shader(const char* vertexPath, const char* fragmentPath, const char* geometryPath = nullptr);
 
 	void start_using() const;
 	void stop_using() const;

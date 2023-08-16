@@ -1,6 +1,6 @@
 #include "Camera.hpp"
 
-static const float CameraMovementSpeed = 1.0f;
+static const float CameraMovementSpeed = 50.0f;
 static const float Sensitivity = 0.1f;
 static const float ZoomUnit = 0.1f;
 
@@ -102,10 +102,10 @@ void Camera::key_process(int key, float frame_time)
         m_pos -= glm::vec3(0.0f, 0.0f, 1.0f) * frame_speed;
         break;
     case GLFW_KEY_A:
-        m_pos += glm::vec3(1.0f, 0.0f, 0.0f) * frame_speed;
+        m_pos -= glm::vec3(1.0f, 0.0f, 0.0f) * frame_speed;
         break;
     case GLFW_KEY_D:
-        m_pos -= glm::vec3(1.0f, 0.0f, 0.0f) * frame_speed;
+        m_pos += glm::vec3(1.0f, 0.0f, 0.0f) * frame_speed;
         break;
     case GLFW_KEY_S:
         m_pos += glm::vec3(0.0f, 0.0f, 1.0f) * frame_speed;

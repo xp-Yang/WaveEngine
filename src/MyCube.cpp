@@ -9,10 +9,8 @@ MyCube::MyCube()
 }
 
 MyCube::MyCube(const Material& material)
+    : MyCube()
 {
-    // 怎么调用默认构造
-    m_model_matrix = (glm::mat4(1.0f));
-    init_mesh();
     m_material = material;
 }
 

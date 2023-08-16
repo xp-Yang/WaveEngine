@@ -68,7 +68,10 @@
     <ClInclude Include="src\View.hpp" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="resource\shader\border.fs" />
+    <None Include="resource\shader\border.vs" />
     <None Include="resource\shader\cube.fs" />
+    <None Include="resource\shader\cube.gs" />
     <None Include="resource\shader\cube.vs" />
     <None Include="resource\shader\ground.fs" />
     <None Include="resource\shader\ground.vs" />

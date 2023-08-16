@@ -139,9 +139,6 @@ void set_view_port(int width, int height) {
 }
 
 void init_cube() {
-    MyCube cube;
-    Shader cube_shader("resource/shader/cube.vs", "resource/shader/cube.fs");
-    Material cube_material{};
 }
 
 void render_imgui() {
@@ -213,10 +210,11 @@ void render_imgui() {
 }
 
 void start_render_loop(GLFWwindow* window) {
-    Shader cube_shader("resource/shader/cube.vs", "resource/shader/cube.fs");
+    Shader cube_shader("resource/shader/cube.vs", "resource/shader/cube.fs"/*, "resource/shader/cube.gs"*/);
     Shader ground_shader("resource/shader/ground.vs", "resource/shader/ground.fs");
     Shader light_shader("resource/shader/light.vs", "resource/shader/light.fs");
     Shader model_shader("resource/shader/model.vs", "resource/shader/model.fs");
+    Shader border_shader("resource/shader/border.vs", "resource/shader/border.fs");
 
     MyCube cube;
     cube.set_material_diffuse_map("resource/images/desert.jpg");
@@ -227,13 +225,14 @@ void start_render_loop(GLFWwindow* window) {
     ground.material().specular_strength = 0.5f;
     MyLight light;
     light.material().color = glm::vec3(1.0f);
-    Model model("resource/model/nanosuit/nanosuit.obj");
+    Model nanosuit("resource/model/nanosuit/nanosuit.obj");
 
     Renderer renderer;
 
     static float ambient_strength = 0.3f;
 
     glEnable(GL_DEPTH_TEST);
+    glEnable(GL_STENCIL_TEST);
 
     while (!glfwWindowShouldClose(window))
     {
@@ -241,7 +240,7 @@ void start_render_loop(GLFWwindow* window) {
 
         glm::vec4 light_bg = glm::vec4(light.get_material().color * ambient_strength * 0.8f, 1.0f);
         glClearColor(light_bg.x, light_bg.y, light_bg.z, light_bg.w);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // also clear the depth buffer
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplGlfw_NewFrame();
@@ -314,7 +313,29 @@ void start_render_loop(GLFWwindow* window) {
             cube_shader.setFloat("material.shininess", cube.get_material().shininess);
             cube_shader.setFloat3("light.color", light.get_material().color);
             cube_shader.setFloat3("light.position", light.get_model_matrix()[3]);
+
+            glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
+            glStencilFunc(GL_ALWAYS, 1, 0xFF);
+            glStencilMask(0xFF);
             renderer.draw(cube_shader, cube.get_mesh().get_VAO(), DrawMode::Indices, cube.get_mesh().get_indices_count());
+
+            //glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
+            glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
+            glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
+            //禁用模板缓冲的写入。
+            glStencilMask(0x00);
+            //关闭深度测试
+            glDisable(GL_DEPTH_TEST);
+
+            border_shader.start_using();
+            auto scale = glm::scale(glm::mat4(1.0f), glm::vec3(1.1f));
+            border_shader.setMatrix("model", 1, scale * cube.get_model_matrix());
+            border_shader.setMatrix("view", 1, camera.get_view());
+            border_shader.setMatrix("projection", 1, camera.get_projection());
+            renderer.draw(border_shader, cube.get_mesh().get_VAO(), DrawMode::Indices, cube.get_mesh().get_indices_count());
+        
+            glStencilMask(0xFF);
+            glEnable(GL_DEPTH_TEST);
         }
 
         // render model
@@ -330,7 +351,7 @@ void start_render_loop(GLFWwindow* window) {
             model_shader.setFloat("material.ambient", ambient_strength);
             model_shader.setFloat3("light.color", light.get_material().color);
             model_shader.setFloat3("light.position", light.get_model_matrix()[3]);
-            model.draw(model_shader, renderer);
+            nanosuit.draw(model_shader, renderer);
         }
 
 
@@ -427,10 +448,6 @@ int main()
     ImGuiIO& io = ImGui::GetIO(); (void)io;
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
-
-    // Setup Dear ImGui style
-    ImGui::StyleColorsDark();
-    //ImGui::StyleColorsLight();
 
     // Setup Platform/Renderer backends
     ImGui_ImplGlfw_InitForOpenGL(window, true);
