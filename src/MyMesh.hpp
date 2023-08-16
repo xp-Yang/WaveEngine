@@ -5,6 +5,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <assimp/material.h>
+#include "stb_image.h"
 #include <vector>
 #include <string>
 
@@ -26,9 +27,14 @@ public:
 	Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices);
 	Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<Texture> textures);
 
-	unsigned int get_VAO() { return m_VAO; }
-	int get_indices_count() { return m_indices.size(); }
-	const std::vector<Texture>& get_texures() { return m_textures; }
+	void build();
+
+	unsigned int get_VAO() const { return m_VAO; }
+	int get_indices_count() const { return m_indices.size(); }
+	const std::vector<Texture>& get_texures() const { return m_textures; }
+
+	static unsigned int generate_texture_from_file(const std::string& full_path, bool gamma);
+	static unsigned int generate_texture_from_file(const char* path, const std::string& directory, bool gamma);
 
 protected:
 	unsigned int m_VAO;

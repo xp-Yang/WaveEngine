@@ -87,6 +87,9 @@
     <ClCompile Include="src\stb_image.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="src\Object.cpp">
+      <Filter>源文件\src</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Camera.hpp">
@@ -150,6 +153,9 @@
       <Filter>源文件\src</Filter>
     </ClInclude>
     <ClInclude Include="src\Material.hpp">
+      <Filter>源文件\src</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Object.hpp">
       <Filter>源文件\src</Filter>
     </ClInclude>
   </ItemGroup>

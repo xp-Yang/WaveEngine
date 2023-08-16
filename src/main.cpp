@@ -10,6 +10,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
+#include "Object.hpp"
 #include "MyCube.hpp"
 #include "MyLight.hpp"
 #include "MyGround.hpp"
@@ -251,7 +252,7 @@ void start_render_loop(GLFWwindow* window) {
             light_shader.setMatrix("view", 1, camera.get_view());
             light_shader.setMatrix("projection", 1, camera.get_projection());
             light_shader.setFloat3("color", light.get_material().color);
-            renderer.draw(light_shader, light.get_vao_id(), DrawMode::Indices, light.get_elements_count());
+            renderer.draw(light_shader, light.get_mesh().get_VAO(), DrawMode::Indices, light.get_mesh().get_indices_count());
         }
 
         // render ground
@@ -268,7 +269,7 @@ void start_render_loop(GLFWwindow* window) {
             ground_shader.setFloat("material.shininess", ground.get_material().shininess);
             ground_shader.setFloat3("light.color", light.get_material().color);
             ground_shader.setFloat3("light.position", light.get_model_matrix()[3]);
-            renderer.draw(ground_shader, ground.get_vao_id(), DrawMode::Indices, ground.get_elements_count());
+            renderer.draw(ground_shader, ground.get_mesh().get_VAO(), DrawMode::Indices, ground.get_mesh().get_indices_count());
         }
 
         // render cube
@@ -304,7 +305,7 @@ void start_render_loop(GLFWwindow* window) {
             cube_shader.setFloat("material.shininess", cube.get_material().shininess);
             cube_shader.setFloat3("light.color", light.get_material().color);
             cube_shader.setFloat3("light.position", light.get_model_matrix()[3]);
-            renderer.draw(cube_shader, cube.get_vao_id(), DrawMode::Indices, cube.get_elements_count());
+            renderer.draw(cube_shader, cube.get_mesh().get_VAO(), DrawMode::Indices, cube.get_mesh().get_indices_count());
         }
 
         // render model
@@ -315,7 +316,7 @@ void start_render_loop(GLFWwindow* window) {
             model_shader.setMatrix("model", 1, nanosuit_translate * nanosuit_scale * cube.get_model_matrix());
             model_shader.setMatrix("view", 1, camera.get_view());
             model_shader.setMatrix("projection", 1, camera.get_projection());
-            model.draw(model_shader);
+            model.draw(model_shader, renderer);
         }
 
 

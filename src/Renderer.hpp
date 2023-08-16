@@ -11,7 +11,7 @@ enum class DrawMode {
 class Renderer {
 public:
     Renderer() = default;
-    void draw(const Shader& shader, GLuint vao_id, DrawMode mode, int indices_count = 0, int array_count = 0);
+    void draw(const Shader& shader, GLuint vao_id, DrawMode mode, int indices_count = 0, int array_count = 0) const;
 
 };
 

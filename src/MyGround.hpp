@@ -1,14 +1,13 @@
 #ifndef MyGround_hpp
 #define MyGround_hpp
-#include "MyCube.hpp"
+#include "Object.hpp"
 
-class MyGround : public MyCube {
+class MyGround : public Object {
 public:
 	MyGround();
-
 protected:
-	virtual void create_vbo() override;
-	virtual void create_vao() override;
+	void init_mesh();
+	void init_material();
 };
 
 #endif

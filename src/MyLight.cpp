@@ -1,7 +1,6 @@
 #include "MyLight.hpp"
 
 MyLight::MyLight()
-    : MyCube()
 {
     auto scale = glm::scale(glm::mat4(1.0f), glm::vec3(0.2f));
     m_model_matrix = scale * glm::mat4(1.0f);
@@ -9,13 +8,15 @@ MyLight::MyLight()
 	auto translate = glm::translate(glm::mat4(1.0f), { 0.0f, 5.0f, 0.0f });
 	m_model_matrix = translate * m_model_matrix;
 
-    create_vbo();
-    create_vao();
+    init_mesh();
 }
 
-void MyLight::create_vbo()
+void MyLight::init_mesh()
 {
-    GLfloat cubeVertex[] =
+    std::vector<Vertex> vertices;
+    std::vector<unsigned int> indices;
+
+    GLfloat cubeVertices[] =
     {
         // vertex           
         -0.2f, -0.2f,  0.2f, // 0 左下
@@ -27,10 +28,28 @@ void MyLight::create_vbo()
          0.2f,  0.2f, -0.2f, // 6 后：右上
          0.2f, -0.2f, -0.2f, // 7 后：右下
     };
-    glGenBuffers(1, &m_vbo_id);
-    glBindBuffer(GL_ARRAY_BUFFER, m_vbo_id);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(cubeVertex), cubeVertex, GL_STATIC_DRAW);
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    for (int i = 0; i < sizeof(cubeVertices) / sizeof(cubeVertices[0]); i += 3) {
+        Vertex vertex;
+
+        glm::vec3 position;
+        position.x = cubeVertices[0 + i];
+        position.y = cubeVertices[1 + i];
+        position.z = cubeVertices[2 + i];
+        vertex.position = position;
+
+        //glm::vec3 normal;
+        //normal.x = cubeVertices[3 + i];
+        //normal.y = cubeVertices[4 + i];
+        //normal.z = cubeVertices[5 + i];
+        //vertex.normal = normal;
+
+        //glm::vec2 vec;
+        //vec.x = cubeVertices[6 + i];
+        //vec.y = cubeVertices[7 + i];
+        //vertex.texture_uv = vec;
+
+        vertices.push_back(vertex);
+    }
 
     GLuint cubeIndices[] =
     {
@@ -41,22 +60,9 @@ void MyLight::create_vbo()
         7, 6, 2, 7, 2, 1, // Quad 4 右面
         4, 0, 3, 4, 3, 5  // Quad 5 左面
     };
-    glGenBuffers(1, &m_ibo_id);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_ibo_id);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(cubeIndices), cubeIndices, GL_STATIC_DRAW);
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-    m_indices_count = sizeof(cubeIndices) / sizeof(cubeIndices[0]);
-}
+    for (int i = 0; i < sizeof(cubeIndices) / sizeof(cubeIndices[0]); i++) {
+        indices.push_back(cubeIndices[i]);
+    }
 
-void MyLight::create_vao() {
-    glGenVertexArrays(1, &m_vao_id);
-    glBindVertexArray(m_vao_id);
-
-    // 顶点数据
-    glBindBuffer(GL_ARRAY_BUFFER, get_vbo_id());
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (GLvoid*)0);
-    glEnableVertexAttribArray(0);
-
-    // 索引数据
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, get_ibo_id());
+    m_mesh = Mesh(vertices, indices);
 }
