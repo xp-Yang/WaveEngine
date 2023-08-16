@@ -255,8 +255,22 @@ void start_render_loop(GLFWwindow* window) {
         last_time = curr_time;
 
         // render light
+        static bool stop_rotate = false;
         {
             light_shader.start_using();
+            static float time_value = 0.0f;
+            if (stop_rotate) {
+                ;
+            }
+            if (!stop_rotate) {
+                time_value = curr_time;
+            }
+            auto scale = glm::scale(glm::mat4(1.0f), glm::vec3(0.2f));
+            glm::mat4 displacement(1.0f);
+            displacement[3].x = 7.0f;
+            glm::mat4 rotate = glm::rotate(glm::mat4(1.0f), time_value * 3, glm::vec3(0.0f, 1.0f, 0.0f));
+            auto translate = glm::translate(glm::mat4(1.0f), { 0.0f, 5.0f, 0.0f });
+            light.set_model_matrix(translate * rotate * displacement * scale);
             light_shader.setMatrix("model", 1, light.get_model_matrix());
             light_shader.setMatrix("view", 1, camera.get_view());
             light_shader.setMatrix("projection", 1, camera.get_projection());
@@ -284,20 +298,10 @@ void start_render_loop(GLFWwindow* window) {
         // render cube
         {
             cube_shader.start_using();
-            //static bool stop_rotate = true;
-            //static float time_value = 0.0f;
-            //if (stop_rotate) {
-            //    ;
-            //}
-            //if (!stop_rotate) {
-            //    float normalization_time = (sin(curr_time) / 3) + 0.6;
-            //    time_value = normalization_time;
-            //}
             static float cube_translate_x = 0.0f;
             static float cube_translate_y = 1.0f;
             static float cube_translate_z = 0.0f;
             auto translate = glm::translate(glm::mat4(1.0f), { cube_translate_x, cube_translate_y, cube_translate_z });
-            //auto rotate = glm::rotate(glm::mat4(1.0f), time_value * 20.0f, glm::vec3(1.0f, 1.0f, 1.0f));
             cube.set_model_matrix(translate * glm::mat4(1.0f));
             cube_shader.setMatrix("model", 1, cube.get_model_matrix());
             cube_shader.setMatrix("view", 1, camera.get_view());
@@ -370,7 +374,7 @@ void start_render_loop(GLFWwindow* window) {
             //ImGui::ColorEdit3("cube color", (float*)&cube_color);
             //ImGui::ColorEdit3("ground color", (float*)&ground_color);
 
-            //if (ImGui::Checkbox("stop rotate", &stop_rotate));
+            if (ImGui::Checkbox("stop rotate", &stop_rotate));
 
             // log
             {
