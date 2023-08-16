@@ -233,6 +233,7 @@ void start_render_loop(GLFWwindow* window) {
 
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_STENCIL_TEST);
+    glStencilMask(0xFF);
 
     while (!glfwWindowShouldClose(window))
     {
@@ -283,21 +284,21 @@ void start_render_loop(GLFWwindow* window) {
         // render cube
         {
             cube_shader.start_using();
-            static bool stop_rotate = true;
-            static float time_value = 0.0f;
-            if (stop_rotate) {
-                ;
-            }
-            if (!stop_rotate) {
-                float normalization_time = (sin(curr_time) / 3) + 0.6;
-                time_value = normalization_time;
-            }
+            //static bool stop_rotate = true;
+            //static float time_value = 0.0f;
+            //if (stop_rotate) {
+            //    ;
+            //}
+            //if (!stop_rotate) {
+            //    float normalization_time = (sin(curr_time) / 3) + 0.6;
+            //    time_value = normalization_time;
+            //}
             static float cube_translate_x = 0.0f;
             static float cube_translate_y = 1.0f;
             static float cube_translate_z = 0.0f;
             auto translate = glm::translate(glm::mat4(1.0f), { cube_translate_x, cube_translate_y, cube_translate_z });
-            auto rotate = glm::rotate(glm::mat4(1.0f), time_value * 20.0f, glm::vec3(1.0f, 1.0f, 1.0f));
-            cube.set_model_matrix(translate * rotate * glm::mat4(1.0f));
+            //auto rotate = glm::rotate(glm::mat4(1.0f), time_value * 20.0f, glm::vec3(1.0f, 1.0f, 1.0f));
+            cube.set_model_matrix(translate * glm::mat4(1.0f));
             cube_shader.setMatrix("model", 1, cube.get_model_matrix());
             cube_shader.setMatrix("view", 1, camera.get_view());
             cube_shader.setMatrix("projection", 1, camera.get_projection());
@@ -316,26 +317,17 @@ void start_render_loop(GLFWwindow* window) {
 
             glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
             glStencilFunc(GL_ALWAYS, 1, 0xFF);
-            glStencilMask(0xFF);
             renderer.draw(cube_shader, cube.get_mesh().get_VAO(), DrawMode::Indices, cube.get_mesh().get_indices_count());
 
-            //glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
             glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
             glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
-            //禁用模板缓冲的写入。
-            glStencilMask(0x00);
-            //关闭深度测试
-            glDisable(GL_DEPTH_TEST);
 
             border_shader.start_using();
-            auto scale = glm::scale(glm::mat4(1.0f), glm::vec3(1.1f));
-            border_shader.setMatrix("model", 1, scale * cube.get_model_matrix());
+            auto scale = glm::scale(glm::mat4(1.0f), glm::vec3(1.05f));
+            border_shader.setMatrix("model", 1, translate * scale * glm::mat4(1.0f));
             border_shader.setMatrix("view", 1, camera.get_view());
             border_shader.setMatrix("projection", 1, camera.get_projection());
             renderer.draw(border_shader, cube.get_mesh().get_VAO(), DrawMode::Indices, cube.get_mesh().get_indices_count());
-        
-            glStencilMask(0xFF);
-            glEnable(GL_DEPTH_TEST);
         }
 
         // render model
