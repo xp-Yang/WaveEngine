@@ -38,6 +38,9 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 }
 
 void mouse_button_callback(GLFWwindow* window, int button, int action, int mods) {
+    if (ImGui::GetIO().WantCaptureMouse) {
+        return;
+    }
     if (button == 0) {
         if (action == GLFW_PRESS)
             mouse_left_status = 1;
@@ -54,6 +57,9 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
 
 void mouse_callback(GLFWwindow* window, double xpos, double ypos) 
 { 
+    if (ImGui::GetIO().WantCaptureMouse) {
+        return;
+    }
     static int last_left_mouse_status = mouse_left_status;
     static int last_right_mouse_status = mouse_right_status;
 
@@ -88,6 +94,9 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos)
 
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 {
+    if (ImGui::GetIO().WantCaptureMouse) {
+        return;
+    }
     camera.mouse_scroll_process(yoffset);
 }
 
