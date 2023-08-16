@@ -22,7 +22,6 @@ MyCube::~MyCube(){
 void MyCube::init_mesh() {
     std::vector<Vertex> vertices;
     std::vector<unsigned int> indices;
-    std::vector<Texture> textures;
 
     GLfloat cubeVertices[] =
     {
@@ -96,7 +95,7 @@ void MyCube::init_mesh() {
             indices.push_back(cubeIndices[i]);
     }
 
-    m_mesh = Mesh(vertices, indices, textures);
+    m_mesh = Mesh(vertices, indices);
 
 
     // 不使用ibo的方式

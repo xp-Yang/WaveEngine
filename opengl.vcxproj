@@ -34,7 +34,7 @@
     <ClCompile Include="src\MyCube.cpp" />
     <ClCompile Include="src\MyGround.cpp" />
     <ClCompile Include="src\MyLight.cpp" />
-    <ClCompile Include="src\MyMesh.cpp" />
+    <ClCompile Include="src\Mesh.cpp" />
     <ClCompile Include="src\MyModel.cpp" />
     <ClCompile Include="src\Renderer.cpp" />
     <ClCompile Include="src\Shader.cpp" />
@@ -60,7 +60,7 @@
     <ClInclude Include="src\MyCube.hpp" />
     <ClInclude Include="src\MyGround.hpp" />
     <ClInclude Include="src\MyLight.hpp" />
-    <ClInclude Include="src\MyMesh.hpp" />
+    <ClInclude Include="src\Mesh.hpp" />
     <ClInclude Include="src\MyModel.hpp" />
     <ClInclude Include="src\Renderer.hpp" />
     <ClInclude Include="src\Shader.hpp" />

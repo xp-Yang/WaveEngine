@@ -325,6 +325,11 @@ void start_render_loop(GLFWwindow* window) {
             model_shader.setMatrix("model", 1, nanosuit_translate * nanosuit_scale * cube.get_model_matrix());
             model_shader.setMatrix("view", 1, camera.get_view());
             model_shader.setMatrix("projection", 1, camera.get_projection());
+            model_shader.setFloat3("viewpos", camera.get_position());
+            model_shader.setFloat3("color", glm::vec3(1.0f));
+            model_shader.setFloat("material.ambient", ambient_strength);
+            model_shader.setFloat3("light.color", light.get_material().color);
+            model_shader.setFloat3("light.position", light.get_model_matrix()[3]);
             model.draw(model_shader, renderer);
         }
 

@@ -1,10 +1,9 @@
-#ifndef MyMesh_hpp
-#define MyMesh_hpp
+#ifndef Mesh_hpp
+#define Mesh_hpp
 #include <glad/glad.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
-#include <assimp/material.h>
 #include "stb_image.h"
 #include <vector>
 #include <string>
@@ -15,23 +14,15 @@ struct Vertex {
 	glm::vec2 texture_uv;
 };
 
-struct Texture {
-	unsigned int id;
-	aiTextureType type;
-	//aiString path;
-};
-
 class Mesh {
 public:
 	Mesh() = default;
 	Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices);
-	Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<Texture> textures);
 
 	void build();
 
 	unsigned int get_VAO() const { return m_VAO; }
 	int get_indices_count() const { return m_indices.size(); }
-	const std::vector<Texture>& get_texures() const { return m_textures; }
 
 	static unsigned int generate_texture_from_file(const std::string& full_path, bool gamma);
 	static unsigned int generate_texture_from_file(const char* path, const std::string& directory, bool gamma);
@@ -43,7 +34,6 @@ protected:
 
 	std::vector<Vertex> m_vertices;
 	std::vector<unsigned int> m_indices;
-	std::vector<Texture> m_textures;
 
 	void create_vbo();
 	void create_vao();

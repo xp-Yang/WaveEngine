@@ -26,7 +26,7 @@ void Model::processNode(aiNode* node, const aiScene* scene)
     for (unsigned int i = 0; i < node->mNumMeshes; i++)
     {
         aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];
-        m_meshes.push_back(processMesh(mesh, scene));
+        m_meshes.push_back(load_mesh(mesh, scene));
     }
     for (unsigned int i = 0; i < node->mNumChildren; i++)
     {
@@ -34,11 +34,10 @@ void Model::processNode(aiNode* node, const aiScene* scene)
     }
 }
 
-Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene)
+Mesh Model::load_mesh(aiMesh* mesh, const aiScene* scene)
 {
     std::vector<Vertex> vertices;
     std::vector<unsigned int> indices;
-    std::vector<Texture> textures;
 
     for (unsigned int i = 0; i < mesh->mNumVertices; i++)
     {
@@ -75,14 +74,10 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene)
     if (mesh->mMaterialIndex >= 0)
     {
         aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
-        std::vector<Texture> diffuseMaps = load_textures(material, aiTextureType_DIFFUSE);
-        textures.insert(textures.end(), diffuseMaps.begin(), diffuseMaps.end());
-        std::vector<Texture> specularMaps = load_textures(material, aiTextureType_SPECULAR);
-        textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
-        std::vector<Texture> normalMaps = load_textures(material, aiTextureType_NORMALS);
-        textures.insert(textures.end(), normalMaps.begin(), normalMaps.end());
-        std::vector<Texture> heightMaps = load_textures(material, aiTextureType_HEIGHT);
-        textures.insert(textures.end(), heightMaps.begin(), heightMaps.end());
+        m_materials.push_back(load_material(material));
+    }
+    else {
+        assert(false, "there is mesh has no material");
     }
 
     // ´¦ÀíË÷Òý
@@ -93,60 +88,63 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene)
             indices.push_back(face.mIndices[j]);
     }
 
-    return Mesh(vertices, indices, textures);
+    return Mesh(vertices, indices);
 }
 
-std::vector<Texture> Model::load_textures(aiMaterial* material, aiTextureType type)
-{
-    std::vector<Texture> textures;
-    for (unsigned int i = 0; i < material->GetTextureCount(type); i++)
-    {
-        aiString str;
-        material->GetTexture(type, i, &str);
-        Texture texture;
-        texture.id = Mesh::generate_texture_from_file(str.C_Str(), directory, false);
-        texture.type = type;
-        //texture.path = str;
-        textures.push_back(texture);
+Material Model::load_material(aiMaterial* material) {
+    Material res;
+
+    aiString str;
+    if (material->GetTextureCount(aiTextureType_DIFFUSE)) {
+        material->GetTexture(aiTextureType_DIFFUSE, 0, &str);
+        res.diffuse_map = Mesh::generate_texture_from_file(str.C_Str(), directory, false);
+        res.diffuse_map_path = directory + '/' + std::string(str.C_Str());
     }
-    return textures;
+
+    if (material->GetTextureCount(aiTextureType_SPECULAR)) {
+        material->GetTexture(aiTextureType_SPECULAR, 0, &str);
+        res.specular_map = Mesh::generate_texture_from_file(str.C_Str(), directory, false);
+        res.specular_map_path = directory + '/' + std::string(str.C_Str());
+    }
+
+    if (material->GetTextureCount(aiTextureType_NORMALS)) {
+        material->GetTexture(aiTextureType_NORMALS, 0, &str);
+        res.normal_map = Mesh::generate_texture_from_file(str.C_Str(), directory, false);
+        res.normal_map_path = directory + '/' + std::string(str.C_Str());
+    }
+
+    if (material->GetTextureCount(aiTextureType_HEIGHT)) {
+        material->GetTexture(aiTextureType_HEIGHT, 0, &str);
+        res.height_map = Mesh::generate_texture_from_file(str.C_Str(), directory, false);
+        res.height_map_path = directory + '/' + std::string(str.C_Str());
+    }
+
+    return res;
 }
 
 void Model::draw(const Shader& shader, const Renderer& renderer)
 {
     shader.start_using();
     for (unsigned int i = 0; i < m_meshes.size(); i++) {
-        auto& textures = m_meshes[i].get_texures();
-        // bind appropriate textures
-        unsigned int diffuseNr = 1;
-        unsigned int specularNr = 1;
-        unsigned int normalNr = 1;
-        unsigned int heightNr = 1;
-        for (unsigned int i = 0; i < textures.size(); i++)
-        {
-            glActiveTexture(GL_TEXTURE0 + i); // active proper texture unit before binding
-            glBindTexture(GL_TEXTURE_2D, textures[i].id);
-
-            std::string name;
-            aiTextureType type = textures[i].type;
-            if (type == aiTextureType_DIFFUSE) {
-                name = "texture_diffuse";
-                name += std::to_string(diffuseNr++);
-            }
-            else if (type == aiTextureType_SPECULAR) {
-                name = "texture_specular";
-                name += std::to_string(specularNr++);
-            }
-            else if (type == aiTextureType_NORMALS) {
-                name = "texture_normal";
-                name += std::to_string(normalNr++);
-            }
-            else if (type == aiTextureType_HEIGHT) {
-                name = "texture_height";
-                name += std::to_string(heightNr++);
-            }
-            // now set the sampler to the correct texture unit
-            shader.setTexture(name, i);
+        if (m_materials[i].diffuse_map != 0) {
+            glActiveTexture(GL_TEXTURE0);
+            glBindTexture(GL_TEXTURE_2D, m_materials[i].diffuse_map);
+            shader.setTexture("material.diffuse_map", 0);
+        }
+        if (m_materials[i].specular_map != 0) {
+            glActiveTexture(GL_TEXTURE0 + 1);
+            glBindTexture(GL_TEXTURE_2D, m_materials[i].specular_map);
+            shader.setTexture("material.specular_map", 1);
+        }
+        if (m_materials[i].normal_map != 0) {
+            glActiveTexture(GL_TEXTURE0 + 2);
+            glBindTexture(GL_TEXTURE_2D, m_materials[i].normal_map);
+            shader.setTexture("material.normal_map", 2);
+        }
+        if (m_materials[i].height_map != 0) {
+            glActiveTexture(GL_TEXTURE0 + 3);
+            glBindTexture(GL_TEXTURE_2D, m_materials[i].normal_map);
+            shader.setTexture("material.height_map", 3);
         }
         // always good practice to set everything back to defaults once configured.
         glActiveTexture(GL_TEXTURE0);

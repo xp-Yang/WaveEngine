@@ -5,7 +5,8 @@
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
-#include "MyMesh.hpp"
+#include "Mesh.hpp"
+#include "Material.hpp"
 #include "Renderer.hpp"
 
 
@@ -17,10 +18,11 @@ public:
 
 private:
 	std::vector<Mesh> m_meshes;
+	std::vector<Material> m_materials;
 
 	void processNode(aiNode* node, const aiScene* scene);
-	Mesh processMesh(aiMesh* mesh, const aiScene* scene);
-	std::vector<Texture> load_textures(aiMaterial* material, aiTextureType type);
+	Mesh load_mesh(aiMesh* mesh, const aiScene* scene);
+	Material load_material(aiMaterial* material);
 };
 
 #endif

@@ -66,7 +66,7 @@
     <ClCompile Include="src\MyLight.cpp">
       <Filter>源文件\src</Filter>
     </ClCompile>
-    <ClCompile Include="src\MyMesh.cpp">
+    <ClCompile Include="src\Mesh.cpp">
       <Filter>源文件\src</Filter>
     </ClCompile>
     <ClCompile Include="src\MyModel.cpp">
@@ -140,7 +140,7 @@
     <ClInclude Include="src\MyLight.hpp">
       <Filter>源文件\src</Filter>
     </ClInclude>
-    <ClInclude Include="src\MyMesh.hpp">
+    <ClInclude Include="src\Mesh.hpp">
       <Filter>源文件\src</Filter>
     </ClInclude>
     <ClInclude Include="src\MyModel.hpp">

@@ -1,7 +1,7 @@
 #ifndef Renderer_hpp
 #define Renderer_hpp
 #include "Shader.hpp"
-#include "MyMesh.hpp"
+#include "Mesh.hpp"
 #include <GLFW/glfw3.h>
 
 enum class DrawMode {

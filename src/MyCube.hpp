@@ -6,7 +6,7 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <string>
 #include "Object.hpp"
-#include "MyMesh.hpp"
+#include "Mesh.hpp"
 #include "Material.hpp"
 
 class MyCube : public Object{
