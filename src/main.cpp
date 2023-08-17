@@ -226,6 +226,7 @@ void start_render_loop(GLFWwindow* window) {
     MyLight light;
     light.material().color = glm::vec3(1.0f);
     Model nanosuit("resource/model/nanosuit/nanosuit.obj");
+    Model yoko("resource/model/yoko/008.obj");
 
     Renderer renderer;
 
@@ -350,6 +351,14 @@ void start_render_loop(GLFWwindow* window) {
             model_shader.setFloat3("light.position", light.get_model_matrix()[3]);
             model_shader.setFloat("magnitude", magnitude);
             nanosuit.draw(model_shader, renderer);
+        }
+
+        {
+            //model_shader.start_using();
+            //auto nanosuit_scale = glm::scale(glm::mat4(1.0f), glm::vec3(0.4f));
+            //auto nanosuit_translate = glm::translate(glm::mat4(1.0f), glm::vec3(-5.0f, 0.0f, 0.0f));
+            //model_shader.setMatrix("model", 1, nanosuit_translate * nanosuit_scale * cube.get_model_matrix());
+            //yoko.draw(model_shader, renderer);
         }
 
 
