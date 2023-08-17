@@ -209,6 +209,19 @@ void render_imgui() {
     //ImGui::End();
 }
 
+// TODO:
+// 1. nanosuit 放在cube前加载就有问题（看起来是纹理加载问题）
+// 2. yoko 和 nanosuit 同时加载就有问题（看起来是纹理加载问题）
+// 3. main.cpp全局变量优化
+// 4. loop中的逻辑分离
+// 5. 材质应该包含shader
+// 6. model.gs explode效果跟着fov缩放变
+// 7. 着色器的坐标空间理解和统一
+// 8. Model类Mesh和Material对应关系处理
+// 9. 相机旋转和平移和缩放（鼠标左键右键滚轮）多次操作会出现问题，缩放不可逆
+// 10. 几何着色器法向量显示
+// 11. 光源物理模型
+// 12. 阴影贴图、帧缓冲、法线贴图、tbn矩阵、天空盒、反射等知识学习
 void start_render_loop(GLFWwindow* window) {
     Shader cube_shader("resource/shader/cube.vs", "resource/shader/cube.fs"/*, "resource/shader/cube.gs"*/);
     Shader ground_shader("resource/shader/ground.vs", "resource/shader/ground.fs");
