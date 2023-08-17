@@ -399,6 +399,11 @@ void start_render_loop(GLFWwindow* window) {
                 ImGui::Text(test_view.c_str());
 
                 ImGui::NewLine();
+                ImGui::Text("inverse view matrix:");
+                std::string inverse_view = matrix_log(glm::inverse(camera.get_view()));
+                ImGui::Text(inverse_view.c_str());
+
+                ImGui::NewLine();
                 ImGui::Text("camera position:");
                 std::string test_camera_pos = vec3_log(camera.get_position());
                 ImGui::Text(test_camera_pos.c_str());
