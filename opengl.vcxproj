@@ -77,7 +77,9 @@
     <None Include="resource\shader\ground.vs" />
     <None Include="resource\shader\light.fs" />
     <None Include="resource\shader\model.fs" />
+    <None Include="resource\shader\model.gs" />
     <None Include="resource\shader\model.vs" />
+    <None Include="resource\shader\model_normal.gs" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="resource\images\cube_specular.png" />

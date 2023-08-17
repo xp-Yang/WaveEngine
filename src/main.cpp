@@ -213,7 +213,7 @@ void start_render_loop(GLFWwindow* window) {
     Shader cube_shader("resource/shader/cube.vs", "resource/shader/cube.fs"/*, "resource/shader/cube.gs"*/);
     Shader ground_shader("resource/shader/ground.vs", "resource/shader/ground.fs");
     Shader light_shader("resource/shader/light.vs", "resource/shader/light.fs");
-    Shader model_shader("resource/shader/model.vs", "resource/shader/model.fs");
+    Shader model_shader("resource/shader/model.vs", "resource/shader/model.fs", "resource/shader/model.gs");
     Shader border_shader("resource/shader/border.vs", "resource/shader/border.fs");
 
     MyCube cube;
@@ -229,7 +229,8 @@ void start_render_loop(GLFWwindow* window) {
 
     Renderer renderer;
 
-    static float ambient_strength = 0.3f;
+    static float ambient_strength = 0.1f;
+    static float magnitude = 0.0f;
 
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_STENCIL_TEST);
@@ -347,6 +348,7 @@ void start_render_loop(GLFWwindow* window) {
             model_shader.setFloat("material.ambient", ambient_strength);
             model_shader.setFloat3("light.color", light.get_material().color);
             model_shader.setFloat3("light.position", light.get_model_matrix()[3]);
+            model_shader.setFloat("magnitude", magnitude);
             nanosuit.draw(model_shader, renderer);
         }
 
@@ -361,6 +363,8 @@ void start_render_loop(GLFWwindow* window) {
             ImGui::SliderFloat("ground diffuse strength", &ground.material().diffuse_strength, 0, 1);
             ImGui::SliderFloat("ground specular strength", &ground.material().specular_strength, 0, 1);
             ImGui::SliderFloat("ground shininess", &ground.material().shininess, 0, 256);
+
+            ImGui::SliderFloat("magnitude", &magnitude, 0.0f, 10.0f);
 
             ImGui::PushItemWidth(85.0f);
             glm::vec3 cube_offset = cube.get_model_matrix()[3];
