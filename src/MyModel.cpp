@@ -125,34 +125,43 @@ Material Model::load_material(aiMaterial* material) {
 void Model::draw(const Shader& shader, const Renderer& renderer)
 {
     shader.start_using();
+    static unsigned int default_map = Mesh::generate_texture_from_file("resource/iamges/default_map.png", false);
     for (unsigned int i = 0; i < m_meshes.size(); i++) {
         if (m_materials[i].diffuse_map != 0) {
             glActiveTexture(GL_TEXTURE0);
             glBindTexture(GL_TEXTURE_2D, m_materials[i].diffuse_map);
             shader.setTexture("material.diffuse_map", 0);
         }else{
-            shader.setTexture("material.diffuse_map", -1);
+            glActiveTexture(GL_TEXTURE0);
+            glBindTexture(GL_TEXTURE_2D, default_map);
+            shader.setTexture("material.diffuse_map", 0);
         }
         if (m_materials[i].specular_map != 0) {
             glActiveTexture(GL_TEXTURE0 + 1);
             glBindTexture(GL_TEXTURE_2D, m_materials[i].specular_map);
             shader.setTexture("material.specular_map", 1);
         }else {
-            shader.setTexture("material.specular_map", -1);
+            glActiveTexture(GL_TEXTURE0 + 1);
+            glBindTexture(GL_TEXTURE_2D, default_map);
+            shader.setTexture("material.specular_map", 0);
         }
         if (m_materials[i].normal_map != 0) {
             glActiveTexture(GL_TEXTURE0 + 2);
             glBindTexture(GL_TEXTURE_2D, m_materials[i].normal_map);
             shader.setTexture("material.normal_map", 2);
         }else {
-            shader.setTexture("material.normal_map", -1);
+            glActiveTexture(GL_TEXTURE0 + 2);
+            glBindTexture(GL_TEXTURE_2D, default_map);
+            shader.setTexture("material.normal_map", 0);
         }
         if (m_materials[i].height_map != 0) {
             glActiveTexture(GL_TEXTURE0 + 3);
             glBindTexture(GL_TEXTURE_2D, m_materials[i].normal_map);
             shader.setTexture("material.height_map", 3);
         }else {
-            shader.setTexture("material.height_map", -1);
+            glActiveTexture(GL_TEXTURE0 + 3);
+            glBindTexture(GL_TEXTURE_2D, default_map);
+            shader.setTexture("material.height_map", 0);
         }
         // always good practice to set everything back to defaults once configured.
         glActiveTexture(GL_TEXTURE0);

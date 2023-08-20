@@ -14,15 +14,3 @@ Object::~Object() {
 
 void Object::init_mesh() {
 }
-
-void Object::set_material_diffuse_map(std::string map_path)
-{
-    m_material.diffuse_map = Mesh::generate_texture_from_file(map_path, false);
-    m_material.diffuse_map_path = map_path;
-}
-
-void Object::set_material_specular_map(std::string map_path)
-{
-    m_material.specular_map = Mesh::generate_texture_from_file(map_path, false);
-    m_material.specular_map_path = map_path;
-}
