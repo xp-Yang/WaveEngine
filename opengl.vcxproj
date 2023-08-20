@@ -73,6 +73,8 @@
     <None Include="resource\shader\cube.fs" />
     <None Include="resource\shader\cube.gs" />
     <None Include="resource\shader\cube.vs" />
+    <None Include="resource\shader\frame.fs" />
+    <None Include="resource\shader\frame.vs" />
     <None Include="resource\shader\ground.fs" />
     <None Include="resource\shader\ground.vs" />
     <None Include="resource\shader\light.fs" />

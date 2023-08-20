@@ -181,6 +181,13 @@
     <None Include="resource\shader\model.vs">
       <Filter>资源文件</Filter>
     </None>
+    <None Include="resource\shader\border.fs" />
+    <None Include="resource\shader\border.vs" />
+    <None Include="resource\shader\cube.gs" />
+    <None Include="resource\shader\model.gs" />
+    <None Include="resource\shader\model_normal.gs" />
+    <None Include="resource\shader\frame.vs" />
+    <None Include="resource\shader\frame.fs" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="resource\images\desert.jpg">

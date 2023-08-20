@@ -23,6 +23,7 @@ public:
     void set_material_specular_map(std::string map_path);
     const glm::mat4& get_model_matrix() const { return m_model_matrix; }
     void set_model_matrix(const glm::mat4& mat) { m_model_matrix = mat; }
+    const glm::vec3& get_world_pos() const { return m_model_matrix[3]; }
 
 protected:
     Mesh     m_mesh;
