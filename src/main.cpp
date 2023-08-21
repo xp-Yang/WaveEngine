@@ -456,14 +456,8 @@ void render_imgui() {
 // 11. 光源物理模型
 // 12. 阴影贴图、帧缓冲、法线贴图、tbn矩阵、天空盒、反射等知识学习
 // 13. 帧缓冲的附件?
-// 13. 为什么要绑上深度缓冲才能work? tex_buffer不是已经被深度测试过的一张纹理吗
 
-void start_render_loop(GLFWwindow* window) {
-    Shader* frame_shader = new Shader("resource/shader/frame.vs", "resource/shader/frame.fs");
-    Shader* depth_shader = new Shader("resource/shader/depth.vs", "resource/shader/depth.fs");
-
-    Renderer renderer;
-
+unsigned int creat_quad() {
     float quadVertices[] = { // vertex attributes for a quad that fills the entire screen in Normalized Device Coordinates.
         // positions   // texCoords
         -1.0f,  1.0f, 0.0f,  0.0f, 1.0f,
@@ -485,12 +479,17 @@ void start_render_loop(GLFWwindow* window) {
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(1);
     glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+    return quadVAO;
+}
 
-    glEnable(GL_DEPTH_TEST);
-    glEnable(GL_STENCIL_TEST);
-    glStencilMask(0xFF);
+void start_render_loop(GLFWwindow* window) {
+    Shader* depth_shader = new Shader("resource/shader/depth.vs", "resource/shader/depth.fs");
 
-    // 创建纹理帧缓冲
+    // debug
+    Shader* frame_shader = new Shader("resource/shader/frame.vs", "resource/shader/frame.fs");
+    Renderer renderer;
+
+    // 创建帧缓冲
     unsigned int frame_buffer;
     glGenFramebuffers(1, &frame_buffer);
     glBindFramebuffer(GL_FRAMEBUFFER, frame_buffer);
@@ -503,18 +502,14 @@ void start_render_loop(GLFWwindow* window) {
     glBindTexture(GL_TEXTURE_2D, 0);
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, tex_buffer, 0);
     // 为什么要绑上深度缓冲才能work? tex_buffer不是已经被深度测试过的一张纹理吗
-    unsigned int rbo;
-    glGenRenderbuffers(1, &rbo);
-    glBindRenderbuffer(GL_RENDERBUFFER, rbo);
-    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, WINDOW_WIDTH, WINDOW_HEIGHT); // use a single renderbuffer object for both a depth AND stencil buffer.
-    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, rbo); // now actually attach it
-    //glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-
+    // 为什么绑定了stencil阴影就有问题？
+    //unsigned int rbo;
+    //glGenRenderbuffers(1, &rbo);
+    //glBindRenderbuffer(GL_RENDERBUFFER, rbo);
+    //glRenderbufferStorage(GL_RENDERBUFFER, /*GL_DEPTH24_STENCIL8*/GL_STENCIL_INDEX, WINDOW_WIDTH, WINDOW_HEIGHT); // use a single renderbuffer object for both a depth AND stencil buffer.
+    //glFramebufferRenderbuffer(GL_FRAMEBUFFER, /*GL_DEPTH_STENCIL_ATTACHMENT*/GL_STENCIL_ATTACHMENT, GL_RENDERBUFFER, rbo); // now actually attach it
+    //glBindRenderbuffer(GL_RENDERBUFFER, 0);
     ////创建深度缓冲（阴影）
-    //unsigned int depth_frame_buffer;
-    //glGenFramebuffers(1, &depth_frame_buffer);
-    //glBindFramebuffer(GL_FRAMEBUFFER, depth_frame_buffer);
     glGenTextures(1, &tex_depth_buffer);
     glActiveTexture(GL_TEXTURE7);
     glBindTexture(GL_TEXTURE_2D, tex_depth_buffer);
@@ -531,6 +526,10 @@ void start_render_loop(GLFWwindow* window) {
     //glReadBuffer(GL_NONE);
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
+    glEnable(GL_DEPTH_TEST);
+    glEnable(GL_STENCIL_TEST);// 为了渲染border
+    glStencilMask(0xFF);
+
     while (!glfwWindowShouldClose(window))
     {
         ImGui_ImplOpenGL3_NewFrame();
@@ -539,31 +538,21 @@ void start_render_loop(GLFWwindow* window) {
 
         glfwPollEvents();//检查触发事件（比如键盘输入、鼠标移动等），然后调用对应的回调函数
 
-        //set_view_port(WINDOW_WIDTH, WINDOW_HEIGHT);
-        //glBindFramebuffer(GL_FRAMEBUFFER, frame_buffer);
-
+        // 1.
         set_view_port(WINDOW_WIDTH, WINDOW_HEIGHT);
         glBindFramebuffer(GL_FRAMEBUFFER, frame_buffer);
-
-
-        glClearColor(ambient_strength * 0.5f, ambient_strength * 0.5f, ambient_strength * 0.5f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-
-        render_scene(depth_shader);
-
-        // 第二处理阶段
-        set_view_port(WINDOW_WIDTH, WINDOW_HEIGHT);
-        glBindFramebuffer(GL_FRAMEBUFFER, 0);
         glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+        render_scene(depth_shader);
 
-        //glBindTexture(GL_TEXTURE_2D, tex_buffer);
-        //renderer.draw(*frame_shader, quadVAO, DrawMode::Arrays, 0, 6);  
-
+        // 2.
+        set_view_port(WINDOW_WIDTH, WINDOW_HEIGHT);
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        glClearColor(ambient_strength * 0.5f, ambient_strength * 0.5f, ambient_strength * 0.5f, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
         // debug
         //glBindTexture(GL_TEXTURE_2D, tex_depth_buffer);
         //renderer.draw(*frame_shader, quadVAO, DrawMode::Arrays, 0, 6);
-        
         render_scene(nullptr);
 
         render_imgui();
@@ -573,7 +562,6 @@ void start_render_loop(GLFWwindow* window) {
 
         glfwSwapBuffers(window);//函数会交换颜色缓冲（它是一个储存着GLFW窗口每一个像素颜色的大缓冲），它在这一迭代中被用来绘制，并输出显示在屏幕上。
     }
-
 }
 
 int main()
