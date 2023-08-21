@@ -160,18 +160,6 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="resource\shader\cube.fs">
-      <Filter>资源文件</Filter>
-    </None>
-    <None Include="resource\shader\cube.vs">
-      <Filter>资源文件</Filter>
-    </None>
-    <None Include="resource\shader\ground.fs">
-      <Filter>资源文件</Filter>
-    </None>
-    <None Include="resource\shader\ground.vs">
-      <Filter>资源文件</Filter>
-    </None>
     <None Include="resource\shader\light.fs">
       <Filter>资源文件</Filter>
     </None>
@@ -187,9 +175,6 @@
     <None Include="resource\shader\border.vs">
       <Filter>资源文件</Filter>
     </None>
-    <None Include="resource\shader\cube.gs">
-      <Filter>资源文件</Filter>
-    </None>
     <None Include="resource\shader\frame.fs">
       <Filter>资源文件</Filter>
     </None>
@@ -202,6 +187,8 @@
     <None Include="resource\shader\model_normal.gs">
       <Filter>资源文件</Filter>
     </None>
+    <None Include="resource\shader\depth.vs" />
+    <None Include="resource\shader\depth.fs" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="resource\images\desert.jpg">

@@ -2,9 +2,10 @@
 
 in GS_OUT{
     vec3 pass_color;
+    vec3 pass_pos;
     vec2 pass_uv;
     vec3 pass_normal;
-    vec3 pass_pos;
+    vec4 FragPosLightSpace;
 } fs_in;
 
 struct Light {
@@ -25,7 +26,28 @@ uniform Material material;
 uniform Light light;
 uniform vec3 viewpos;
 
+uniform sampler2D shadowMap;
+
 out vec4 fragment_color;
+
+float ShadowCalculation(vec4 fragPosLightSpace)
+{
+    // 执行透视除法
+    vec3 projCoords = fragPosLightSpace.xyz / fragPosLightSpace.w;
+    // 变换到[0,1]的范围
+    projCoords = projCoords * 0.5 + 0.5;
+    if(projCoords.z > 1.0)
+        return 0.0;
+
+    float bias = 0.005;
+    //float bias = max(0.05 * (1.0 - dot(normal, lightDir)), 0.005);
+    // 取得最近点的深度(使用[0,1]范围下的fragPosLight当坐标)
+    float closestDepth = texture(shadowMap, projCoords.xy).r;
+    // 检查当前片段是否在阴影中
+    float shadow = projCoords.z - bias > closestDepth ? 1.0 : 0.0;
+
+    return shadow;
+}
 
 void main()
 {
@@ -41,11 +63,17 @@ void main()
     float spec_coef = pow(max(dot(view_direction, reflect_direction), 0.001), material.shininess);
     vec3 specular_light = light.color * spec_coef * vec3(texture(material.specular_map, fs_in.pass_uv));
 
-    fragment_color = vec4(fs_in.pass_color * (ambient_light + diffuse_light + specular_light), 1.0);
-	
-    //fragment_color = texture(Texture, pass_uv);
+    // 计算阴影
+    float shadow = ShadowCalculation(fs_in.FragPosLightSpace);       
+    vec3 lighting = (ambient_light + (1.0 - shadow) * (diffuse_light + specular_light)) * fs_in.pass_color;    
 
+    fragment_color = vec4(fs_in.pass_color * (ambient_light + diffuse_light + specular_light), 1.0);
+    fragment_color = vec4(lighting, 1.0);
     //debug
+    //fragment_color = vec4(1.0, 0.0, 0.0, 1.0);
+    //fragment_color = vec4(fs_in.pass_uv, 0.0, 1.0);
+    //fragment_color = vec4(vec3(shadow), 1.0);
+    //fragment_color = vec4(normal, 1.0);
     //fragment_color = vec4(abs(spec_coef),abs(spec_coef),abs(spec_coef), 1.0f);
     //fragment_color = vec4(abs(view_direction), 1.0f);
 }

@@ -12,5 +12,6 @@ Object::~Object() {
     //glDeleteVertexArrays(1, &m_vao_id);
 }
 
-void Object::init_mesh() {
-}
+void Object::init_mesh() {}
+
+void Object::init_material() {}

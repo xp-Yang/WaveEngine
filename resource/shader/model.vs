@@ -8,12 +8,14 @@ uniform vec3 color;
 uniform mat4 model;
 uniform mat4 view;
 uniform mat4 projection;
+uniform mat4 lightSpaceMatrix;
 
 out VS_OUT {
     vec3 pass_color;
+    vec3 pass_pos;
     vec2 pass_uv;
     vec3 pass_normal;
-    vec3 pass_pos;
+    vec4 FragPosLightSpace;
 } vs_out;
 
 void main()
@@ -23,6 +25,7 @@ void main()
 	vs_out.pass_uv = vertex_uv;
     vs_out.pass_pos = vec3(model * vec4(vertex_pos, 1.0));
     vs_out.pass_normal = vec3(model * vec4(vertex_normal, 0.0));
+    vs_out.FragPosLightSpace = lightSpaceMatrix * vec4(vs_out.pass_pos, 1.0);
     //Normal = mat3(transpose(inverse(model))) * aNormal;  
 
     gl_Position = projection * view * model * vec4(vertex_pos, 1.0);
