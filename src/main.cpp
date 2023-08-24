@@ -184,6 +184,7 @@ void init_scene() {
     scene.set_camera(camera);
 }
 
+static bool pixel_style = false;
 static bool stop_rotate = false;
 static float ambient_strength = 0.1f;
 static float magnitude = 0.0f;
@@ -368,77 +369,77 @@ void render_imgui() {
     auto& cube = *scene.object(1);
     auto& ground = *scene.object(2);
 
+    ImGui::Begin("Controller");
+
+    if (ImGui::Checkbox("pixel style", &pixel_style));
+
+    ImGui::SliderFloat("ambient strength", &ambient_strength, 0.0f, 1.0f);
+    ImGui::SliderFloat("cube shininess", &cube.material().shininess, 0, 1.5f);
+
+    ImGui::SliderFloat("ground diffuse strength", &ground.material().diffuse_strength, 0, 1);
+    ImGui::SliderFloat("ground specular strength", &ground.material().specular_strength, 0, 1);
+    ImGui::SliderFloat("ground shininess", &ground.material().shininess, 0, 256);
+
+    ImGui::SliderFloat("magnitude", &magnitude, 0.0f, 10.0f);
+
+    ImGui::PushItemWidth(85.0f);
+    static glm::vec3 cube_offset = { 0.0f, 1.0f, 0.0f };
+    ImGui::SliderFloat("##cube x", &cube_offset.x, -10.0f, 10.0f);
+    ImGui::SameLine();
+    ImGui::SliderFloat("##cube y", &cube_offset.y, -10.0f, 10.0f);
+    ImGui::SameLine();
+    ImGui::SliderFloat("cube xyz", &cube_offset.z, -10.0f, 10.0f);
+    auto translate = glm::translate(glm::mat4(1.0f), cube_offset);
+    cube.set_model_matrix(translate);
+    ImGui::PopItemWidth();
+    //ImGui::ColorEdit3("light color", (float*)&light_color);
+    //ImGui::ColorEdit3("cube color", (float*)&cube_color);
+    //ImGui::ColorEdit3("ground color", (float*)&ground_color);
+
+    if (ImGui::Checkbox("stop rotate", &stop_rotate));
+
+    // log
     {
-        ImGui::Begin("Controller");
+        ImGui::NewLine();
+        ImGui::Text("light matrix:");
+        std::string test_light = matrix_log(light.get_model_matrix());
+        ImGui::Text(test_light.c_str());
 
-        ImGui::SliderFloat("ambient strength", &ambient_strength, 0.0f, 1.0f);
-        ImGui::SliderFloat("cube shininess", &cube.material().shininess, 0, 1.5f);
+        ImGui::NewLine();
+        ImGui::Text("cube matrix:");
+        std::string test_cube = matrix_log(cube.get_model_matrix());
+        ImGui::Text(test_cube.c_str());
 
-        ImGui::SliderFloat("ground diffuse strength", &ground.material().diffuse_strength, 0, 1);
-        ImGui::SliderFloat("ground specular strength", &ground.material().specular_strength, 0, 1);
-        ImGui::SliderFloat("ground shininess", &ground.material().shininess, 0, 256);
+        //ImGui::NewLine();
+        //ImGui::Text("ground matrix:");
+        //std::string test_ground = matrix_log(ground.get_model_matrix());
+        //ImGui::Text(test_ground.c_str());
 
-        ImGui::SliderFloat("magnitude", &magnitude, 0.0f, 10.0f);
+        ImGui::NewLine();
+        ImGui::Text("view matrix:");
+        std::string test_view = matrix_log(camera->get_view());
+        ImGui::Text(test_view.c_str());
 
-        ImGui::PushItemWidth(85.0f);
-        static glm::vec3 cube_offset = {0.0f, 1.0f, 0.0f};
-        ImGui::SliderFloat("##cube x", &cube_offset.x, -10.0f, 10.0f);
-        ImGui::SameLine();
-        ImGui::SliderFloat("##cube y", &cube_offset.y, -10.0f, 10.0f);
-        ImGui::SameLine();
-        ImGui::SliderFloat("cube xyz", &cube_offset.z, -10.0f, 10.0f);
-        auto translate = glm::translate(glm::mat4(1.0f), cube_offset);
-        cube.set_model_matrix(translate);
-        ImGui::PopItemWidth();
-        //ImGui::ColorEdit3("light color", (float*)&light_color);
-        //ImGui::ColorEdit3("cube color", (float*)&cube_color);
-        //ImGui::ColorEdit3("ground color", (float*)&ground_color);
+        ImGui::NewLine();
+        ImGui::Text("inverse view matrix:");
+        std::string inverse_view = matrix_log(glm::inverse(camera->get_view()));
+        ImGui::Text(inverse_view.c_str());
 
-        if (ImGui::Checkbox("stop rotate", &stop_rotate));
+        ImGui::NewLine();
+        ImGui::Text("camera position:");
+        std::string test_camera_pos = vec3_log(camera->get_position());
+        ImGui::Text(test_camera_pos.c_str());
 
-        // log
-        {
-            ImGui::NewLine();
-            ImGui::Text("light matrix:");
-            std::string test_light = matrix_log(light.get_model_matrix());
-            ImGui::Text(test_light.c_str());
+        ImGui::NewLine();
+        ImGui::Text("camera direction:");
+        std::string test_camera_dir = vec3_log(camera->get_direction().dir);
+        ImGui::Text(test_camera_dir.c_str());
 
-            ImGui::NewLine();
-            ImGui::Text("cube matrix:");
-            std::string test_cube = matrix_log(cube.get_model_matrix());
-            ImGui::Text(test_cube.c_str());
-
-            //ImGui::NewLine();
-            //ImGui::Text("ground matrix:");
-            //std::string test_ground = matrix_log(ground.get_model_matrix());
-            //ImGui::Text(test_ground.c_str());
-
-            ImGui::NewLine();
-            ImGui::Text("view matrix:");
-            std::string test_view = matrix_log(camera->get_view());
-            ImGui::Text(test_view.c_str());
-
-            ImGui::NewLine();
-            ImGui::Text("inverse view matrix:");
-            std::string inverse_view = matrix_log(glm::inverse(camera->get_view()));
-            ImGui::Text(inverse_view.c_str());
-
-            ImGui::NewLine();
-            ImGui::Text("camera position:");
-            std::string test_camera_pos = vec3_log(camera->get_position());
-            ImGui::Text(test_camera_pos.c_str());
-
-            ImGui::NewLine();
-            ImGui::Text("camera direction:");
-            std::string test_camera_dir = vec3_log(camera->get_direction().dir);
-            ImGui::Text(test_camera_dir.c_str());
-
-            ImGuiIO& io = ImGui::GetIO();
-            ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / io.Framerate, io.Framerate);
-        }
-
-        ImGui::End();
+        ImGuiIO& io = ImGui::GetIO();
+        ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / io.Framerate, io.Framerate);
     }
+
+    ImGui::End();
 }
 
 // TODO:
@@ -456,6 +457,7 @@ void render_imgui() {
 // 11. 光源物理模型
 // 12. 阴影贴图、帧缓冲、法线贴图、tbn矩阵、天空盒、反射等知识学习
 // 13. 帧缓冲的附件?
+// 14. 看一下模型加载那篇文章，贴图文件是相对路径保存的和绝对路径保存的，Assimp的简单原理。
 
 unsigned int creat_quad() {
     float quadVertices[] = { // vertex attributes for a quad that fills the entire screen in Normalized Device Coordinates.
@@ -489,18 +491,19 @@ void start_render_loop(GLFWwindow* window) {
     Shader* frame_shader = new Shader("resource/shader/frame.vs", "resource/shader/frame.fs");
     Renderer renderer;
 
+    unsigned int quad_VAO = creat_quad();
     // 创建帧缓冲
     unsigned int frame_buffer;
     glGenFramebuffers(1, &frame_buffer);
     glBindFramebuffer(GL_FRAMEBUFFER, frame_buffer);
-    unsigned int tex_buffer;
-    glGenTextures(1, &tex_buffer);
-    glBindTexture(GL_TEXTURE_2D, tex_buffer);
+    unsigned int tex_color_buffer;
+    glGenTextures(1, &tex_color_buffer);
+    glBindTexture(GL_TEXTURE_2D, tex_color_buffer);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, WINDOW_WIDTH, WINDOW_HEIGHT, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glBindTexture(GL_TEXTURE_2D, 0);
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, tex_buffer, 0);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, tex_color_buffer, 0);
     // 为什么要绑上深度缓冲才能work? tex_buffer不是已经被深度测试过的一张纹理吗
     // 为什么绑定了stencil阴影就有问题？
     //unsigned int rbo;
@@ -538,22 +541,45 @@ void start_render_loop(GLFWwindow* window) {
 
         glfwPollEvents();//检查触发事件（比如键盘输入、鼠标移动等），然后调用对应的回调函数
 
-        // 1.
-        set_view_port(WINDOW_WIDTH, WINDOW_HEIGHT);
+        // 1. 生成深度缓冲
+        float depth_buffer_width = WINDOW_WIDTH;
+        float depth_buffer_height = WINDOW_HEIGHT;
+        set_view_port(depth_buffer_width, depth_buffer_height);
         glBindFramebuffer(GL_FRAMEBUFFER, frame_buffer);
         glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
         render_scene(depth_shader);
 
-        // 2.
+            // debug depth
+            //glBindFramebuffer(GL_FRAMEBUFFER, 0);
+            //glClearColor(ambient_strength * 0.5f, ambient_strength * 0.5f, ambient_strength * 0.5f, 1.0f);
+            //glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+            //glBindTexture(GL_TEXTURE_2D, tex_depth_buffer);
+            //renderer.draw(*frame_shader, quad_VAO, DrawMode::Arrays, 0, 6);
+        
+        // 2. 生成颜色缓冲
+        float color_buffer_width = WINDOW_WIDTH;
+        float color_buffer_height = WINDOW_HEIGHT;
+        if (pixel_style) {
+            color_buffer_width /= 8.0f;
+            color_buffer_height /= 8.0f;
+        }
+        glBindTexture(GL_TEXTURE_2D, tex_color_buffer);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, color_buffer_width, color_buffer_height, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+        set_view_port(color_buffer_width, color_buffer_height);
+        glBindFramebuffer(GL_FRAMEBUFFER, frame_buffer);
+        glClearColor(ambient_strength * 0.5f, ambient_strength * 0.5f, ambient_strength * 0.5f, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+        render_scene(nullptr);
+
+        // TODO 阴影为何消失了
+        // 3. 默认缓冲
         set_view_port(WINDOW_WIDTH, WINDOW_HEIGHT);
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
         glClearColor(ambient_strength * 0.5f, ambient_strength * 0.5f, ambient_strength * 0.5f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-        // debug
-        //glBindTexture(GL_TEXTURE_2D, tex_depth_buffer);
-        //renderer.draw(*frame_shader, quadVAO, DrawMode::Arrays, 0, 6);
-        render_scene(nullptr);
+        glBindTexture(GL_TEXTURE_2D, tex_color_buffer);
+        renderer.draw(*frame_shader, quad_VAO, DrawMode::Arrays, 0, 6);
 
         render_imgui();
 
