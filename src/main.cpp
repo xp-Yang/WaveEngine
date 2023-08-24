@@ -492,6 +492,7 @@ void start_render_loop(GLFWwindow* window) {
     Renderer renderer;
 
     unsigned int quad_VAO = creat_quad();
+
     // 创建帧缓冲
     unsigned int frame_buffer;
     glGenFramebuffers(1, &frame_buffer);
@@ -505,14 +506,20 @@ void start_render_loop(GLFWwindow* window) {
     glBindTexture(GL_TEXTURE_2D, 0);
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, tex_color_buffer, 0);
     // 为什么要绑上深度缓冲才能work? tex_buffer不是已经被深度测试过的一张纹理吗
-    // 为什么绑定了stencil阴影就有问题？
-    //unsigned int rbo;
-    //glGenRenderbuffers(1, &rbo);
-    //glBindRenderbuffer(GL_RENDERBUFFER, rbo);
+    // 为什么只绑定了stencil，阴影就会有问题？
+    unsigned int rbo;
+    glGenRenderbuffers(1, &rbo);
+    glBindRenderbuffer(GL_RENDERBUFFER, rbo);
+    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, WINDOW_WIDTH, WINDOW_HEIGHT); // use a single renderbuffer object for both a depth AND stencil buffer.
+    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, rbo); // now actually attach it
     //glRenderbufferStorage(GL_RENDERBUFFER, /*GL_DEPTH24_STENCIL8*/GL_STENCIL_INDEX, WINDOW_WIDTH, WINDOW_HEIGHT); // use a single renderbuffer object for both a depth AND stencil buffer.
     //glFramebufferRenderbuffer(GL_FRAMEBUFFER, /*GL_DEPTH_STENCIL_ATTACHMENT*/GL_STENCIL_ATTACHMENT, GL_RENDERBUFFER, rbo); // now actually attach it
-    //glBindRenderbuffer(GL_RENDERBUFFER, 0);
+    glBindRenderbuffer(GL_RENDERBUFFER, 0);
+
     ////创建深度缓冲（阴影）
+    unsigned int depth_frame_buffer;
+    glGenFramebuffers(1, &depth_frame_buffer);
+    glBindFramebuffer(GL_FRAMEBUFFER, depth_frame_buffer);
     glGenTextures(1, &tex_depth_buffer);
     glActiveTexture(GL_TEXTURE7);
     glBindTexture(GL_TEXTURE_2D, tex_depth_buffer);
@@ -525,8 +532,8 @@ void start_render_loop(GLFWwindow* window) {
     glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor);
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, tex_depth_buffer, 0);
     //不包含颜色缓冲的帧缓冲对象是不完整的，所以我们需要显式告诉OpenGL我们不适用任何颜色数据进行渲染。
-    //glDrawBuffer(GL_NONE);
-    //glReadBuffer(GL_NONE);
+    glDrawBuffer(GL_NONE);
+    glReadBuffer(GL_NONE);
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
     glEnable(GL_DEPTH_TEST);
@@ -545,7 +552,7 @@ void start_render_loop(GLFWwindow* window) {
         float depth_buffer_width = WINDOW_WIDTH;
         float depth_buffer_height = WINDOW_HEIGHT;
         set_view_port(depth_buffer_width, depth_buffer_height);
-        glBindFramebuffer(GL_FRAMEBUFFER, frame_buffer);
+        glBindFramebuffer(GL_FRAMEBUFFER, depth_frame_buffer);
         glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
         render_scene(depth_shader);
@@ -572,7 +579,7 @@ void start_render_loop(GLFWwindow* window) {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
         render_scene(nullptr);
 
-        // TODO 阴影为何消失了
+        // 颜色缓冲和深度缓冲使用同一个framebuffer，第3步渲染时阴影没了，为什么？
         // 3. 默认缓冲
         set_view_port(WINDOW_WIDTH, WINDOW_HEIGHT);
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
