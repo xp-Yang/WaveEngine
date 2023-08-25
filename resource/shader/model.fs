@@ -32,19 +32,19 @@ out vec4 fragment_color;
 
 float ShadowCalculation(vec4 fragPosLightSpace)
 {
-    // 执行透视除法
+    // 1.还在裁剪空间，执行透视除法，变换到NDC空间
     vec3 projCoords = fragPosLightSpace.xyz / fragPosLightSpace.w;
-    // 变换到[0,1]的范围
+    // 2.变换到[0,1]的范围。 ？应当变换到屏幕空间，便于和gl_FragCoord处于相同空间
     projCoords = projCoords * 0.5 + 0.5;
     if(projCoords.z > 1.0)
         return 0.0;
 
     float bias = 0.005;
     //float bias = max(0.05 * (1.0 - dot(normal, lightDir)), 0.005);
-    // 取得最近点的深度(使用[0,1]范围下的fragPosLight当坐标)
+    // ？采样时的坐标在哪个空间
     float closestDepth = texture(shadowMap, projCoords.xy).r;
     // 检查当前片段是否在阴影中
-    float shadow = projCoords.z - bias > closestDepth ? 1.0 : 0.0;
+    float shadow = projCoords.z - closestDepth > bias ? 1.0 : 0.0;
 
     return shadow;
 }

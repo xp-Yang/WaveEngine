@@ -90,6 +90,9 @@
     <ClCompile Include="src\Object.cpp">
       <Filter>源文件\src</Filter>
     </ClCompile>
+    <ClCompile Include="src\MySphere.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Camera.hpp">
@@ -158,6 +161,9 @@
     <ClInclude Include="src\Object.hpp">
       <Filter>源文件\src</Filter>
     </ClInclude>
+    <ClInclude Include="src\MySphere.hpp">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="resource\shader\light.fs">
@@ -184,11 +190,12 @@
     <None Include="resource\shader\model.gs">
       <Filter>资源文件</Filter>
     </None>
-    <None Include="resource\shader\model_normal.gs">
+    <None Include="resource\shader\normal.gs">
       <Filter>资源文件</Filter>
     </None>
     <None Include="resource\shader\depth.vs" />
     <None Include="resource\shader\depth.fs" />
+    <None Include="resource\shader\normal.fs" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="resource\images\desert.jpg">

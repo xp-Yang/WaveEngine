@@ -26,6 +26,7 @@
     <ClCompile Include="imgui\imgui_impl_opengl3.cpp" />
     <ClCompile Include="imgui\imgui_tables.cpp" />
     <ClCompile Include="imgui\imgui_widgets.cpp" />
+    <ClCompile Include="src\MySphere.cpp" />
     <ClCompile Include="src\Object.cpp" />
     <ClCompile Include="src\glad.c" />
     <ClCompile Include="src\main.cpp" />
@@ -53,6 +54,7 @@
     <ClInclude Include="imgui\imstb_rectpack.h" />
     <ClInclude Include="imgui\imstb_textedit.h" />
     <ClInclude Include="imgui\imstb_truetype.h" />
+    <ClInclude Include="src\MySphere.hpp" />
     <ClInclude Include="src\Object.hpp" />
     <ClInclude Include="resource\shader\light.vs" />
     <ClInclude Include="src\Camera.hpp" />
@@ -78,7 +80,8 @@
     <None Include="resource\shader\model.fs" />
     <None Include="resource\shader\model.gs" />
     <None Include="resource\shader\model.vs" />
-    <None Include="resource\shader\model_normal.gs" />
+    <None Include="resource\shader\normal.fs" />
+    <None Include="resource\shader\normal.gs" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="resource\images\cube_specular.png" />

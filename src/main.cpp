@@ -27,8 +27,50 @@
 Scene scene;
 
 static float delta_time = 0.0f; // 当前帧与上一帧的时间差
-static int mouse_left_status;
-static int mouse_right_status;
+
+void imgui_mouse_callback() 
+{
+    ImGuiIO& io = ImGui::GetIO();
+    double xpos, ypos;
+    xpos = io.MousePos.x;
+    ypos = io.MousePos.y;
+    auto camera = scene.camera();
+    if (io.WantCaptureMouse) {
+        return;
+    }
+    static int last_left_mouse_status = io.MouseDown[0];
+    static int last_right_mouse_status = io.MouseDown[1];
+
+    static float last_pos_x = WINDOW_WIDTH / 2;
+    static float last_pos_y = WINDOW_HEIGHT / 2;
+    if (last_left_mouse_status != io.MouseDown[0]) {
+        last_pos_x = xpos;
+        last_pos_y = ypos;
+        last_left_mouse_status = io.MouseDown[0];
+    }
+    if (io.MouseDown[0]) {
+        float delta_x = xpos - last_pos_x;
+        float delta_y = -(ypos - last_pos_y);
+        last_pos_x = xpos;
+        last_pos_y = ypos;
+        camera->mouse_process(delta_x, delta_y, 0);
+    }
+
+    if (last_right_mouse_status != io.MouseDown[1]) {
+        last_pos_x = xpos;
+        last_pos_y = ypos;
+        last_right_mouse_status = io.MouseDown[1];
+    }
+    if (io.MouseDown[1]) {
+        float delta_x = xpos - last_pos_x;
+        float delta_y = -(ypos - last_pos_y);
+        last_pos_x = xpos;
+        last_pos_y = ypos;
+        camera->mouse_process(delta_x, delta_y, 1);
+    }
+
+    camera->mouse_scroll_process(io.MouseWheel);
+}
 
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode)
 {
@@ -37,72 +79,6 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
         glfwSetWindowShouldClose(window, GL_TRUE);
     camera->key_process(key, delta_time);
 }
-
-void mouse_button_callback(GLFWwindow* window, int button, int action, int mods) {
-    if (ImGui::GetIO().WantCaptureMouse) {
-        return;
-    }
-    if (button == 0) {
-        if (action == GLFW_PRESS)
-            mouse_left_status = 1;
-        if (action == GLFW_RELEASE)
-            mouse_left_status = 0;
-    }
-    if (button == 1) {
-        if (action == GLFW_PRESS)
-            mouse_right_status = 1;
-        if (action == GLFW_RELEASE)
-            mouse_right_status = 0;
-    }
-}
-
-void mouse_callback(GLFWwindow* window, double xpos, double ypos) 
-{
-    auto camera = scene.camera();
-    if (ImGui::GetIO().WantCaptureMouse) {
-        return;
-    }
-    static int last_left_mouse_status = mouse_left_status;
-    static int last_right_mouse_status = mouse_right_status;
-
-    static float last_pos_x = WINDOW_WIDTH / 2;
-    static float last_pos_y = WINDOW_HEIGHT / 2;
-    if (last_left_mouse_status != mouse_left_status) {
-        last_pos_x = xpos;
-        last_pos_y = ypos;
-        last_left_mouse_status = mouse_left_status;
-    }
-    if (mouse_left_status) {
-        float delta_x = xpos - last_pos_x;
-        float delta_y = -(ypos - last_pos_y); // 注意这里是相反的，因为glfwSetCursorPosCallback返回给mouse_callback函数的 (x,y) 是鼠标相对于窗口左上角的位置，所以需要将 (ypos - lastY) 取反
-        last_pos_x = xpos;
-        last_pos_y = ypos;
-        camera->mouse_process(delta_x, delta_y, 0);
-    }
-
-    if (last_right_mouse_status != mouse_right_status) {
-        last_pos_x = xpos;
-        last_pos_y = ypos;
-        last_right_mouse_status = mouse_right_status;
-    }
-    if (mouse_right_status) {
-        float delta_x = xpos - last_pos_x;
-        float delta_y = -(ypos - last_pos_y);
-        last_pos_x = xpos;
-        last_pos_y = ypos;
-        camera->mouse_process(delta_x, delta_y, 1);
-    }
-}
-
-void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
-{
-    auto camera = scene.camera();
-    if (ImGui::GetIO().WantCaptureMouse) {
-        return;
-    }
-    camera->mouse_scroll_process(yoffset);
-}
-
 
 GLFWwindow* create_window(int size_x, int size_y) {
     //glfwInit函数来初始化GLFW，glfwWindowHint函数来配置GLFW
@@ -139,6 +115,23 @@ void set_view_port(int width, int height) {
     // 另外一个意义表示这个绘制好的图像将会被显示在屏幕的什么区域。
     // 进行视口变换(Viewport Transform),标准化设备坐标会变换为屏幕空间坐标。所得的屏幕空间坐标又会被变换为片段输入到片段着色器中。
     glViewport(0, 0, width, height);
+}
+
+void create_tetrahedron() {
+    float side_length = 5.0f;
+    glm::vec3 a = glm::vec3(0, 0, 0);
+    glm::vec3 b = glm::vec3(side_length, 0, 0);
+    glm::vec3 c = glm::vec3(side_length / 2.0f, 0, - side_length * sqrt(3.0f) / 2.0f);
+    glm::vec3 d = glm::vec3(side_length / 2.0f, - side_length * sqrt(6.0f) / 3.0f, side_length * sqrt(3.0f) / 2.0f / 3.0f);
+
+    Mesh tetrahedron;
+    glm::vec3 vertices[] = {
+        a,b,c,d,
+    };
+}
+
+void create_sphere() {
+
 }
 
 void init_scene() {
@@ -184,6 +177,29 @@ void init_scene() {
     scene.set_camera(camera);
 }
 
+void screen_shot() {
+    const int channels_num = 3;
+    const int w = (int)WINDOW_WIDTH;
+    const int h = (int)WINDOW_HEIGHT;
+
+    unsigned char data[w * h * channels_num];
+
+    glReadPixels(0, 0, w, h, GL_BGR, GL_UNSIGNED_BYTE, data);
+
+    int index = 0;
+    for (int j = h - 1; j >= 0; --j)
+    {
+        for (int i = 0; i < w; ++i)
+        {
+            data[index++] = (unsigned char)(255.0 * i / w);
+            data[index++] = (unsigned char)(255.0 * j / h);
+            data[index++] = (unsigned char)(255.0 * 0.2);
+        }
+    }
+
+    //stbi_write_jpg("jpg_test_.jpg", w, h, channels_num, data, w * channels_num);
+}
+
 static bool pixel_style = false;
 static bool stop_rotate = false;
 static float ambient_strength = 0.1f;
@@ -200,6 +216,8 @@ void render_scene(Shader* depth_shader) {
 
     Shader* light_shader = light.material().shader;
     Shader* model_shader = nanosuit.m_materials[0].shader;
+    // TODO remove
+    Shader* normal_shader = new Shader("resource/shader/model.vs", "resource/shader/normal.fs", "resource/shader/normal.gs");
 
     Renderer renderer;
 
@@ -230,6 +248,14 @@ void render_scene(Shader* depth_shader) {
     model_shader->setFloat3("viewpos", camera->get_position());
     model_shader->setFloat3("light.color", light.get_material().color);
     model_shader->setFloat3("light.position", light.get_model_matrix()[3]);
+
+    normal_shader->start_using();
+    normal_shader->setMatrix("view", 1, camera->get_view());
+    normal_shader->setMatrix("projection", 1, camera->get_projection());
+    normal_shader->setFloat("material.ambient", ambient_strength);
+    normal_shader->setFloat3("viewpos", camera->get_position());
+    normal_shader->setFloat3("light.color", light.get_material().color);
+    normal_shader->setFloat3("light.position", light.get_model_matrix()[3]);
 
     // render light
     {
@@ -312,8 +338,15 @@ void render_scene(Shader* depth_shader) {
             depth_shader->start_using();
             depth_shader->setMatrix("model", 1, cube.get_model_matrix());
             renderer.draw(*depth_shader, cube.get_mesh().get_VAO(), DrawMode::Indices, cube.get_mesh().get_indices_count());
-        }else
+        }
+        else {
             renderer.draw(*model_shader, cube.get_mesh().get_VAO(), DrawMode::Indices, cube.get_mesh().get_indices_count());
+            
+            normal_shader->start_using();
+            normal_shader->setMatrix("model", 1, cube.get_model_matrix());
+            normal_shader->setFloat("magnitude", magnitude);
+            renderer.draw(*normal_shader, cube.get_mesh().get_VAO(), DrawMode::Indices, cube.get_mesh().get_indices_count());
+        }
 
 
         // render border
@@ -344,8 +377,15 @@ void render_scene(Shader* depth_shader) {
             depth_shader->start_using();
             depth_shader->setMatrix("model", 1, nanosuit_translate * nanosuit_scale);
             nanosuit.draw(*depth_shader, renderer);
-        }else
+        }
+        else {
             nanosuit.draw(*model_shader, renderer);
+
+            normal_shader->start_using();
+            normal_shader->setMatrix("model", 1, nanosuit_translate* nanosuit_scale);
+            normal_shader->setFloat("magnitude", magnitude);
+            nanosuit.draw(*normal_shader, renderer);
+        }
     }
 
     {
@@ -358,8 +398,15 @@ void render_scene(Shader* depth_shader) {
             depth_shader->start_using();
             depth_shader->setMatrix("model", 1, yoko_translate * yoko_scale);
             yoko.draw(*depth_shader, renderer);
-        }else
+        }
+        else {
             yoko.draw(*model_shader, renderer);
+
+            normal_shader->start_using();
+            normal_shader->setMatrix("model", 1, yoko_translate* yoko_scale);
+            normal_shader->setFloat("magnitude", magnitude);
+            yoko.draw(*normal_shader, renderer);
+        }
     }
 }
 
@@ -448,27 +495,33 @@ void render_imgui() {
 // done: main.cpp全局变量优化 答: 已将Object渲染对象和Camera交由Scene管理
 // done: loop中的逻辑分离 答: 分离了imgui的渲染
 // done: 材质应该包含shader
-// 1. 键盘和鼠标callback事件用imgui处理? 交由View对象管理?
-// 6. model.gs explode效果跟着fov缩放变
-// 7. 着色器的坐标空间理解和统一
+// 颜色缓冲和深度缓冲使用同一个framebuffer，第3步渲染时阴影没了，为什么？ 
+// 不对： 答：因为frame_buffer渲染的时候，有了一个新的深度缓冲区，片段着色器画的阴影去和新的深度缓冲区比较深度了，结果就没画出来。 
+//       最后深度测试结束后，tex_depth_buffer也更新掉了。
+// 注意开启像素化后能看见位置不对的阴影
+// done: model.gs 的 explode 效果跟着fov缩放变 答：原因：learnOpengl的gs算法在裁剪空间计算法向量，而投影变换是非正交变换。
+// done: 着色器的坐标空间理解和统一
+// done: 键盘和鼠标callback事件用imgui处理?
+// done: 几何着色器法向量显示
+// 7. 定义View、Scene对象职责
 // 8. Model类Mesh和Material对应关系处理
 // 9. 相机旋转和平移和缩放（鼠标左键右键滚轮）多次操作会出现问题，缩放不可逆。相机的拖动导致距离渲染对象变近
-// 10. 几何着色器法向量显示
 // 11. 光源物理模型
 // 12. 阴影贴图、帧缓冲、法线贴图、tbn矩阵、天空盒、反射等知识学习
 // 13. 帧缓冲的附件?
 // 14. 看一下模型加载那篇文章，贴图文件是相对路径保存的和绝对路径保存的，Assimp的简单原理。
+// 15. picking
 
 unsigned int creat_quad() {
     float quadVertices[] = { // vertex attributes for a quad that fills the entire screen in Normalized Device Coordinates.
-        // positions   // texCoords
-        -1.0f,  1.0f, 0.0f,  0.0f, 1.0f,
-        -1.0f, -1.0f, 0.0f,  0.0f, 0.0f,
-         1.0f, -1.0f, 0.0f,  1.0f, 0.0f,
-
-        -1.0f,  1.0f, 0.0f,  0.0f, 1.0f,
-         1.0f, -1.0f, 0.0f,  1.0f, 0.0f,
-         1.0f,  1.0f, 0.0f,  1.0f, 1.0f
+        // positions          // uv
+        -1.0f,  1.0f, 0.0f,   0.0f, 1.0f,
+        -1.0f, -1.0f, 0.0f,   0.0f, 0.0f,
+         1.0f, -1.0f, 0.0f,   1.0f, 0.0f,
+                              
+        -1.0f,  1.0f, 0.0f,   0.0f, 1.0f,
+         1.0f, -1.0f, 0.0f,   1.0f, 0.0f,
+         1.0f,  1.0f, 0.0f,   1.0f, 1.0f
     };
     // screen quad VAO
     unsigned int quadVAO, quadVBO;
@@ -507,19 +560,19 @@ void start_render_loop(GLFWwindow* window) {
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, tex_color_buffer, 0);
     // 为什么要绑上深度缓冲才能work? tex_buffer不是已经被深度测试过的一张纹理吗
     // 为什么只绑定了stencil，阴影就会有问题？
-    unsigned int rbo;
-    glGenRenderbuffers(1, &rbo);
-    glBindRenderbuffer(GL_RENDERBUFFER, rbo);
-    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, WINDOW_WIDTH, WINDOW_HEIGHT); // use a single renderbuffer object for both a depth AND stencil buffer.
-    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, rbo); // now actually attach it
-    //glRenderbufferStorage(GL_RENDERBUFFER, /*GL_DEPTH24_STENCIL8*/GL_STENCIL_INDEX, WINDOW_WIDTH, WINDOW_HEIGHT); // use a single renderbuffer object for both a depth AND stencil buffer.
-    //glFramebufferRenderbuffer(GL_FRAMEBUFFER, /*GL_DEPTH_STENCIL_ATTACHMENT*/GL_STENCIL_ATTACHMENT, GL_RENDERBUFFER, rbo); // now actually attach it
-    glBindRenderbuffer(GL_RENDERBUFFER, 0);
+    //unsigned int rbo;
+    //glGenRenderbuffers(1, &rbo);
+    //glBindRenderbuffer(GL_RENDERBUFFER, rbo);
+    //glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, WINDOW_WIDTH, WINDOW_HEIGHT); // use a single renderbuffer object for both a depth AND stencil buffer.
+    //glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, rbo); // now actually attach it
+    ////glRenderbufferStorage(GL_RENDERBUFFER, /*GL_DEPTH24_STENCIL8*/GL_STENCIL_INDEX, WINDOW_WIDTH, WINDOW_HEIGHT); // use a single renderbuffer object for both a depth AND stencil buffer.
+    ////glFramebufferRenderbuffer(GL_FRAMEBUFFER, /*GL_DEPTH_STENCIL_ATTACHMENT*/GL_STENCIL_ATTACHMENT, GL_RENDERBUFFER, rbo); // now actually attach it
+    //glBindRenderbuffer(GL_RENDERBUFFER, 0);
 
     ////创建深度缓冲（阴影）
-    unsigned int depth_frame_buffer;
-    glGenFramebuffers(1, &depth_frame_buffer);
-    glBindFramebuffer(GL_FRAMEBUFFER, depth_frame_buffer);
+    //unsigned int depth_frame_buffer;
+    //glGenFramebuffers(1, &depth_frame_buffer);
+    //glBindFramebuffer(GL_FRAMEBUFFER, depth_frame_buffer);
     glGenTextures(1, &tex_depth_buffer);
     glActiveTexture(GL_TEXTURE7);
     glBindTexture(GL_TEXTURE_2D, tex_depth_buffer);
@@ -532,8 +585,8 @@ void start_render_loop(GLFWwindow* window) {
     glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor);
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, tex_depth_buffer, 0);
     //不包含颜色缓冲的帧缓冲对象是不完整的，所以我们需要显式告诉OpenGL我们不适用任何颜色数据进行渲染。
-    glDrawBuffer(GL_NONE);
-    glReadBuffer(GL_NONE);
+    //glDrawBuffer(GL_NONE);
+    //glReadBuffer(GL_NONE);
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
     glEnable(GL_DEPTH_TEST);
@@ -552,7 +605,7 @@ void start_render_loop(GLFWwindow* window) {
         float depth_buffer_width = WINDOW_WIDTH;
         float depth_buffer_height = WINDOW_HEIGHT;
         set_view_port(depth_buffer_width, depth_buffer_height);
-        glBindFramebuffer(GL_FRAMEBUFFER, depth_frame_buffer);
+        glBindFramebuffer(GL_FRAMEBUFFER, frame_buffer);
         glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
         render_scene(depth_shader);
@@ -579,8 +632,7 @@ void start_render_loop(GLFWwindow* window) {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
         render_scene(nullptr);
 
-        // 颜色缓冲和深度缓冲使用同一个framebuffer，第3步渲染时阴影没了，为什么？
-        // 3. 默认缓冲
+        //// 3. 默认缓冲
         set_view_port(WINDOW_WIDTH, WINDOW_HEIGHT);
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
         glClearColor(ambient_strength * 0.5f, ambient_strength * 0.5f, ambient_strength * 0.5f, 1.0f);
@@ -588,6 +640,7 @@ void start_render_loop(GLFWwindow* window) {
         glBindTexture(GL_TEXTURE_2D, tex_color_buffer);
         renderer.draw(*frame_shader, quad_VAO, DrawMode::Arrays, 0, 6);
 
+        imgui_mouse_callback();
         render_imgui();
 
         ImGui::Render();
@@ -605,9 +658,6 @@ int main()
     set_view_port(WINDOW_WIDTH, WINDOW_HEIGHT);
 
     glfwSetKeyCallback(window, key_callback);
-    glfwSetCursorPosCallback(window, mouse_callback);
-    glfwSetMouseButtonCallback(window, mouse_button_callback);
-    glfwSetScrollCallback(window, scroll_callback);
     //glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED); // FPS 模式
 
     // setup imgui
