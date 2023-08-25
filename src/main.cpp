@@ -8,6 +8,7 @@
 
 #include "Object.hpp"
 #include "MyCube.hpp"
+#include "MySphere.hpp"
 #include "MyLight.hpp"
 #include "MyGround.hpp"
 #include "MyModel.hpp"
@@ -20,13 +21,9 @@
 #include <stdio.h>
 #include <map>
 
-#define PI (3.14159)
-
 Scene scene;
 
-static float delta_time = 0.0f; // 当前帧与上一帧的时间差
-
-void imgui_mouse_callback() 
+void imgui_callback() 
 {
     ImGuiIO& io = ImGui::GetIO();
     double xpos, ypos;
@@ -68,14 +65,21 @@ void imgui_mouse_callback()
     }
 
     camera->mouse_scroll_process(io.MouseWheel);
-}
 
-void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode)
-{
-    auto camera = scene.camera();
-    if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
-        glfwSetWindowShouldClose(window, GL_TRUE);
-    camera->key_process(key, delta_time);
+    float delta_time = 1.0f / io.Framerate;
+    if (io.KeysDown['W']) {
+        std::cout << "imgui key event" << std::endl;
+        camera->key_process('W', delta_time);
+    }
+    if (io.KeysDown['A']) {
+        camera->key_process('A', delta_time);
+    }
+    if (io.KeysDown['S']) {
+        camera->key_process('S', delta_time);
+    }
+    if(io.KeysDown['D']) {
+        camera->key_process('D', delta_time);
+    }
 }
 
 GLFWwindow* create_window(int size_x, int size_y) {
@@ -115,75 +119,6 @@ void set_view_port(int width, int height) {
     glViewport(0, 0, width, height);
 }
 
-void create_tetrahedron() {
-    float side_length = 5.0f;
-    glm::vec3 a = glm::vec3(0, 0, 0);
-    glm::vec3 b = glm::vec3(side_length, 0, 0);
-    glm::vec3 c = glm::vec3(side_length / 2.0f, 0, - side_length * sqrt(3.0f) / 2.0f);
-    glm::vec3 d = glm::vec3(side_length / 2.0f, - side_length * sqrt(6.0f) / 3.0f, side_length * sqrt(3.0f) / 2.0f / 3.0f);
-
-    glm::vec3 center = glm::vec3(side_length / 2.0f, -side_length * sqrt(6.0f) / 3.0f * (3.0f / 4.0f), side_length * sqrt(3.0f) / 2.0f / 3.0f);
-    
-    glm::vec3 vertices[] = {
-        a,b,c,d,
-    };
-}
-
-struct Triangle {
-    glm::vec3 vertices[3];
-};
-
-std::vector<Triangle> subdivide(Triangle triangle) {
-    // TODO 法向量
-    glm::vec3 new_vertex0 = (triangle.vertices[0] + triangle.vertices[1]) / 2.0f;
-    glm::vec3 new_vertex1 = (triangle.vertices[1] + triangle.vertices[2]) / 2.0f;
-    glm::vec3 new_vertex2 = (triangle.vertices[2] + triangle.vertices[0]) / 2.0f;
-
-    Triangle new_triangle0 = { triangle.vertices[0], new_vertex0, new_vertex2 };
-    Triangle new_triangle1 = { new_vertex0, triangle.vertices[1], new_vertex1 };
-    Triangle new_triangle2 = { new_vertex0, new_vertex1, new_vertex2 };
-    Triangle new_triangle3 = { new_vertex2, new_vertex1,  triangle.vertices[2] };
-
-    return { new_triangle0, new_triangle1, new_triangle2, new_triangle3 };
-}
-
-void create_icosphere() {
-    // 0. 创建正四面体
-    float side_length = 5.0f;
-    glm::vec3 a = glm::vec3(0, 0, 0);
-    glm::vec3 b = glm::vec3(side_length, 0, 0);
-    glm::vec3 c = glm::vec3(side_length / 2.0f, 0, -side_length * sqrt(3.0f) / 2.0f);
-    glm::vec3 d = glm::vec3(side_length / 2.0f, -side_length * sqrt(6.0f) / 3.0f, side_length * sqrt(3.0f) / 2.0f / 3.0f);
-
-    glm::vec3 center = glm::vec3(side_length / 2.0f, -side_length * sqrt(6.0f) / 3.0f * (3.0f / 4.0f), side_length * sqrt(3.0f) / 2.0f / 3.0f);
-
-    std::vector<Triangle> triangles = {
-        { a,b,c },
-        { a,b,d },
-        { b,c,d },
-        { c,a,d },
-    };
-
-    // 1. 对每个面细分
-    int recursion_depth = 3;
-    for (int i = 0; i < recursion_depth; i++) {
-        std::vector<Triangle> new_triangles;
-        for (int j = 0; j < 4; j ++) {
-            auto divided_triangles = subdivide(triangles[j]);
-            new_triangles.insert(new_triangles.end(), divided_triangles.begin(), divided_triangles.end());
-        }
-        triangles = new_triangles;
-    }
-
-    // 2. 对所有细分顶点到中心的距离做归一化
-    for (auto& triangle : triangles) {
-        for (auto& vertex : triangle.vertices) {
-            vertex = center + glm::normalize(vertex - center);
-        }
-    }
-
-}
-
 void init_scene() {
     MyLight* light = new MyLight();
     Material light_material;
@@ -197,6 +132,11 @@ void init_scene() {
     cube_material.set_diffuse_map("resource/images/desert.jpg");
     cube_material.set_specular_map("resource/images/cube_specular.png");
     cube->set_material(cube_material);
+
+    MySphere* sphere = new MySphere();
+    Material sphere_material;
+    sphere_material.shader = new Shader("resource/shader/sphere.vs", "resource/shader/sphere.fs");
+    sphere->set_material(sphere_material);
 
     MyGround* ground = new MyGround();
     Material ground_material;
@@ -219,11 +159,12 @@ void init_scene() {
 
     Camera* camera = new Camera({ 0.0f, 10.0f, 10.0f }, -35.0f/*-atan(1.0f / 10.0f) * 180.0f / PI*/, 0.0f, 0.0f);
 
-    scene.append_object(light);
-    scene.append_object(cube);
-    scene.append_object(ground);
-    scene.append_object(nanosuit);
-    scene.append_object(yoko);
+    scene.insert_object("light", light);
+    scene.insert_object("cube", cube);
+    scene.insert_object("sphere", sphere);
+    scene.insert_object("ground", ground);
+    scene.insert_object("nanosuit", nanosuit);
+    scene.insert_object("yoko", yoko);
     scene.set_camera(camera);
 }
 
@@ -250,32 +191,31 @@ void screen_shot() {
     //stbi_write_jpg("jpg_test_.jpg", w, h, channels_num, data, w * channels_num);
 }
 
+// TODO remove
 static bool pixel_style = false;
 static bool stop_rotate = false;
+static bool normal_debug = false;
 static float ambient_strength = 0.1f;
+static int icosphere_accuracy = 0;
 static float magnitude = 0.0f;
 unsigned int tex_depth_buffer;
 
 void render_scene(Shader* depth_shader) {
     Camera* camera = scene.camera();
-    auto& light = *scene.object(0);
-    auto& cube = *scene.object(1);
-    auto& ground = *scene.object(2);
-    Model& nanosuit = *static_cast<Model*>(scene.object(3));
-    Model& yoko = *static_cast<Model*>(scene.object(4));
+    auto& light = *scene.object("light");
+    auto& cube = *scene.object("cube");
+    MySphere& sphere = *static_cast<MySphere*>(scene.object("sphere"));
+    auto& ground = *scene.object("ground");
+    Model& nanosuit = *static_cast<Model*>(scene.object("nanosuit"));
+    Model& yoko = *static_cast<Model*>(scene.object("yoko"));
 
     Shader* light_shader = light.material().shader;
+    Shader* sphere_shader = sphere.material().shader;
     Shader* model_shader = nanosuit.m_materials[0].shader;
     // TODO remove
     Shader* normal_shader = new Shader("resource/shader/model.vs", "resource/shader/normal.fs", "resource/shader/normal.gs");
 
     Renderer renderer;
-
-    static float last_time = 0.0f; // 上一帧的时间
-    GLfloat curr_time = glfwGetTime();
-
-    delta_time = curr_time - last_time;
-    last_time = curr_time;
 
     glm::mat4 lightProjection = glm::ortho(-10.0f * WINDOW_WIDTH / WINDOW_HEIGHT, 10.0f * WINDOW_WIDTH / WINDOW_HEIGHT, -5.0f, 15.0f, 0.1f, 100.0f);
     //lightProjection = glm::perspective(glm::radians(45.0f), /*1.0f*/WINDOW_WIDTH / WINDOW_HEIGHT, 0.1f, 100.0f);
@@ -315,7 +255,7 @@ void render_scene(Shader* depth_shader) {
             ;
         }
         if (!stop_rotate) {
-            time_value = curr_time;
+            time_value = glfwGetTime();
         }
         auto scale = glm::scale(glm::mat4(1.0f), glm::vec3(0.2f));
         glm::mat4 displacement(1.0f);
@@ -336,12 +276,33 @@ void render_scene(Shader* depth_shader) {
             renderer.draw(*light_shader, light.get_mesh().get_VAO(), DrawMode::Indices, light.get_mesh().get_indices_count());
     }
 
+    // render sphere
+    {
+        if (icosphere_accuracy != sphere.get_recursive_depth())
+            sphere.create_icosphere(icosphere_accuracy);
+        sphere_shader->start_using();
+        auto sphere_translate = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, 0.0f));
+        sphere_shader->setMatrix("model", 1, sphere_translate * cube.get_model_matrix());
+        sphere_shader->setMatrix("view", 1, camera->get_view());
+        sphere_shader->setMatrix("projection", 1, camera->get_projection());
+        sphere_shader->setFloat3("color", glm::vec3(1.0f));
+        glBindVertexArray(sphere.get_mesh().get_VAO());
+        glDrawArrays(GL_LINE_LOOP, 0, sphere.get_vertices_count());
+        glBindVertexArray(0);
+
+        //normal_shader->start_using();
+        //normal_shader->setMatrix("model", 1, sphere_translate * cube.get_model_matrix());
+        //normal_shader->setFloat("magnitude", magnitude);
+        //renderer.draw(*normal_shader, sphere.get_mesh().get_VAO(), DrawMode::Arrays, sphere.get_vertices_count());
+    }
+
     // render ground
     {
         model_shader->start_using();
         model_shader->setMatrix("model", 1, ground.get_model_matrix());
         model_shader->setFloat3("color", glm::vec3(1.0f));
         model_shader->setFloat("material.shininess", ground.get_material().shininess);
+        model_shader->setFloat("magnitude", 0);
         // TODO 设置重复铺满
         static unsigned int default_map = Mesh::generate_texture_from_file("resource/images/default_white_map.png", false);
         glActiveTexture(GL_TEXTURE0);
@@ -366,49 +327,49 @@ void render_scene(Shader* depth_shader) {
             renderer.draw(*model_shader, ground.get_mesh().get_VAO(), DrawMode::Indices, ground.get_mesh().get_indices_count());
     }
 
-    // render cube
-    {
-        model_shader->start_using();
-        model_shader->setMatrix("model", 1, cube.get_model_matrix());
-        model_shader->setFloat3("color", glm::vec3(1.0f));
-        model_shader->setFloat("magnitude", magnitude);
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, cube.material().diffuse_map);
-        model_shader->setTexture("material.diffuse_map", 0);
-        glActiveTexture(GL_TEXTURE1);
-        glBindTexture(GL_TEXTURE_2D, cube.material().specular_map);
-        model_shader->setTexture("material.specular_map", 1);
-        glActiveTexture(GL_TEXTURE0);
-        model_shader->setFloat("material.shininess", cube.get_material().shininess);
+    //// render cube
+    //{
+    //    model_shader->start_using();
+    //    model_shader->setMatrix("model", 1, cube.get_model_matrix());
+    //    model_shader->setFloat3("color", glm::vec3(1.0f));
+    //    model_shader->setFloat("magnitude", magnitude);
+    //    glActiveTexture(GL_TEXTURE0);
+    //    glBindTexture(GL_TEXTURE_2D, cube.material().diffuse_map);
+    //    model_shader->setTexture("material.diffuse_map", 0);
+    //    glActiveTexture(GL_TEXTURE1);
+    //    glBindTexture(GL_TEXTURE_2D, cube.material().specular_map);
+    //    model_shader->setTexture("material.specular_map", 1);
+    //    glActiveTexture(GL_TEXTURE0);
+    //    model_shader->setFloat("material.shininess", cube.get_material().shininess);
 
-        glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
-        glStencilFunc(GL_ALWAYS, 1, 0xFF);
+    //    glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
+    //    glStencilFunc(GL_ALWAYS, 1, 0xFF);
 
-        if (depth_shader) {
-            depth_shader->start_using();
-            depth_shader->setMatrix("model", 1, cube.get_model_matrix());
-            renderer.draw(*depth_shader, cube.get_mesh().get_VAO(), DrawMode::Indices, cube.get_mesh().get_indices_count());
-        }
-        else {
-            renderer.draw(*model_shader, cube.get_mesh().get_VAO(), DrawMode::Indices, cube.get_mesh().get_indices_count());
-            
-            normal_shader->start_using();
-            normal_shader->setMatrix("model", 1, cube.get_model_matrix());
-            normal_shader->setFloat("magnitude", magnitude);
-            renderer.draw(*normal_shader, cube.get_mesh().get_VAO(), DrawMode::Indices, cube.get_mesh().get_indices_count());
-        }
+    //    if (depth_shader) {
+    //        depth_shader->start_using();
+    //        depth_shader->setMatrix("model", 1, cube.get_model_matrix());
+    //        renderer.draw(*depth_shader, cube.get_mesh().get_VAO(), DrawMode::Indices, cube.get_mesh().get_indices_count());
+    //    }
+    //    else {
+    //        renderer.draw(*model_shader, cube.get_mesh().get_VAO(), DrawMode::Indices, cube.get_mesh().get_indices_count());
+    //        
+    //        normal_shader->start_using();
+    //        normal_shader->setMatrix("model", 1, cube.get_model_matrix());
+    //        normal_shader->setFloat("magnitude", magnitude);
+    //        renderer.draw(*normal_shader, cube.get_mesh().get_VAO(), DrawMode::Indices, cube.get_mesh().get_indices_count());
+    //    }
 
 
-        // render border
-        //glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
-        //glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
-        //border_shader->start_using();
-        //auto scale = glm::scale(glm::mat4(1.0f), glm::vec3(1.05f));
-        //border_shader->setMatrix("model", 1, cube.get_model_matrix() * scale * glm::mat4(1.0f));
-        //border_shader->setMatrix("view", 1, camera->get_view());
-        //border_shader->setMatrix("projection", 1, camera->get_projection());
-        //renderer.draw(*border_shader, cube.get_mesh().get_VAO(), DrawMode::Indices, cube.get_mesh().get_indices_count());
-    }
+    //    // render border
+    //    //glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
+    //    //glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
+    //    //border_shader->start_using();
+    //    //auto scale = glm::scale(glm::mat4(1.0f), glm::vec3(1.05f));
+    //    //border_shader->setMatrix("model", 1, cube.get_model_matrix() * scale * glm::mat4(1.0f));
+    //    //border_shader->setMatrix("view", 1, camera->get_view());
+    //    //border_shader->setMatrix("projection", 1, camera->get_projection());
+    //    //renderer.draw(*border_shader, cube.get_mesh().get_VAO(), DrawMode::Indices, cube.get_mesh().get_indices_count());
+    //}
 
     // render model
     {
@@ -431,10 +392,12 @@ void render_scene(Shader* depth_shader) {
         else {
             nanosuit.draw(*model_shader, renderer);
 
-            normal_shader->start_using();
-            normal_shader->setMatrix("model", 1, nanosuit_translate* nanosuit_scale);
-            normal_shader->setFloat("magnitude", magnitude);
-            nanosuit.draw(*normal_shader, renderer);
+            if (normal_debug) {
+                normal_shader->start_using();
+                normal_shader->setMatrix("model", 1, nanosuit_translate * nanosuit_scale);
+                normal_shader->setFloat("magnitude", magnitude);
+                nanosuit.draw(*normal_shader, renderer);
+            }
         }
     }
 
@@ -452,19 +415,21 @@ void render_scene(Shader* depth_shader) {
         else {
             yoko.draw(*model_shader, renderer);
 
-            normal_shader->start_using();
-            normal_shader->setMatrix("model", 1, yoko_translate* yoko_scale);
-            normal_shader->setFloat("magnitude", magnitude);
-            yoko.draw(*normal_shader, renderer);
+            if (normal_debug) {
+                normal_shader->start_using();
+                normal_shader->setMatrix("model", 1, yoko_translate * yoko_scale);
+                normal_shader->setFloat("magnitude", magnitude);
+                yoko.draw(*normal_shader, renderer);
+            }
         }
     }
 }
 
 void render_imgui() {
     auto camera = scene.camera();
-    auto& light = *scene.object(0);
-    auto& cube = *scene.object(1);
-    auto& ground = *scene.object(2);
+    auto& light = *scene.object("light");
+    auto& cube = *scene.object("cube");
+    auto& ground = *scene.object("ground");
 
     ImGui::Begin("Controller");
 
@@ -473,9 +438,9 @@ void render_imgui() {
     ImGui::SliderFloat("ambient strength", &ambient_strength, 0.0f, 1.0f);
     ImGui::SliderFloat("cube shininess", &cube.material().shininess, 0, 1.5f);
 
-    ImGui::SliderFloat("ground diffuse strength", &ground.material().diffuse_strength, 0, 1);
-    ImGui::SliderFloat("ground specular strength", &ground.material().specular_strength, 0, 1);
-    ImGui::SliderFloat("ground shininess", &ground.material().shininess, 0, 256);
+    //ImGui::SliderFloat("ground diffuse strength", &ground.material().diffuse_strength, 0, 1);
+    //ImGui::SliderFloat("ground specular strength", &ground.material().specular_strength, 0, 1);
+    ImGui::SliderFloat("ground shininess", &ground.material().shininess, 0, 512);
 
     ImGui::SliderFloat("magnitude", &magnitude, 0.0f, 10.0f);
 
@@ -489,11 +454,13 @@ void render_imgui() {
     auto translate = glm::translate(glm::mat4(1.0f), cube_offset);
     cube.set_model_matrix(translate);
     ImGui::PopItemWidth();
+    ImGui::SliderInt("icosphere accuracy", &icosphere_accuracy, 0, 10);
     //ImGui::ColorEdit3("light color", (float*)&light_color);
     //ImGui::ColorEdit3("cube color", (float*)&cube_color);
     //ImGui::ColorEdit3("ground color", (float*)&ground_color);
 
     if (ImGui::Checkbox("stop rotate", &stop_rotate));
+    if (ImGui::Checkbox("open normal debug", &normal_debug));
 
     // log
     {
@@ -553,6 +520,7 @@ void render_imgui() {
 // done: 着色器的坐标空间理解和统一
 // done: 键盘和鼠标callback事件用imgui处理?
 // done: 几何着色器法向量显示
+// done: 键盘事件摄像机移动方向应该是摄像机坐标系方向
 // 7. 定义View、Scene对象职责
 // 8. Model类Mesh和Material对应关系处理
 // 9. 相机旋转和平移和缩放（鼠标左键右键滚轮）多次操作会出现问题，缩放不可逆。相机的拖动导致距离渲染对象变近
@@ -562,6 +530,7 @@ void render_imgui() {
 // 14. 看一下模型加载那篇文章，贴图文件是相对路径保存的和绝对路径保存的，Assimp的简单原理。
 // 15. picking
 // 16. 粒子系统
+// 17. 地板铺满
 
 unsigned int creat_quad() {
     float quadVertices[] = { // vertex attributes for a quad that fills the entire screen in Normalized Device Coordinates.
@@ -651,6 +620,7 @@ void start_render_loop(GLFWwindow* window) {
         ImGui::NewFrame();
 
         glfwPollEvents();//检查触发事件（比如键盘输入、鼠标移动等），然后调用对应的回调函数
+        imgui_callback();
 
         // 1. 生成深度缓冲
         float depth_buffer_width = WINDOW_WIDTH;
@@ -683,7 +653,7 @@ void start_render_loop(GLFWwindow* window) {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
         render_scene(nullptr);
 
-        //// 3. 默认缓冲
+        // 3. 默认缓冲
         set_view_port(WINDOW_WIDTH, WINDOW_HEIGHT);
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
         glClearColor(ambient_strength * 0.5f, ambient_strength * 0.5f, ambient_strength * 0.5f, 1.0f);
@@ -691,7 +661,6 @@ void start_render_loop(GLFWwindow* window) {
         glBindTexture(GL_TEXTURE_2D, tex_color_buffer);
         renderer.draw(*frame_shader, quad_VAO, DrawMode::Arrays, 0, 6);
 
-        imgui_mouse_callback();
         render_imgui();
 
         ImGui::Render();
@@ -708,7 +677,6 @@ int main()
     //glfwGetFramebufferSize(window, &width, &height);
     set_view_port(WINDOW_WIDTH, WINDOW_HEIGHT);
 
-    glfwSetKeyCallback(window, key_callback);
     //glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED); // FPS 模式
 
     // setup imgui

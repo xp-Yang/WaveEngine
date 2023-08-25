@@ -82,6 +82,8 @@
     <None Include="resource\shader\model.vs" />
     <None Include="resource\shader\normal.fs" />
     <None Include="resource\shader\normal.gs" />
+    <None Include="resource\shader\sphere.fs" />
+    <None Include="resource\shader\sphere.vs" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="resource\images\cube_specular.png" />

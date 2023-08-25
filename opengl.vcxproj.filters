@@ -196,6 +196,8 @@
     <None Include="resource\shader\depth.vs" />
     <None Include="resource\shader\depth.fs" />
     <None Include="resource\shader\normal.fs" />
+    <None Include="resource\shader\sphere.vs" />
+    <None Include="resource\shader\sphere.fs" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="resource\images\desert.jpg">

@@ -97,24 +97,27 @@ void Camera::key_process(int key, float frame_time)
     // 每一帧持续时间越长，意味着上一帧的渲染花费了越多时间，所以这一帧的速度应该越大，来平衡渲染所花去的时间
     float frame_speed = CameraMovementSpeed * frame_time;
 
+    auto forward = m_direction.dir;
+    auto right = m_direction.get_right_direction();
+    auto up = m_direction.get_up_direction();
     switch (key) {
     case GLFW_KEY_W:
-        m_pos -= glm::vec3(0.0f, 0.0f, 1.0f) * frame_speed;
+        m_pos += forward * frame_speed;
         break;
     case GLFW_KEY_A:
-        m_pos -= glm::vec3(1.0f, 0.0f, 0.0f) * frame_speed;
+        m_pos -= right * frame_speed;
         break;
     case GLFW_KEY_D:
-        m_pos += glm::vec3(1.0f, 0.0f, 0.0f) * frame_speed;
+        m_pos += right * frame_speed;
         break;
     case GLFW_KEY_S:
-        m_pos += glm::vec3(0.0f, 0.0f, 1.0f) * frame_speed;
+        m_pos -= forward * frame_speed;
         break;
     case GLFW_KEY_Z:
-        m_pos -= glm::vec3(0.0f, 1.0f, 0.0f) * frame_speed;
+        m_pos += up * frame_speed;
         break;
     case GLFW_KEY_C:
-        m_pos += glm::vec3(0.0f, 1.0f, 0.0f) * frame_speed;
+        m_pos -= up * frame_speed;
         break;
     case GLFW_KEY_1:
         break;
@@ -125,16 +128,12 @@ void Camera::key_process(int key, float frame_time)
     case GLFW_KEY_4:
         break;
     case GLFW_KEY_SPACE:
-
         break;
     default:
         break;
     }
 
     m_view_matrix = glm::lookAt(m_pos, m_pos + m_direction.dir, up);
-
-    std::cout << key << std::endl;
-    matrix_log(m_view_matrix);
 }
 
 

@@ -1,5 +1,12 @@
 #include "Mesh.hpp"
 
+Mesh::Mesh(std::vector<Vertex> vertices)
+    : m_vertices(vertices)
+{
+    create_vbo();
+    create_vao();
+}
+
 Mesh::Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices)
     : m_vertices(vertices)
     , m_indices(indices)
@@ -11,6 +18,13 @@ Mesh::Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices)
 void Mesh::build() {
     create_vbo();
     create_vao();
+}
+
+void Mesh::reset()
+{
+    glDeleteVertexArrays(1, &m_VAO);
+    m_vertices.clear();
+    m_indices.clear();
 }
 
 void Mesh::create_vbo()
@@ -40,9 +54,11 @@ void Mesh::create_vao()
     glEnableVertexAttribArray(2);
 
     // Ë÷ÒýÊý¾Ý
-    glGenBuffers(1, &m_IBO);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_IBO);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_indices.size() * sizeof(unsigned int), &m_indices[0], GL_STATIC_DRAW);
+    if (!m_indices.empty()) {
+        glGenBuffers(1, &m_IBO);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_IBO);
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_indices.size() * sizeof(unsigned int), &m_indices[0], GL_STATIC_DRAW);
+    }
 }
 
 unsigned int Mesh::generate_texture_from_file(const std::string& full_path, bool gamma) {

@@ -3,21 +3,25 @@
 
 #include "Object.hpp"
 #include "View.hpp"
+#include <unordered_map>
 
 class Scene {
 public:
 	Scene() = default;
 	~Scene() = default;
-	Object* object(int index) { return index < m_objects.size() ? m_objects[index] : nullptr; }
-	std::vector<Object*> objects() { return m_objects; }
-	void append_object(Object* object) { m_objects.push_back(object); }
-	void destory_object(int index);
-	void destory_object(Object* object);
+	Object* object(const std::string& name) {
+		auto it = m_objects.find(name);
+		if (it == m_objects.end())
+			return nullptr;
+		else
+			return m_objects[name];
+	}
+	void insert_object(const std::string& name, Object* object) { m_objects.insert({ name, object }); }
 	void destory_all_objects();
 	void set_camera(Camera* camera) { m_camera = camera; }
 	Camera* camera() { return m_camera; }
 private:
-	std::vector<Object*> m_objects;
+	std::unordered_map<std::string, Object*> m_objects;
 	Camera* m_camera{ nullptr };
 };
 

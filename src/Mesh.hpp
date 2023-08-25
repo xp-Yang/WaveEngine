@@ -17,9 +17,11 @@ struct Vertex {
 class Mesh {
 public:
 	Mesh() = default;
+	Mesh(std::vector<Vertex> vertices);
 	Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices);
 
 	void build();
+	void reset();
 
 	unsigned int get_VAO() const { return m_VAO; }
 	int get_indices_count() const { return m_indices.size(); }
