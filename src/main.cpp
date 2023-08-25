@@ -1,14 +1,10 @@
 #include "../imgui/imgui.h"
 #include "../imgui/imgui_impl_glfw.h"
 #include "../imgui/imgui_impl_opengl3.h"
-#include <stdio.h>
 #define GL_SILENCE_DEPRECATION
 
 #include <glad/glad.h> 
 #include <GLFW/glfw3.h>
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
 
 #include "Object.hpp"
 #include "MyCube.hpp"
@@ -21,6 +17,8 @@
 #include "View.hpp"
 #include "Scene.hpp"
 #include "stb_image.h"
+#include <stdio.h>
+#include <map>
 
 #define PI (3.14159)
 
@@ -124,13 +122,65 @@ void create_tetrahedron() {
     glm::vec3 c = glm::vec3(side_length / 2.0f, 0, - side_length * sqrt(3.0f) / 2.0f);
     glm::vec3 d = glm::vec3(side_length / 2.0f, - side_length * sqrt(6.0f) / 3.0f, side_length * sqrt(3.0f) / 2.0f / 3.0f);
 
-    Mesh tetrahedron;
+    glm::vec3 center = glm::vec3(side_length / 2.0f, -side_length * sqrt(6.0f) / 3.0f * (3.0f / 4.0f), side_length * sqrt(3.0f) / 2.0f / 3.0f);
+    
     glm::vec3 vertices[] = {
         a,b,c,d,
     };
 }
 
-void create_sphere() {
+struct Triangle {
+    glm::vec3 vertices[3];
+};
+
+std::vector<Triangle> subdivide(Triangle triangle) {
+    // TODO 法向量
+    glm::vec3 new_vertex0 = (triangle.vertices[0] + triangle.vertices[1]) / 2.0f;
+    glm::vec3 new_vertex1 = (triangle.vertices[1] + triangle.vertices[2]) / 2.0f;
+    glm::vec3 new_vertex2 = (triangle.vertices[2] + triangle.vertices[0]) / 2.0f;
+
+    Triangle new_triangle0 = { triangle.vertices[0], new_vertex0, new_vertex2 };
+    Triangle new_triangle1 = { new_vertex0, triangle.vertices[1], new_vertex1 };
+    Triangle new_triangle2 = { new_vertex0, new_vertex1, new_vertex2 };
+    Triangle new_triangle3 = { new_vertex2, new_vertex1,  triangle.vertices[2] };
+
+    return { new_triangle0, new_triangle1, new_triangle2, new_triangle3 };
+}
+
+void create_icosphere() {
+    // 0. 创建正四面体
+    float side_length = 5.0f;
+    glm::vec3 a = glm::vec3(0, 0, 0);
+    glm::vec3 b = glm::vec3(side_length, 0, 0);
+    glm::vec3 c = glm::vec3(side_length / 2.0f, 0, -side_length * sqrt(3.0f) / 2.0f);
+    glm::vec3 d = glm::vec3(side_length / 2.0f, -side_length * sqrt(6.0f) / 3.0f, side_length * sqrt(3.0f) / 2.0f / 3.0f);
+
+    glm::vec3 center = glm::vec3(side_length / 2.0f, -side_length * sqrt(6.0f) / 3.0f * (3.0f / 4.0f), side_length * sqrt(3.0f) / 2.0f / 3.0f);
+
+    std::vector<Triangle> triangles = {
+        { a,b,c },
+        { a,b,d },
+        { b,c,d },
+        { c,a,d },
+    };
+
+    // 1. 对每个面细分
+    int recursion_depth = 3;
+    for (int i = 0; i < recursion_depth; i++) {
+        std::vector<Triangle> new_triangles;
+        for (int j = 0; j < 4; j ++) {
+            auto divided_triangles = subdivide(triangles[j]);
+            new_triangles.insert(new_triangles.end(), divided_triangles.begin(), divided_triangles.end());
+        }
+        triangles = new_triangles;
+    }
+
+    // 2. 对所有细分顶点到中心的距离做归一化
+    for (auto& triangle : triangles) {
+        for (auto& vertex : triangle.vertices) {
+            vertex = center + glm::normalize(vertex - center);
+        }
+    }
 
 }
 
@@ -511,6 +561,7 @@ void render_imgui() {
 // 13. 帧缓冲的附件?
 // 14. 看一下模型加载那篇文章，贴图文件是相对路径保存的和绝对路径保存的，Assimp的简单原理。
 // 15. picking
+// 16. 粒子系统
 
 unsigned int creat_quad() {
     float quadVertices[] = { // vertex attributes for a quad that fills the entire screen in Normalized Device Coordinates.
