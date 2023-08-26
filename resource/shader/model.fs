@@ -66,10 +66,9 @@ void main()
     // º∆À„“ı”∞
     float shadow = ShadowCalculation(fs_in.FragPosLightSpace);       
     vec3 lighting = (ambient_light + (1.0 - shadow) * (diffuse_light + specular_light)) * fs_in.pass_color;    
-
-    fragment_color = vec4(fs_in.pass_color * (ambient_light + diffuse_light + specular_light), 1.0);
     fragment_color = vec4(lighting, 1.0);
     //debug
+    //fragment_color = vec4(fs_in.pass_color * (ambient_light + diffuse_light + specular_light), 1.0);
     //fragment_color = vec4(1.0, 0.0, 0.0, 1.0);
     //fragment_color = vec4(fs_in.pass_uv, 0.0, 1.0);
     //fragment_color = vec4(vec3(shadow), 1.0);

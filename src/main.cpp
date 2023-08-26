@@ -174,8 +174,8 @@ void init_scene() {
     Material ground_material;
     ground_material.shader = new Shader("resource/shader/model.vs", "resource/shader/model.fs", "resource/shader/model.gs");
     ground_material.color = glm::vec3(1.0f);
-    ground_material.diffuse_strength = 0.5f;
-    ground_material.specular_strength = 0.5f;
+    ground_material.set_diffuse_map("resource/images/desert.jpg");
+    ground_material.set_specular_map("resource/images/desert.jpg");
     ground->set_material(ground_material);
 
     Model* nanosuit = new Model("resource/model/nanosuit/nanosuit.obj");
@@ -233,7 +233,7 @@ static int icosphere_accuracy = 0;
 static float magnitude = 0.0f;
 unsigned int tex_depth_buffer;
 
-void render_scene(Shader* depth_shader) {
+void render_scene(Shader* depth_shader, Shader* normal_shader) {
     Camera* camera = scene.camera();
     auto& light = *scene.object("light");
     auto& cube = *scene.object("cube");
@@ -245,8 +245,6 @@ void render_scene(Shader* depth_shader) {
     Shader* light_shader = light.material().shader;
     Shader* sphere_shader = sphere.material().shader;
     Shader* model_shader = nanosuit.m_materials[0].shader;
-    // TODO remove
-    Shader* normal_shader = new Shader("resource/shader/model.vs", "resource/shader/normal.fs", "resource/shader/normal.gs");
 
     static unsigned int default_map = Mesh::generate_texture_from_file("resource/images/default_white_map.png", false);
 
@@ -267,6 +265,7 @@ void render_scene(Shader* depth_shader) {
     model_shader->setMatrix("lightSpaceMatrix", 1, lightSpaceMatrix);
 
     model_shader->start_using();
+    model_shader->setFloat3("color", glm::vec3(1.0f));
     model_shader->setMatrix("view", 1, camera->get_view());
     model_shader->setMatrix("projection", 1, camera->get_projection());
     model_shader->setFloat("material.ambient", ambient_strength);
@@ -318,9 +317,6 @@ void render_scene(Shader* depth_shader) {
         model_shader->start_using();
         auto sphere_translate = glm::translate(glm::mat4(1.0f), glm::vec3(1.0f, 0.0f, 2.0f));
         model_shader->setMatrix("model", 1, sphere_translate * cube.get_model_matrix());
-        model_shader->setMatrix("view", 1, camera->get_view());
-        model_shader->setMatrix("projection", 1, camera->get_projection());
-        model_shader->setFloat3("color", glm::vec3(1.0f));
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, default_map);
         model_shader->setTexture("material.diffuse_map", 0);
@@ -331,33 +327,33 @@ void render_scene(Shader* depth_shader) {
         glBindTexture(GL_TEXTURE_2D, default_map);
         model_shader->setTexture("material.normal_map", 2);
 
-        glBindVertexArray(sphere.get_mesh().get_VAO());
-        glDrawArrays(GL_TRIANGLES, 0, sphere.get_vertices_count());
-        glBindVertexArray(0);
+        //glBindVertexArray(sphere.get_mesh().get_VAO());
+        //glDrawArrays(GL_LINE_LOOP, 0, sphere.get_vertices_count());
+        //glBindVertexArray(0);
 
-        normal_shader->start_using();
-        normal_shader->setMatrix("model", 1, sphere_translate * cube.get_model_matrix());
-        normal_shader->setFloat("magnitude", magnitude);
-        renderer.draw(*normal_shader, sphere.get_mesh().get_VAO(), DrawMode::Arrays, sphere.get_vertices_count());
+        renderer.draw(*model_shader, sphere.get_mesh().get_VAO(), DrawMode::Arrays, 0, sphere.get_vertices_count());
+
+        if (normal_debug) {
+            normal_shader->start_using();
+            normal_shader->setMatrix("model", 1, sphere_translate * cube.get_model_matrix());
+            normal_shader->setFloat("magnitude", magnitude);
+            renderer.draw(*normal_shader, sphere.get_mesh().get_VAO(), DrawMode::Arrays, 0, sphere.get_vertices_count());
+        }
     }
 
     // render ground
     {
         model_shader->start_using();
         model_shader->setMatrix("model", 1, ground.get_model_matrix());
-        model_shader->setFloat3("color", glm::vec3(1.0f));
         model_shader->setFloat("material.shininess", ground.get_material().shininess);
         model_shader->setFloat("magnitude", 0);
         // TODO 设置重复铺满
         glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, default_map);
+        glBindTexture(GL_TEXTURE_2D, ground.material().diffuse_map);
         model_shader->setTexture("material.diffuse_map", 0);
         glActiveTexture(GL_TEXTURE0 + 1);
-        glBindTexture(GL_TEXTURE_2D, default_map);
+        glBindTexture(GL_TEXTURE_2D, ground.material().specular_map);
         model_shader->setTexture("material.specular_map", 1);
-        glActiveTexture(GL_TEXTURE0 + 2);
-        glBindTexture(GL_TEXTURE_2D, default_map);
-        model_shader->setTexture("material.normal_map", 2);
         glActiveTexture(GL_TEXTURE7);
         glBindTexture(GL_TEXTURE_2D, tex_depth_buffer);
         model_shader->setTexture("shadowMap", 7);
@@ -375,7 +371,6 @@ void render_scene(Shader* depth_shader) {
     {
         model_shader->start_using();
         model_shader->setMatrix("model", 1, cube.get_model_matrix());
-        model_shader->setFloat3("color", glm::vec3(1.0f));
         model_shader->setFloat("magnitude", magnitude);
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, cube.material().diffuse_map);
@@ -423,7 +418,6 @@ void render_scene(Shader* depth_shader) {
         auto nanosuit_scale = glm::scale(glm::mat4(1.0f), glm::vec3(0.4f));
         auto nanosuit_translate = glm::translate(glm::mat4(1.0f), glm::vec3(5.0f, 0.0f, 0.0f));
         model_shader->setMatrix("model", 1, nanosuit_translate * nanosuit_scale);
-        model_shader->setFloat3("color", glm::vec3(1.0f));
         model_shader->setFloat("magnitude", magnitude);
         glActiveTexture(GL_TEXTURE7);
         glBindTexture(GL_TEXTURE_2D, tex_depth_buffer);
@@ -452,6 +446,7 @@ void render_scene(Shader* depth_shader) {
         auto yoko_scale = glm::scale(glm::mat4(1.0f), glm::vec3(0.25f));
         auto yoko_translate = glm::translate(glm::mat4(1.0f), glm::vec3(-5.0f, 0.0f, 0.0f));
         model_shader->setMatrix("model", 1, yoko_translate * yoko_scale);
+        model_shader->setFloat("magnitude", magnitude);
 
         if (depth_shader) {
             depth_shader->start_using();
@@ -500,7 +495,7 @@ void render_imgui() {
     auto translate = glm::translate(glm::mat4(1.0f), cube_offset);
     cube.set_model_matrix(translate);
     ImGui::PopItemWidth();
-    ImGui::SliderInt("icosphere accuracy", &icosphere_accuracy, 0, 10);
+    ImGui::SliderInt("icosphere accuracy", &icosphere_accuracy, 0, 8);
     //ImGui::ColorEdit3("light color", (float*)&light_color);
     //ImGui::ColorEdit3("cube color", (float*)&cube_color);
     //ImGui::ColorEdit3("ground color", (float*)&ground_color);
@@ -555,12 +550,10 @@ void render_imgui() {
 // TODO:
 // done: nanosuit 放在cube前加载就有问题: 答: body是nanosuit的最后一个材质，可能被cube覆盖了？已经无法复现。
 // done: yoko 和 nanosuit 同时加载就有问题: 答: yoko模型没有镜面贴图，使用了nanosuit的镜面贴图导致的，加上default_map解决了
-// done: main.cpp全局变量优化 答: 已将Object渲染对象和Camera交由Scene管理
+// done: main.cpp全局变量优化 答: 已将所有Object渲染对象和Camera交由Scene管理
 // done: loop中的逻辑分离 答: 分离了imgui的渲染
 // done: 材质应该包含shader
 // 颜色缓冲和深度缓冲使用同一个framebuffer，第3步渲染时阴影没了，为什么？ 
-// 不对： 答：因为frame_buffer渲染的时候，有了一个新的深度缓冲区，片段着色器画的阴影去和新的深度缓冲区比较深度了，结果就没画出来。 
-//       最后深度测试结束后，tex_depth_buffer也更新掉了。
 // 注意开启像素化后能看见位置不对的阴影
 // done: model.gs 的 explode 效果跟着fov缩放变 答：原因：learnOpengl的gs算法在裁剪空间计算法向量，而投影变换是非正交变换。
 // done: 着色器的坐标空间理解和统一
@@ -572,9 +565,9 @@ void render_imgui() {
 // 7. 定义View、Scene对象职责
 // 8. Model类Mesh和Material对应关系处理
 // 11. 光源物理模型
-// 12. 阴影贴图、帧缓冲、法线贴图、tbn矩阵、天空盒、反射等知识学习
+// 12. 阴影贴图(done)、帧缓冲(done)、法线贴图、tbn矩阵、天空盒、反射等知识学习
 // 13. 帧缓冲的附件?
-// 14. 看一下模型加载那篇文章，贴图文件是相对路径保存的和绝对路径保存的，Assimp的简单原理。
+// 14. 看一下模型加载那篇文章，贴图文件是相对路径保存的或绝对路径保存的，Assimp的简单原理。
 // 15. picking
 // 16. 粒子系统
 // 17. 地板铺满
@@ -607,6 +600,7 @@ unsigned int creat_quad() {
 
 void start_render_loop(GLFWwindow* window) {
     Shader* depth_shader = new Shader("resource/shader/depth.vs", "resource/shader/depth.fs");
+    Shader* normal_shader = new Shader("resource/shader/model.vs", "resource/shader/normal.fs", "resource/shader/normal.gs");
 
     // debug
     Shader* frame_shader = new Shader("resource/shader/frame.vs", "resource/shader/frame.fs");
@@ -677,7 +671,7 @@ void start_render_loop(GLFWwindow* window) {
         glBindFramebuffer(GL_FRAMEBUFFER, frame_buffer);
         glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-        render_scene(depth_shader);
+        render_scene(depth_shader, normal_shader);
 
             // debug depth
             //glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -699,7 +693,7 @@ void start_render_loop(GLFWwindow* window) {
         glBindFramebuffer(GL_FRAMEBUFFER, frame_buffer);
         glClearColor(ambient_strength * 0.5f, ambient_strength * 0.5f, ambient_strength * 0.5f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-        render_scene(nullptr);
+        render_scene(nullptr, normal_shader);
 
         // 3. 默认缓冲
         set_view_port(WINDOW_WIDTH, WINDOW_HEIGHT);

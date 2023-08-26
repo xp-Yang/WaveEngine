@@ -17,8 +17,8 @@
 
 struct Material {
     glm::vec3 color{ 1.0f, 1.0f, 1.0f };
-    float diffuse_strength{ 1.0f };
-    float specular_strength{ 1.0f };
+    //float diffuse_strength{ 1.0f };
+    //float specular_strength{ 1.0f };
     unsigned int diffuse_map{ 0 };
     unsigned int specular_map{ 0 };
     unsigned int normal_map{ 0 };

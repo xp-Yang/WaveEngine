@@ -20,9 +20,6 @@ void Material::update_shader_binding() {
         glActiveTexture(GL_TEXTURE3);
         glBindTexture(GL_TEXTURE_2D, height_map);
         shader->setTexture("material.height_map", 3);
-
-        shader->setFloat("material.diffuse", diffuse_strength);
-        shader->setFloat("material.specular", specular_strength);
 	}
 }
 

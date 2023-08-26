@@ -37,8 +37,8 @@ void MyGround::init_mesh()
         vertex.normal = normal;
 
         glm::vec2 vec;
-        vec.x = cubeVertices[6 + i];
-        vec.y = cubeVertices[7 + i];
+        vec.x = cubeVertices[6 + i] * 100.0f;
+        vec.y = cubeVertices[7 + i] * 100.0f;
         vertex.texture_uv = vec;
 
         vertices.push_back(vertex);
