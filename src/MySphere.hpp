@@ -15,5 +15,6 @@ public:
 
 private:
 	std::vector<Triangle> m_triangles;
+	glm::vec3 m_center;
 	int m_recursive_depth = 0;
 };

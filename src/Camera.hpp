@@ -10,8 +10,6 @@
 #define WINDOW_WIDTH 1600.0f
 #define WINDOW_HEIGHT 900.0f
 
-std::string matrix_log(const glm::mat4 mat);
-std::string vec3_log(const glm::vec3 vec);
 static glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f);
 
 class CameraStyle {
@@ -36,19 +34,26 @@ struct Direction {
 
     const glm::vec3& get_right_direction() { // camera µÄ x Öá
         glm::vec3 cameraRight = glm::normalize(glm::cross(dir, up));
+        for (int i = 0; i < 3; i++) {
+            if (abs(cameraRight[i] - 1) < 0.00001f)
+                cameraRight[i] = 1.0f;
+        }
         return cameraRight;
     }
 
     const glm::vec3& get_up_direction() { // camera µÄ y Öá
         glm::vec3 right_dir = get_right_direction();
         glm::vec3 cameraUp = glm::cross(right_dir, dir);
+        for (int i = 0; i < 3; i++) {
+            if (abs(cameraUp[i] - 1) < 0.00001f)
+                cameraUp[i] = 1.0f;
+        }
         return cameraUp;
     }
 };
 
 class Camera {
 public:
-    Camera(const glm::vec3& position);
     Camera(const glm::vec3& position, float pitch, float yaw, float roll);
     Camera(const glm::vec3& position, glm::vec3 dir);
 
@@ -57,8 +62,6 @@ public:
     const Direction& get_direction();
     const glm::mat4& get_view();
     const glm::mat4& get_projection();
-
-    void surround_with_target(const float radius);
 
     void key_process(int key, float frame_time);
     void mouse_process(double delta_x, double delta_y, int mouse_button);
