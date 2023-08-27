@@ -1,3 +1,6 @@
+#ifndef MySphere_hpp
+#define MySphere_hpp
+
 #include "Object.hpp"
 
 struct Triangle {
@@ -18,3 +21,5 @@ private:
 	glm::vec3 m_center;
 	int m_recursive_depth = 0;
 };
+
+#endif

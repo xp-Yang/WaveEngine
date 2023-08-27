@@ -40,6 +40,7 @@
     <ClCompile Include="src\Renderer.cpp" />
     <ClCompile Include="src\Shader.cpp" />
     <ClCompile Include="src\Scene.cpp" />
+    <ClCompile Include="src\Skybox.cpp" />
     <ClCompile Include="src\stb_image.cpp" />
     <ClCompile Include="src\test.cpp" />
     <ClCompile Include="src\View.cpp" />
@@ -67,6 +68,7 @@
     <ClInclude Include="src\Renderer.hpp" />
     <ClInclude Include="src\Shader.hpp" />
     <ClInclude Include="src\Scene.hpp" />
+    <ClInclude Include="src\Skybox.hpp" />
     <ClInclude Include="src\View.hpp" />
   </ItemGroup>
   <ItemGroup>
@@ -82,8 +84,8 @@
     <None Include="resource\shader\model.vs" />
     <None Include="resource\shader\normal.fs" />
     <None Include="resource\shader\normal.gs" />
-    <None Include="resource\shader\sphere.fs" />
-    <None Include="resource\shader\sphere.vs" />
+    <None Include="resource\shader\skybox.fs" />
+    <None Include="resource\shader\skybox.vs" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="resource\images\cube_specular.png" />

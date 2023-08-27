@@ -97,25 +97,25 @@ Material Model::load_material(aiMaterial* material) {
     aiString str;
     if (material->GetTextureCount(aiTextureType_DIFFUSE)) {
         material->GetTexture(aiTextureType_DIFFUSE, 0, &str);
-        res.diffuse_map = Mesh::generate_texture_from_file(str.C_Str(), directory, false);
+        res.diffuse_map = generate_texture_from_file(str.C_Str(), directory, false);
         res.diffuse_map_path = directory + '/' + std::string(str.C_Str());
     }
 
     if (material->GetTextureCount(aiTextureType_SPECULAR)) {
         material->GetTexture(aiTextureType_SPECULAR, 0, &str);
-        res.specular_map = Mesh::generate_texture_from_file(str.C_Str(), directory, false);
+        res.specular_map = generate_texture_from_file(str.C_Str(), directory, false);
         res.specular_map_path = directory + '/' + std::string(str.C_Str());
     }
 
     if (material->GetTextureCount(aiTextureType_NORMALS)) {
         material->GetTexture(aiTextureType_NORMALS, 0, &str);
-        res.normal_map = Mesh::generate_texture_from_file(str.C_Str(), directory, false);
+        res.normal_map = generate_texture_from_file(str.C_Str(), directory, false);
         res.normal_map_path = directory + '/' + std::string(str.C_Str());
     }
 
     if (material->GetTextureCount(aiTextureType_HEIGHT)) {
         material->GetTexture(aiTextureType_HEIGHT, 0, &str);
-        res.height_map = Mesh::generate_texture_from_file(str.C_Str(), directory, false);
+        res.height_map = generate_texture_from_file(str.C_Str(), directory, false);
         res.height_map_path = directory + '/' + std::string(str.C_Str());
     }
 
@@ -125,7 +125,7 @@ Material Model::load_material(aiMaterial* material) {
 void Model::draw(const Shader& shader, const Renderer& renderer)
 {
     shader.start_using();
-    static unsigned int default_map = Mesh::generate_texture_from_file("resource/iamges/default_map.png", false);
+    static unsigned int default_map = generate_texture_from_file("resource/iamges/default_map.png", false);
     for (unsigned int i = 0; i < m_meshes.size(); i++) {
         if (m_materials[i].diffuse_map != 0) {
             glActiveTexture(GL_TEXTURE0);

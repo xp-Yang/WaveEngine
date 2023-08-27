@@ -93,6 +93,9 @@
     <ClCompile Include="src\MySphere.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="src\Skybox.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Camera.hpp">
@@ -164,6 +167,9 @@
     <ClInclude Include="src\MySphere.hpp">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="src\Skybox.hpp">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="resource\shader\light.fs">
@@ -196,8 +202,8 @@
     <None Include="resource\shader\depth.vs" />
     <None Include="resource\shader\depth.fs" />
     <None Include="resource\shader\normal.fs" />
-    <None Include="resource\shader\sphere.vs" />
-    <None Include="resource\shader\sphere.fs" />
+    <None Include="resource\shader\skybox.vs" />
+    <None Include="resource\shader\skybox.fs" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="resource\images\desert.jpg">

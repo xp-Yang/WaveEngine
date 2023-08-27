@@ -7,7 +7,7 @@ public:
 	MyGround();
 protected:
 	void init_mesh();
-	void init_material();
+	void init_material() {};
 };
 
 #endif

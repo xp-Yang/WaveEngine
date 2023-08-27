@@ -7,6 +7,7 @@
 #include <GLFW/glfw3.h>
 
 #include "Object.hpp"
+#include "Skybox.hpp"
 #include "MyCube.hpp"
 #include "MySphere.hpp"
 #include "MyLight.hpp"
@@ -152,6 +153,13 @@ void set_view_port(int width, int height) {
 }
 
 void init_scene() {
+    Skybox* skybox = new Skybox();
+    Material skybox_material;
+    skybox_material.shader = new Shader("resource/shader/skybox.vs", "resource/shader/skybox.fs");
+    skybox_material.diffuse_map = skybox->get_texture_id();
+    skybox_material.diffuse_map_path = "resource/images/skybox/.jpg";
+    skybox->set_material(skybox_material);
+
     MyLight* light = new MyLight();
     Material light_material;
     light_material.shader = new Shader("resource/shader/light.vs", "resource/shader/light.fs");
@@ -167,7 +175,6 @@ void init_scene() {
 
     MySphere* sphere = new MySphere();
     Material sphere_material;
-    sphere_material.shader = new Shader("resource/shader/sphere.vs", "resource/shader/sphere.fs");
     sphere->set_material(sphere_material);
 
     MyGround* ground = new MyGround();
@@ -192,6 +199,7 @@ void init_scene() {
     glm::vec3 camera_pos(0.0f, 15.0f, 15.0f);
     Camera* camera = new Camera(camera_pos, glm::vec3(0.0f) - camera_pos);
 
+    scene.insert_object("skybox", skybox);
     scene.insert_object("light", light);
     scene.insert_object("cube", cube);
     scene.insert_object("sphere", sphere);
@@ -229,12 +237,13 @@ static bool pixel_style = false;
 static bool stop_rotate = false;
 static bool normal_debug = false;
 static float ambient_strength = 0.1f;
-static int icosphere_accuracy = 0;
+static int icosphere_accuracy = 8;
 static float magnitude = 0.0f;
 unsigned int tex_depth_buffer;
 
 void render_scene(Shader* depth_shader, Shader* normal_shader) {
     Camera* camera = scene.camera();
+    Skybox& skybox = *static_cast<Skybox*>(scene.object("skybox"));
     auto& light = *scene.object("light");
     auto& cube = *scene.object("cube");
     MySphere& sphere = *static_cast<MySphere*>(scene.object("sphere"));
@@ -242,11 +251,11 @@ void render_scene(Shader* depth_shader, Shader* normal_shader) {
     Model& nanosuit = *static_cast<Model*>(scene.object("nanosuit"));
     Model& yoko = *static_cast<Model*>(scene.object("yoko"));
 
+    Shader* skybox_shader = skybox.material().shader;
     Shader* light_shader = light.material().shader;
-    Shader* sphere_shader = sphere.material().shader;
     Shader* model_shader = nanosuit.m_materials[0].shader;
 
-    static unsigned int default_map = Mesh::generate_texture_from_file("resource/images/default_white_map.png", false);
+    static unsigned int default_map = generate_texture_from_file("resource/images/default_white_map.png", false);
 
     Renderer renderer;
 
@@ -281,6 +290,17 @@ void render_scene(Shader* depth_shader, Shader* normal_shader) {
     normal_shader->setFloat3("light.color", light.get_material().color);
     normal_shader->setFloat3("light.position", light.get_model_matrix()[3]);
 
+    // render skybox
+    {
+        skybox_shader->start_using();
+        skybox_shader->setMatrix("model", 1, skybox.get_model_matrix());
+        skybox_shader->setMatrix("view", 1, camera->get_view());
+        skybox_shader->setMatrix("projection", 1, camera->get_projection());
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, skybox.get_texture_id());
+        model_shader->setTexture("skybox", 0);
+        renderer.draw(*skybox_shader, skybox.get_mesh().get_VAO(), DrawMode::Indices, skybox.get_mesh().get_indices_count());
+    }
     // render light
     {
         light_shader->start_using();
@@ -347,7 +367,6 @@ void render_scene(Shader* depth_shader, Shader* normal_shader) {
         model_shader->setMatrix("model", 1, ground.get_model_matrix());
         model_shader->setFloat("material.shininess", ground.get_material().shininess);
         model_shader->setFloat("magnitude", 0);
-        // TODO 设置重复铺满
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, ground.material().diffuse_map);
         model_shader->setTexture("material.diffuse_map", 0);
@@ -481,7 +500,7 @@ void render_imgui() {
 
     //ImGui::SliderFloat("ground diffuse strength", &ground.material().diffuse_strength, 0, 1);
     //ImGui::SliderFloat("ground specular strength", &ground.material().specular_strength, 0, 1);
-    ImGui::SliderFloat("ground shininess", &ground.material().shininess, 0, 512);
+    ImGui::SliderFloat("ground shininess", &ground.material().shininess, 0, 512.f);
 
     ImGui::SliderFloat("magnitude", &magnitude, 0.0f, 10.0f);
 
@@ -557,10 +576,11 @@ void render_imgui() {
 // 注意开启像素化后能看见位置不对的阴影
 // done: model.gs 的 explode 效果跟着fov缩放变 答：原因：learnOpengl的gs算法在裁剪空间计算法向量，而投影变换是非正交变换。
 // done: 着色器的坐标空间理解和统一
-// done: 键盘和鼠标callback事件用imgui处理?
+// done: 键盘和鼠标callback事件用imgui处理
 // done: 几何着色器法向量显示
 // done: 键盘事件摄像机移动方向应该是摄像机坐标系方向
 // done：当前相机拖动视角为FPS style,会导致相机旋转和平移多次操作会出现问题，相机的拖动导致距离渲染对象变近。需要实现拖动视角令相机在一个圆轨道运行
+// done: 地板铺满
 // 6. 解决相机运动死锁问题(direction = (0,-1,0)时)
 // 7. 定义View、Scene对象职责
 // 8. Model类Mesh和Material对应关系处理
@@ -570,7 +590,6 @@ void render_imgui() {
 // 14. 看一下模型加载那篇文章，贴图文件是相对路径保存的或绝对路径保存的，Assimp的简单原理。
 // 15. picking
 // 16. 粒子系统
-// 17. 地板铺满
 // 18. low-poly
 
 unsigned int creat_quad() {
@@ -684,8 +703,8 @@ void start_render_loop(GLFWwindow* window) {
         float color_buffer_width = WINDOW_WIDTH;
         float color_buffer_height = WINDOW_HEIGHT;
         if (pixel_style) {
-            color_buffer_width /= 8.0f;
-            color_buffer_height /= 8.0f;
+            color_buffer_width /= 6.0f;
+            color_buffer_height /= 6.0f;
         }
         glBindTexture(GL_TEXTURE_2D, tex_color_buffer);
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, color_buffer_width, color_buffer_height, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);

@@ -2,7 +2,7 @@
 
 MyGround::MyGround()
 {
-    auto scale = glm::scale(glm::mat4(1.0f), glm::vec3(1000.0f));
+    auto scale = glm::scale(glm::mat4(1.0f), glm::vec3(20.0f));
     m_model_matrix = scale * glm::mat4(1.0f);
 
     init_mesh();
@@ -37,8 +37,8 @@ void MyGround::init_mesh()
         vertex.normal = normal;
 
         glm::vec2 vec;
-        vec.x = cubeVertices[6 + i] * 100.0f;
-        vec.y = cubeVertices[7 + i] * 100.0f;
+        vec.x = cubeVertices[6 + i] * 2.0f;
+        vec.y = cubeVertices[7 + i] * 2.0f;
         vertex.texture_uv = vec;
 
         vertices.push_back(vertex);

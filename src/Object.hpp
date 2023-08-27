@@ -28,8 +28,8 @@ protected:
     Material m_material;
     glm::mat4 m_model_matrix;
 
-    void init_mesh();
-    void init_material();
+    virtual void init_mesh();
+    virtual void init_material();
 };
 
 #endif

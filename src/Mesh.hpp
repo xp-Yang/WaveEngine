@@ -26,9 +26,6 @@ public:
 	unsigned int get_VAO() const { return m_VAO; }
 	int get_indices_count() const { return m_indices.size(); }
 
-	static unsigned int generate_texture_from_file(const std::string& full_path, bool gamma);
-	static unsigned int generate_texture_from_file(const char* path, const std::string& directory, bool gamma);
-
 protected:
 	unsigned int m_VAO;
 	unsigned int m_VBO;
