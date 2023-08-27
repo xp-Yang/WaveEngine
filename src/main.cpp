@@ -401,7 +401,7 @@ void render_scene(Shader* depth_shader, Shader* normal_shader) {
     // render cube
     {
         model_shader->start_using();
-        model_shader->setMatrix("model", 1, cube.get_model_matrix());
+        model_shader->setMatrix("model", 1, glm::scale(glm::mat4(1.0f), glm::vec3(20.0f)) * cube.get_model_matrix());
         model_shader->setFloat("magnitude", magnitude);
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, cube.material().diffuse_map);
@@ -529,7 +529,7 @@ void render_imgui() {
     auto translate = glm::translate(glm::mat4(1.0f), cube_offset);
     cube.set_model_matrix(translate);
     ImGui::PopItemWidth();
-    ImGui::SliderInt("icosphere accuracy", &icosphere_accuracy, 0, 8);
+    ImGui::SliderInt("icosphere accuracy", &icosphere_accuracy, 0, 10);
     //ImGui::ColorEdit3("light color", (float*)&light_color);
     //ImGui::ColorEdit3("cube color", (float*)&cube_color);
     //ImGui::ColorEdit3("ground color", (float*)&ground_color);
@@ -608,6 +608,7 @@ void render_imgui() {
 // 18. low-poly
 // 19. 天空盒的采样和着色器采样坐标系理解
 // 19. 天空盒的模型矩阵大小代表着什么
+// 20. 动态环境贴图
 
 unsigned int creat_quad() {
     float quadVertices[] = { // vertex attributes for a quad that fills the entire screen in Normalized Device Coordinates.
