@@ -27,8 +27,10 @@ uniform Light light;
 uniform vec3 viewpos;
 
 uniform sampler2D shadowMap;
+uniform samplerCube skybox;
+uniform bool enable_skybox_sample;
 
-out vec4 fragment_color;
+out vec4 out_color;
 
 float ShadowCalculation(vec4 fragPosLightSpace)
 {
@@ -66,13 +68,20 @@ void main()
     // º∆À„“ı”∞
     float shadow = ShadowCalculation(fs_in.FragPosLightSpace);       
     vec3 lighting = (ambient_light + (1.0 - shadow) * (diffuse_light + specular_light)) * fs_in.pass_color;    
-    fragment_color = vec4(lighting, 1.0);
+    out_color = vec4(lighting, 1.0);
+
+    if(enable_skybox_sample){
+        vec3 I = normalize(fs_in.pass_pos - viewpos);
+        vec3 R = reflect(I, normalize(normal));
+        out_color = vec4(texture(skybox, R).rgb, 1.0);
+    }
+
     //debug
-    //fragment_color = vec4(fs_in.pass_color * (ambient_light + diffuse_light + specular_light), 1.0);
-    //fragment_color = vec4(1.0, 0.0, 0.0, 1.0);
-    //fragment_color = vec4(fs_in.pass_uv, 0.0, 1.0);
-    //fragment_color = vec4(vec3(shadow), 1.0);
-    //fragment_color = vec4(normal, 1.0);
-    //fragment_color = vec4(abs(spec_coef),abs(spec_coef),abs(spec_coef), 1.0f);
-    //fragment_color = vec4(abs(view_direction), 1.0f);
+    //out_color = vec4(fs_in.pass_color * (ambient_light + diffuse_light + specular_light), 1.0);
+    //out_color = vec4(1.0, 0.0, 0.0, 1.0);
+    //out_color = vec4(fs_in.pass_uv, 0.0, 1.0);
+    //out_color = vec4(vec3(shadow), 1.0);
+    //out_color = vec4(normal, 1.0);
+    //out_color = vec4(abs(spec_coef),abs(spec_coef),abs(spec_coef), 1.0f);
+    //out_color = vec4(abs(view_direction), 1.0f);
 }

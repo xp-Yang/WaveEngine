@@ -4,7 +4,7 @@ Skybox::Skybox()
 	:MyCube()
 {
 	m_mesh;
-	m_model_matrix = glm::scale(glm::mat4(1.0f), glm::vec3(100.0f));
+	m_model_matrix = glm::scale(glm::mat4(1.0f), glm::vec3(1.0f));
 
     std::vector<std::string> faces
     {
@@ -29,9 +29,7 @@ unsigned int Skybox::generate_cube_map(std::vector<std::string> faces) {
         unsigned char* data = stbi_load(faces[i].c_str(), &width, &height, &nrChannels, 0);
         if (data)
         {
-            glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i,
-                0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data
-            );
+            glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
             stbi_image_free(data);
         }
         else

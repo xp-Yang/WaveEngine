@@ -282,6 +282,10 @@ void render_scene(Shader* depth_shader, Shader* normal_shader) {
     model_shader->setFloat3("light.color", light.get_material().color);
     model_shader->setFloat3("light.position", light.get_model_matrix()[3]);
 
+    glActiveTexture(GL_TEXTURE6);
+    glBindTexture(GL_TEXTURE_CUBE_MAP, skybox.get_texture_id());
+    model_shader->setTexture("skybox", 6);
+
     normal_shader->start_using();
     normal_shader->setMatrix("view", 1, camera->get_view());
     normal_shader->setMatrix("projection", 1, camera->get_projection());
@@ -292,15 +296,20 @@ void render_scene(Shader* depth_shader, Shader* normal_shader) {
 
     // render skybox
     {
+        glDepthMask(GL_FALSE);
         skybox_shader->start_using();
         skybox_shader->setMatrix("model", 1, skybox.get_model_matrix());
-        skybox_shader->setMatrix("view", 1, camera->get_view());
+        auto skybox_view = camera->get_view();
+        skybox_view = glm::mat4(glm::mat3(skybox_view));
+        skybox_shader->setMatrix("view", 1, skybox_view);
         skybox_shader->setMatrix("projection", 1, camera->get_projection());
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, skybox.get_texture_id());
-        model_shader->setTexture("skybox", 0);
+        glActiveTexture(GL_TEXTURE6);
+        glBindTexture(GL_TEXTURE_CUBE_MAP, skybox.get_texture_id());
+        skybox_shader->setTexture("skybox", 6);
         renderer.draw(*skybox_shader, skybox.get_mesh().get_VAO(), DrawMode::Indices, skybox.get_mesh().get_indices_count());
+        glDepthMask(GL_TRUE);
     }
+
     // render light
     {
         light_shader->start_using();
@@ -346,6 +355,7 @@ void render_scene(Shader* depth_shader, Shader* normal_shader) {
         glActiveTexture(GL_TEXTURE0 + 2);
         glBindTexture(GL_TEXTURE_2D, default_map);
         model_shader->setTexture("material.normal_map", 2);
+        model_shader->setBool("enable_skybox_sample", true);
 
         //glBindVertexArray(sphere.get_mesh().get_VAO());
         //glDrawArrays(GL_LINE_LOOP, 0, sphere.get_vertices_count());
@@ -360,31 +370,33 @@ void render_scene(Shader* depth_shader, Shader* normal_shader) {
             renderer.draw(*normal_shader, sphere.get_mesh().get_VAO(), DrawMode::Arrays, 0, sphere.get_vertices_count());
         }
     }
+    model_shader->start_using();
+    model_shader->setBool("enable_skybox_sample", false);
 
     // render ground
-    {
-        model_shader->start_using();
-        model_shader->setMatrix("model", 1, ground.get_model_matrix());
-        model_shader->setFloat("material.shininess", ground.get_material().shininess);
-        model_shader->setFloat("magnitude", 0);
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, ground.material().diffuse_map);
-        model_shader->setTexture("material.diffuse_map", 0);
-        glActiveTexture(GL_TEXTURE0 + 1);
-        glBindTexture(GL_TEXTURE_2D, ground.material().specular_map);
-        model_shader->setTexture("material.specular_map", 1);
-        glActiveTexture(GL_TEXTURE7);
-        glBindTexture(GL_TEXTURE_2D, tex_depth_buffer);
-        model_shader->setTexture("shadowMap", 7);
-        glActiveTexture(GL_TEXTURE0);
+    //{
+    //    model_shader->start_using();
+    //    model_shader->setMatrix("model", 1, ground.get_model_matrix());
+    //    model_shader->setFloat("material.shininess", ground.get_material().shininess);
+    //    model_shader->setFloat("magnitude", 0);
+    //    glActiveTexture(GL_TEXTURE0);
+    //    glBindTexture(GL_TEXTURE_2D, ground.material().diffuse_map);
+    //    model_shader->setTexture("material.diffuse_map", 0);
+    //    glActiveTexture(GL_TEXTURE0 + 1);
+    //    glBindTexture(GL_TEXTURE_2D, ground.material().specular_map);
+    //    model_shader->setTexture("material.specular_map", 1);
+    //    glActiveTexture(GL_TEXTURE7);
+    //    glBindTexture(GL_TEXTURE_2D, tex_depth_buffer);
+    //    model_shader->setTexture("shadowMap", 7);
+    //    glActiveTexture(GL_TEXTURE0);
 
-        if (depth_shader) {
-            depth_shader->start_using();
-            depth_shader->setMatrix("model", 1, ground.get_model_matrix());
-            renderer.draw(*depth_shader, ground.get_mesh().get_VAO(), DrawMode::Indices, ground.get_mesh().get_indices_count());
-        }else
-            renderer.draw(*model_shader, ground.get_mesh().get_VAO(), DrawMode::Indices, ground.get_mesh().get_indices_count());
-    }
+    //    if (depth_shader) {
+    //        depth_shader->start_using();
+    //        depth_shader->setMatrix("model", 1, ground.get_model_matrix());
+    //        renderer.draw(*depth_shader, ground.get_mesh().get_VAO(), DrawMode::Indices, ground.get_mesh().get_indices_count());
+    //    }else
+    //        renderer.draw(*model_shader, ground.get_mesh().get_VAO(), DrawMode::Indices, ground.get_mesh().get_indices_count());
+    //}
 
     // render cube
     {
@@ -399,6 +411,7 @@ void render_scene(Shader* depth_shader, Shader* normal_shader) {
         model_shader->setTexture("material.specular_map", 1);
         glActiveTexture(GL_TEXTURE0);
         model_shader->setFloat("material.shininess", cube.get_material().shininess);
+        model_shader->setBool("enable_skybox_sample", true);
 
         glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
         glStencilFunc(GL_ALWAYS, 1, 0xFF);
@@ -430,6 +443,8 @@ void render_scene(Shader* depth_shader, Shader* normal_shader) {
         //border_shader->setMatrix("projection", 1, camera->get_projection());
         //renderer.draw(*border_shader, cube.get_mesh().get_VAO(), DrawMode::Indices, cube.get_mesh().get_indices_count());
     }
+    model_shader->start_using();
+    model_shader->setBool("enable_skybox_sample", false);
 
     // render model
     {
@@ -585,12 +600,14 @@ void render_imgui() {
 // 7. 定义View、Scene对象职责
 // 8. Model类Mesh和Material对应关系处理
 // 11. 光源物理模型
-// 12. 阴影贴图(done)、帧缓冲(done)、法线贴图、tbn矩阵、天空盒、反射等知识学习
+// 12. 阴影贴图(done)、帧缓冲(done)、法线贴图、tbn矩阵、天空盒(done)、反射(done)等知识学习
 // 13. 帧缓冲的附件?
 // 14. 看一下模型加载那篇文章，贴图文件是相对路径保存的或绝对路径保存的，Assimp的简单原理。
 // 15. picking
 // 16. 粒子系统
 // 18. low-poly
+// 19. 天空盒的采样和着色器采样坐标系理解
+// 19. 天空盒的模型矩阵大小代表着什么
 
 unsigned int creat_quad() {
     float quadVertices[] = { // vertex attributes for a quad that fills the entire screen in Normalized Device Coordinates.
