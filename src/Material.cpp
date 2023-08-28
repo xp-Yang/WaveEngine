@@ -7,6 +7,7 @@ void Material::update_shader_binding() {
         shader->start_using();
 
         shader->setFloat3("color", color);
+        shader->setFloat("material.ambient", ambient_strength);
         shader->setFloat("material.shininess", shininess);
 
         glActiveTexture(GL_TEXTURE0);

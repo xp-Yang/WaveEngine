@@ -22,20 +22,21 @@ void Renderer::render(const View& view) const {
     const auto& skybox = view.get_scene().get_skybox();
     const auto& light = view.get_scene().get_light();
     for (auto& item : view.get_scene().get_objects()) {
-        if (item.second) {
+        if (item.second && item.second->renderable()) {
             Object* obj = item.second;
             Shader* shader = obj->get_material().shader;
+            obj->material().update_shader_binding();
             shader->start_using();
             shader->setMatrix("model", 1, obj->get_model_matrix());
             shader->setMatrix("view", 1, camera.get_view());
             shader->setMatrix("projection", 1, camera.get_projection());
-            shader->setFloat3("viewpos", camera.get_position());
+            shader->setFloat3("camera_pos", camera.get_position());
             shader->setFloat3("light.color", light.get_material().color);
             shader->setFloat3("light.position", light.get_model_matrix()[3]);
             glActiveTexture(GL_TEXTURE6);
             glBindTexture(GL_TEXTURE_CUBE_MAP, skybox.get_texture_id());
             shader->setTexture("skybox", 6);
-            shader->setBool("enable_skybox_sample", true);
+            shader->setBool("enable_skybox_sample", false);
             //if (false) {
             //    glActiveTexture(GL_TEXTURE7);
             //    glBindTexture(GL_TEXTURE_2D, tex_depth_buffer);
@@ -44,10 +45,7 @@ void Renderer::render(const View& view) const {
             //}
             glBindVertexArray(obj->get_mesh().get_VAO());
             if (obj->get_mesh().get_indices_count() <= 0) {
-                // TODO refine
-                auto sphere = dynamic_cast<MySphere*>(obj);
-                if (sphere)
-                    glDrawArrays(GL_TRIANGLES, 0, sphere->get_vertices_count());
+                glDrawArrays(GL_TRIANGLES, 0, obj->get_mesh().get_vertices_count());
             }
             else {
                 glDrawElements(GL_TRIANGLES, obj->get_mesh().get_indices_count(), GL_UNSIGNED_INT, 0);

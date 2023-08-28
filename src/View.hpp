@@ -28,8 +28,10 @@ public:
     Scene& get_scene() { return *scene; }
 
     void set_render_quality();
-    void enable_shadow_map();
+    void enable_shadow_map(bool enable);
     void set_render_style();
+
+    void mouse_and_key_callback();
 
 private:
     Camera* camera{ nullptr };

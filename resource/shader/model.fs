@@ -24,7 +24,7 @@ struct Material {
 
 uniform Material material;
 uniform Light light;
-uniform vec3 viewpos;
+uniform vec3 camera_pos;
 
 uniform sampler2D shadow_map;
 uniform samplerCube skybox;
@@ -60,7 +60,7 @@ void main()
     float diffuse_coef = max(dot(light_direction, normal), 0.0);
     vec3 diffuse_light = light.color * diffuse_coef * vec3(texture(material.diffuse_map, fs_in.pass_uv));
 
-    vec3 view_direction = normalize(viewpos - fs_in.pass_pos);
+    vec3 view_direction = normalize(camera_pos - fs_in.pass_pos);
     vec3 reflect_direction = reflect(-light_direction, normal);
     float spec_coef = pow(max(dot(view_direction, reflect_direction), 0.001), material.shininess);
     vec3 specular_light = light.color * spec_coef * vec3(texture(material.specular_map, fs_in.pass_uv));
@@ -71,13 +71,13 @@ void main()
     out_color = vec4(lighting, 1.0);
 
     if(enable_skybox_sample){
-        vec3 I = normalize(fs_in.pass_pos - viewpos);
+        vec3 I = normalize(fs_in.pass_pos - camera_pos);
         vec3 R = reflect(I, normalize(normal));
         out_color = vec4(texture(skybox, R).rgb, 1.0);
     }
 
     //debug
-    //out_color = vec4(fs_in.pass_color * (ambient_light + diffuse_light + specular_light), 1.0);
+    out_color = vec4(fs_in.pass_color * (ambient_light + diffuse_light + specular_light), 1.0);
     //out_color = vec4(1.0, 0.0, 0.0, 1.0);
     //out_color = vec4(fs_in.pass_uv, 0.0, 1.0);
     //out_color = vec4(vec3(shadow), 1.0);

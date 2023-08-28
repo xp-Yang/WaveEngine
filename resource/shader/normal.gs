@@ -11,10 +11,6 @@ in VS_OUT {
     vec4 FragPosLightSpace;
 } gs_in[];
 
-uniform float magnitude;
-
-uniform mat4 projection;
-
 void GenerateLine(int index)
 {
     const float MAGNITUDE = 0.1;

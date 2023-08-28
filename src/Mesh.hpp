@@ -25,6 +25,7 @@ public:
 
 	unsigned int get_VAO() const { return m_VAO; }
 	int get_indices_count() const { return m_indices.size(); }
+	int get_vertices_count() const { return m_vertices.size(); }
 
 protected:
 	unsigned int m_VAO;

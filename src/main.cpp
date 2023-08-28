@@ -56,67 +56,6 @@ std::string vec3_log(const glm::vec3 vec) {
     return result;
 }
 
-void imgui_callback() 
-{
-    ImGuiIO& io = ImGui::GetIO();
-    auto& camera = view.get_camera();
-
-    double xpos, ypos;
-    xpos = io.MousePos.x;
-    ypos = io.MousePos.y;
-    if (io.WantCaptureMouse) {
-        return;
-    }
-    static bool last_left_mouse_status = io.MouseDown[0];
-    static bool last_right_mouse_status = io.MouseDown[1];
-
-    static float last_pos_x = WINDOW_WIDTH / 2;
-    static float last_pos_y = WINDOW_HEIGHT / 2;
-    if (last_left_mouse_status != io.MouseDown[0]) {
-        last_pos_x = xpos;
-        last_pos_y = ypos;
-        last_left_mouse_status = io.MouseDown[0];
-    }
-    if (io.MouseDown[0]) {
-        float delta_x = xpos - last_pos_x;
-        float delta_y = -(ypos - last_pos_y);
-        last_pos_x = xpos;
-        last_pos_y = ypos;
-        camera.mouse_process(delta_x, delta_y, 0);
-    }
-
-    if (last_right_mouse_status != io.MouseDown[1]) {
-        last_pos_x = xpos;
-        last_pos_y = ypos;
-        last_right_mouse_status = io.MouseDown[1];
-    }
-    if (io.MouseDown[1]) {
-        float delta_x = xpos - last_pos_x;
-        float delta_y = -(ypos - last_pos_y);
-        last_pos_x = xpos;
-        last_pos_y = ypos;
-        camera.mouse_process(delta_x, delta_y, 1);
-    }
-
-    camera.mouse_scroll_process(io.MouseWheel);
-
-    float delta_time = 1.0f / io.Framerate;
-    if (io.KeyShift)
-        delta_time /= 10.0f;
-    if (io.KeysDown['W']) {
-        camera.key_process('W', delta_time);
-    }
-    if (io.KeysDown['A']) {
-        camera.key_process('A', delta_time);
-    }
-    if (io.KeysDown['S']) {
-        camera.key_process('S', delta_time);
-    }
-    if(io.KeysDown['D']) {
-        camera.key_process('D', delta_time);
-    }
-}
-
 GLFWwindow* create_window(int size_x, int size_y) {
     //glfwInit函数来初始化GLFW，glfwWindowHint函数来配置GLFW
     glfwInit();
@@ -145,73 +84,6 @@ GLFWwindow* create_window(int size_x, int size_y) {
     return window;
 }
 
-void init_scene() {
-    Skybox* skybox = new Skybox();
-    Material skybox_material;
-    skybox_material.shader = new Shader("resource/shader/skybox.vs", "resource/shader/skybox.fs");
-    skybox_material.diffuse_map = skybox->get_texture_id();
-    skybox_material.diffuse_map_path = "resource/images/skybox/test.jpg";
-    skybox->set_material(skybox_material);
-
-    MyLight* light = new MyLight();
-    Material light_material;
-    light_material.shader = new Shader("resource/shader/light.vs", "resource/shader/light.fs");
-    light->set_material(light_material);
-
-    MyCube* cube = new MyCube();
-    Material cube_material;
-    cube_material.shader = new Shader("resource/shader/model.vs", "resource/shader/model.fs", "resource/shader/model.gs");
-    cube_material.set_diffuse_map("resource/images/default_white_map.png");
-    cube_material.set_specular_map("resource/images/cube_specular.png");
-    cube->set_material(cube_material);
-
-    MySphere* sphere = new MySphere();
-    Material sphere_material;
-    sphere_material.shader = new Shader("resource/shader/model.vs", "resource/shader/model.fs", "resource/shader/model.gs");
-    sphere_material.set_diffuse_map("resource/images/default_white_map.png");
-    sphere_material.set_specular_map("resource/images/cube_specular.png");
-    sphere->set_material(sphere_material);
-
-    MyGround* ground = new MyGround();
-    Material ground_material;
-    ground_material.shader = new Shader("resource/shader/model.vs", "resource/shader/model.fs", "resource/shader/model.gs");
-    ground_material.set_diffuse_map("resource/images/desert.jpg");
-    ground_material.set_specular_map("resource/images/desert.jpg");
-    ground->set_material(ground_material);
-
-    Model* nanosuit = new Model("resource/model/nanosuit/nanosuit.obj");
-    Shader* model_shader = new Shader("resource/shader/model.vs", "resource/shader/model.fs", "resource/shader/model.gs");
-    for (auto& material : nanosuit->m_materials) {
-        material.shader = model_shader;
-    }
-    Material nanosuit_material;
-    nanosuit_material.shader = model_shader;
-    nanosuit->set_material(nanosuit_material);
-
-    Model* yoko = new Model("resource/model/yoko/008.obj");
-    for (auto& material : yoko->m_materials) {
-        material.shader = model_shader;
-    }
-    Material yoko_material;
-    yoko_material.shader = model_shader;
-    yoko->set_material(yoko_material);
-
-    scene.insert_object("cube", cube);
-    scene.insert_object("sphere", sphere);
-    scene.insert_object("ground", ground);
-    scene.insert_object("nanosuit", nanosuit);
-    scene.insert_object("yoko", yoko);
-    scene.set_skybox(skybox);
-    scene.set_light(light);
-}
-
-void init_view() {
-    glm::vec3 camera_pos(0.0f, 15.0f, 15.0f);
-    Camera* camera = new Camera(camera_pos, glm::vec3(0.0f) - camera_pos);
-    view.set_camera(camera);
-    view.set_scene(&scene);
-}
-
 // TODO remove
 static bool pixel_style = false;
 static bool stop_rotate = false;
@@ -221,8 +93,9 @@ static int icosphere_accuracy = 8;
 static float magnitude = 0.0f;
 unsigned int tex_depth_buffer;
 
-void render_scene(Shader* depth_shader, Shader* normal_shader) {
+void render_scene(Shader* depth_shader) {
     Camera& camera = view.get_camera();
+
     Skybox& skybox = *const_cast<Skybox*>(&scene.get_skybox());
     auto& light = *const_cast<MyLight*>(&scene.get_light());
     auto& cube = *scene.object("cube");
@@ -237,6 +110,7 @@ void render_scene(Shader* depth_shader, Shader* normal_shader) {
     Shader* sphere_shader = sphere.material().shader;
     Shader* ground_shader = ground.material().shader;
     Shader* model_shader = nanosuit.m_materials[0].shader;
+    Shader* yoko_shader = yoko.m_materials[0].shader;
 
     Renderer renderer;
 
@@ -250,27 +124,15 @@ void render_scene(Shader* depth_shader, Shader* normal_shader) {
         depth_shader->setMatrix("view", 1, lightSpaceMatrix);
     }
 
-    light_shader->start_using();
-    light_shader->setMatrix("lightSpaceMatrix", 1, lightSpaceMatrix);
-    light_shader->setMatrix("view", 1, camera.get_view());
-    light_shader->setMatrix("projection", 1, camera.get_projection());
-    light_shader->setFloat3("color", light.get_material().color);
-
-    normal_shader->start_using();
-    normal_shader->setMatrix("view", 1, camera.get_view());
-    normal_shader->setMatrix("projection", 1, camera.get_projection());
-
-    skybox_shader->start_using();
-    auto skybox_view = camera.get_view();
-    skybox_view = glm::mat4(glm::mat3(skybox_view));
-    skybox_shader->setMatrix("view", 1, skybox_view);
-    skybox_shader->setMatrix("projection", 1, camera.get_projection());
-
     // render skybox
     {
         glDepthMask(GL_FALSE);
         skybox_shader->start_using();
+        auto skybox_view = camera.get_view();
+        skybox_view = glm::mat4(glm::mat3(skybox_view));
         skybox_shader->setMatrix("model", 1, skybox.get_model_matrix());
+        skybox_shader->setMatrix("view", 1, skybox_view);
+        skybox_shader->setMatrix("projection", 1, camera.get_projection());
         glActiveTexture(GL_TEXTURE6);
         glBindTexture(GL_TEXTURE_CUBE_MAP, skybox.get_texture_id());
         skybox_shader->setTexture("skybox", 6);
@@ -281,6 +143,10 @@ void render_scene(Shader* depth_shader, Shader* normal_shader) {
     // render light
     {
         light_shader->start_using();
+        light_shader->setMatrix("model", 1, light.get_model_matrix());
+        light_shader->setMatrix("view", 1, camera.get_view());
+        light_shader->setMatrix("projection", 1, camera.get_projection());
+        light_shader->setFloat3("color", light.get_material().color);
         static float time_value = 0.0f;
         if (stop_rotate) {
             ;
@@ -299,7 +165,8 @@ void render_scene(Shader* depth_shader, Shader* normal_shader) {
             depth_shader->start_using();
             depth_shader->setMatrix("model", 1, light.get_model_matrix());
             renderer.draw(*depth_shader, light.get_mesh().get_VAO(), DrawMode::Indices, light.get_mesh().get_indices_count());
-        }else
+        }
+        else
             renderer.draw(*light_shader, light.get_mesh().get_VAO(), DrawMode::Indices, light.get_mesh().get_indices_count());
     }
 
@@ -311,50 +178,18 @@ void render_scene(Shader* depth_shader, Shader* normal_shader) {
         }
         sphere_shader->start_using();
         sphere_shader->setMatrix("lightSpaceMatrix", 1, lightSpaceMatrix);
-        sphere_shader->setFloat("material.ambient", ambient_strength);
+        sphere_shader->setFloat("magnitude", magnitude);
         auto sphere_translate = glm::translate(glm::mat4(1.0f), glm::vec3(1.0f, 2.0f, 2.0f));
         sphere.set_model_matrix(sphere_translate * glm::mat4(1.0f));
-        sphere.material().update_shader_binding();
-
-        // debug
-        //glBindVertexArray(sphere.get_mesh().get_VAO());
-        //glDrawArrays(GL_LINE_LOOP, 0, sphere.get_vertices_count());
-        //glBindVertexArray(0);
 
         //renderer.draw(*sphere_shader, sphere.get_mesh().get_VAO(), DrawMode::Arrays, 0, sphere.get_vertices_count());
-
-        if (normal_debug) {
-            normal_shader->start_using();
-            normal_shader->setMatrix("model", 1, sphere.get_model_matrix());
-            normal_shader->setFloat("magnitude", magnitude);
-            renderer.draw(*normal_shader, sphere.get_mesh().get_VAO(), DrawMode::Arrays, 0, sphere.get_vertices_count());
-        }
-    }
-
-    // render ground
-    {
-        ground_shader->start_using();
-        ground_shader->setMatrix("lightSpaceMatrix", 1, lightSpaceMatrix);
-        ground_shader->setFloat("material.ambient", ambient_strength);
-        ground_shader->setFloat("magnitude", 0);
-        ground.material().update_shader_binding();
-
-        if (depth_shader) {
-            depth_shader->start_using();
-            depth_shader->setMatrix("model", 1, ground.get_model_matrix());
-            renderer.draw(*depth_shader, ground.get_mesh().get_VAO(), DrawMode::Indices, ground.get_mesh().get_indices_count());
-        }
-        //else
-        //    renderer.draw(*ground_shader, ground.get_mesh().get_VAO(), DrawMode::Indices, ground.get_mesh().get_indices_count());
     }
 
     // render cube
     {
         cube_shader->start_using();
         cube_shader->setMatrix("lightSpaceMatrix", 1, lightSpaceMatrix);
-        cube_shader->setFloat("material.ambient", ambient_strength);
         cube_shader->setFloat("magnitude", magnitude);
-        cube.material().update_shader_binding();
 
         glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
         glStencilFunc(GL_ALWAYS, 1, 0xFF);
@@ -366,13 +201,6 @@ void render_scene(Shader* depth_shader, Shader* normal_shader) {
         }
         else {
             //renderer.draw(*cube_shader, cube.get_mesh().get_VAO(), DrawMode::Indices, cube.get_mesh().get_indices_count());
-
-            if (normal_debug) {
-                normal_shader->start_using();
-                normal_shader->setMatrix("model", 1, cube.get_model_matrix());
-                normal_shader->setFloat("magnitude", magnitude);
-                renderer.draw(*normal_shader, cube.get_mesh().get_VAO(), DrawMode::Indices, cube.get_mesh().get_indices_count());
-            }
         }
 
         // render border
@@ -386,22 +214,33 @@ void render_scene(Shader* depth_shader, Shader* normal_shader) {
         //renderer.draw(*border_shader, cube.get_mesh().get_VAO(), DrawMode::Indices, cube.get_mesh().get_indices_count());
     }
 
+    // render ground
+    {
+        ground.set_renderable(false);
+        ground_shader->start_using();
+        ground_shader->setMatrix("lightSpaceMatrix", 1, lightSpaceMatrix);
+        ground_shader->setFloat("magnitude", 0);
+
+        if (depth_shader) {
+            depth_shader->start_using();
+            depth_shader->setMatrix("model", 1, ground.get_model_matrix());
+            renderer.draw(*depth_shader, ground.get_mesh().get_VAO(), DrawMode::Indices, ground.get_mesh().get_indices_count());
+        }
+        else {
+            //renderer.draw(*ground_shader, ground.get_mesh().get_VAO(), DrawMode::Indices, ground.get_mesh().get_indices_count());
+        }
+    }
+
     renderer.render(view);
 
-    // render model
-    model_shader->start_using();
-    model_shader->setMatrix("lightSpaceMatrix", 1, lightSpaceMatrix);
-    model_shader->setFloat("material.ambient", ambient_strength);
+    // render nanosuit
     {
         model_shader->start_using();
+        model_shader->setMatrix("lightSpaceMatrix", 1, lightSpaceMatrix);
+        model_shader->setFloat("magnitude", magnitude);
         auto nanosuit_scale = glm::scale(glm::mat4(1.0f), glm::vec3(0.4f));
         auto nanosuit_translate = glm::translate(glm::mat4(1.0f), glm::vec3(5.0f, 0.0f, 0.0f));
-        model_shader->setMatrix("model", 1, nanosuit_translate * nanosuit_scale);
-        model_shader->setFloat("magnitude", magnitude);
-        glActiveTexture(GL_TEXTURE7);
-        glBindTexture(GL_TEXTURE_2D, tex_depth_buffer);
-        model_shader->setTexture("shadow_map", 7);
-        glActiveTexture(GL_TEXTURE0);
+        nanosuit.set_model_matrix(nanosuit_translate * nanosuit_scale);
 
         if (depth_shader) {
             depth_shader->start_using();
@@ -409,23 +248,19 @@ void render_scene(Shader* depth_shader, Shader* normal_shader) {
             nanosuit.draw(*depth_shader, renderer);
         }
         else {
+            // TODO renderer如何处理这种情况
             nanosuit.draw(*model_shader, renderer);
-
-            if (normal_debug) {
-                normal_shader->start_using();
-                normal_shader->setMatrix("model", 1, nanosuit_translate * nanosuit_scale);
-                normal_shader->setFloat("magnitude", magnitude);
-                nanosuit.draw(*normal_shader, renderer);
-            }
         }
     }
 
+    // render yoko
     {
-        model_shader->start_using();
+        yoko_shader->start_using();
+        yoko_shader->setMatrix("lightSpaceMatrix", 1, lightSpaceMatrix);
+        yoko_shader->setFloat("magnitude", magnitude);
         auto yoko_scale = glm::scale(glm::mat4(1.0f), glm::vec3(0.25f));
         auto yoko_translate = glm::translate(glm::mat4(1.0f), glm::vec3(-5.0f, 0.0f, 0.0f));
-        model_shader->setMatrix("model", 1, yoko_translate * yoko_scale);
-        model_shader->setFloat("magnitude", magnitude);
+        yoko.set_model_matrix(yoko_translate * yoko_scale);
 
         if (depth_shader) {
             depth_shader->start_using();
@@ -433,14 +268,7 @@ void render_scene(Shader* depth_shader, Shader* normal_shader) {
             yoko.draw(*depth_shader, renderer);
         }
         else {
-            yoko.draw(*model_shader, renderer);
-
-            if (normal_debug) {
-                normal_shader->start_using();
-                normal_shader->setMatrix("model", 1, yoko_translate * yoko_scale);
-                normal_shader->setFloat("magnitude", magnitude);
-                yoko.draw(*normal_shader, renderer);
-            }
+            yoko.draw(*yoko_shader, renderer);
         }
     }
 }
@@ -526,6 +354,48 @@ void render_imgui() {
     ImGui::End();
 }
 
+void render_normal() {
+    static Shader* normal_shader = new Shader("resource/shader/model.vs", "resource/shader/normal.fs", "resource/shader/normal.gs");
+    if (!normal_debug)
+        return;
+    auto& camera = view.get_camera();
+
+    normal_shader->start_using();
+    normal_shader->setMatrix("view", 1, camera.get_view());
+    normal_shader->setMatrix("projection", 1, camera.get_projection());
+    Renderer renderer;
+    //for (auto& item : view.get_scene().get_objects()) {
+    //    if (item.second && item.second->renderable()) {
+    //        Object& obj = *item.second;
+    //        normal_shader->start_using();
+    //        normal_shader->setMatrix("model", 1, obj.get_model_matrix());
+    //        if (obj.get_mesh().get_indices_count() <= 0) {
+    //            renderer.draw(*normal_shader, obj.get_mesh().get_VAO(), DrawMode::Arrays, 0, obj.get_mesh().get_vertices_count());
+    //        }
+    //        else {
+    //            renderer.draw(*normal_shader, obj.get_mesh().get_VAO(), DrawMode::Indices, obj.get_mesh().get_indices_count());
+    //        }
+    //    }
+    //}
+
+    auto& cube = *scene.object("cube");
+    MySphere& sphere = *static_cast<MySphere*>(scene.object("sphere"));
+    Model& nanosuit = *static_cast<Model*>(scene.object("nanosuit"));
+    Model& yoko = *static_cast<Model*>(scene.object("yoko"));
+
+    normal_shader->setMatrix("model", 1, sphere.get_model_matrix());
+    renderer.draw(*normal_shader, sphere.get_mesh().get_VAO(), DrawMode::Arrays, 0, sphere.get_vertices_count());
+    
+    normal_shader->setMatrix("model", 1, cube.get_model_matrix());
+    renderer.draw(*normal_shader, cube.get_mesh().get_VAO(), DrawMode::Indices, cube.get_mesh().get_indices_count());
+    
+    normal_shader->setMatrix("model", 1, nanosuit.get_model_matrix());
+    nanosuit.draw(*normal_shader, renderer);
+    
+    normal_shader->setMatrix("model", 1, yoko.get_model_matrix());
+    yoko.draw(*normal_shader, renderer);
+}
+
 // TODO:
 // done: nanosuit 放在cube前加载就有问题: 答: body是nanosuit的最后一个材质，可能被cube覆盖了？已经无法复现。
 // done: yoko 和 nanosuit 同时加载就有问题: 答: yoko模型没有镜面贴图，使用了nanosuit的镜面贴图导致的，加上default_map解决了
@@ -585,14 +455,12 @@ unsigned int creat_quad() {
 }
 
 void start_render_loop(GLFWwindow* window) {
+    // TODO 有bug，想办法放进view开启shadow_map的逻辑
     Shader* depth_shader = new Shader("resource/shader/depth.vs", "resource/shader/depth.fs");
-    Shader* normal_shader = new Shader("resource/shader/model.vs", "resource/shader/normal.fs", "resource/shader/normal.gs");
-
-    // debug
-    Shader* frame_shader = new Shader("resource/shader/frame.vs", "resource/shader/frame.fs");
-    Renderer renderer;
 
     unsigned int quad_VAO = creat_quad();
+    Shader* frame_shader = new Shader("resource/shader/frame.vs", "resource/shader/frame.fs");
+    Renderer renderer;
 
     // 创建帧缓冲
     unsigned int frame_buffer;
@@ -648,7 +516,7 @@ void start_render_loop(GLFWwindow* window) {
         ImGui::NewFrame();
 
         glfwPollEvents();//检查触发事件（比如键盘输入、鼠标移动等），然后调用对应的回调函数
-        imgui_callback();
+        view.mouse_and_key_callback();
 
         // 1. 生成深度缓冲
         float depth_buffer_width = WINDOW_WIDTH;
@@ -657,7 +525,7 @@ void start_render_loop(GLFWwindow* window) {
         glBindFramebuffer(GL_FRAMEBUFFER, frame_buffer);
         glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-        render_scene(depth_shader, normal_shader);
+        render_scene(depth_shader);
 
             // debug depth
             //glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -679,7 +547,7 @@ void start_render_loop(GLFWwindow* window) {
         glBindFramebuffer(GL_FRAMEBUFFER, frame_buffer);
         glClearColor(ambient_strength * 0.5f, ambient_strength * 0.5f, ambient_strength * 0.5f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-        render_scene(nullptr, normal_shader);
+        render_scene(nullptr);
 
         // 3. 默认缓冲
         glViewport(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
@@ -688,6 +556,9 @@ void start_render_loop(GLFWwindow* window) {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
         glBindTexture(GL_TEXTURE_2D, tex_color_buffer);
         renderer.draw(*frame_shader, quad_VAO, DrawMode::Arrays, 0, 6);
+
+        // TODO 想办法把这个render进缓冲区
+        //render_normal();
 
         render_imgui();
 
@@ -714,8 +585,12 @@ int main()
     ImGui_ImplGlfw_InitForOpenGL(window, true);
     ImGui_ImplOpenGL3_Init("#version 330");
 
-    init_scene();
-    init_view();
+    scene.init_scene();
+    glm::vec3 camera_pos(0.0f, 15.0f, 15.0f);
+    Camera* camera = new Camera(camera_pos, glm::vec3(0.0f) - camera_pos);
+    view.set_camera(camera);
+    view.set_scene(&scene);
+
     start_render_loop(window);
 
     // shutdown
