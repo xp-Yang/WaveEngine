@@ -146,22 +146,22 @@ void Camera::mouse_scroll_process(double yoffset)
     m_projection_matrix = glm::perspective(glm::radians(fov), WINDOW_WIDTH / WINDOW_HEIGHT, 0.1f, 100.0f);
 }
 
-const glm::vec3& Camera::get_position() {
+const glm::vec3& Camera::get_position() const {
     return m_pos;
 }
 
-const glm::vec3& Camera::get_target() {
+const glm::vec3& Camera::get_target() const {
     return m_target;
 }
 
-const Direction& Camera::get_direction() {
+const Direction& Camera::get_direction() const {
     return m_direction;
 }
 
-const glm::mat4& Camera::get_view() {
+const glm::mat4& Camera::get_view() const {
     return m_view_matrix;
 }
 
-const glm::mat4& Camera::get_projection() {
+const glm::mat4& Camera::get_projection() const {
     return m_projection_matrix;
 }

@@ -23,6 +23,7 @@
 #include <map>
 
 Scene scene;
+View view;
 
 std::string matrix_log(const glm::mat4 mat)
 {
@@ -58,10 +59,11 @@ std::string vec3_log(const glm::vec3 vec) {
 void imgui_callback() 
 {
     ImGuiIO& io = ImGui::GetIO();
+    auto& camera = view.get_camera();
+
     double xpos, ypos;
     xpos = io.MousePos.x;
     ypos = io.MousePos.y;
-    auto camera = scene.camera();
     if (io.WantCaptureMouse) {
         return;
     }
@@ -80,7 +82,7 @@ void imgui_callback()
         float delta_y = -(ypos - last_pos_y);
         last_pos_x = xpos;
         last_pos_y = ypos;
-        camera->mouse_process(delta_x, delta_y, 0);
+        camera.mouse_process(delta_x, delta_y, 0);
     }
 
     if (last_right_mouse_status != io.MouseDown[1]) {
@@ -93,25 +95,25 @@ void imgui_callback()
         float delta_y = -(ypos - last_pos_y);
         last_pos_x = xpos;
         last_pos_y = ypos;
-        camera->mouse_process(delta_x, delta_y, 1);
+        camera.mouse_process(delta_x, delta_y, 1);
     }
 
-    camera->mouse_scroll_process(io.MouseWheel);
+    camera.mouse_scroll_process(io.MouseWheel);
 
     float delta_time = 1.0f / io.Framerate;
     if (io.KeyShift)
         delta_time /= 10.0f;
     if (io.KeysDown['W']) {
-        camera->key_process('W', delta_time);
+        camera.key_process('W', delta_time);
     }
     if (io.KeysDown['A']) {
-        camera->key_process('A', delta_time);
+        camera.key_process('A', delta_time);
     }
     if (io.KeysDown['S']) {
-        camera->key_process('S', delta_time);
+        camera.key_process('S', delta_time);
     }
     if(io.KeysDown['D']) {
-        camera->key_process('D', delta_time);
+        camera.key_process('D', delta_time);
     }
 }
 
@@ -143,27 +145,17 @@ GLFWwindow* create_window(int size_x, int size_y) {
     return window;
 }
 
-void set_view_port(int width, int height) {
-    // 设置Viewport
-    // 它的定义具有两个意义。
-    // 一个意义是它定义了上面定义的视景体中的景物将会绘制到一张什么尺寸的画布之上，
-    // 另外一个意义表示这个绘制好的图像将会被显示在屏幕的什么区域。
-    // 进行视口变换(Viewport Transform),标准化设备坐标会变换为屏幕空间坐标。所得的屏幕空间坐标又会被变换为片段输入到片段着色器中。
-    glViewport(0, 0, width, height);
-}
-
 void init_scene() {
     Skybox* skybox = new Skybox();
     Material skybox_material;
     skybox_material.shader = new Shader("resource/shader/skybox.vs", "resource/shader/skybox.fs");
     skybox_material.diffuse_map = skybox->get_texture_id();
-    skybox_material.diffuse_map_path = "resource/images/skybox/.jpg";
+    skybox_material.diffuse_map_path = "resource/images/skybox/test.jpg";
     skybox->set_material(skybox_material);
 
     MyLight* light = new MyLight();
     Material light_material;
     light_material.shader = new Shader("resource/shader/light.vs", "resource/shader/light.fs");
-    light_material.color = glm::vec3(1.0f);
     light->set_material(light_material);
 
     MyCube* cube = new MyCube();
@@ -175,12 +167,14 @@ void init_scene() {
 
     MySphere* sphere = new MySphere();
     Material sphere_material;
+    sphere_material.shader = new Shader("resource/shader/model.vs", "resource/shader/model.fs", "resource/shader/model.gs");
+    sphere_material.set_diffuse_map("resource/images/default_white_map.png");
+    sphere_material.set_specular_map("resource/images/cube_specular.png");
     sphere->set_material(sphere_material);
 
     MyGround* ground = new MyGround();
     Material ground_material;
     ground_material.shader = new Shader("resource/shader/model.vs", "resource/shader/model.fs", "resource/shader/model.gs");
-    ground_material.color = glm::vec3(1.0f);
     ground_material.set_diffuse_map("resource/images/desert.jpg");
     ground_material.set_specular_map("resource/images/desert.jpg");
     ground->set_material(ground_material);
@@ -190,46 +184,32 @@ void init_scene() {
     for (auto& material : nanosuit->m_materials) {
         material.shader = model_shader;
     }
+    Material nanosuit_material;
+    nanosuit_material.shader = model_shader;
+    nanosuit->set_material(nanosuit_material);
 
     Model* yoko = new Model("resource/model/yoko/008.obj");
     for (auto& material : yoko->m_materials) {
         material.shader = model_shader;
     }
+    Material yoko_material;
+    yoko_material.shader = model_shader;
+    yoko->set_material(yoko_material);
 
-    glm::vec3 camera_pos(0.0f, 15.0f, 15.0f);
-    Camera* camera = new Camera(camera_pos, glm::vec3(0.0f) - camera_pos);
-
-    scene.insert_object("skybox", skybox);
-    scene.insert_object("light", light);
     scene.insert_object("cube", cube);
     scene.insert_object("sphere", sphere);
     scene.insert_object("ground", ground);
     scene.insert_object("nanosuit", nanosuit);
     scene.insert_object("yoko", yoko);
-    scene.set_camera(camera);
+    scene.set_skybox(skybox);
+    scene.set_light(light);
 }
 
-void screen_shot() {
-    const int channels_num = 3;
-    const int w = (int)WINDOW_WIDTH;
-    const int h = (int)WINDOW_HEIGHT;
-
-    unsigned char data[w * h * channels_num];
-
-    glReadPixels(0, 0, w, h, GL_BGR, GL_UNSIGNED_BYTE, data);
-
-    int index = 0;
-    for (int j = h - 1; j >= 0; --j)
-    {
-        for (int i = 0; i < w; ++i)
-        {
-            data[index++] = (unsigned char)(255.0 * i / w);
-            data[index++] = (unsigned char)(255.0 * j / h);
-            data[index++] = (unsigned char)(255.0 * 0.2);
-        }
-    }
-
-    //stbi_write_jpg("jpg_test_.jpg", w, h, channels_num, data, w * channels_num);
+void init_view() {
+    glm::vec3 camera_pos(0.0f, 15.0f, 15.0f);
+    Camera* camera = new Camera(camera_pos, glm::vec3(0.0f) - camera_pos);
+    view.set_camera(camera);
+    view.set_scene(&scene);
 }
 
 // TODO remove
@@ -242,9 +222,9 @@ static float magnitude = 0.0f;
 unsigned int tex_depth_buffer;
 
 void render_scene(Shader* depth_shader, Shader* normal_shader) {
-    Camera* camera = scene.camera();
-    Skybox& skybox = *static_cast<Skybox*>(scene.object("skybox"));
-    auto& light = *scene.object("light");
+    Camera& camera = view.get_camera();
+    Skybox& skybox = *const_cast<Skybox*>(&scene.get_skybox());
+    auto& light = *const_cast<MyLight*>(&scene.get_light());
     auto& cube = *scene.object("cube");
     MySphere& sphere = *static_cast<MySphere*>(scene.object("sphere"));
     auto& ground = *scene.object("ground");
@@ -253,9 +233,10 @@ void render_scene(Shader* depth_shader, Shader* normal_shader) {
 
     Shader* skybox_shader = skybox.material().shader;
     Shader* light_shader = light.material().shader;
+    Shader* cube_shader = cube.material().shader;
+    Shader* sphere_shader = sphere.material().shader;
+    Shader* ground_shader = ground.material().shader;
     Shader* model_shader = nanosuit.m_materials[0].shader;
-
-    static unsigned int default_map = generate_texture_from_file("resource/images/default_white_map.png", false);
 
     Renderer renderer;
 
@@ -266,43 +247,30 @@ void render_scene(Shader* depth_shader, Shader* normal_shader) {
     glm::mat4 lightSpaceMatrix = lightProjection * lightView;
     if (depth_shader) {
         depth_shader->start_using();
-        depth_shader->setMatrix("lightSpaceMatrix", 1, lightSpaceMatrix);
+        depth_shader->setMatrix("view", 1, lightSpaceMatrix);
     }
+
     light_shader->start_using();
     light_shader->setMatrix("lightSpaceMatrix", 1, lightSpaceMatrix);
-    model_shader->start_using();
-    model_shader->setMatrix("lightSpaceMatrix", 1, lightSpaceMatrix);
-
-    model_shader->start_using();
-    model_shader->setFloat3("color", glm::vec3(1.0f));
-    model_shader->setMatrix("view", 1, camera->get_view());
-    model_shader->setMatrix("projection", 1, camera->get_projection());
-    model_shader->setFloat("material.ambient", ambient_strength);
-    model_shader->setFloat3("viewpos", camera->get_position());
-    model_shader->setFloat3("light.color", light.get_material().color);
-    model_shader->setFloat3("light.position", light.get_model_matrix()[3]);
-
-    glActiveTexture(GL_TEXTURE6);
-    glBindTexture(GL_TEXTURE_CUBE_MAP, skybox.get_texture_id());
-    model_shader->setTexture("skybox", 6);
+    light_shader->setMatrix("view", 1, camera.get_view());
+    light_shader->setMatrix("projection", 1, camera.get_projection());
+    light_shader->setFloat3("color", light.get_material().color);
 
     normal_shader->start_using();
-    normal_shader->setMatrix("view", 1, camera->get_view());
-    normal_shader->setMatrix("projection", 1, camera->get_projection());
-    normal_shader->setFloat("material.ambient", ambient_strength);
-    normal_shader->setFloat3("viewpos", camera->get_position());
-    normal_shader->setFloat3("light.color", light.get_material().color);
-    normal_shader->setFloat3("light.position", light.get_model_matrix()[3]);
+    normal_shader->setMatrix("view", 1, camera.get_view());
+    normal_shader->setMatrix("projection", 1, camera.get_projection());
+
+    skybox_shader->start_using();
+    auto skybox_view = camera.get_view();
+    skybox_view = glm::mat4(glm::mat3(skybox_view));
+    skybox_shader->setMatrix("view", 1, skybox_view);
+    skybox_shader->setMatrix("projection", 1, camera.get_projection());
 
     // render skybox
     {
         glDepthMask(GL_FALSE);
         skybox_shader->start_using();
         skybox_shader->setMatrix("model", 1, skybox.get_model_matrix());
-        auto skybox_view = camera->get_view();
-        skybox_view = glm::mat4(glm::mat3(skybox_view));
-        skybox_shader->setMatrix("view", 1, skybox_view);
-        skybox_shader->setMatrix("projection", 1, camera->get_projection());
         glActiveTexture(GL_TEXTURE6);
         glBindTexture(GL_TEXTURE_CUBE_MAP, skybox.get_texture_id());
         skybox_shader->setTexture("skybox", 6);
@@ -326,10 +294,6 @@ void render_scene(Shader* depth_shader, Shader* normal_shader) {
         glm::mat4 rotate = glm::rotate(glm::mat4(1.0f), time_value * 3, glm::vec3(0.0f, 1.0f, 0.0f));
         auto translate = glm::translate(glm::mat4(1.0f), { 0.0f, 5.0f, 0.0f });
         light.set_model_matrix(translate * rotate * displacement * scale);
-        light_shader->setMatrix("model", 1, light.get_model_matrix());
-        light_shader->setMatrix("view", 1, camera->get_view());
-        light_shader->setMatrix("projection", 1, camera->get_projection());
-        light_shader->setFloat3("color", light.get_material().color);
 
         if (depth_shader) {
             depth_shader->start_using();
@@ -341,77 +305,56 @@ void render_scene(Shader* depth_shader, Shader* normal_shader) {
 
     // render sphere
     {
-        if (icosphere_accuracy != sphere.get_recursive_depth())
+        if (icosphere_accuracy != sphere.get_recursive_depth()) {
             sphere.create_icosphere(icosphere_accuracy);
-        model_shader->start_using();
-        auto sphere_translate = glm::translate(glm::mat4(1.0f), glm::vec3(1.0f, 0.0f, 2.0f));
-        model_shader->setMatrix("model", 1, sphere_translate * cube.get_model_matrix());
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, default_map);
-        model_shader->setTexture("material.diffuse_map", 0);
-        glActiveTexture(GL_TEXTURE0 + 1);
-        glBindTexture(GL_TEXTURE_2D, default_map);
-        model_shader->setTexture("material.specular_map", 1);
-        glActiveTexture(GL_TEXTURE0 + 2);
-        glBindTexture(GL_TEXTURE_2D, default_map);
-        model_shader->setTexture("material.normal_map", 2);
-        model_shader->setBool("enable_skybox_sample", true);
+            icosphere_accuracy = sphere.get_recursive_depth();
+        }
+        sphere_shader->start_using();
+        sphere_shader->setMatrix("lightSpaceMatrix", 1, lightSpaceMatrix);
+        sphere_shader->setFloat("material.ambient", ambient_strength);
+        auto sphere_translate = glm::translate(glm::mat4(1.0f), glm::vec3(1.0f, 2.0f, 2.0f));
+        sphere.set_model_matrix(sphere_translate * glm::mat4(1.0f));
+        sphere.material().update_shader_binding();
 
+        // debug
         //glBindVertexArray(sphere.get_mesh().get_VAO());
         //glDrawArrays(GL_LINE_LOOP, 0, sphere.get_vertices_count());
         //glBindVertexArray(0);
 
-        renderer.draw(*model_shader, sphere.get_mesh().get_VAO(), DrawMode::Arrays, 0, sphere.get_vertices_count());
+        //renderer.draw(*sphere_shader, sphere.get_mesh().get_VAO(), DrawMode::Arrays, 0, sphere.get_vertices_count());
 
         if (normal_debug) {
             normal_shader->start_using();
-            normal_shader->setMatrix("model", 1, sphere_translate * cube.get_model_matrix());
+            normal_shader->setMatrix("model", 1, sphere.get_model_matrix());
             normal_shader->setFloat("magnitude", magnitude);
             renderer.draw(*normal_shader, sphere.get_mesh().get_VAO(), DrawMode::Arrays, 0, sphere.get_vertices_count());
         }
     }
-    model_shader->start_using();
-    model_shader->setBool("enable_skybox_sample", false);
 
     // render ground
-    //{
-    //    model_shader->start_using();
-    //    model_shader->setMatrix("model", 1, ground.get_model_matrix());
-    //    model_shader->setFloat("material.shininess", ground.get_material().shininess);
-    //    model_shader->setFloat("magnitude", 0);
-    //    glActiveTexture(GL_TEXTURE0);
-    //    glBindTexture(GL_TEXTURE_2D, ground.material().diffuse_map);
-    //    model_shader->setTexture("material.diffuse_map", 0);
-    //    glActiveTexture(GL_TEXTURE0 + 1);
-    //    glBindTexture(GL_TEXTURE_2D, ground.material().specular_map);
-    //    model_shader->setTexture("material.specular_map", 1);
-    //    glActiveTexture(GL_TEXTURE7);
-    //    glBindTexture(GL_TEXTURE_2D, tex_depth_buffer);
-    //    model_shader->setTexture("shadowMap", 7);
-    //    glActiveTexture(GL_TEXTURE0);
+    {
+        ground_shader->start_using();
+        ground_shader->setMatrix("lightSpaceMatrix", 1, lightSpaceMatrix);
+        ground_shader->setFloat("material.ambient", ambient_strength);
+        ground_shader->setFloat("magnitude", 0);
+        ground.material().update_shader_binding();
 
-    //    if (depth_shader) {
-    //        depth_shader->start_using();
-    //        depth_shader->setMatrix("model", 1, ground.get_model_matrix());
-    //        renderer.draw(*depth_shader, ground.get_mesh().get_VAO(), DrawMode::Indices, ground.get_mesh().get_indices_count());
-    //    }else
-    //        renderer.draw(*model_shader, ground.get_mesh().get_VAO(), DrawMode::Indices, ground.get_mesh().get_indices_count());
-    //}
+        if (depth_shader) {
+            depth_shader->start_using();
+            depth_shader->setMatrix("model", 1, ground.get_model_matrix());
+            renderer.draw(*depth_shader, ground.get_mesh().get_VAO(), DrawMode::Indices, ground.get_mesh().get_indices_count());
+        }
+        //else
+        //    renderer.draw(*ground_shader, ground.get_mesh().get_VAO(), DrawMode::Indices, ground.get_mesh().get_indices_count());
+    }
 
     // render cube
     {
-        model_shader->start_using();
-        model_shader->setMatrix("model", 1, glm::scale(glm::mat4(1.0f), glm::vec3(20.0f)) * cube.get_model_matrix());
-        model_shader->setFloat("magnitude", magnitude);
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, cube.material().diffuse_map);
-        model_shader->setTexture("material.diffuse_map", 0);
-        glActiveTexture(GL_TEXTURE1);
-        glBindTexture(GL_TEXTURE_2D, cube.material().specular_map);
-        model_shader->setTexture("material.specular_map", 1);
-        glActiveTexture(GL_TEXTURE0);
-        model_shader->setFloat("material.shininess", cube.get_material().shininess);
-        model_shader->setBool("enable_skybox_sample", true);
+        cube_shader->start_using();
+        cube_shader->setMatrix("lightSpaceMatrix", 1, lightSpaceMatrix);
+        cube_shader->setFloat("material.ambient", ambient_strength);
+        cube_shader->setFloat("magnitude", magnitude);
+        cube.material().update_shader_binding();
 
         glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
         glStencilFunc(GL_ALWAYS, 1, 0xFF);
@@ -422,7 +365,7 @@ void render_scene(Shader* depth_shader, Shader* normal_shader) {
             renderer.draw(*depth_shader, cube.get_mesh().get_VAO(), DrawMode::Indices, cube.get_mesh().get_indices_count());
         }
         else {
-            renderer.draw(*model_shader, cube.get_mesh().get_VAO(), DrawMode::Indices, cube.get_mesh().get_indices_count());
+            //renderer.draw(*cube_shader, cube.get_mesh().get_VAO(), DrawMode::Indices, cube.get_mesh().get_indices_count());
 
             if (normal_debug) {
                 normal_shader->start_using();
@@ -432,21 +375,23 @@ void render_scene(Shader* depth_shader, Shader* normal_shader) {
             }
         }
 
-
         // render border
         //glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
         //glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
         //border_shader->start_using();
         //auto scale = glm::scale(glm::mat4(1.0f), glm::vec3(1.05f));
         //border_shader->setMatrix("model", 1, cube.get_model_matrix() * scale * glm::mat4(1.0f));
-        //border_shader->setMatrix("view", 1, camera->get_view());
-        //border_shader->setMatrix("projection", 1, camera->get_projection());
+        //border_shader->setMatrix("view", 1, camera.get_view());
+        //border_shader->setMatrix("projection", 1, camera.get_projection());
         //renderer.draw(*border_shader, cube.get_mesh().get_VAO(), DrawMode::Indices, cube.get_mesh().get_indices_count());
     }
-    model_shader->start_using();
-    model_shader->setBool("enable_skybox_sample", false);
+
+    renderer.render(view);
 
     // render model
+    model_shader->start_using();
+    model_shader->setMatrix("lightSpaceMatrix", 1, lightSpaceMatrix);
+    model_shader->setFloat("material.ambient", ambient_strength);
     {
         model_shader->start_using();
         auto nanosuit_scale = glm::scale(glm::mat4(1.0f), glm::vec3(0.4f));
@@ -455,7 +400,7 @@ void render_scene(Shader* depth_shader, Shader* normal_shader) {
         model_shader->setFloat("magnitude", magnitude);
         glActiveTexture(GL_TEXTURE7);
         glBindTexture(GL_TEXTURE_2D, tex_depth_buffer);
-        model_shader->setTexture("shadowMap", 7);
+        model_shader->setTexture("shadow_map", 7);
         glActiveTexture(GL_TEXTURE0);
 
         if (depth_shader) {
@@ -501,8 +446,8 @@ void render_scene(Shader* depth_shader, Shader* normal_shader) {
 }
 
 void render_imgui() {
-    auto camera = scene.camera();
-    auto& light = *scene.object("light");
+    auto& camera = view.get_camera();
+    auto& light = *const_cast<MyLight*>(&scene.get_light());
     auto& cube = *scene.object("cube");
     auto& ground = *scene.object("ground");
 
@@ -556,22 +501,22 @@ void render_imgui() {
 
         ImGui::NewLine();
         ImGui::Text("view matrix:");
-        std::string test_view = matrix_log(camera->get_view());
+        std::string test_view = matrix_log(camera.get_view());
         ImGui::Text(test_view.c_str());
 
         ImGui::NewLine();
         ImGui::Text("inverse view matrix:");
-        std::string inverse_view = matrix_log(glm::inverse(camera->get_view()));
+        std::string inverse_view = matrix_log(glm::inverse(camera.get_view()));
         ImGui::Text(inverse_view.c_str());
 
         ImGui::NewLine();
         ImGui::Text("camera position:");
-        std::string test_camera_pos = vec3_log(camera->get_position());
+        std::string test_camera_pos = vec3_log(camera.get_position());
         ImGui::Text(test_camera_pos.c_str());
 
         ImGui::NewLine();
         ImGui::Text("camera direction:");
-        std::string test_camera_dir = vec3_log(camera->get_direction().dir);
+        std::string test_camera_dir = vec3_log(camera.get_direction().dir);
         ImGui::Text(test_camera_dir.c_str());
 
         ImGuiIO& io = ImGui::GetIO();
@@ -608,7 +553,11 @@ void render_imgui() {
 // 18. low-poly
 // 19. 天空盒的采样和着色器采样坐标系理解
 // 19. 天空盒的模型矩阵大小代表着什么
-// 20. 动态环境贴图
+// 19. 当前反射算法的弱点：距离不对
+// 20. 动态环境贴图，球面时
+// 21. depth_shader可以移出，直接用同一个shader传不同view矩阵即可
+// 22. 窗口大小可缩放
+// 23. 批渲染？
 
 unsigned int creat_quad() {
     float quadVertices[] = { // vertex attributes for a quad that fills the entire screen in Normalized Device Coordinates.
@@ -704,7 +653,7 @@ void start_render_loop(GLFWwindow* window) {
         // 1. 生成深度缓冲
         float depth_buffer_width = WINDOW_WIDTH;
         float depth_buffer_height = WINDOW_HEIGHT;
-        set_view_port(depth_buffer_width, depth_buffer_height);
+        glViewport(0, 0, depth_buffer_width, depth_buffer_height);
         glBindFramebuffer(GL_FRAMEBUFFER, frame_buffer);
         glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
@@ -726,14 +675,14 @@ void start_render_loop(GLFWwindow* window) {
         }
         glBindTexture(GL_TEXTURE_2D, tex_color_buffer);
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, color_buffer_width, color_buffer_height, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
-        set_view_port(color_buffer_width, color_buffer_height);
+        glViewport(0, 0, color_buffer_width, color_buffer_height);
         glBindFramebuffer(GL_FRAMEBUFFER, frame_buffer);
         glClearColor(ambient_strength * 0.5f, ambient_strength * 0.5f, ambient_strength * 0.5f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
         render_scene(nullptr, normal_shader);
 
         // 3. 默认缓冲
-        set_view_port(WINDOW_WIDTH, WINDOW_HEIGHT);
+        glViewport(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
         glClearColor(ambient_strength * 0.5f, ambient_strength * 0.5f, ambient_strength * 0.5f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
@@ -752,10 +701,6 @@ void start_render_loop(GLFWwindow* window) {
 int main()
 {
     GLFWwindow* window = create_window(WINDOW_WIDTH, WINDOW_HEIGHT);
-    //int width, height;
-    //glfwGetFramebufferSize(window, &width, &height);
-    set_view_port(WINDOW_WIDTH, WINDOW_HEIGHT);
-
     //glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED); // FPS 模式
 
     // setup imgui
@@ -770,6 +715,7 @@ int main()
     ImGui_ImplOpenGL3_Init("#version 330");
 
     init_scene();
+    init_view();
     start_render_loop(window);
 
     // shutdown

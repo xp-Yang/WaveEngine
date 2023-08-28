@@ -5,6 +5,7 @@ void Material::update_shader_binding() {
 	if (shader) {
         // TODO location不存在则返回-1
         shader->start_using();
+
         shader->setFloat3("color", color);
         shader->setFloat("material.shininess", shininess);
 
@@ -20,6 +21,9 @@ void Material::update_shader_binding() {
         glActiveTexture(GL_TEXTURE3);
         glBindTexture(GL_TEXTURE_2D, height_map);
         shader->setTexture("material.height_map", 3);
+        glActiveTexture(GL_TEXTURE0);
+
+        shader->stop_using();
 	}
 }
 

@@ -92,6 +92,15 @@ GLuint test_vao()
 //    return texture_id;
 //}
 
+//void set_view_port(int width, int height) {
+    // 设置Viewport
+    // 它的定义具有两个意义。
+    // 一个意义是它定义了上面定义的视景体中的景物将会绘制到一张什么尺寸的画布之上，
+    // 另外一个意义表示这个绘制好的图像将会被显示在屏幕的什么区域。
+    // 进行视口变换(Viewport Transform),标准化设备坐标会变换为屏幕空间坐标。所得的屏幕空间坐标又会被变换为片段输入到片段着色器中。
+    //glViewport(0, 0, width, height);
+//}
+
 static glm::vec3 cubePositions[] = {
     glm::vec3(0.0f,  0.0f,  0.0f),
     glm::vec3(0.6f,  0.3f, -0.4f),

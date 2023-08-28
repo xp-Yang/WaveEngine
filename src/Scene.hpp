@@ -2,7 +2,8 @@
 #define Scene_hpp
 
 #include "Object.hpp"
-#include "View.hpp"
+#include "MyLight.hpp"
+#include "Skybox.hpp"
 #include <unordered_map>
 
 class Scene {
@@ -16,13 +17,30 @@ public:
 		else
 			return m_objects[name];
 	}
-	void insert_object(const std::string& name, Object* object) { m_objects.insert({ name, object }); }
-	void destory_all_objects();
-	void set_camera(Camera* camera) { m_camera = camera; }
-	Camera* camera() { return m_camera; }
+	Object* object(const std::string& name) const {
+		auto it = m_objects.find(name);
+		if (it == m_objects.end())
+			return nullptr;
+		else
+			return m_objects.at(name);
+	}
+	const std::unordered_map<std::string, Object*>& get_objects() const { return m_objects; }
+	bool insert_object(const std::string& name, Object* object) { return m_objects.insert({ name, object }).second; }
+	void remove_object(const std::string& name);
+	void set_light(MyLight* light) { m_light = light; }
+	void set_skybox(Skybox* skybox) { m_skybox = skybox; }
+	const MyLight& get_light() const { return *m_light; }
+	const Skybox& get_skybox() const { return *m_skybox; }
+
+	void init_scene();
+	//unsigned int get_shadow_map();
+	//void render_shadow_map();
+	//void render_scene();
+
 private:
 	std::unordered_map<std::string, Object*> m_objects;
-	Camera* m_camera{ nullptr };
+	MyLight* m_light;
+	Skybox* m_skybox;
 };
 
 #endif

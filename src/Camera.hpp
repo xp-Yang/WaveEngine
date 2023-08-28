@@ -32,7 +32,7 @@ struct Direction {
     float yaw = 0.0f; // 方向向量在世界坐标系 x-z 平面的投影矢量相对世界坐标系 -z 轴的夹角
     float roll = 0.0f;
 
-    const glm::vec3& get_right_direction() { // camera 的 x 轴
+    const glm::vec3& get_right_direction() const { // camera 的 x 轴
         glm::vec3 cameraRight = glm::normalize(glm::cross(dir, up));
         for (int i = 0; i < 3; i++) {
             if (abs(cameraRight[i] - 1) < 0.00001f)
@@ -41,7 +41,7 @@ struct Direction {
         return cameraRight;
     }
 
-    const glm::vec3& get_up_direction() { // camera 的 y 轴
+    const glm::vec3& get_up_direction() const { // camera 的 y 轴
         glm::vec3 right_dir = get_right_direction();
         glm::vec3 cameraUp = glm::cross(right_dir, dir);
         for (int i = 0; i < 3; i++) {
@@ -57,18 +57,18 @@ public:
     Camera(const glm::vec3& position, float pitch, float yaw, float roll);
     Camera(const glm::vec3& position, glm::vec3 dir);
 
-    const glm::vec3& get_position();
-    const glm::vec3& get_target();
-    const Direction& get_direction();
-    const glm::mat4& get_view();
-    const glm::mat4& get_projection();
+    const glm::vec3& get_position() const;
+    const glm::vec3& get_target() const;
+    const Direction& get_direction() const;
+    const glm::mat4& get_view() const;
+    const glm::mat4& get_projection() const;
 
     void key_process(int key, float frame_time);
     void mouse_process(double delta_x, double delta_y, int mouse_button);
     void mouse_scroll_process(double yoffset);
 
 private:
-    CameraStyle* m_style{ nullptr };
+    //CameraStyle m_style;
 
     glm::vec3 m_pos;
     glm::vec3 m_target;

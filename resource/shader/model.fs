@@ -26,7 +26,7 @@ uniform Material material;
 uniform Light light;
 uniform vec3 viewpos;
 
-uniform sampler2D shadowMap;
+uniform sampler2D shadow_map;
 uniform samplerCube skybox;
 uniform bool enable_skybox_sample;
 
@@ -44,7 +44,7 @@ float ShadowCalculation(vec4 fragPosLightSpace)
     float bias = 0.005;
     //float bias = max(0.05 * (1.0 - dot(normal, lightDir)), 0.005);
     // ？采样时的坐标在哪个空间
-    float closestDepth = texture(shadowMap, projCoords.xy).r;
+    float closestDepth = texture(shadow_map, projCoords.xy).r;
     // 检查当前片段是否在阴影中
     float shadow = projCoords.z - closestDepth > bias ? 1.0 : 0.0;
 

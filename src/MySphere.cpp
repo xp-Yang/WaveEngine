@@ -1,4 +1,6 @@
 #include "MySphere.hpp"
+#include <stdio.h>
+#include <time.h>
 
 MySphere::MySphere() {
     create_icosphere(6);
@@ -41,6 +43,9 @@ void MySphere::create_icosphere(int recursive_depth) {
     // 0. 创建正四面体
     create_tetrahedron();
 
+    // Start measuring time
+    clock_t start = clock();
+
     // 1. 对每个面细分
     for (int i = 0; i < recursive_depth; i++) {
         std::vector<Triangle> new_triangles;
@@ -49,6 +54,12 @@ void MySphere::create_icosphere(int recursive_depth) {
             new_triangles.insert(new_triangles.end(), divided_triangles.begin(), divided_triangles.end());
         }
         m_triangles = new_triangles;
+        clock_t end = clock();
+        double elapsed = double(end - start) / CLOCKS_PER_SEC;
+        if (elapsed > 1) {
+            create_icosphere(recursive_depth - 1);
+            return;
+        }
     }
 
     // 2. 对所有细分顶点到中心的距离做归一化
@@ -70,4 +81,10 @@ void MySphere::create_icosphere(int recursive_depth) {
     }
 
     m_mesh = Mesh(all_vertices);
+
+    // Stop measuring time and calculate the elapsed time
+    clock_t end = clock();
+    double elapsed = double(end - start) / CLOCKS_PER_SEC;
+
+    printf("create_icosphere(%d): Time measured: %.3f seconds.\n", recursive_depth, elapsed);
 }

@@ -125,7 +125,7 @@ Material Model::load_material(aiMaterial* material) {
 void Model::draw(const Shader& shader, const Renderer& renderer)
 {
     shader.start_using();
-    static unsigned int default_map = generate_texture_from_file("resource/iamges/default_map.png", false);
+    static unsigned int default_map = generate_texture_from_file("resource/images/default_map.png", false);
     for (unsigned int i = 0; i < m_meshes.size(); i++) {
         if (m_materials[i].diffuse_map != 0) {
             glActiveTexture(GL_TEXTURE0);
