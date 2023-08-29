@@ -84,6 +84,8 @@
     <None Include="resource\shader\model.vs" />
     <None Include="resource\shader\normal.fs" />
     <None Include="resource\shader\normal.gs" />
+    <None Include="resource\shader\picking.fs" />
+    <None Include="resource\shader\picking.vs" />
     <None Include="resource\shader\skybox.fs" />
     <None Include="resource\shader\skybox.vs" />
   </ItemGroup>

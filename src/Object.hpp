@@ -29,6 +29,7 @@ public:
     void set_renderable(bool renderable) { m_is_renderable = renderable; }
     bool render_as_indices() { return m_render_as_indices; }
     void set_render_as_indices(bool as_indices) { m_render_as_indices = as_indices; }
+    int get_id() const { return m_id; }
 
 protected:
     std::vector<Mesh> m_meshes;
@@ -36,6 +37,7 @@ protected:
     glm::mat4 m_model_matrix;
     bool m_is_renderable;
     bool m_render_as_indices;
+    int m_id;
 
     virtual void init_meshes() {}
     virtual void init_materials() {}
@@ -43,6 +45,7 @@ protected:
 private:
     static Mesh default_mesh;
     static Material default_material;
+    static int id_count;
 };
 
 #endif

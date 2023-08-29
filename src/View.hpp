@@ -34,8 +34,11 @@ public:
     bool is_shadow_map_enable() const { return m_enable_shadow_map; }
     void set_shadow_map_id(unsigned int id) { shadow_map_id = id; }
     unsigned int get_shadow_map_id() const { return shadow_map_id; }
-
+    void enable_picking(bool enable) { m_enable_picking = true; }
+    void set_picking_FBO(unsigned int fbo) { picking_FBO = fbo; }
     void mouse_and_key_callback();
+
+    void render_picking();
 
 private:
     Camera* camera{ nullptr };
@@ -43,7 +46,9 @@ private:
 
     float render_parameters;
     unsigned int shadow_map_id;
+    unsigned int picking_FBO;
     bool m_enable_shadow_map{ false };
+    bool m_enable_picking{ false };
 };
 
 #endif

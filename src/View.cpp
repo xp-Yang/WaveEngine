@@ -62,6 +62,8 @@ void View::mouse_and_key_callback()
         last_pos_x = xpos;
         last_pos_y = ypos;
         last_left_mouse_status = io.MouseDown[0];
+        if(io.MouseDown[0])
+            render_picking();
     }
     if (io.MouseDown[0]) {
         float delta_x = xpos - last_pos_x;
@@ -101,4 +103,102 @@ void View::mouse_and_key_callback()
     if (io.KeysDown['D']) {
         camera.key_process('D', delta_time);
     }
+}
+
+void View::render_picking() {
+    static Shader* picking_shader = new Shader("resource/shader/picking.vs", "resource/shader/picking.fs");
+
+    auto& camera = get_camera();
+    Skybox& skybox = *const_cast<Skybox*>(&get_scene().get_skybox());
+    auto& light = *const_cast<MyLight*>(&get_scene().get_light());
+
+    glViewport(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    //glBindFramebuffer(GL_FRAMEBUFFER, picking_FBO);
+    glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+
+    picking_shader->start_using();
+    picking_shader->setMatrix("view", 1, camera.get_view());
+    picking_shader->setMatrix("projection", 1, camera.get_projection());
+
+    {
+        int id = skybox.get_id();
+        int r = (id & 0x000000FF) >> 0;
+        int g = (id & 0x0000FF00) >> 8;
+        int b = (id & 0x00FF0000) >> 16;
+        glm::vec4 color(r / 255.0f, g / 255.0f, b / 255.0f, 1.0f);
+        picking_shader->setFloat4("picking_color", color);
+        picking_shader->setMatrix("model", 1, skybox.get_model_matrix());
+        glBindVertexArray(skybox.mesh().get_VAO());
+        if (!skybox.render_as_indices()) {
+            glDrawArrays(GL_TRIANGLES, 0, skybox.mesh().get_vertices_count());
+        }
+        else {
+            glDrawElements(GL_TRIANGLES, skybox.mesh().get_indices_count(), GL_UNSIGNED_INT, 0);
+        }
+        glBindVertexArray(0);
+    }
+
+    {
+        int id = light.get_id();
+        int r = (id & 0x000000FF) >> 0;
+        int g = (id & 0x0000FF00) >> 8;
+        int b = (id & 0x00FF0000) >> 16;
+        glm::vec4 color(r / 255.0f, g / 255.0f, b / 255.0f, 1.0f);
+        picking_shader->setFloat4("picking_color", color);
+        picking_shader->setMatrix("model", 1, light.get_model_matrix());
+        glBindVertexArray(light.mesh().get_VAO());
+        if (!light.render_as_indices()) {
+            glDrawArrays(GL_TRIANGLES, 0, light.mesh().get_vertices_count());
+        }
+        else {
+            glDrawElements(GL_TRIANGLES, light.mesh().get_indices_count(), GL_UNSIGNED_INT, 0);
+        }
+        glBindVertexArray(0);
+    }
+
+    for (auto& item : get_scene().get_objects()) {
+        if (item.second && item.second->renderable()) {
+            Object* obj = item.second;
+            picking_shader->setMatrix("model", 1, obj->get_model_matrix());
+            for (int i = 0; i < obj->get_meshes().size(); i++) {
+                int id = obj->get_id();
+                int r = (id & 0x000000FF) >> 0;
+                int g = (id & 0x0000FF00) >> 8;
+                int b = (id & 0x00FF0000) >> 16;
+                glm::vec4 color(r / 255.0f, g / 255.0f, b / 255.0f, 1.0f);
+                picking_shader->setFloat4("picking_color", color);
+                glBindVertexArray(obj->mesh(i).get_VAO());
+                if (!obj->render_as_indices()) {
+                    glDrawArrays(GL_TRIANGLES, 0, obj->mesh(i).get_vertices_count());
+                }
+                else {
+                    glDrawElements(GL_TRIANGLES, obj->mesh(i).get_indices_count(), GL_UNSIGNED_INT, 0);
+                }
+                glBindVertexArray(0);
+            }
+        }
+    }
+
+    // Wait until all the pending drawing commands are really done.
+    // Ultra-mega-over slow ! 
+    // There are usually a long time between glDrawElements() and
+    // all the fragments completely rasterized.
+    glFlush();
+    glFinish();
+
+    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+
+    //glReadBuffer(GL_COLOR_ATTACHMENT0);
+    unsigned char data[4] = { 0,0,0,0 };
+    int x = ImGui::GetIO().MousePos.x;
+    int y = ImGui::GetIO().MousePos.y;
+    glReadPixels(x, y, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, data);
+    if (data[0] != 0 || data[1] != 0 || data[2] != 0) {
+        int test = 0;
+    }
+    int pickedID = (int)data[0] + (((int)data[1]) << 8) + (((int)data[2]) << 16);
+    //glReadBuffer(GL_NONE);
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }

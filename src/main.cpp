@@ -373,6 +373,7 @@ void render_normal() {
 // 22. 窗口大小可缩放
 // 23. 批渲染？
 // 24. 学会renderdoc使用
+// 25. 优化cpu和gpu的io调用
 
 unsigned int creat_quad() {
     float quadVertices[] = { // vertex attributes for a quad that fills the entire screen in Normalized Device Coordinates.
@@ -451,6 +452,34 @@ void start_render_loop(GLFWwindow* window) {
     glReadBuffer(GL_NONE);
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
+    // 创建picking帧缓冲
+    unsigned int picking_FBO;
+    glGenFramebuffers(1, &picking_FBO);
+    glBindFramebuffer(GL_FRAMEBUFFER, picking_FBO);
+    view.set_picking_FBO(picking_FBO);
+    unsigned int picking_texture;
+    glActiveTexture(GL_TEXTURE8);
+    glGenTextures(1, &picking_texture);
+    glBindTexture(GL_TEXTURE_2D, picking_texture);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, WINDOW_WIDTH, WINDOW_HEIGHT, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, picking_texture, 0);
+    unsigned int picking_depth_texture;
+    glGenTextures(1, &picking_depth_texture);
+    glActiveTexture(GL_TEXTURE7);
+    glBindTexture(GL_TEXTURE_2D, picking_depth_texture);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, WINDOW_WIDTH, WINDOW_HEIGHT, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, picking_depth_texture, 0);
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_STENCIL_TEST);// 为了渲染border
     glStencilMask(0xFF);
@@ -465,15 +494,15 @@ void start_render_loop(GLFWwindow* window) {
         view.mouse_and_key_callback();
 
         // 1. 生成深度缓冲
-        float depth_buffer_width = WINDOW_WIDTH;
-        float depth_buffer_height = WINDOW_HEIGHT;
-        glViewport(0, 0, depth_buffer_width, depth_buffer_height);
-        glBindFramebuffer(GL_FRAMEBUFFER, depth_FBO);
-        glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-        configure_scene();
-        render_shadow_map(depth_shader);
-        view.set_shadow_map_id(depth_texture);
+        //float depth_buffer_width = WINDOW_WIDTH;
+        //float depth_buffer_height = WINDOW_HEIGHT;
+        //glViewport(0, 0, depth_buffer_width, depth_buffer_height);
+        //glBindFramebuffer(GL_FRAMEBUFFER, depth_FBO);
+        //glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+        //glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+        //configure_scene();
+        //render_shadow_map(depth_shader);
+        //view.set_shadow_map_id(depth_texture);
 
             // debug depth
             //glViewport(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
@@ -484,30 +513,32 @@ void start_render_loop(GLFWwindow* window) {
             //renderer.draw(*frame_shader, quad_VAO, DrawMode::Arrays, 0, 6);
         
         // 2. 生成颜色缓冲
-        float color_buffer_width = WINDOW_WIDTH;
-        float color_buffer_height = WINDOW_HEIGHT;
-        if (pixel_style) {
-            color_buffer_width /= 6.0f;
-            color_buffer_height /= 6.0f;
-        }
-        glBindTexture(GL_TEXTURE_2D, tex_color_buffer);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, color_buffer_width, color_buffer_height, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
-        glViewport(0, 0, color_buffer_width, color_buffer_height);
-        glBindFramebuffer(GL_FRAMEBUFFER, 0);
-        glClearColor(ambient_strength * 0.5f, ambient_strength * 0.5f, ambient_strength * 0.5f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+        //float color_buffer_width = WINDOW_WIDTH;
+        //float color_buffer_height = WINDOW_HEIGHT;
+        //if (pixel_style) {
+        //    color_buffer_width /= 6.0f;
+        //    color_buffer_height /= 6.0f;
+        //}
+        //glBindTexture(GL_TEXTURE_2D, tex_color_buffer);
+        //glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, color_buffer_width, color_buffer_height, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+        //glViewport(0, 0, color_buffer_width, color_buffer_height);
+        //glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        //glClearColor(ambient_strength * 0.5f, ambient_strength * 0.5f, ambient_strength * 0.5f, 1.0f);
+        //glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
         configure_scene();
-        view.enable_shadow_map(true);
-        renderer.render(view);
+        //view.enable_shadow_map(true);
+        //renderer.render(view);
 
-        render_normal();
+        //render_normal();
+
+        view.render_picking();
 
         // 3. 默认缓冲
         //glViewport(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
         //glBindFramebuffer(GL_FRAMEBUFFER, 0);
         //glClearColor(ambient_strength * 0.5f, ambient_strength * 0.5f, ambient_strength * 0.5f, 1.0f);
         //glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-        //glBindTexture(GL_TEXTURE_2D, tex_color_buffer);
+        //glBindTexture(GL_TEXTURE_2D, picking_texture);
         //renderer.draw(*frame_shader, quad_VAO, DrawMode::Arrays, 0, 6);
 
         render_imgui();
