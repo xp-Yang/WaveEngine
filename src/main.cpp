@@ -281,11 +281,7 @@ void render_shadow_map(Shader* depth_shader) {
 
     Renderer renderer;
 
-    glm::mat4 lightProjection = glm::ortho(-15.0f * WINDOW_WIDTH / WINDOW_HEIGHT, 15.0f * WINDOW_WIDTH / WINDOW_HEIGHT, -15.0f, 15.0f, 0.1f, 100.0f);
-    //lightProjection = glm::perspective(glm::radians(45.0f), /*1.0f*/WINDOW_WIDTH / WINDOW_HEIGHT, 0.1f, 100.0f);
-    glm::vec3 light_pos = light.get_model_matrix()[3];
-    glm::mat4 lightView = glm::lookAt(light_pos, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-    glm::mat4 lightSpaceMatrix = lightProjection * lightView;
+    glm::mat4 lightSpaceMatrix = light.get_light_space_matrix();
 
     if (depth_shader) {
         depth_shader->start_using();
@@ -376,6 +372,7 @@ void render_normal() {
 // 21. depth_shader可以移出，直接用同一个shader传不同view矩阵即可
 // 22. 窗口大小可缩放
 // 23. 批渲染？
+// 24. 学会renderdoc使用
 
 unsigned int creat_quad() {
     float quadVertices[] = { // vertex attributes for a quad that fills the entire screen in Normalized Device Coordinates.
@@ -403,7 +400,7 @@ unsigned int creat_quad() {
 }
 
 void start_render_loop(GLFWwindow* window) {
-    // TODO 有bug，想办法放进view开启shadow_map的逻辑
+    // TODO 想办法放进view开启shadow_map的逻辑
     Shader* depth_shader = new Shader("resource/shader/depth.vs", "resource/shader/depth.fs");
 
     unsigned int quad_VAO = creat_quad();

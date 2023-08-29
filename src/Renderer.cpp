@@ -68,14 +68,9 @@ void Renderer::render(const View& view) {
                 shader->setTexture("skybox", 6);
                 shader->setBool("enable_skybox_sample", false);
                 if (view.is_shadow_map_enable()) {
-                    // TODO 从light获取
-                    glm::mat4 lightProjection = glm::ortho(-15.0f * WINDOW_WIDTH / WINDOW_HEIGHT, 15.0f * WINDOW_WIDTH / WINDOW_HEIGHT, -15.0f, 15.0f, 0.1f, 100.0f);
-                    //lightProjection = glm::perspective(glm::radians(45.0f), /*1.0f*/WINDOW_WIDTH / WINDOW_HEIGHT, 0.1f, 100.0f);
-                    glm::vec3 light_pos = light.get_model_matrix()[3];
-                    glm::mat4 lightView = glm::lookAt(light_pos, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-                    glm::mat4 lightSpaceMatrix = lightProjection * lightView;
-                    shader->setMatrix("lightSpaceMatrix", 1, lightSpaceMatrix);
-
+                    auto light_mat = light.get_light_space_matrix();
+                    shader->setMatrix("lightSpaceMatrix", 1, light_mat);
+                    // TODO 研究一下 这样为什么不行? shader->setMatrix("lightSpaceMatrix", 1, light.get_light_space_matrix());
                     glActiveTexture(GL_TEXTURE7);
                     glBindTexture(GL_TEXTURE_2D, view.get_shadow_map_id());
                     shader->setTexture("shadow_map", 7);
