@@ -67,18 +67,12 @@ void Scene::init() {
     for (int i = 0; i < nanosuit->get_materials().size(); i++) {
         nanosuit->material(i).shader = nanosuit_shader;
     }
-    //Material nanosuit_material;
-    //nanosuit_material.shader = nanosuit_shader;
-    //nanosuit->set_material(nanosuit_material);
 
     Model* yoko = new Model("resource/model/yoko/008.obj");
     Shader* yoko_shader = new Shader("resource/shader/model.vs", "resource/shader/model.fs", "resource/shader/model.gs");
     for (int i = 0; i < yoko->get_materials().size(); i++) {
         yoko->material(i).shader = yoko_shader;
     }
-    //Material yoko_material;
-    //yoko_material.shader = yoko_shader;
-    //yoko->set_material(yoko_material);
 
     insert_object("cube", cube);
     insert_object("sphere", sphere);

@@ -113,6 +113,7 @@ void View::render_picking() {
     auto& light = *const_cast<MyLight*>(&get_scene().get_light());
 
     glViewport(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
+    glEnable(GL_DEPTH_TEST);
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
     //glBindFramebuffer(GL_FRAMEBUFFER, picking_FBO);
     glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
@@ -185,20 +186,30 @@ void View::render_picking() {
     // Ultra-mega-over slow ! 
     // There are usually a long time between glDrawElements() and
     // all the fragments completely rasterized.
-    glFlush();
-    glFinish();
+    if (ImGui::GetIO().MouseDown[0]) {
+        glFlush();
+        glFinish();
 
-    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+        glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
-    //glReadBuffer(GL_COLOR_ATTACHMENT0);
-    unsigned char data[4] = { 0,0,0,0 };
-    int x = ImGui::GetIO().MousePos.x;
-    int y = ImGui::GetIO().MousePos.y;
-    glReadPixels(x, y, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, data);
-    if (data[0] != 0 || data[1] != 0 || data[2] != 0) {
-        int test = 0;
+        //glReadBuffer(GL_COLOR_ATTACHMENT0);
+        unsigned char data[4] = { 0,0,0,0 };
+        // 注意这里传给glReadPixels()的坐标是相对于屏幕左下角的
+        int x = ImGui::GetIO().MousePos.x;
+        int y = WINDOW_HEIGHT - ImGui::GetIO().MousePos.y;
+        glReadPixels(x, y, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, data);
+        int picked_id = (int)data[0] + (((int)data[1]) << 8) + (((int)data[2]) << 16);
+        for (auto& item : get_scene().get_objects()) {
+            if (item.second) {
+                if (item.second->get_id() == picked_id) {
+                    item.second->set_picked(true);
+                }
+                else
+                    item.second->set_picked(false);
+            }
+        }
     }
-    int pickedID = (int)data[0] + (((int)data[1]) << 8) + (((int)data[2]) << 16);
+
     //glReadBuffer(GL_NONE);
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }

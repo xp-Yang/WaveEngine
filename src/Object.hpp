@@ -30,6 +30,8 @@ public:
     bool render_as_indices() { return m_render_as_indices; }
     void set_render_as_indices(bool as_indices) { m_render_as_indices = as_indices; }
     int get_id() const { return m_id; }
+    bool is_picked() const { return m_picked; }
+    void set_picked(bool picked) { m_picked = picked; }
 
 protected:
     std::vector<Mesh> m_meshes;
@@ -37,6 +39,7 @@ protected:
     glm::mat4 m_model_matrix;
     bool m_is_renderable;
     bool m_render_as_indices;
+    bool m_picked;
     int m_id;
 
     virtual void init_meshes() {}
