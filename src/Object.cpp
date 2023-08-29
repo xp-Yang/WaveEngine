@@ -3,8 +3,9 @@
 
 Object::Object()
     : m_model_matrix(glm::mat4(1.0f))
+    , m_is_renderable(true)
+    , m_render_as_indices(true)
 {
-
 }
 
 Object::~Object() {
@@ -12,6 +13,5 @@ Object::~Object() {
     //glDeleteVertexArrays(1, &m_vao_id);
 }
 
-void Object::init_mesh() {}
-
-void Object::init_material() {}
+Mesh Object::default_mesh = Mesh();
+Material Object::default_material = Material();

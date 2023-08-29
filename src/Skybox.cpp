@@ -1,9 +1,8 @@
 #include "Skybox.hpp"
 
 Skybox::Skybox()
-	:MyCube()
+	: MyCube()
 {
-	m_mesh;
 	m_model_matrix = glm::scale(glm::mat4(1.0f), glm::vec3(1.0f));
 
     std::vector<std::string> faces

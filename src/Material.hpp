@@ -35,10 +35,9 @@ struct Material {
 
     Shader* shader{ nullptr };
 
-    void update_shader_binding();
+    void update_shader_binding() const;
     void set_specular_map(std::string map_path);
     void set_diffuse_map(std::string map_path);
-
 };
 
 #endif

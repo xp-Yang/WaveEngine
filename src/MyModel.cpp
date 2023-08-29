@@ -156,7 +156,7 @@ void Model::draw(const Shader& shader, const Renderer& renderer)
         }
         if (m_materials[i].height_map != 0) {
             glActiveTexture(GL_TEXTURE0 + 3);
-            glBindTexture(GL_TEXTURE_2D, m_materials[i].normal_map);
+            glBindTexture(GL_TEXTURE_2D, m_materials[i].height_map);
             shader.setTexture("material.height_map", 3);
         }else {
             glActiveTexture(GL_TEXTURE0 + 3);

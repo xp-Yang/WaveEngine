@@ -4,6 +4,7 @@
 
 MySphere::MySphere() {
     create_icosphere(6);
+    set_render_as_indices(false);
 }
 
 void MySphere::create_tetrahedron() {
@@ -37,7 +38,7 @@ std::vector<Triangle> MySphere::subdivide(Triangle triangle) {
 }
 
 void MySphere::create_icosphere(int recursive_depth) {
-    m_mesh.reset();
+    m_meshes.clear();
     m_recursive_depth = recursive_depth;
 
     // 0. 创建正四面体
@@ -80,7 +81,7 @@ void MySphere::create_icosphere(int recursive_depth) {
         }
     }
 
-    m_mesh = Mesh(all_vertices);
+    append_mesh(Mesh(all_vertices));
 
     // Stop measuring time and calculate the elapsed time
     clock_t end = clock();

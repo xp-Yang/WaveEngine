@@ -5,19 +5,13 @@ MyCube::MyCube()
     : Object()
 {
     m_model_matrix = (glm::mat4(1.0f));
-    init_mesh();
-}
-
-MyCube::MyCube(const Material& material)
-    : MyCube()
-{
-    m_material = material;
+    init_meshes();
 }
 
 MyCube::~MyCube(){
 }
 
-void MyCube::init_mesh() {
+void MyCube::init_meshes() {
     std::vector<Vertex> vertices;
     std::vector<unsigned int> indices;
 
@@ -93,7 +87,7 @@ void MyCube::init_mesh() {
             indices.push_back(cubeIndices[i]);
     }
 
-    m_mesh = Mesh(vertices, indices);
+    append_mesh(Mesh(vertices, indices));
 
 
     // 不使用ibo的方式

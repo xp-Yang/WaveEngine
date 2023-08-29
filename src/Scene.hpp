@@ -26,13 +26,13 @@ public:
 	}
 	const std::unordered_map<std::string, Object*>& get_objects() const { return m_objects; }
 	bool insert_object(const std::string& name, Object* object) { return m_objects.insert({ name, object }).second; }
-	void remove_object(const std::string& name);
+	void remove_object(const std::string& name) { m_objects.erase(name); };
 	void set_light(MyLight* light) { m_light = light; }
 	void set_skybox(Skybox* skybox) { m_skybox = skybox; }
 	const MyLight& get_light() const { return *m_light; }
 	const Skybox& get_skybox() const { return *m_skybox; }
 
-	void init_scene();
+	void init();
 	//unsigned int get_shadow_map();
 	//void render_shadow_map();
 	//void render_scene();

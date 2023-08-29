@@ -6,8 +6,8 @@ class MyGround : public Object {
 public:
 	MyGround();
 protected:
-	void init_mesh();
-	void init_material() {};
+	void init_meshes();
+	void init_materials() {};
 };
 
 #endif

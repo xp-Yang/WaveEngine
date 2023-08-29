@@ -1,14 +1,15 @@
 #include "MyGround.hpp"
 
 MyGround::MyGround()
+    : Object()
 {
     auto scale = glm::scale(glm::mat4(1.0f), glm::vec3(20.0f));
     m_model_matrix = scale * glm::mat4(1.0f);
 
-    init_mesh();
+    init_meshes();
 }
 
-void MyGround::init_mesh()
+void MyGround::init_meshes()
 {
     std::vector<Vertex> vertices;
     std::vector<unsigned int> indices;
@@ -53,5 +54,5 @@ void MyGround::init_mesh()
         indices.push_back(cubeIndices[i]);
     }
 
-    m_mesh = Mesh(vertices, indices);
+    append_mesh(Mesh(vertices, indices));
 }

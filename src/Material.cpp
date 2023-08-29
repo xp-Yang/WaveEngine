@@ -1,7 +1,7 @@
 #include "Material.hpp"
 #include "Mesh.hpp"
 
-void Material::update_shader_binding() {
+void Material::update_shader_binding() const {
 	if (shader) {
         // TODO location不存在则返回-1
         shader->start_using();
@@ -76,7 +76,6 @@ unsigned int generate_texture_from_file(const char* path, const std::string& dir
 
 void Material::set_diffuse_map(std::string map_path)
 {
-    // TODO 这个函数要放在Mesh里吗？
     diffuse_map = generate_texture_from_file(map_path, false);
     diffuse_map_path = map_path;
 }

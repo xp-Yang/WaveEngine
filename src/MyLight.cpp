@@ -1,6 +1,7 @@
 #include "MyLight.hpp"
 
 MyLight::MyLight()
+    : Object()
 {
     auto scale = glm::scale(glm::mat4(1.0f), glm::vec3(0.2f));
     m_model_matrix = scale * glm::mat4(1.0f);
@@ -8,10 +9,10 @@ MyLight::MyLight()
 	auto translate = glm::translate(glm::mat4(1.0f), { 0.0f, 5.0f, 0.0f });
 	m_model_matrix = translate * m_model_matrix;
 
-    init_mesh();
+    init_meshes();
 }
 
-void MyLight::init_mesh()
+void MyLight::init_meshes()
 {
     std::vector<Vertex> vertices;
     std::vector<unsigned int> indices;
@@ -64,5 +65,5 @@ void MyLight::init_mesh()
         indices.push_back(cubeIndices[i]);
     }
 
-    m_mesh = Mesh(vertices, indices);
+    append_mesh(Mesh(vertices, indices));
 }

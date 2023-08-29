@@ -12,12 +12,11 @@
 class MyCube : public Object{
 public:
     MyCube();
-    MyCube(const Material& material);
     ~MyCube();
 
 protected:
-    void init_mesh();
-    void init_material() {};
+    void init_meshes();
+    void init_materials() {};
 };
 
 #endif

@@ -16,11 +16,8 @@ public:
 	Model(const std::string& file_path);
 	void load_model(const std::string& file_path);
 	void draw(const Shader& shader, const Renderer& renderer);
-	std::vector<Mesh> m_meshes;
-	std::vector<Material> m_materials;
 
 private:
-
 	void processNode(aiNode* node, const aiScene* scene);
 	Mesh load_mesh(aiMesh* mesh, const aiScene* scene);
 	Material load_material(aiMaterial* material);
