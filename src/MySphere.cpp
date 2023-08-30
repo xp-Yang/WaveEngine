@@ -16,6 +16,12 @@ void MySphere::create_tetrahedron() {
 
     m_center = glm::vec3(side_length / 2.0f, side_length * sqrt(6.0f) / 3.0f * (1.0f / 4.0f), -side_length * sqrt(3.0f) / 2.0f / 3.0f);
 
+    a -= m_center;
+    b -= m_center;
+    c -= m_center;
+    d -= m_center;
+    m_center -= m_center;
+
     m_triangles = {
         { c,b,a },
         { a,b,d },

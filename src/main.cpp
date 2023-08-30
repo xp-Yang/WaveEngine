@@ -90,7 +90,6 @@ static bool stop_rotate = false;
 static bool normal_debug = false;
 static float ambient_strength = 0.1f;
 static int icosphere_accuracy = 8;
-static float magnitude = 0.0f;
 
 // TODO 以后在UI上直接编辑这些属性
 void configure_scene() {
@@ -138,32 +137,24 @@ void configure_scene() {
             sphere.create_icosphere(icosphere_accuracy);
             icosphere_accuracy = sphere.get_recursive_depth();
         }
-        sphere_shader->start_using();
-        sphere_shader->setFloat("magnitude", magnitude);
         auto sphere_translate = glm::translate(glm::mat4(1.0f), glm::vec3(1.0f, 2.0f, 2.0f));
         sphere.set_model_matrix(sphere_translate * glm::mat4(1.0f));
     }
 
     // cube
     {
-        cube_shader->start_using();
-        cube_shader->setFloat("magnitude", magnitude);
-
-        glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
-        glStencilFunc(GL_ALWAYS, 1, 0xFF);
+        glm::vec3 cube_offset = { 0.0f, 1.0f, 0.0f };
+        auto translate = glm::translate(glm::mat4(1.0f), cube_offset);
+        cube.set_model_matrix(translate); // TODO 不知道为什么必须要先设一下model_matrix才能被选中
     }
 
     // ground
     {
         ground.set_renderable(false);
-        ground_shader->start_using();
-        ground_shader->setFloat("magnitude", 0);
     }
 
     // nanosuit
     {
-        model_shader->start_using();
-        model_shader->setFloat("magnitude", magnitude);
         auto nanosuit_scale = glm::scale(glm::mat4(1.0f), glm::vec3(0.4f));
         auto nanosuit_translate = glm::translate(glm::mat4(1.0f), glm::vec3(5.0f, 0.0f, 0.0f));
         nanosuit.set_model_matrix(nanosuit_translate * nanosuit_scale);
@@ -171,12 +162,76 @@ void configure_scene() {
 
     // yoko
     {
-        yoko_shader->start_using();
-        yoko_shader->setFloat("magnitude", magnitude);
         auto yoko_scale = glm::scale(glm::mat4(1.0f), glm::vec3(0.25f));
         auto yoko_translate = glm::translate(glm::mat4(1.0f), glm::vec3(-5.0f, 0.0f, 0.0f));
         yoko.set_model_matrix(yoko_translate * yoko_scale);
     }
+}
+
+void configure_object()
+{
+    static Object* last_obj = nullptr;
+    Object* curr_obj = nullptr;
+    std::string obj_name = "";
+    for (auto& item : view.get_scene().get_objects()) {
+        if (item.second) {
+            if (item.second->is_picked()) {
+                curr_obj = item.second;
+                obj_name = item.first;
+            }
+        }
+    }
+    if (!curr_obj)
+        return;
+
+    bool visible = curr_obj->renderable();
+    bool reflection = curr_obj->is_enable_reflection();
+    glm::vec3 color = curr_obj->material().color;
+    float shininess = curr_obj->material().shininess;
+    glm::vec3 obj_offset = curr_obj->get_model_matrix()[3];
+    float explosion_ratio = curr_obj->get_explostion_ratio();
+
+    auto reset_param = [](Object* curr_obj) {
+    };
+
+    if (curr_obj != last_obj) {
+        last_obj = curr_obj;
+        reset_param(curr_obj);
+    }
+
+    ImGui::Begin((obj_name + " controller").c_str(), nullptr, ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse);
+    ImGui::Checkbox((std::string("visible") + "##" + obj_name).c_str(), &visible);
+    ImGui::Checkbox((std::string("enable reflection") + "##" + obj_name).c_str(), &reflection);
+    ImGui::ColorEdit3((std::string("color") + "##" + obj_name).c_str(), (float*)&color);
+    ImGui::SliderFloat((std::string("shininess") + "##" + obj_name).c_str(), &shininess, 0.1f, 512.0f);
+    ImGui::SliderFloat((std::string("explosion ratio") + "##" + obj_name).c_str(), &explosion_ratio, 0.0f, 10.0f);
+    ImGui::PushItemWidth(85.0f);
+    ImGui::SliderFloat((std::string("##x") + "##" + obj_name).c_str(), &obj_offset.x, -10.0f, 10.0f);
+    ImGui::SameLine();
+    ImGui::SliderFloat((std::string("##y") + "##" + obj_name).c_str(), &obj_offset.y, -10.0f, 10.0f);
+    ImGui::SameLine();
+    ImGui::SliderFloat((std::string("xyz") + "##" + obj_name).c_str(), &obj_offset.z, -10.0f, 10.0f);
+    ImGui::PopItemWidth();
+    // 编辑对象材质属性
+    for (int i = 0; i < curr_obj->get_materials().size(); i++) {
+        curr_obj->material(i).ambient_strength;
+        curr_obj->material(i).color = color;
+        curr_obj->material(i).shininess = shininess;
+        //curr_obj->material(i).set_diffuse_map();
+        //curr_obj->material(i).set_specular_map();
+    }
+    // 编辑对象坐标
+    auto new_matrix = curr_obj->get_model_matrix();
+    new_matrix[3] = glm::vec4(obj_offset, 1.0f);
+    curr_obj->set_model_matrix(new_matrix);
+    // 编辑可见性
+    curr_obj->set_renderable(visible);
+    // 是否开启法向量检查
+    // 编辑对象的explosion ratio
+    curr_obj->set_explostion_ratio(explosion_ratio);
+    // 编辑对象是否开启反射
+    curr_obj->enable_reflection(reflection);
+    ImGui::End();
 }
 
 void render_imgui() {
@@ -185,33 +240,17 @@ void render_imgui() {
     auto& cube = *scene.object("cube");
     auto& ground = *scene.object("ground");
 
-    ImGui::Begin("Controller");
+    ImGui::Begin("Global Controller", nullptr, ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse);
 
     if (ImGui::Checkbox("pixel style", &pixel_style));
 
     ImGui::SliderFloat("ambient strength", &ambient_strength, 0.0f, 1.0f);
-    ImGui::SliderFloat("model(except ground) shininess", &cube.material().shininess, 0, 512.f);
 
     //ImGui::SliderFloat("ground diffuse strength", &ground.material().diffuse_strength, 0, 1);
     //ImGui::SliderFloat("ground specular strength", &ground.material().specular_strength, 0, 1);
     ImGui::SliderFloat("ground shininess", &ground.material().shininess, 0, 512.f);
 
-    ImGui::SliderFloat("magnitude", &magnitude, 0.0f, 10.0f);
-
-    ImGui::PushItemWidth(85.0f);
-    static glm::vec3 cube_offset = { 0.0f, 1.0f, 0.0f };
-    ImGui::SliderFloat("##cube x", &cube_offset.x, -10.0f, 10.0f);
-    ImGui::SameLine();
-    ImGui::SliderFloat("##cube y", &cube_offset.y, -10.0f, 10.0f);
-    ImGui::SameLine();
-    ImGui::SliderFloat("cube xyz", &cube_offset.z, -10.0f, 10.0f);
-    auto translate = glm::translate(glm::mat4(1.0f), cube_offset);
-    cube.set_model_matrix(translate);
-    ImGui::PopItemWidth();
     ImGui::SliderInt("icosphere accuracy", &icosphere_accuracy, 0, 10);
-    //ImGui::ColorEdit3("light color", (float*)&light_color);
-    //ImGui::ColorEdit3("cube color", (float*)&cube_color);
-    //ImGui::ColorEdit3("ground color", (float*)&ground_color);
 
     if (ImGui::Checkbox("stop rotate", &stop_rotate));
     if (ImGui::Checkbox("open normal debug", &normal_debug));
@@ -334,7 +373,7 @@ void render_normal() {
 // done: nanosuit 放在cube前加载就有问题: 答: body是nanosuit的最后一个材质，可能被cube覆盖了？已经无法复现。
 // done: yoko 和 nanosuit 同时加载就有问题: 答: yoko模型没有镜面贴图，使用了nanosuit的镜面贴图导致的，加上default_map解决了
 // done: main.cpp全局变量优化 答: 已将所有Object渲染对象交由Scene管理
-// done: loop中的逻辑分离 答: 分离了imgui的渲染
+// done: loop 中的逻辑分离 答: 分离了imgui的渲染
 // done: 材质应该包含shader
 // 颜色缓冲和深度缓冲使用同一个framebuffer，第3步渲染时阴影没了，为什么？ 
 // 注意开启像素化后能看见位置不对的阴影
@@ -479,6 +518,8 @@ void start_render_loop(GLFWwindow* window) {
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
 
+        configure_object();
+
         glfwPollEvents();//检查触发事件（比如键盘输入、鼠标移动等），然后调用对应的回调函数
         view.mouse_and_key_callback();
 
@@ -489,7 +530,6 @@ void start_render_loop(GLFWwindow* window) {
         glBindFramebuffer(GL_FRAMEBUFFER, depth_FBO);
         glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-        configure_scene();
         render_shadow_map(depth_shader);
         view.set_shadow_map_id(depth_texture);
 
@@ -501,8 +541,6 @@ void start_render_loop(GLFWwindow* window) {
             //glBindTexture(GL_TEXTURE_2D, view.get_shadow_map_id());
             //renderer.draw(*frame_shader, quad_VAO, DrawMode::Arrays, 0, 6);
             
-            view.render_picking();
-
         // 2. 生成颜色缓冲
         float color_buffer_width = WINDOW_WIDTH;
         float color_buffer_height = WINDOW_HEIGHT;
@@ -516,7 +554,6 @@ void start_render_loop(GLFWwindow* window) {
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
         glClearColor(ambient_strength * 0.5f, ambient_strength * 0.5f, ambient_strength * 0.5f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-        configure_scene();
         view.enable_shadow_map(true);
         renderer.render(view);
 
@@ -556,6 +593,8 @@ int main()
     ImGui_ImplOpenGL3_Init("#version 330");
 
     scene.init();
+    configure_scene();
+
     glm::vec3 camera_pos(0.0f, 15.0f, 15.0f);
     Camera* camera = new Camera(camera_pos, glm::vec3(0.0f) - camera_pos);
     view.set_camera(camera);

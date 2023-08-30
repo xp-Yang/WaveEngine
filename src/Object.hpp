@@ -32,6 +32,10 @@ public:
     int get_id() const { return m_id; }
     bool is_picked() const { return m_picked; }
     void set_picked(bool picked) { m_picked = picked; }
+    bool is_enable_reflection() const { return m_enable_relection; }
+    void enable_reflection(bool enable) { m_enable_relection = enable; }
+    float get_explostion_ratio() const { return m_explosion_ratio; }
+    void set_explostion_ratio(float ratio) { m_explosion_ratio = ratio; }
 
 protected:
     std::vector<Mesh> m_meshes;
@@ -40,6 +44,8 @@ protected:
     bool m_is_renderable;
     bool m_render_as_indices;
     bool m_picked;
+    bool m_enable_relection;
+    float m_explosion_ratio;
     int m_id;
 
     virtual void init_meshes() {}

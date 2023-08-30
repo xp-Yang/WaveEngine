@@ -72,7 +72,7 @@ void main()
     if(enable_skybox_sample){
         vec3 I = normalize(fs_in.pass_pos - camera_pos);
         vec3 R = reflect(I, normalize(normal));
-        out_color = vec4(texture(skybox, R).rgb, 1.0);
+        out_color = 0.33 * vec4(lighting, 1.0) + 0.66 * vec4(texture(skybox, R).rgb, 1.0);
     }
 
     //debug

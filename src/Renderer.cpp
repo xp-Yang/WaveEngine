@@ -68,7 +68,8 @@ void Renderer::render(const View& view) {
                 glActiveTexture(GL_TEXTURE6);
                 glBindTexture(GL_TEXTURE_CUBE_MAP, skybox.get_texture_id());
                 shader->setTexture("skybox", 6);
-                shader->setBool("enable_skybox_sample", false);
+                shader->setBool("enable_skybox_sample", obj->is_enable_reflection());
+                shader->setFloat("magnitude", obj->get_explostion_ratio());
                 if (view.is_shadow_map_enable()) {
                     auto light_mat = light.get_light_space_matrix();
                     shader->setMatrix("lightSpaceMatrix", 1, light_mat);
@@ -100,14 +101,16 @@ void Renderer::render(const View& view) {
                 glStencilFunc(GL_ALWAYS, 1, 0xFF); //总是通过模板测试
                 glStencilOp(GL_KEEP, GL_REPLACE, GL_REPLACE); //如果模板测试通过了，设置模板缓冲区为1
                 glStencilMask(0xFF);
-                glBindVertexArray(obj->mesh().get_VAO());
-                if (!obj->render_as_indices()) {
-                    glDrawArrays(GL_TRIANGLES, 0, obj->mesh().get_vertices_count());
+                for (int i = 0; i < obj->get_meshes().size(); i++) {
+                    glBindVertexArray(obj->mesh(i).get_VAO());
+                    if (!obj->render_as_indices()) {
+                        glDrawArrays(GL_TRIANGLES, 0, obj->mesh(i).get_vertices_count());
+                    }
+                    else {
+                        glDrawElements(GL_TRIANGLES, obj->mesh(i).get_indices_count(), GL_UNSIGNED_INT, 0);
+                    }
+                    glBindVertexArray(0);
                 }
-                else {
-                    glDrawElements(GL_TRIANGLES, obj->mesh().get_indices_count(), GL_UNSIGNED_INT, 0);
-                }
-                glBindVertexArray(0);
                 shader->stop_using();
 
                 glStencilFunc(GL_NOTEQUAL, 1, 0xFF); //指定什么情况下通过模板测试，这里只有当前模板缓冲区不为1的部分才通过测试
@@ -122,19 +125,21 @@ void Renderer::render(const View& view) {
                 glStencilMask(0x00);
 
                 border_shader->start_using();
-                auto scale = glm::scale(glm::mat4(1.0f), glm::vec3(1.15f));
+                auto scale = glm::scale(glm::mat4(1.0f), glm::vec3(1.05f));
                 border_shader->setMatrix("model", 1, obj->get_model_matrix() * scale * glm::mat4(1.0f));
                 border_shader->setMatrix("view", 1, camera.get_view());
                 border_shader->setMatrix("projection", 1, camera.get_projection());
                 //draw(*border_shader, obj->mesh().get_VAO(), DrawMode::Indices, obj->mesh().get_indices_count());
-                glBindVertexArray(obj->mesh().get_VAO());
-                if (!obj->render_as_indices()) {
-                    glDrawArrays(GL_TRIANGLES, 0, obj->mesh().get_vertices_count());
+                for (int i = 0; i < obj->get_meshes().size(); i++) {
+                    glBindVertexArray(obj->mesh(i).get_VAO());
+                    if (!obj->render_as_indices()) {
+                        glDrawArrays(GL_TRIANGLES, 0, obj->mesh(i).get_vertices_count());
+                    }
+                    else {
+                        glDrawElements(GL_TRIANGLES, obj->mesh(i).get_indices_count(), GL_UNSIGNED_INT, 0);
+                    }
+                    glBindVertexArray(0);
                 }
-                else {
-                    glDrawElements(GL_TRIANGLES, obj->mesh().get_indices_count(), GL_UNSIGNED_INT, 0);
-                }
-                glBindVertexArray(0);
                 glStencilMask(0xFF);
             }
         }

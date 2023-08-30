@@ -5,6 +5,9 @@ Object::Object()
     : m_model_matrix(glm::mat4(1.0f))
     , m_is_renderable(true)
     , m_render_as_indices(true)
+    , m_picked(false)
+    , m_enable_relection(false)
+    , m_explosion_ratio(0.0f)
     , m_id(++id_count)
 {
 }
