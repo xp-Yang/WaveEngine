@@ -31,12 +31,23 @@ void Material::update_shader_binding() const {
 
 unsigned int generate_texture_from_file(const std::string& full_path, bool gamma) {
     std::string filename = full_path;
+    int width, height, nrComponents;
+    unsigned char* data = stbi_load(filename.c_str(), &width, &height, &nrComponents, 0);
+
+    unsigned int pbo;
+    glGenBuffers(1, &pbo);
+    glBindBuffer(GL_PIXEL_UNPACK_BUFFER, pbo);
+    glBufferData(GL_PIXEL_UNPACK_BUFFER, width * height * nrComponents, 0, GL_STREAM_DRAW);
+    GLubyte* ptr = (GLubyte*)glMapBuffer(GL_PIXEL_UNPACK_BUFFER, GL_READ_WRITE);
+    if (ptr)
+    {
+        memcpy(ptr, data, width * height * nrComponents);
+        glUnmapBuffer(GL_PIXEL_UNPACK_BUFFER); // release the mapped buffer
+    }
 
     unsigned int textureID;
     glGenTextures(1, &textureID);
 
-    int width, height, nrComponents;
-    unsigned char* data = stbi_load(filename.c_str(), &width, &height, &nrComponents, 0);
     if (data)
     {
         GLenum format;
@@ -48,7 +59,7 @@ unsigned int generate_texture_from_file(const std::string& full_path, bool gamma
             format = GL_RGBA;
 
         glBindTexture(GL_TEXTURE_2D, textureID);
-        glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
+        glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, 0);
         glGenerateMipmap(GL_TEXTURE_2D);
 
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
@@ -63,6 +74,8 @@ unsigned int generate_texture_from_file(const std::string& full_path, bool gamma
         //std::cout << "Texture failed to load at path: " << path << std::endl;
         stbi_image_free(data);
     }
+
+    glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
 
     return textureID;
 }
