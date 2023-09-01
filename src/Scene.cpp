@@ -82,3 +82,7 @@ void Scene::init() {
     set_skybox(skybox);
     set_light(light);
 }
+
+void Scene::addEntity(ecs::Entity entity) {
+    
+}

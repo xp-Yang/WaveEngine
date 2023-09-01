@@ -1,6 +1,8 @@
 #ifndef Scene_hpp
 #define Scene_hpp
 
+#include "ECS/Entity.hpp"
+#include "ECS/Component.hpp"
 #include "Object.hpp"
 #include "MyLight.hpp"
 #include "Skybox.hpp"
@@ -37,10 +39,14 @@ public:
 	//void render_shadow_map();
 	//void render_scene();
 
+	void addEntity(ecs::Entity entity);
+
 private:
 	std::unordered_map<std::string, Object*> m_objects;
 	MyLight* m_light;
 	Skybox* m_skybox;
+
+	std::vector<ecs::Entity> m_entities;
 };
 
 #endif

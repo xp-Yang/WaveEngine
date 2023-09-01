@@ -26,6 +26,8 @@
     <ClCompile Include="imgui\imgui_impl_opengl3.cpp" />
     <ClCompile Include="imgui\imgui_tables.cpp" />
     <ClCompile Include="imgui\imgui_widgets.cpp" />
+    <ClCompile Include="src\ECS\Component.cpp" />
+    <ClCompile Include="src\ECS\Entity.cpp" />
     <ClCompile Include="src\MySphere.cpp" />
     <ClCompile Include="src\Object.cpp" />
     <ClCompile Include="src\glad.c" />
@@ -42,8 +44,10 @@
     <ClCompile Include="src\Scene.cpp" />
     <ClCompile Include="src\Skybox.cpp" />
     <ClCompile Include="src\stb_image.cpp" />
+    <ClCompile Include="src\ECS\System.cpp" />
     <ClCompile Include="src\test.cpp" />
     <ClCompile Include="src\View.cpp" />
+    <ClCompile Include="src\ECS\World.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="imgui\imconfig.h" />
@@ -55,6 +59,8 @@
     <ClInclude Include="imgui\imstb_rectpack.h" />
     <ClInclude Include="imgui\imstb_textedit.h" />
     <ClInclude Include="imgui\imstb_truetype.h" />
+    <ClInclude Include="src\ECS\Component.hpp" />
+    <ClInclude Include="src\ECS\Entity.hpp" />
     <ClInclude Include="src\MySphere.hpp" />
     <ClInclude Include="src\Object.hpp" />
     <ClInclude Include="resource\shader\light.vs" />
@@ -69,7 +75,9 @@
     <ClInclude Include="src\Shader.hpp" />
     <ClInclude Include="src\Scene.hpp" />
     <ClInclude Include="src\Skybox.hpp" />
+    <ClInclude Include="src\ECS\System.hpp" />
     <ClInclude Include="src\View.hpp" />
+    <ClInclude Include="src\ECS\World.hpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="resource\shader\border.fs" />
