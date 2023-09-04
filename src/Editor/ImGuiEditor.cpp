@@ -5,8 +5,7 @@
 #include <glm/gtc/type_ptr.hpp>
 #include "../Logger.hpp"
 
-ImGuiEditor::ImGuiEditor(const View& view)
-    : view(view)
+ImGuiEditor::ImGuiEditor()
 {
 	pixel_style = false;
 	stop_rotate = false;

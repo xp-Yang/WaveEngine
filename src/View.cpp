@@ -179,12 +179,11 @@ void View::render_for_picking() {
 
         for (auto entity : world.entityView<ecs::MeshComponent, ecs::MaterialComponent, ecs::TransformComponent>()) {
             if (entity.getId() == picked_id) {
-                // TODO ?? 这里怎么刚加完就没了
                 world.addComponent<ecs::PickedComponent>(entity);
                 break;
             }
             else
-                ; // remove component
+                ; // TODO remove component
         }
     }
 

@@ -28,7 +28,7 @@
 
 Scene scene;
 View view;
-ImGuiEditor editor(view);
+ImGuiEditor editor;
 
 GLFWwindow* create_window(int size_x, int size_y) {
     //glfwInit函数来初始化GLFW，glfwWindowHint函数来配置GLFW
@@ -116,6 +116,7 @@ void render_shadow_map(Shader* depth_shader) {
 // done: 定义View、Scene对象职责 答：参考filament
 // done: Model类Mesh和Material对应关系处理
 // done: picking
+// done: 实现ECS架构，Component数据驱动开发，main.cpp所有全局变量封装，所有逻辑分离
 // 10. 解决相机运动死锁问题(direction = (0,-1,0)时)
 // 21. depth_shader可以移出，直接用同一个shader传不同view矩阵即可
 // 11. 光源物理模型

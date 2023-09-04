@@ -6,7 +6,7 @@
 
 class ImGuiEditor {
 public:
-	ImGuiEditor(const View& view);
+	ImGuiEditor();
 	void render();
 	void render_global_editor();
 	void render_camera_editor();
@@ -17,9 +17,6 @@ public:
 	bool normal_debug;
 	float ambient_strength;
 	int icosphere_accuracy;
-
-private:
-	const View& view;
 };
 
 #endif
