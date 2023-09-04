@@ -2,9 +2,6 @@
 #define Mesh_hpp
 #include <glad/glad.h>
 #include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
-#include "stb_image.h"
 #include <vector>
 #include <string>
 
@@ -24,8 +21,8 @@ public:
 	void reset();
 
 	unsigned int get_VAO() const { return m_VAO; }
-	int get_indices_count() const { return m_indices.size(); }
-	int get_vertices_count() const { return m_vertices.size(); }
+	size_t get_indices_count() const { return m_indices.size(); }
+	size_t get_vertices_count() const { return m_vertices.size(); }
 
 protected:
 	unsigned int m_VAO;

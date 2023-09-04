@@ -13,7 +13,7 @@ public:
 	void create_tetrahedron();
 	void create_icosphere(int recursive_depth);
 	std::vector<Triangle> subdivide(Triangle triangle);
-	int get_vertices_count() { return m_triangles.size() * 3; }
+	size_t get_vertices_count() { return m_triangles.size() * 3; }
 	int get_recursive_depth() { return m_recursive_depth; }
 
 private:

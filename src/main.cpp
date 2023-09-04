@@ -5,6 +5,9 @@
 
 #include <glad/glad.h> 
 #include <GLFW/glfw3.h>
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
 
 #include "Object.hpp"
 #include "Skybox.hpp"
@@ -15,46 +18,17 @@
 #include "MyModel.hpp"
 #include "Shader.hpp"
 #include "Renderer.hpp"
-#include "Camera.hpp"
 #include "View.hpp"
 #include "Scene.hpp"
 #include "stb_image.h"
-#include <stdio.h>
-#include <map>
+#include "ECS/World.hpp"
+#include "ECS/Components.hpp"
+#include "Editor/ImGuiEditor.hpp"
+#include "Logger.hpp"
 
 Scene scene;
 View view;
-
-std::string matrix_log(const glm::mat4 mat)
-{
-    std::string result;
-    char buf[1024];
-    sprintf_s(buf, "%.3f %.3f %.3f %.3f \n", mat[0].x, mat[1].x, mat[2].x, mat[3].x);
-    result += buf;
-    sprintf_s(buf, "%.3f %.3f %.3f %.3f \n", mat[0].y, mat[1].y, mat[2].y, mat[3].y);
-    result += buf;
-    sprintf_s(buf, "%.3f %.3f %.3f %.3f \n", mat[0].z, mat[1].z, mat[2].z, mat[3].z);
-    result += buf;
-    sprintf_s(buf, "%.3f %.3f %.3f %.3f \n", mat[0].w, mat[1].w, mat[2].w, mat[3].w);
-    result += buf;
-    //printf("%.3f %.3f %.3f %.3f \n", mat[0][0], mat[1][0], mat[2][0], mat[3][0]);
-    //printf("%.3f %.3f %.3f %.3f \n", mat[0][1], mat[1][1], mat[2][1], mat[3][1]);
-    //printf("%.3f %.3f %.3f %.3f \n", mat[0][2], mat[1][2], mat[2][2], mat[3][2]);
-    //printf("%.3f %.3f %.3f %.3f \n", mat[0][3], mat[1][3], mat[2][3], mat[3][3]);
-    sprintf_s(buf, "\n");
-    result += buf;
-    return result;
-}
-
-std::string vec3_log(const glm::vec3 vec) {
-    std::string result;
-    char buf[1024];
-    sprintf_s(buf, "%.3f %.3f %.3f \n", vec.x, vec.y, vec.z);
-    result += buf;
-    sprintf_s(buf, "\n");
-    result += buf;
-    return result;
-}
+ImGuiEditor editor(view);
 
 GLFWwindow* create_window(int size_x, int size_y) {
     //glfwInit函数来初始化GLFW，glfwWindowHint函数来配置GLFW
@@ -84,221 +58,6 @@ GLFWwindow* create_window(int size_x, int size_y) {
     return window;
 }
 
-// TODO remove
-static bool pixel_style = false;
-static bool stop_rotate = false;
-static bool normal_debug = false;
-static float ambient_strength = 0.1f;
-static int icosphere_accuracy = 8;
-
-// TODO 以后在UI上直接编辑这些属性
-void configure_scene() {
-    Skybox& skybox = *const_cast<Skybox*>(&scene.get_skybox());
-    auto& light = *const_cast<MyLight*>(&scene.get_light());
-    auto& cube = *scene.object("cube");
-    MySphere& sphere = *static_cast<MySphere*>(scene.object("sphere"));
-    auto& ground = *scene.object("ground");
-    Model& nanosuit = *static_cast<Model*>(scene.object("nanosuit"));
-    Model& yoko = *static_cast<Model*>(scene.object("yoko"));
-
-    Shader* skybox_shader = skybox.material().shader;
-    Shader* light_shader = light.material().shader;
-    Shader* cube_shader = cube.material().shader;
-    Shader* sphere_shader = sphere.material().shader;
-    Shader* ground_shader = ground.material().shader;
-    Shader* model_shader = nanosuit.material().shader;
-    Shader* yoko_shader = yoko.material().shader;
-
-
-    // skybox
-    {
-    }
-
-    // light
-    {
-        static float time_value = 0.0f;
-        if (stop_rotate) {
-            ;
-        }
-        if (!stop_rotate) {
-            time_value = glfwGetTime();
-        }
-        auto scale = glm::scale(glm::mat4(1.0f), glm::vec3(0.2f));
-        glm::mat4 displacement(1.0f);
-        displacement[3].x = 12.0f;
-        glm::mat4 rotate = glm::rotate(glm::mat4(1.0f), time_value * 3, glm::vec3(0.0f, 1.0f, 0.0f));
-        auto translate = glm::translate(glm::mat4(1.0f), { 0.0f, 12.0f, 0.0f });
-        light.set_model_matrix(translate * rotate * displacement * scale);
-    }
-
-    // sphere
-    {
-        if (icosphere_accuracy != sphere.get_recursive_depth()) {
-            sphere.create_icosphere(icosphere_accuracy);
-            icosphere_accuracy = sphere.get_recursive_depth();
-        }
-        auto sphere_translate = glm::translate(glm::mat4(1.0f), glm::vec3(1.0f, 2.0f, 2.0f));
-        sphere.set_model_matrix(sphere_translate * glm::mat4(1.0f));
-    }
-
-    // cube
-    {
-        glm::vec3 cube_offset = { 0.0f, 1.0f, 0.0f };
-        auto translate = glm::translate(glm::mat4(1.0f), cube_offset);
-        cube.set_model_matrix(translate); // TODO 不知道为什么必须要先设一下model_matrix才能被选中
-    }
-
-    // ground
-    {
-        ground.set_renderable(false);
-    }
-
-    // nanosuit
-    {
-        auto nanosuit_scale = glm::scale(glm::mat4(1.0f), glm::vec3(0.4f));
-        auto nanosuit_translate = glm::translate(glm::mat4(1.0f), glm::vec3(5.0f, 0.0f, 0.0f));
-        nanosuit.set_model_matrix(nanosuit_translate * nanosuit_scale);
-    }
-
-    // yoko
-    {
-        auto yoko_scale = glm::scale(glm::mat4(1.0f), glm::vec3(0.25f));
-        auto yoko_translate = glm::translate(glm::mat4(1.0f), glm::vec3(-5.0f, 0.0f, 0.0f));
-        yoko.set_model_matrix(yoko_translate * yoko_scale);
-    }
-}
-
-void configure_object()
-{
-    static Object* last_obj = nullptr;
-    Object* curr_obj = nullptr;
-    std::string obj_name = "";
-    for (auto& item : view.get_scene().get_objects()) {
-        if (item.second) {
-            if (item.second->is_picked()) {
-                curr_obj = item.second;
-                obj_name = item.first;
-            }
-        }
-    }
-    if (!curr_obj)
-        return;
-
-    bool visible = curr_obj->renderable();
-    bool reflection = curr_obj->is_enable_reflection();
-    glm::vec3 color = curr_obj->material().color;
-    float shininess = curr_obj->material().shininess;
-    glm::vec3 obj_offset = curr_obj->get_model_matrix()[3];
-    float explosion_ratio = curr_obj->get_explostion_ratio();
-
-    auto reset_param = [](Object* curr_obj) {
-    };
-
-    if (curr_obj != last_obj) {
-        last_obj = curr_obj;
-        reset_param(curr_obj);
-    }
-
-    ImGui::Begin((obj_name + " controller").c_str(), nullptr, ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse);
-    ImGui::Checkbox((std::string("visible") + "##" + obj_name).c_str(), &visible);
-    ImGui::Checkbox((std::string("enable reflection") + "##" + obj_name).c_str(), &reflection);
-    ImGui::ColorEdit3((std::string("color") + "##" + obj_name).c_str(), (float*)&color);
-    ImGui::SliderFloat((std::string("shininess") + "##" + obj_name).c_str(), &shininess, 0.1f, 512.0f);
-    ImGui::SliderFloat((std::string("explosion ratio") + "##" + obj_name).c_str(), &explosion_ratio, 0.0f, 10.0f);
-    ImGui::PushItemWidth(85.0f);
-    ImGui::SliderFloat((std::string("##x") + "##" + obj_name).c_str(), &obj_offset.x, -10.0f, 10.0f);
-    ImGui::SameLine();
-    ImGui::SliderFloat((std::string("##y") + "##" + obj_name).c_str(), &obj_offset.y, -10.0f, 10.0f);
-    ImGui::SameLine();
-    ImGui::SliderFloat((std::string("xyz") + "##" + obj_name).c_str(), &obj_offset.z, -10.0f, 10.0f);
-    ImGui::PopItemWidth();
-    // 编辑对象材质属性
-    for (int i = 0; i < curr_obj->get_materials().size(); i++) {
-        curr_obj->material(i).ambient_strength;
-        curr_obj->material(i).color = color;
-        curr_obj->material(i).shininess = shininess;
-        //curr_obj->material(i).set_diffuse_map();
-        //curr_obj->material(i).set_specular_map();
-    }
-    // 编辑对象坐标
-    auto new_matrix = curr_obj->get_model_matrix();
-    new_matrix[3] = glm::vec4(obj_offset, 1.0f);
-    curr_obj->set_model_matrix(new_matrix);
-    // 编辑可见性
-    curr_obj->set_renderable(visible);
-    // 是否开启法向量检查
-    // 编辑对象的explosion ratio
-    curr_obj->set_explostion_ratio(explosion_ratio);
-    // 编辑对象是否开启反射
-    curr_obj->enable_reflection(reflection);
-    ImGui::End();
-}
-
-void render_imgui() {
-    auto& camera = view.get_camera();
-    auto& light = *const_cast<MyLight*>(&scene.get_light());
-    auto& cube = *scene.object("cube");
-    auto& ground = *scene.object("ground");
-
-    ImGui::Begin("Global Controller", nullptr, ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse);
-
-    if (ImGui::Checkbox("pixel style", &pixel_style));
-
-    ImGui::SliderFloat("ambient strength", &ambient_strength, 0.0f, 1.0f);
-
-    //ImGui::SliderFloat("ground diffuse strength", &ground.material().diffuse_strength, 0, 1);
-    //ImGui::SliderFloat("ground specular strength", &ground.material().specular_strength, 0, 1);
-    ImGui::SliderFloat("ground shininess", &ground.material().shininess, 0, 512.f);
-
-    ImGui::SliderInt("icosphere accuracy", &icosphere_accuracy, 0, 10);
-
-    if (ImGui::Checkbox("stop rotate", &stop_rotate));
-    if (ImGui::Checkbox("open normal debug", &normal_debug));
-
-    // log
-    {
-        ImGui::NewLine();
-        ImGui::Text("light matrix:");
-        std::string test_light = matrix_log(light.get_model_matrix());
-        ImGui::Text(test_light.c_str());
-
-        ImGui::NewLine();
-        ImGui::Text("cube matrix:");
-        std::string test_cube = matrix_log(cube.get_model_matrix());
-        ImGui::Text(test_cube.c_str());
-
-        //ImGui::NewLine();
-        //ImGui::Text("ground matrix:");
-        //std::string test_ground = matrix_log(ground.get_model_matrix());
-        //ImGui::Text(test_ground.c_str());
-
-        ImGui::NewLine();
-        ImGui::Text("view matrix:");
-        std::string test_view = matrix_log(camera.get_view());
-        ImGui::Text(test_view.c_str());
-
-        ImGui::NewLine();
-        ImGui::Text("inverse view matrix:");
-        std::string inverse_view = matrix_log(glm::inverse(camera.get_view()));
-        ImGui::Text(inverse_view.c_str());
-
-        ImGui::NewLine();
-        ImGui::Text("camera position:");
-        std::string test_camera_pos = vec3_log(camera.get_position());
-        ImGui::Text(test_camera_pos.c_str());
-
-        ImGui::NewLine();
-        ImGui::Text("camera direction:");
-        std::string test_camera_dir = vec3_log(camera.get_direction().dir);
-        ImGui::Text(test_camera_dir.c_str());
-
-        ImGuiIO& io = ImGui::GetIO();
-        ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / io.Framerate, io.Framerate);
-    }
-
-    ImGui::End();
-}
-
 void render_shadow_map(Shader* depth_shader) {
     Skybox& skybox = *const_cast<Skybox*>(&scene.get_skybox());
     auto& light = *const_cast<MyLight*>(&scene.get_light());
@@ -312,26 +71,23 @@ void render_shadow_map(Shader* depth_shader) {
 
     glm::mat4 lightSpaceMatrix = light.get_light_space_matrix();
 
-    if (depth_shader) {
-        depth_shader->start_using();
-        depth_shader->setMatrix("view", 1, lightSpaceMatrix);
-    }
-
     depth_shader->start_using();
+    depth_shader->setMatrix("view", 1, lightSpaceMatrix);
+
     depth_shader->setMatrix("model", 1, light.get_model_matrix());
-    renderer.draw(*depth_shader, light.mesh().get_VAO(), DrawMode::Indices, light.mesh().get_indices_count());
+    renderer.drawIndex(*depth_shader, light.mesh().get_VAO(), light.mesh().get_indices_count());
 
     depth_shader->start_using();
     depth_shader->setMatrix("model", 1, sphere.get_model_matrix());
-    renderer.draw(*depth_shader, sphere.mesh().get_VAO(), DrawMode::Arrays, 0, sphere.mesh().get_vertices_count());
+    renderer.drawTriangle(*depth_shader, sphere.mesh().get_VAO(), sphere.mesh().get_vertices_count());
 
     depth_shader->start_using();
     depth_shader->setMatrix("model", 1, cube.get_model_matrix());
-    renderer.draw(*depth_shader, cube.mesh().get_VAO(), DrawMode::Indices, cube.mesh().get_indices_count());
+    renderer.drawIndex(*depth_shader, cube.mesh().get_VAO(), cube.mesh().get_indices_count());
 
     depth_shader->start_using();
     depth_shader->setMatrix("model", 1, ground.get_model_matrix());
-    renderer.draw(*depth_shader, ground.mesh().get_VAO(), DrawMode::Indices, ground.mesh().get_indices_count());
+    renderer.drawIndex(*depth_shader, ground.mesh().get_VAO(), ground.mesh().get_indices_count());
 
     depth_shader->start_using();
     depth_shader->setMatrix("model", 1, nanosuit.get_model_matrix());
@@ -340,33 +96,6 @@ void render_shadow_map(Shader* depth_shader) {
     depth_shader->start_using();
     depth_shader->setMatrix("model", 1, yoko.get_model_matrix());
     yoko.draw(*depth_shader, renderer);
-}
-
-void render_normal() {
-    static Shader* normal_shader = new Shader("resource/shader/model.vs", "resource/shader/normal.fs", "resource/shader/normal.gs");
-    if (!normal_debug)
-        return;
-    auto& camera = view.get_camera();
-
-    normal_shader->start_using();
-    normal_shader->setMatrix("view", 1, camera.get_view());
-    normal_shader->setMatrix("projection", 1, camera.get_projection());
-    Renderer renderer;
-    for (auto& item : view.get_scene().get_objects()) {
-        if (item.second && item.second->renderable()) {
-            Object& obj = *item.second;
-            normal_shader->start_using();
-            normal_shader->setMatrix("model", 1, obj.get_model_matrix());
-            for (int i = 0; i < obj.get_meshes().size(); i++) {
-                if (!obj.render_as_indices()) {
-                    renderer.draw(*normal_shader, obj.mesh(i).get_VAO(), DrawMode::Arrays, 0, obj.mesh(i).get_vertices_count());
-                }
-                else {
-                    renderer.draw(*normal_shader, obj.mesh(i).get_VAO(), DrawMode::Indices, obj.mesh(i).get_indices_count());
-                }
-            }
-        }
-    }
 }
 
 // TODO:
@@ -386,8 +115,9 @@ void render_normal() {
 // done: 地板铺满
 // done: 定义View、Scene对象职责 答：参考filament
 // done: Model类Mesh和Material对应关系处理
+// done: picking
 // 10. 解决相机运动死锁问题(direction = (0,-1,0)时)
-// 15. picking
+// 21. depth_shader可以移出，直接用同一个shader传不同view矩阵即可
 // 11. 光源物理模型
 // 12. 阴影贴图(done)、帧缓冲(done)、法线贴图、tbn矩阵、天空盒(done)、反射(done)等知识学习
 // 13. 帧缓冲的附件?
@@ -398,11 +128,11 @@ void render_normal() {
 // 19. 天空盒的模型矩阵大小代表着什么
 // 19. 当前反射算法的弱点：距离不对
 // 20. 动态环境贴图，球面时
-// 21. depth_shader可以移出，直接用同一个shader传不同view矩阵即可
 // 22. 窗口大小可缩放
 // 23. 批渲染？
 // 24. 学会renderdoc使用
 // 25. 优化cpu和gpu的io调用
+// 26. Editor 编辑材质后，保存文件
 
 unsigned int creat_quad() {
     float quadVertices[] = { // vertex attributes for a quad that fills the entire screen in Normalized Device Coordinates.
@@ -518,8 +248,6 @@ void start_render_loop(GLFWwindow* window) {
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
 
-        configure_object();
-
         glfwPollEvents();//检查触发事件（比如键盘输入、鼠标移动等），然后调用对应的回调函数
         view.mouse_and_key_callback();
 
@@ -544,7 +272,7 @@ void start_render_loop(GLFWwindow* window) {
         // 2. 生成颜色缓冲
         float color_buffer_width = WINDOW_WIDTH;
         float color_buffer_height = WINDOW_HEIGHT;
-        if (pixel_style) {
+        if (editor.pixel_style) {
             color_buffer_width /= 6.0f;
             color_buffer_height /= 6.0f;
         }
@@ -552,12 +280,14 @@ void start_render_loop(GLFWwindow* window) {
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, color_buffer_width, color_buffer_height, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
         glViewport(0, 0, color_buffer_width, color_buffer_height);
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
-        glClearColor(ambient_strength * 0.5f, ambient_strength * 0.5f, ambient_strength * 0.5f, 1.0f);
+        glClearColor(editor.ambient_strength * 0.5f, editor.ambient_strength * 0.5f, editor.ambient_strength * 0.5f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
         view.enable_shadow_map(true);
-        renderer.render(view);
+        //renderer.render(view);
+        renderer.render_ecs(view);
 
-        render_normal();
+        if (editor.normal_debug)
+            renderer.render_normal(view);
 
         // 3. 默认缓冲
         //glViewport(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
@@ -567,7 +297,7 @@ void start_render_loop(GLFWwindow* window) {
         //glBindTexture(GL_TEXTURE_2D, picking_texture);
         //renderer.draw(*frame_shader, quad_VAO, DrawMode::Arrays, 0, 6);
 
-        render_imgui();
+        editor.render();
 
         ImGui::Render();
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
@@ -578,7 +308,7 @@ void start_render_loop(GLFWwindow* window) {
 
 int main()
 {
-    GLFWwindow* window = create_window(WINDOW_WIDTH, WINDOW_HEIGHT);
+    GLFWwindow* window = create_window((int)WINDOW_WIDTH, (int)WINDOW_HEIGHT);
     //glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED); // FPS 模式
 
     // setup imgui
@@ -593,11 +323,7 @@ int main()
     ImGui_ImplOpenGL3_Init("#version 330");
 
     scene.init();
-    configure_scene();
 
-    glm::vec3 camera_pos(0.0f, 15.0f, 15.0f);
-    Camera* camera = new Camera(camera_pos, glm::vec3(0.0f) - camera_pos);
-    view.set_camera(camera);
     view.set_scene(&scene);
 
     start_render_loop(window);

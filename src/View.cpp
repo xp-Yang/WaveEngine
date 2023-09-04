@@ -1,4 +1,5 @@
 #include "View.hpp"
+#include "Renderer.hpp"
 
 // TODO
 //void View::enable_shadow_map(bool enable)
@@ -45,11 +46,10 @@
 void View::mouse_and_key_callback()
 {
     ImGuiIO& io = ImGui::GetIO();
-    auto& camera = get_camera();
 
-    double xpos, ypos;
-    xpos = io.MousePos.x;
-    ypos = io.MousePos.y;
+    float xpos, ypos;
+    xpos = (float)io.MousePos.x;
+    ypos = (float)io.MousePos.y;
     if (io.WantCaptureMouse) {
         return;
     }
@@ -63,14 +63,14 @@ void View::mouse_and_key_callback()
         last_pos_y = ypos;
         last_left_mouse_status = io.MouseDown[0];
         if(io.MouseDown[0])
-            render_picking();
+            render_for_picking();
     }
     if (io.MouseDown[0]) {
         float delta_x = xpos - last_pos_x;
         float delta_y = -(ypos - last_pos_y);
         last_pos_x = xpos;
         last_pos_y = ypos;
-        camera.mouse_process(delta_x, delta_y, 0);
+        ecs::CameraSystem::mouse_process(delta_x, delta_y, 0);
     }
 
     if (last_right_mouse_status != io.MouseDown[1]) {
@@ -83,32 +83,33 @@ void View::mouse_and_key_callback()
         float delta_y = -(ypos - last_pos_y);
         last_pos_x = xpos;
         last_pos_y = ypos;
-        camera.mouse_process(delta_x, delta_y, 1);
+        ecs::CameraSystem::mouse_process(delta_x, delta_y, 1);
     }
 
-    camera.mouse_scroll_process(io.MouseWheel);
+    ecs::CameraSystem::mouse_scroll_process(io.MouseWheel);
 
     float delta_time = 1.0f / io.Framerate;
     if (io.KeyShift)
         delta_time /= 10.0f;
     if (io.KeysDown['W']) {
-        camera.key_process('W', delta_time);
+        ecs::CameraSystem::key_process('W', delta_time);
     }
     if (io.KeysDown['A']) {
-        camera.key_process('A', delta_time);
+        ecs::CameraSystem::key_process('A', delta_time);
     }
     if (io.KeysDown['S']) {
-        camera.key_process('S', delta_time);
+        ecs::CameraSystem::key_process('S', delta_time);
     }
     if (io.KeysDown['D']) {
-        camera.key_process('D', delta_time);
+        ecs::CameraSystem::key_process('D', delta_time);
     }
 }
 
-void View::render_picking() {
+void View::render_for_picking() {
+    Renderer renderer;
+
     static Shader* picking_shader = new Shader("resource/shader/picking.vs", "resource/shader/picking.fs");
 
-    auto& camera = get_camera();
     Skybox& skybox = *const_cast<Skybox*>(&get_scene().get_skybox());
     auto& light = *const_cast<MyLight*>(&get_scene().get_light());
 
@@ -120,66 +121,42 @@ void View::render_picking() {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
     picking_shader->start_using();
-    picking_shader->setMatrix("view", 1, camera.get_view());
-    picking_shader->setMatrix("projection", 1, camera.get_projection());
 
-    {
-        int id = skybox.get_id();
-        int r = (id & 0x000000FF) >> 0;
-        int g = (id & 0x0000FF00) >> 8;
-        int b = (id & 0x00FF0000) >> 16;
-        glm::vec4 color(r / 255.0f, g / 255.0f, b / 255.0f, 1.0f);
-        picking_shader->setFloat4("picking_color", color);
-        picking_shader->setMatrix("model", 1, skybox.get_model_matrix());
-        glBindVertexArray(skybox.mesh().get_VAO());
-        if (!skybox.render_as_indices()) {
-            glDrawArrays(GL_TRIANGLES, 0, skybox.mesh().get_vertices_count());
-        }
-        else {
-            glDrawElements(GL_TRIANGLES, skybox.mesh().get_indices_count(), GL_UNSIGNED_INT, 0);
-        }
-        glBindVertexArray(0);
+    auto& world = ecs::World::get();
+    glm::mat4 camera_view = glm::mat4(1.0f);
+    glm::mat4 camera_projection;
+    for (auto entity : world.entityView<ecs::CameraComponent>()) {
+        ecs::CameraComponent& camera = *world.getComponent<ecs::CameraComponent>(entity);
+        camera_view = camera.view;
+        camera_projection = camera.projection;
     }
+    picking_shader->setMatrix("view", 1, camera_view);
+    picking_shader->setMatrix("projection", 1, camera_projection);
 
-    {
-        int id = light.get_id();
-        int r = (id & 0x000000FF) >> 0;
-        int g = (id & 0x0000FF00) >> 8;
-        int b = (id & 0x00FF0000) >> 16;
-        glm::vec4 color(r / 255.0f, g / 255.0f, b / 255.0f, 1.0f);
-        picking_shader->setFloat4("picking_color", color);
-        picking_shader->setMatrix("model", 1, light.get_model_matrix());
-        glBindVertexArray(light.mesh().get_VAO());
-        if (!light.render_as_indices()) {
-            glDrawArrays(GL_TRIANGLES, 0, light.mesh().get_vertices_count());
-        }
-        else {
-            glDrawElements(GL_TRIANGLES, light.mesh().get_indices_count(), GL_UNSIGNED_INT, 0);
-        }
-        glBindVertexArray(0);
-    }
+    for (auto entity : world.entityView<ecs::MeshComponent, ecs::MaterialComponent, ecs::TransformComponent>()) {
+        auto& mesh = *world.getComponent<ecs::MeshComponent>(entity);
+        auto& model_matrix = *world.getComponent<ecs::TransformComponent>(entity);
 
-    for (auto& item : get_scene().get_objects()) {
-        if (item.second && item.second->renderable()) {
-            Object* obj = item.second;
-            picking_shader->setMatrix("model", 1, obj->get_model_matrix());
-            for (int i = 0; i < obj->get_meshes().size(); i++) {
-                int id = obj->get_id();
-                int r = (id & 0x000000FF) >> 0;
-                int g = (id & 0x0000FF00) >> 8;
-                int b = (id & 0x00FF0000) >> 16;
-                glm::vec4 color(r / 255.0f, g / 255.0f, b / 255.0f, 1.0f);
-                picking_shader->setFloat4("picking_color", color);
-                glBindVertexArray(obj->mesh(i).get_VAO());
-                if (!obj->render_as_indices()) {
-                    glDrawArrays(GL_TRIANGLES, 0, obj->mesh(i).get_vertices_count());
-                }
-                else {
-                    glDrawElements(GL_TRIANGLES, obj->mesh(i).get_indices_count(), GL_UNSIGNED_INT, 0);
-                }
-                glBindVertexArray(0);
+        auto model_mat = model_matrix.transform();
+        picking_shader->setMatrix("model", 1, model_mat);
+        for (int i = 0; i < mesh.meshes.size(); i++) {
+            int id = entity.getId();
+            int r = (id & 0x000000FF) >> 0;
+            int g = (id & 0x0000FF00) >> 8;
+            int b = (id & 0x00FF0000) >> 16;
+            glm::vec4 color(r / 255.0f, g / 255.0f, b / 255.0f, 1.0f);
+            picking_shader->setFloat4("picking_color", color);
+
+            auto& name = *world.getComponent<ecs::NameComponent>(entity);
+            if (name.name == "sphere") {
+                renderer.drawTriangle(*picking_shader, mesh.meshes[i].get_VAO(), mesh.meshes[i].get_vertices_count());
+            }
+            else {
+                renderer.drawIndex(*picking_shader, mesh.meshes[i].get_VAO(), mesh.meshes[i].get_indices_count());
             }
         }
+
+        // TODO skybox 的模型矩阵是mat4(1.0f)，picking也是按照这个位置记录的
     }
 
     // Wait until all the pending drawing commands are really done.
@@ -195,18 +172,19 @@ void View::render_picking() {
         //glReadBuffer(GL_COLOR_ATTACHMENT0);
         unsigned char data[4] = { 0,0,0,0 };
         // 注意这里传给glReadPixels()的坐标是相对于屏幕左下角的
-        int x = ImGui::GetIO().MousePos.x;
-        int y = WINDOW_HEIGHT - ImGui::GetIO().MousePos.y;
+        int x = (int)ImGui::GetIO().MousePos.x;
+        int y = (int)(WINDOW_HEIGHT - ImGui::GetIO().MousePos.y);
         glReadPixels(x, y, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, data);
         int picked_id = (int)data[0] + (((int)data[1]) << 8) + (((int)data[2]) << 16);
-        for (auto& item : get_scene().get_objects()) {
-            if (item.second) {
-                if (item.second->get_id() == picked_id) {
-                    item.second->set_picked(true);
-                }
-                else
-                    item.second->set_picked(false);
+
+        for (auto entity : world.entityView<ecs::MeshComponent, ecs::MaterialComponent, ecs::TransformComponent>()) {
+            if (entity.getId() == picked_id) {
+                // TODO ?? 这里怎么刚加完就没了
+                world.addComponent<ecs::PickedComponent>(entity);
+                break;
             }
+            else
+                ; // remove component
         }
     }
 

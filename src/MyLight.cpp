@@ -1,5 +1,5 @@
 #include "MyLight.hpp"
-#include "Camera.hpp"
+#include "ECS/Components.hpp"
 
 MyLight::MyLight()
     : Object()
@@ -73,7 +73,7 @@ const glm::mat4& MyLight::get_light_space_matrix() const {
     glm::mat4 light_projection = glm::ortho(-15.0f * WINDOW_WIDTH / WINDOW_HEIGHT, 15.0f * WINDOW_WIDTH / WINDOW_HEIGHT, -15.0f, 15.0f, 0.1f, 100.0f);
     //lightProjection = glm::perspective(glm::radians(45.0f), /*1.0f*/WINDOW_WIDTH / WINDOW_HEIGHT, 0.1f, 100.0f);
     glm::vec3 light_pos = get_model_matrix()[3];
-    glm::mat4 light_view = glm::lookAt(light_pos, glm::vec3(0.0f, 0.0f, 0.0f), up);
+    glm::mat4 light_view = glm::lookAt(light_pos, glm::vec3(0.0f, 0.0f, 0.0f), ecs::CameraComponent::up);
     glm::mat4 ret = light_projection * light_view;
     return ret;
 }

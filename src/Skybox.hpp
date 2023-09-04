@@ -1,7 +1,6 @@
 #ifndef Skybox_hpp
 #define Skybox_hpp
 
-#include "Object.hpp"
 #include "MyCube.hpp"
 
 class Skybox : public MyCube {

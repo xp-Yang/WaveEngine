@@ -1,5 +1,5 @@
 #include "Material.hpp"
-#include "Mesh.hpp"
+#include "stb_image.h"
 
 void Material::update_shader_binding() const {
 	if (shader) {

@@ -1,7 +1,9 @@
 #ifndef View_hpp
 #define View_hpp
 
-#include "Camera.hpp"
+#include "ECS/World.hpp"
+#include "ECS/CameraSystem.hpp"
+#include "ECS/Components.hpp"
 #include "Scene.hpp"
 
 struct RenderParam {
@@ -20,11 +22,11 @@ class View {
 public:
     View() = default;
 
-    void set_camera(Camera* camera) { this->camera = camera; } //View 并不拥有 Camera
+    //void set_camera(Camera* camera) { this->camera = camera; } //View 并不拥有 Camera
     void set_scene(Scene* scene) { this->scene = scene; }    //View 并不拥有 Scene
     void set_view_port(int width, int height) { glViewport(0, 0, width, height); }
-    const Camera& get_camera() const { return *camera; }
-    Camera& get_camera() { return *camera; }
+    //const Camera& get_camera() const { return *camera; }
+    //Camera& get_camera() { return *camera; }
     const Scene& get_scene() const { return *scene; }
     Scene& get_scene() { return *scene; }
 
@@ -38,13 +40,13 @@ public:
     void set_picking_FBO(unsigned int fbo) { picking_FBO = fbo; }
     void mouse_and_key_callback();
 
-    void render_picking();
+    void render_for_picking();
 
 private:
-    Camera* camera{ nullptr };
+    //Camera* camera{ nullptr };
     Scene* scene{ nullptr };
 
-    float render_parameters;
+    //float render_parameters;
     unsigned int shadow_map_id;
     unsigned int picking_FBO;
     bool m_enable_shadow_map{ false };

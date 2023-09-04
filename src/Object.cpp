@@ -1,5 +1,4 @@
 #include "Object.hpp"
-#include "stb_image.h"
 
 Object::Object()
     : m_model_matrix(glm::mat4(1.0f))

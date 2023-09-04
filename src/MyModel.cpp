@@ -77,7 +77,7 @@ Mesh Model::load_mesh(aiMesh* mesh, const aiScene* scene)
         m_materials.push_back(load_material(material));
     }
     else {
-        assert(false, "there is mesh has no material");
+        assert(false);
     }
 
     // ´¦ÀíË÷Òý
@@ -166,6 +166,6 @@ void Model::draw(const Shader& shader, const Renderer& renderer)
         // always good practice to set everything back to defaults once configured.
         glActiveTexture(GL_TEXTURE0);
 
-        renderer.draw(shader, m_meshes[i].get_VAO(), DrawMode::Indices, m_meshes[i].get_indices_count(), 0);
+        renderer.drawIndex(shader, m_meshes[i].get_VAO(), m_meshes[i].get_indices_count());
     }
 }

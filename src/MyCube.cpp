@@ -1,5 +1,4 @@
 #include "MyCube.hpp"
-#include "stb_image.h"
 
 MyCube::MyCube()
     : Object()

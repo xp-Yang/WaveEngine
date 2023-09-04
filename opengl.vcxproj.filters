@@ -21,9 +21,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\Camera.cpp">
-      <Filter>源文件\src</Filter>
-    </ClCompile>
     <ClCompile Include="src\MyCube.cpp">
       <Filter>源文件\src</Filter>
     </ClCompile>
@@ -96,23 +93,32 @@
     <ClCompile Include="src\Skybox.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="src\ECS\Entity.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="src\ECS\Component.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
     <ClCompile Include="src\ECS\System.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="src\ECS\World.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="src\ECS\Components.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Editor\ImGuiEditor.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Logger.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ECS\CameraSystem.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ECS\RenderSystem.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ECS\MaterialSystem.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\Camera.hpp">
-      <Filter>源文件\src</Filter>
-    </ClInclude>
     <ClInclude Include="src\MyCube.hpp">
       <Filter>源文件\src</Filter>
     </ClInclude>
@@ -182,16 +188,28 @@
     <ClInclude Include="src\Skybox.hpp">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="src\ECS\Entity.hpp">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="src\ECS\Component.hpp">
-      <Filter>头文件</Filter>
-    </ClInclude>
     <ClInclude Include="src\ECS\System.hpp">
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="src\ECS\World.hpp">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\ECS\Components.hpp">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Editor\ImGuiEditor.hpp">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Logger.hpp">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\ECS\CameraSystem.hpp">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\ECS\RenderSystem.hpp">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\ECS\MaterialSystem.hpp">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>
@@ -232,9 +250,6 @@
     <None Include="resource\shader\picking.fs" />
   </ItemGroup>
   <ItemGroup>
-    <Image Include="resource\images\desert.jpg">
-      <Filter>资源文件</Filter>
-    </Image>
     <Image Include="resource\images\cube_specular.png">
       <Filter>资源文件</Filter>
     </Image>

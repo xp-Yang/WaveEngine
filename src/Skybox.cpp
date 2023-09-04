@@ -1,4 +1,5 @@
 #include "Skybox.hpp"
+#include "stb_image.h"
 
 Skybox::Skybox()
 	: MyCube()
@@ -14,6 +15,8 @@ Skybox::Skybox()
         "resource/images/skybox/front.jpg",
         "resource/images/skybox/back.jpg"
     };
+
+    // TODO 是否可以放到material中
     m_texture_id = generate_cube_map(faces);
 }
 

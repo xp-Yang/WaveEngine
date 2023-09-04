@@ -3,17 +3,16 @@
 #include "Shader.hpp"
 #include "Mesh.hpp"
 #include "View.hpp"
-#include <GLFW/glfw3.h>
 
-enum class DrawMode {
-    Indices,
-    Arrays
-};
 class Renderer {
 public:
     Renderer() = default;
-    void draw(const Shader& shader, GLuint vao_id, DrawMode mode, int indices_count = 0, int array_count = 0) const;
+    void drawIndex(const Shader& shader, GLuint vao_id, size_t indices_count) const;
+    void drawTriangle(const Shader& shader, GLuint vao_id, size_t array_count) const;
     void render(const View& view);
+    void render_ecs(const View& view);
+    void render_picking_border();
+    void render_normal(const View& view);
 };
 
 #endif
