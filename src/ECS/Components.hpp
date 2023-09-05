@@ -99,9 +99,7 @@ struct SkyboxComponent {
 struct LightComponent {};
 
 // 不需要数据，仅用作标记选中的entity
-struct PickedComponent {
-	int test = 0;
-};
+struct PickedComponent {};
 
 struct BoxCollider3DComponent {
 

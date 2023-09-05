@@ -4,8 +4,6 @@
 Skybox::Skybox()
 	: MyCube()
 {
-	m_model_matrix = glm::scale(glm::mat4(1.0f), glm::vec3(1.0f));
-
     std::vector<std::string> faces
     {
         "resource/images/skybox/right.jpg",

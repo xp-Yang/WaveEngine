@@ -20,14 +20,7 @@ public:
     Material& material(const int index = 0) { return index < m_materials.size() ? m_materials[index] : Object::default_material; }
     void append_mesh(const Mesh& mesh) { m_meshes.push_back(mesh); }
     void append_material(const Material& material) { m_materials.push_back(material); }
-    const glm::mat4& get_model_matrix() const { return m_model_matrix; }
-    void set_model_matrix(const glm::mat4& mat) { m_model_matrix = mat; }
-    const glm::vec3& get_world_pos() const { return m_model_matrix[3]; }
-    bool renderable() const { return m_is_renderable; }
-    void set_renderable(bool renderable) { m_is_renderable = renderable; }
     int get_id() const { return m_id; }
-    bool is_picked() const { return m_picked; }
-    void set_picked(bool picked) { m_picked = picked; }
     bool is_enable_reflection() const { return m_enable_relection; }
     void enable_reflection(bool enable) { m_enable_relection = enable; }
     float get_explostion_ratio() const { return m_explosion_ratio; }
@@ -36,9 +29,6 @@ public:
 protected:
     std::vector<Mesh> m_meshes;
     std::vector<Material> m_materials;
-    glm::mat4 m_model_matrix;
-    bool m_is_renderable;
-    bool m_picked;
     bool m_enable_relection;
     float m_explosion_ratio;
     int m_id;

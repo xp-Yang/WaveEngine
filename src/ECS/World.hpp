@@ -117,8 +117,12 @@ public:
         if (component_id >= m_component_pools.size()) {
             return;
         }
-        else
-            m_component_pools.erase(m_component_pools.begin() + component_id);
+        else {
+            // TODO
+            // 1.先要判断是否所有entity都不再使用这个component了
+            // 2.要正确释放里面内容
+            //m_component_pools.erase(m_component_pools.begin() + component_id);
+        }
     }
 
     template<typename... ComponentTypes>

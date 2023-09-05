@@ -4,12 +4,6 @@
 MyLight::MyLight()
     : Object()
 {
-    auto scale = glm::scale(glm::mat4(1.0f), glm::vec3(0.2f));
-    m_model_matrix = scale * glm::mat4(1.0f);
-
-	auto translate = glm::translate(glm::mat4(1.0f), { 0.0f, 5.0f, 0.0f });
-	m_model_matrix = translate * m_model_matrix;
-
     init_meshes();
 }
 
@@ -70,9 +64,11 @@ void MyLight::init_meshes()
 }
 
 const glm::mat4& MyLight::get_light_space_matrix() const {
+    // TODO “∆»Îlightsystem
     glm::mat4 light_projection = glm::ortho(-15.0f * WINDOW_WIDTH / WINDOW_HEIGHT, 15.0f * WINDOW_WIDTH / WINDOW_HEIGHT, -15.0f, 15.0f, 0.1f, 100.0f);
     //lightProjection = glm::perspective(glm::radians(45.0f), /*1.0f*/WINDOW_WIDTH / WINDOW_HEIGHT, 0.1f, 100.0f);
-    glm::vec3 light_pos = get_model_matrix()[3];
+    //glm::vec3 light_pos = get_model_matrix()[3];
+    glm::vec3 light_pos = glm::vec3(12.0f, 12.0f, 0.0f);
     glm::mat4 light_view = glm::lookAt(light_pos, glm::vec3(0.0f, 0.0f, 0.0f), ecs::CameraComponent::up);
     glm::mat4 ret = light_projection * light_view;
     return ret;

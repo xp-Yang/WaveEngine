@@ -3,9 +3,6 @@
 MyGround::MyGround()
     : Object()
 {
-    auto scale = glm::scale(glm::mat4(1.0f), glm::vec3(20.0f));
-    m_model_matrix = scale * glm::mat4(1.0f);
-
     init_meshes();
 }
 

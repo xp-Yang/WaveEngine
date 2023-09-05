@@ -25,6 +25,7 @@
 #include "ECS/Components.hpp"
 #include "Editor/ImGuiEditor.hpp"
 #include "Logger.hpp"
+#include "FrameBufferQuad.hpp"
 
 Scene scene;
 View view;
@@ -56,46 +57,6 @@ GLFWwindow* create_window(int size_x, int size_y) {
         return nullptr;
     }
     return window;
-}
-
-void render_shadow_map(Shader* depth_shader) {
-    Skybox& skybox = *const_cast<Skybox*>(&scene.get_skybox());
-    auto& light = *const_cast<MyLight*>(&scene.get_light());
-    auto& cube = *scene.object("cube");
-    MySphere& sphere = *static_cast<MySphere*>(scene.object("sphere"));
-    auto& ground = *scene.object("ground");
-    Model& nanosuit = *static_cast<Model*>(scene.object("nanosuit"));
-    Model& yoko = *static_cast<Model*>(scene.object("yoko"));
-
-    Renderer renderer;
-
-    glm::mat4 lightSpaceMatrix = light.get_light_space_matrix();
-
-    depth_shader->start_using();
-    depth_shader->setMatrix("view", 1, lightSpaceMatrix);
-
-    depth_shader->setMatrix("model", 1, light.get_model_matrix());
-    renderer.drawIndex(*depth_shader, light.mesh().get_VAO(), light.mesh().get_indices_count());
-
-    depth_shader->start_using();
-    depth_shader->setMatrix("model", 1, sphere.get_model_matrix());
-    renderer.drawTriangle(*depth_shader, sphere.mesh().get_VAO(), sphere.mesh().get_vertices_count());
-
-    depth_shader->start_using();
-    depth_shader->setMatrix("model", 1, cube.get_model_matrix());
-    renderer.drawIndex(*depth_shader, cube.mesh().get_VAO(), cube.mesh().get_indices_count());
-
-    depth_shader->start_using();
-    depth_shader->setMatrix("model", 1, ground.get_model_matrix());
-    renderer.drawIndex(*depth_shader, ground.mesh().get_VAO(), ground.mesh().get_indices_count());
-
-    depth_shader->start_using();
-    depth_shader->setMatrix("model", 1, nanosuit.get_model_matrix());
-    nanosuit.draw(*depth_shader, renderer);
-
-    depth_shader->start_using();
-    depth_shader->setMatrix("model", 1, yoko.get_model_matrix());
-    yoko.draw(*depth_shader, renderer);
 }
 
 // TODO:
@@ -134,37 +95,11 @@ void render_shadow_map(Shader* depth_shader) {
 // 24. 学会renderdoc使用
 // 25. 优化cpu和gpu的io调用
 // 26. Editor 编辑材质后，保存文件
-
-unsigned int creat_quad() {
-    float quadVertices[] = { // vertex attributes for a quad that fills the entire screen in Normalized Device Coordinates.
-        // positions          // uv
-        -1.0f,  1.0f, 0.0f,   0.0f, 1.0f,
-        -1.0f, -1.0f, 0.0f,   0.0f, 0.0f,
-         1.0f, -1.0f, 0.0f,   1.0f, 0.0f,
-                              
-        -1.0f,  1.0f, 0.0f,   0.0f, 1.0f,
-         1.0f, -1.0f, 0.0f,   1.0f, 0.0f,
-         1.0f,  1.0f, 0.0f,   1.0f, 1.0f
-    };
-    // screen quad VAO
-    unsigned int quadVAO, quadVBO;
-    glGenVertexArrays(1, &quadVAO);
-    glGenBuffers(1, &quadVBO);
-    glBindVertexArray(quadVAO);
-    glBindBuffer(GL_ARRAY_BUFFER, quadVBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), &quadVertices, GL_STATIC_DRAW);
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
-    glEnableVertexAttribArray(1);
-    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
-    return quadVAO;
-}
+// 27. main的逻辑放入SandBox中
 
 void start_render_loop(GLFWwindow* window) {
-    // TODO 想办法放进view开启shadow_map的逻辑
-    Shader* depth_shader = new Shader("resource/shader/depth.vs", "resource/shader/depth.fs");
-
-    unsigned int quad_VAO = creat_quad();
+    FrameBufferQuad quad;
+    unsigned int quad_VAO = quad.get_quad_VAO();
     Shader* frame_shader = new Shader("resource/shader/frame.vs", "resource/shader/frame.fs");
     Renderer renderer;
 
@@ -259,7 +194,7 @@ void start_render_loop(GLFWwindow* window) {
         glBindFramebuffer(GL_FRAMEBUFFER, depth_FBO);
         glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-        render_shadow_map(depth_shader);
+        renderer.render_shadow_map(view);
         view.set_shadow_map_id(depth_texture);
 
             // debug depth
@@ -284,7 +219,6 @@ void start_render_loop(GLFWwindow* window) {
         glClearColor(editor.ambient_strength * 0.5f, editor.ambient_strength * 0.5f, editor.ambient_strength * 0.5f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
         view.enable_shadow_map(true);
-        //renderer.render(view);
         renderer.render_ecs(view);
 
         if (editor.normal_debug)

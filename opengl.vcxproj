@@ -31,6 +31,7 @@
     <ClCompile Include="src\ECS\MaterialSystem.cpp" />
     <ClCompile Include="src\ECS\RenderSystem.cpp" />
     <ClCompile Include="src\Editor\ImGuiEditor.cpp" />
+    <ClCompile Include="src\FrameBufferQuad.cpp" />
     <ClCompile Include="src\Logger.cpp" />
     <ClCompile Include="src\MySphere.cpp" />
     <ClCompile Include="src\Object.cpp" />
@@ -67,6 +68,7 @@
     <ClInclude Include="src\ECS\MaterialSystem.hpp" />
     <ClInclude Include="src\ECS\RenderSystem.hpp" />
     <ClInclude Include="src\Editor\ImGuiEditor.hpp" />
+    <ClInclude Include="src\FrameBufferQuad.hpp" />
     <ClInclude Include="src\Logger.hpp" />
     <ClInclude Include="src\MySphere.hpp" />
     <ClInclude Include="src\Object.hpp" />

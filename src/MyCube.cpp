@@ -3,7 +3,6 @@
 MyCube::MyCube()
     : Object()
 {
-    m_model_matrix = (glm::mat4(1.0f));
     init_meshes();
 }
 
