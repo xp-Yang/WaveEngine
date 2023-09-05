@@ -112,6 +112,10 @@ struct LightComponent {
 // 不需要数据，仅用作标记选中的entity
 struct PickedComponent {};
 
+struct ReceiveShadowComponent {};
+
+struct ReceiveReflectionComponent {};
+
 struct BoxCollider3DComponent {
 
 };

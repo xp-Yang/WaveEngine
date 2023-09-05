@@ -25,7 +25,7 @@ void ImGuiEditor::render_global_editor() {
     ImGui::Begin("Global Controller", nullptr, ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse);
 
     ImGui::Checkbox("pixel style", &pixel_style);
-    ImGui::SliderFloat("global ambient strength", &global_ambient_strength, 0.0f, 1.0f);
+    //ImGui::SliderFloat("global ambient strength", &global_ambient_strength, 0.0f, 1.0f);
 
 	static float time_value = 0.0f;
 	if (!stop_rotate) {

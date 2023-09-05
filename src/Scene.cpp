@@ -61,7 +61,6 @@ void Scene::init() {
 	auto& light_transform = world.addComponent<ecs::TransformComponent>(light_entity);
     light_transform.translation = { 12.0f, 12.0f, 0.0f };
     light_transform.scale = glm::vec3(0.5f);
-	// TODO 这里 push_back 应该会拷贝, 但是Mesh::create_cube_mesh()返回值如果是const左值引用就会crash，为什么?
 	world.addComponent<ecs::MeshComponent>(light_entity).meshes.push_back(Mesh::create_cube_mesh());
 	Material light_material;
 	light_material.shader = new Shader("resource/shader/light.vs", "resource/shader/light.fs");

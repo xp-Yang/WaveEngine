@@ -65,6 +65,8 @@ public:
     // 所有entity都从这里创建
     ecs::Entity create_entity();
 
+    void detroy_entity(const ecs::Entity& entity);
+
     template<typename T>
     bool hasComponent(ecs::Entity entity)
     {
@@ -118,8 +120,7 @@ public:
             return;
         }
         else {
-            // TODO
-            // 1.先要判断是否所有entity都不再使用这个component了
+            // TODO 1.先要判断是否所有entity都不再使用这个component了
             // 2.要正确释放里面内容
             //m_component_pools.erase(m_component_pools.begin() + component_id);
         }
@@ -130,9 +131,7 @@ public:
         return EnttView<ComponentTypes ...>();
     }
 
-    // TODO 需要封装
-    //friend class EnttView;
-//private:
+private:
     struct EntityDesc
     {
         Entity entity;
@@ -141,6 +140,15 @@ public:
 
     std::vector<EntityDesc> m_entities;
     std::vector<ComponentPool*> m_component_pools;
+
+public:
+    const std::vector<EntityDesc>& getAllEntities() {
+        return m_entities;
+    }
+
+    const std::vector<ComponentPool*>& getAllComponentPools() {
+        return m_component_pools;
+    }
 
 private:
     World() = default;
@@ -170,13 +178,13 @@ public:
             : world(_world), entity_id(entity_id), mask(mask), all(all) {}
 
         Entity operator*() {
-            return world->m_entities[entity_id].entity;
+            return world->getAllEntities()[entity_id].entity;
         }
 
         Iter& operator++() {
             entity_id++;
-            for (; entity_id < world->m_entities.size(); entity_id++) {
-                if (mask == (world->m_entities[entity_id].mask & mask))
+            for (; entity_id < world->getAllEntities().size(); entity_id++) {
+                if (mask == (world->getAllEntities()[entity_id].mask & mask))
                     break;
             }
             return *this;
@@ -205,8 +213,8 @@ public:
     const Iter begin() const
     {
         int i = 0;
-        for (i = 0; i < world->m_entities.size(); i++) {
-            if ((world->m_entities[i].mask & m_mask) == m_mask)
+        for (i = 0; i < world->getAllEntities().size(); i++) {
+            if ((world->getAllEntities()[i].mask & m_mask) == m_mask)
                 break;
         }
         return Iter(world, i, m_mask, all);
@@ -214,15 +222,8 @@ public:
 
     const Iter end() const
     {
-        //int i = world->m_entities.size() - 1;
-        //for (i = world->m_entities.size() - 1; i >= 0; i--) {
-        //    if (world->m_entities[i].mask & m_mask == m_mask)
-        //        break;
-        //}
-        //return Iter(world, i, m_mask, all);
-
         // 配合operator++()
-        return Iter(world, (int)world->m_entities.size(), m_mask, all);
+        return Iter(world, (int)world->getAllEntities().size(), m_mask, all);
     }
 
     ecs::World* world{ nullptr };

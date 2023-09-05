@@ -9,7 +9,6 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
-#include "Object.hpp"
 #include "MyModel.hpp"
 #include "Shader.hpp"
 #include "Renderer.hpp"
@@ -91,6 +90,8 @@ GLFWwindow* create_window(int size_x, int size_y) {
 // 25. 优化cpu和gpu的io调用
 // 26. Editor 编辑材质后，保存文件
 // 27. main的逻辑放入SandBox中
+// 27. Material 频繁修改, 思考一下它的ECS架构
+// 27. RenderSystem, 思考一下它的ECS架构
 
 void start_render_loop(GLFWwindow* window) {
     FrameBufferQuad quad;
@@ -195,7 +196,7 @@ void start_render_loop(GLFWwindow* window) {
             // debug depth
             //glViewport(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
             //glBindFramebuffer(GL_FRAMEBUFFER, 0);
-            //glClearColor(ambient_strength * 0.5f, ambient_strength * 0.5f, ambient_strength * 0.5f, 1.0f);
+            //glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
             //glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
             //glBindTexture(GL_TEXTURE_2D, view.get_shadow_map_id());
             //renderer.draw(*frame_shader, quad_VAO, DrawMode::Arrays, 0, 6);
@@ -211,7 +212,7 @@ void start_render_loop(GLFWwindow* window) {
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, color_buffer_width, color_buffer_height, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
         glViewport(0, 0, color_buffer_width, color_buffer_height);
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
-        glClearColor(editor.global_ambient_strength * 0.5f, editor.global_ambient_strength * 0.5f, editor.global_ambient_strength * 0.5f, 1.0f);
+        glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
         view.enable_shadow_map(true);
         renderer.render_ecs(view);
@@ -222,7 +223,7 @@ void start_render_loop(GLFWwindow* window) {
         // 3. 默认缓冲
         //glViewport(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
         //glBindFramebuffer(GL_FRAMEBUFFER, 0);
-        //glClearColor(ambient_strength * 0.5f, ambient_strength * 0.5f, ambient_strength * 0.5f, 1.0f);
+        //glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
         //glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
         //glBindTexture(GL_TEXTURE_2D, picking_texture);
         //renderer.draw(*frame_shader, quad_VAO, DrawMode::Arrays, 0, 6);

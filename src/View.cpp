@@ -1,8 +1,7 @@
 #include "View.hpp"
 #include "Renderer.hpp"
 
-// TODO
-//void View::enable_shadow_map(bool enable)
+//TODO void View::enable_shadow_map(bool enable)
 //{
 //    //1.视角切换为光源视角，渲染到帧缓冲区，获得shadow_map
 //    Shader* depth_shader = new Shader("resource/shader/depth.vs", "resource/shader/depth.fs");
