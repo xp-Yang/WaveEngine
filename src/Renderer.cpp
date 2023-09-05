@@ -1,5 +1,6 @@
 #include "Renderer.hpp"
 #include "ECS/Components.hpp"
+#include <windows.h>
 
 void Renderer::drawIndex(const Shader& shader, GLuint vao_id, size_t indices_count) const
 {
@@ -147,6 +148,10 @@ void Renderer::render(const View& view) {
 // TODO 性能测试
 void Renderer::render_ecs(const View& view) 
 {
+    LARGE_INTEGER t1, t2, tc;
+    QueryPerformanceFrequency(&tc);
+    QueryPerformanceCounter(&t1);
+
     auto& world = ecs::World::get();
 
     glm::mat4 camera_view = glm::mat4(1.0f);
@@ -215,6 +220,10 @@ void Renderer::render_ecs(const View& view)
     }
 
     render_picking_border();
+
+    QueryPerformanceCounter(&t2);
+    auto time = (double)(t2.QuadPart - t1.QuadPart) / (double)tc.QuadPart;
+    std::cout << "render_ecs(): time: " << time << std::endl;  //输出时间（单位：ｓ）
 }
 
 void Renderer::render_picking_border()
