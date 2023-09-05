@@ -206,14 +206,7 @@ void Renderer::render_ecs(const View& view)
             shader->setBool("enable_skybox_sample", /*obj->is_enable_reflection()*/false);
             shader->setFloat("magnitude", /*obj->get_explostion_ratio()*/0);
 
-            // TODO ¸øsphere¼ÓÉÏindex
-            auto& name = *world.getComponent<ecs::NameComponent>(entity);
-            if (name.name == "sphere") {
-                drawTriangle(*shader, mesh.meshes[i].get_VAO(), mesh.meshes[i].get_vertices_count());
-            }
-            else {
-                drawIndex(*shader, mesh.meshes[i].get_VAO(), mesh.meshes[i].get_indices_count());
-            }
+            drawIndex(*shader, mesh.meshes[i].get_VAO(), mesh.meshes[i].get_indices_count());
             glDepthMask(GL_TRUE);
             shader->stop_using();
         }
@@ -260,13 +253,7 @@ void Renderer::render_picking_border()
             Shader* shader = material.materials[i].shader;
             shader->start_using();
 
-            auto& name = *world.getComponent<ecs::NameComponent>(entity);
-            if (name.name == "sphere") {
-                drawTriangle(*shader, mesh.meshes[i].get_VAO(), mesh.meshes[i].get_vertices_count());
-            }
-            else {
-                drawIndex(*shader, mesh.meshes[i].get_VAO(), mesh.meshes[i].get_indices_count());
-            }
+            drawIndex(*shader, mesh.meshes[i].get_VAO(), mesh.meshes[i].get_indices_count());
             shader->stop_using();
         }
 
@@ -287,13 +274,7 @@ void Renderer::render_picking_border()
         border_shader->setMatrix("view", 1, camera_view);
         border_shader->setMatrix("projection", 1, camera_projection);
         for (int i = 0; i < mesh.meshes.size(); i++) {
-            auto& name = *world.getComponent<ecs::NameComponent>(entity);
-            if (name.name == "sphere") {
-                drawTriangle(*border_shader, mesh.meshes[i].get_VAO(), mesh.meshes[i].get_vertices_count());
-            }
-            else {
-                drawIndex(*border_shader, mesh.meshes[i].get_VAO(), mesh.meshes[i].get_indices_count());
-            }
+            drawIndex(*border_shader, mesh.meshes[i].get_VAO(), mesh.meshes[i].get_indices_count());
         }
         glStencilMask(0xFF);
     }
@@ -315,19 +296,15 @@ void Renderer::render_normal(const View& view) {
     normal_shader->setMatrix("view", 1, camera_view);
     normal_shader->setMatrix("projection", 1, camera_projection);
     Renderer renderer;
-    for (auto& item : view.get_scene().get_objects()) {
-        if (item.second && item.second->renderable()) {
-            Object& obj = *item.second;
-            normal_shader->start_using();
-            normal_shader->setMatrix("model", 1, obj.get_model_matrix());
-            for (int i = 0; i < obj.get_meshes().size(); i++) {
-                if (!obj.render_as_indices()) {
-                    renderer.drawTriangle(*normal_shader, obj.mesh(i).get_VAO(), obj.mesh(i).get_vertices_count());
-                }
-                else {
-                    renderer.drawIndex(*normal_shader, obj.mesh(i).get_VAO(), obj.mesh(i).get_indices_count());
-                }
-            }
+    for (auto entity : world.entityView<ecs::MeshComponent, ecs::MaterialComponent, ecs::TransformComponent>()) {
+        auto& mesh = *world.getComponent<ecs::MeshComponent>(entity);
+        auto& model_matrix = *world.getComponent<ecs::TransformComponent>(entity);
+        auto model_mat = model_matrix.transform();
+
+        normal_shader->start_using();
+        normal_shader->setMatrix("model", 1, model_mat);
+        for (int i = 0; i < mesh.meshes.size(); i++) {
+            renderer.drawIndex(*normal_shader, mesh.meshes[i].get_VAO(), mesh.meshes[i].get_indices_count());
         }
     }
 }

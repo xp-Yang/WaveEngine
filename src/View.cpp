@@ -147,13 +147,7 @@ void View::render_for_picking() {
             glm::vec4 color(r / 255.0f, g / 255.0f, b / 255.0f, 1.0f);
             picking_shader->setFloat4("picking_color", color);
 
-            auto& name = *world.getComponent<ecs::NameComponent>(entity);
-            if (name.name == "sphere") {
-                renderer.drawTriangle(*picking_shader, mesh.meshes[i].get_VAO(), mesh.meshes[i].get_vertices_count());
-            }
-            else {
-                renderer.drawIndex(*picking_shader, mesh.meshes[i].get_VAO(), mesh.meshes[i].get_indices_count());
-            }
+            renderer.drawIndex(*picking_shader, mesh.meshes[i].get_VAO(), mesh.meshes[i].get_indices_count());
         }
 
         // TODO skybox 的模型矩阵是mat4(1.0f)，picking也是按照这个位置记录的
@@ -180,10 +174,9 @@ void View::render_for_picking() {
         for (auto entity : world.entityView<ecs::MeshComponent, ecs::MaterialComponent, ecs::TransformComponent>()) {
             if (entity.getId() == picked_id) {
                 world.addComponent<ecs::PickedComponent>(entity);
-                break;
             }
             else
-                ; // TODO remove component
+                world.removeComponent<ecs::PickedComponent>(entity);
         }
     }
 

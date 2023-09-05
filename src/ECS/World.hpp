@@ -105,11 +105,20 @@ public:
         return *component;
     }
 
-    // TODO
     template<typename T>
     void removeComponent(ecs::Entity entity) 
     {
+        int id = entity.getId();
 
+        int component_id = getComponentId<T>();
+        m_entities[id].mask.reset(component_id);
+
+        // 池中都没这个component
+        if (component_id >= m_component_pools.size()) {
+            return;
+        }
+        else
+            m_component_pools.erase(m_component_pools.begin() + component_id);
     }
 
     template<typename... ComponentTypes>

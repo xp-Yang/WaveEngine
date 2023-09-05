@@ -25,8 +25,6 @@ public:
     const glm::vec3& get_world_pos() const { return m_model_matrix[3]; }
     bool renderable() const { return m_is_renderable; }
     void set_renderable(bool renderable) { m_is_renderable = renderable; }
-    bool render_as_indices() { return m_render_as_indices; }
-    void set_render_as_indices(bool as_indices) { m_render_as_indices = as_indices; }
     int get_id() const { return m_id; }
     bool is_picked() const { return m_picked; }
     void set_picked(bool picked) { m_picked = picked; }
@@ -40,7 +38,6 @@ protected:
     std::vector<Material> m_materials;
     glm::mat4 m_model_matrix;
     bool m_is_renderable;
-    bool m_render_as_indices;
     bool m_picked;
     bool m_enable_relection;
     float m_explosion_ratio;

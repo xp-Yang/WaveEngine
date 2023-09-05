@@ -4,7 +4,6 @@
 
 MySphere::MySphere() {
     create_icosphere(6);
-    set_render_as_indices(false);
 }
 
 void MySphere::create_tetrahedron() {
@@ -87,7 +86,14 @@ void MySphere::create_icosphere(int recursive_depth) {
         }
     }
 
-    append_mesh(Mesh(all_vertices));
+    // TODO 优化索引算法
+    std::vector<unsigned int> indices;
+    indices.reserve(all_vertices.size() + 1);
+    for (int i = 0; i < all_vertices.size(); i++) {
+        indices.push_back(i);
+    }
+
+    append_mesh(Mesh(all_vertices, indices));
 
     // Stop measuring time and calculate the elapsed time
     clock_t end = clock();
