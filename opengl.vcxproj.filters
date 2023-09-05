@@ -21,9 +21,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\MyCube.cpp">
-      <Filter>源文件\src</Filter>
-    </ClCompile>
     <ClCompile Include="src\Renderer.cpp">
       <Filter>源文件\src</Filter>
     </ClCompile>
@@ -57,12 +54,6 @@
     <ClCompile Include="src\Material.cpp">
       <Filter>源文件\src</Filter>
     </ClCompile>
-    <ClCompile Include="src\MyGround.cpp">
-      <Filter>源文件\src</Filter>
-    </ClCompile>
-    <ClCompile Include="src\MyLight.cpp">
-      <Filter>源文件\src</Filter>
-    </ClCompile>
     <ClCompile Include="src\Mesh.cpp">
       <Filter>源文件\src</Filter>
     </ClCompile>
@@ -86,12 +77,6 @@
     </ClCompile>
     <ClCompile Include="src\Object.cpp">
       <Filter>源文件\src</Filter>
-    </ClCompile>
-    <ClCompile Include="src\MySphere.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Skybox.cpp">
-      <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="src\ECS\System.cpp">
       <Filter>源文件</Filter>
@@ -120,11 +105,11 @@
     <ClCompile Include="src\FrameBufferQuad.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="src\Texture.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\MyCube.hpp">
-      <Filter>源文件\src</Filter>
-    </ClInclude>
     <ClInclude Include="src\Renderer.hpp">
       <Filter>源文件\src</Filter>
     </ClInclude>
@@ -161,12 +146,6 @@
     <ClInclude Include="resource\shader\light.vs">
       <Filter>资源文件</Filter>
     </ClInclude>
-    <ClInclude Include="src\MyGround.hpp">
-      <Filter>源文件\src</Filter>
-    </ClInclude>
-    <ClInclude Include="src\MyLight.hpp">
-      <Filter>源文件\src</Filter>
-    </ClInclude>
     <ClInclude Include="src\Mesh.hpp">
       <Filter>源文件\src</Filter>
     </ClInclude>
@@ -184,12 +163,6 @@
     </ClInclude>
     <ClInclude Include="src\Object.hpp">
       <Filter>源文件\src</Filter>
-    </ClInclude>
-    <ClInclude Include="src\MySphere.hpp">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Skybox.hpp">
-      <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="src\ECS\System.hpp">
       <Filter>头文件</Filter>
@@ -216,6 +189,9 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="src\FrameBufferQuad.hpp">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Texture.hpp">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>

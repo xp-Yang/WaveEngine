@@ -2,6 +2,7 @@
 #define System_hpp
 
 namespace ecs {
+
 class System {
 
 };
@@ -27,7 +28,8 @@ class ChangeMaterialSystem {
 
 };
 
-
+struct LightSystem {
+};
 
 }
 

@@ -33,23 +33,19 @@
     <ClCompile Include="src\Editor\ImGuiEditor.cpp" />
     <ClCompile Include="src\FrameBufferQuad.cpp" />
     <ClCompile Include="src\Logger.cpp" />
-    <ClCompile Include="src\MySphere.cpp" />
     <ClCompile Include="src\Object.cpp" />
     <ClCompile Include="src\glad.c" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\Material.cpp" />
-    <ClCompile Include="src\MyCube.cpp" />
-    <ClCompile Include="src\MyGround.cpp" />
-    <ClCompile Include="src\MyLight.cpp" />
     <ClCompile Include="src\Mesh.cpp" />
     <ClCompile Include="src\MyModel.cpp" />
     <ClCompile Include="src\Renderer.cpp" />
     <ClCompile Include="src\Shader.cpp" />
     <ClCompile Include="src\Scene.cpp" />
-    <ClCompile Include="src\Skybox.cpp" />
     <ClCompile Include="src\stb_image.cpp" />
     <ClCompile Include="src\ECS\System.cpp" />
     <ClCompile Include="src\test.cpp" />
+    <ClCompile Include="src\Texture.cpp" />
     <ClCompile Include="src\View.cpp" />
     <ClCompile Include="src\ECS\World.cpp" />
   </ItemGroup>
@@ -70,20 +66,16 @@
     <ClInclude Include="src\Editor\ImGuiEditor.hpp" />
     <ClInclude Include="src\FrameBufferQuad.hpp" />
     <ClInclude Include="src\Logger.hpp" />
-    <ClInclude Include="src\MySphere.hpp" />
     <ClInclude Include="src\Object.hpp" />
     <ClInclude Include="resource\shader\light.vs" />
     <ClInclude Include="src\Material.hpp" />
-    <ClInclude Include="src\MyCube.hpp" />
-    <ClInclude Include="src\MyGround.hpp" />
-    <ClInclude Include="src\MyLight.hpp" />
     <ClInclude Include="src\Mesh.hpp" />
     <ClInclude Include="src\MyModel.hpp" />
     <ClInclude Include="src\Renderer.hpp" />
     <ClInclude Include="src\Shader.hpp" />
     <ClInclude Include="src\Scene.hpp" />
-    <ClInclude Include="src\Skybox.hpp" />
     <ClInclude Include="src\ECS\System.hpp" />
+    <ClInclude Include="src\Texture.hpp" />
     <ClInclude Include="src\View.hpp" />
     <ClInclude Include="src\ECS\World.hpp" />
   </ItemGroup>

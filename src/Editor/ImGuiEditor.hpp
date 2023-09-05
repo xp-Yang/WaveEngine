@@ -15,7 +15,7 @@ public:
 	bool pixel_style;
 	bool stop_rotate;
 	bool normal_debug;
-	float ambient_strength;
+	float global_ambient_strength;
 	int icosphere_accuracy;
 };
 

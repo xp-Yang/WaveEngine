@@ -10,11 +10,6 @@
 #include <glm/gtc/type_ptr.hpp>
 
 #include "Object.hpp"
-#include "Skybox.hpp"
-#include "MyCube.hpp"
-#include "MySphere.hpp"
-#include "MyLight.hpp"
-#include "MyGround.hpp"
 #include "MyModel.hpp"
 #include "Shader.hpp"
 #include "Renderer.hpp"
@@ -216,7 +211,7 @@ void start_render_loop(GLFWwindow* window) {
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, color_buffer_width, color_buffer_height, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
         glViewport(0, 0, color_buffer_width, color_buffer_height);
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
-        glClearColor(editor.ambient_strength * 0.5f, editor.ambient_strength * 0.5f, editor.ambient_strength * 0.5f, 1.0f);
+        glClearColor(editor.global_ambient_strength * 0.5f, editor.global_ambient_strength * 0.5f, editor.global_ambient_strength * 0.5f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
         view.enable_shadow_map(true);
         renderer.render_ecs(view);

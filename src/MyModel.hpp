@@ -15,7 +15,6 @@ class Model : public Object{
 public:
 	Model(const std::string& file_path);
 	void load_model(const std::string& file_path);
-	void draw(const Shader& shader, const Renderer& renderer);
 
 private:
 	void processNode(aiNode* node, const aiScene* scene);

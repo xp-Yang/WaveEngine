@@ -110,9 +110,6 @@ void View::render_for_picking() {
 
     static Shader* picking_shader = new Shader("resource/shader/picking.vs", "resource/shader/picking.fs");
 
-    Skybox& skybox = *const_cast<Skybox*>(&get_scene().get_skybox());
-    auto& light = *const_cast<MyLight*>(&get_scene().get_light());
-
     glViewport(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
     glEnable(GL_DEPTH_TEST);
     glBindFramebuffer(GL_FRAMEBUFFER, 0);

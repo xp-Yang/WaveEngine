@@ -3,16 +3,14 @@
 Mesh::Mesh(std::vector<Vertex> vertices)
     : m_vertices(vertices)
 {
-    create_vbo();
-    create_vao();
+    build();
 }
 
 Mesh::Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices)
     : m_vertices(vertices)
     , m_indices(indices)
 {
-    create_vbo();
-    create_vao();
+    build();
 }
 
 void Mesh::build() {
@@ -59,4 +57,289 @@ void Mesh::create_vao()
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_IBO);
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_indices.size() * sizeof(unsigned int), &m_indices[0], GL_STATIC_DRAW);
     }
+}
+
+
+
+Mesh Mesh::create_cube_mesh() {
+    std::vector<Vertex> vertices;
+    std::vector<unsigned int> indices;
+
+    GLfloat cubeVertices[] =
+    {
+        // 如果只有位置，只需要8个顶点就行，但是每个面的法向量不同，所以相同位置的顶点有三个不同的法向量属性，一共需要24个各不相同的顶点
+        // pos                  // normal              // uv           
+        -0.5f,  0.5f, -0.5f,    0.0f,  0.0f, -1.0f,    0.0f, 1.0f,    // 0  后面 左上（从前面看）
+        -0.5f, -0.5f, -0.5f,    0.0f,  0.0f, -1.0f,    0.0f, 0.0f,    // 1  后面 左下（从前面看）
+         0.5f, -0.5f, -0.5f,    0.0f,  0.0f, -1.0f,    1.0f, 0.0f,    // 2  后面 右下（从前面看）
+         0.5f,  0.5f, -0.5f,    0.0f,  0.0f, -1.0f,    1.0f, 1.0f,    // 3  后面 右上（从前面看）
+
+        -0.5f,  0.5f,  0.5f,    0.0f,  0.0f,  1.0f,    0.0f, 1.0f,    // 4  前面 左上
+        -0.5f, -0.5f,  0.5f,    0.0f,  0.0f,  1.0f,    0.0f, 0.0f,    // 5  前面 左下
+         0.5f, -0.5f,  0.5f,    0.0f,  0.0f,  1.0f,    1.0f, 0.0f,    // 6  前面 右下 
+         0.5f,  0.5f,  0.5f,    0.0f,  0.0f,  1.0f,    1.0f, 1.0f,    // 7  前面 右上 
+
+        -0.5f, -0.5f,  0.5f,   -1.0f,  0.0f,  0.0f,    0.0f, 1.0f,    // 8  左面
+        -0.5f, -0.5f, -0.5f,   -1.0f,  0.0f,  0.0f,    0.0f, 0.0f,    // 9  左面
+        -0.5f,  0.5f, -0.5f,   -1.0f,  0.0f,  0.0f,    1.0f, 0.0f,    // 10 左面
+        -0.5f,  0.5f,  0.5f,   -1.0f,  0.0f,  0.0f,    1.0f, 1.0f,    // 11 左面
+
+         0.5f, -0.5f,  0.5f,    1.0f,  0.0f,  0.0f,    0.0f, 1.0f,    // 12 右面
+         0.5f, -0.5f, -0.5f,    1.0f,  0.0f,  0.0f,    0.0f, 0.0f,    // 13 右面
+         0.5f,  0.5f, -0.5f,    1.0f,  0.0f,  0.0f,    1.0f, 0.0f,    // 14 右面
+         0.5f,  0.5f,  0.5f,    1.0f,  0.0f,  0.0f,    1.0f, 1.0f,    // 15 右面
+
+        -0.5f, -0.5f,  0.5f,    0.0f, -1.0f,  0.0f,    0.0f, 1.0f,    // 16 下面 左上
+        -0.5f, -0.5f, -0.5f,    0.0f, -1.0f,  0.0f,    0.0f, 0.0f,    // 17 下面 左下
+         0.5f, -0.5f, -0.5f,    0.0f, -1.0f,  0.0f,    1.0f, 0.0f,    // 18 下面 右下
+         0.5f, -0.5f,  0.5f,    0.0f, -1.0f,  0.0f,    1.0f, 1.0f,    // 19 下面 右上
+
+        -0.5f,  0.5f,  0.5f,    0.0f,  1.0f,  0.0f,    0.0f, 1.0f,    // 20 上面 左上
+        -0.5f,  0.5f, -0.5f,    0.0f,  1.0f,  0.0f,    0.0f, 0.0f,    // 21 上面 左下
+         0.5f,  0.5f, -0.5f,    0.0f,  1.0f,  0.0f,    1.0f, 0.0f,    // 22 上面 右下
+         0.5f,  0.5f,  0.5f,    0.0f,  1.0f,  0.0f,    1.0f, 1.0f,    // 23 上面 右上
+    };
+
+    for (int i = 0; i < sizeof(cubeVertices) / sizeof(cubeVertices[0]); i += 8) {
+        Vertex vertex;
+
+        glm::vec3 position;
+        position.x = cubeVertices[0 + i];
+        position.y = cubeVertices[1 + i];
+        position.z = cubeVertices[2 + i];
+        vertex.position = position;
+
+        glm::vec3 normal;
+        normal.x = cubeVertices[3 + i];
+        normal.y = cubeVertices[4 + i];
+        normal.z = cubeVertices[5 + i];
+        vertex.normal = normal;
+
+        glm::vec2 vec;
+        vec.x = cubeVertices[6 + i];
+        vec.y = cubeVertices[7 + i];
+        vertex.texture_uv = vec;
+
+        vertices.push_back(vertex);
+    }
+
+    GLuint cubeIndices[] =
+    {
+        1 , 2 , 3 , 1 , 3 , 0 , //后面
+        5 , 6 , 7 , 5 , 7 , 4 , //前面
+        9 , 10, 11, 9 , 11, 8 , //左面
+        13, 14, 15, 13, 15, 12, //右面
+        17, 18, 19, 17, 19, 16, //下面
+        21, 22, 23, 21, 23, 20, //上面
+    };
+
+    for (int i = 0; i < sizeof(cubeIndices) / sizeof(cubeIndices[0]); i++) {
+        indices.push_back(cubeIndices[i]);
+    }
+
+    return Mesh(vertices, indices);
+
+
+    // 不使用ibo的方式
+    //float cubeVertices[] = {
+    //// pos                  // normal              // uv           
+    //-0.5f, -0.5f, -0.5f,    0.0f,  0.0f, -1.0f,    0.0f, 0.0f,    // 0  后面 左下   
+    // 0.5f, -0.5f, -0.5f,    0.0f,  0.0f, -1.0f,    1.0f, 0.0f,    // 1  后面 右下   
+    // 0.5f,  0.5f, -0.5f,    0.0f,  0.0f, -1.0f,    1.0f, 1.0f,    // 2  后面 右上   
+    // 0.5f,  0.5f, -0.5f,    0.0f,  0.0f, -1.0f,    1.0f, 1.0f,    // 3  后面 右上   
+    //-0.5f,  0.5f, -0.5f,    0.0f,  0.0f, -1.0f,    0.0f, 1.0f,    // 4  后面 左上
+    //-0.5f, -0.5f, -0.5f,    0.0f,  0.0f, -1.0f,    0.0f, 0.0f,    // 5  后面 左下
+    //                                                                    
+    //-0.5f, -0.5f,  0.5f,    0.0f,  0.0f,  1.0f,    0.0f, 0.0f,    // 6  前面 左下 
+    // 0.5f, -0.5f,  0.5f,    0.0f,  0.0f,  1.0f,    1.0f, 0.0f,    // 7  前面 右下 
+    // 0.5f,  0.5f,  0.5f,    0.0f,  0.0f,  1.0f,    1.0f, 1.0f,    // 8  前面 右上 
+    // 0.5f,  0.5f,  0.5f,    0.0f,  0.0f,  1.0f,    1.0f, 1.0f,    // 9  前面 右上 
+    //-0.5f,  0.5f,  0.5f,    0.0f,  0.0f,  1.0f,    0.0f, 1.0f,    // 10 前面 左上
+    //-0.5f, -0.5f,  0.5f,    0.0f,  0.0f,  1.0f,    0.0f, 0.0f,    // 11 前面 左下
+    //                                                                    
+    //-0.5f,  0.5f,  0.5f,   -1.0f,  0.0f,  0.0f,    1.0f, 1.0f,    // 12 左面 右上
+    //-0.5f,  0.5f, -0.5f,   -1.0f,  0.0f,  0.0f,    1.0f, 0.0f,    // 13 左面 右下
+    //-0.5f, -0.5f, -0.5f,   -1.0f,  0.0f,  0.0f,    0.0f, 0.0f,    // 14 左面 左下
+    //-0.5f, -0.5f, -0.5f,   -1.0f,  0.0f,  0.0f,    0.0f, 0.0f,    // 15 左面 左下
+    //-0.5f, -0.5f,  0.5f,   -1.0f,  0.0f,  0.0f,    0.0f, 1.0f,    // 16 左面 左上
+    //-0.5f,  0.5f,  0.5f,   -1.0f,  0.0f,  0.0f,    1.0f, 1.0f,    // 17 左面 右上
+    //                                                                    
+    // 0.5f,  0.5f,  0.5f,    1.0f,  0.0f,  0.0f,    1.0f, 1.0f,    // 18 右面 右上
+    // 0.5f,  0.5f, -0.5f,    1.0f,  0.0f,  0.0f,    1.0f, 0.0f,    // 19 右面 右下
+    // 0.5f, -0.5f, -0.5f,    1.0f,  0.0f,  0.0f,    0.0f, 0.0f,    // 20 右面 左下
+    // 0.5f, -0.5f, -0.5f,    1.0f,  0.0f,  0.0f,    0.0f, 0.0f,    // 21 右面 左下
+    // 0.5f, -0.5f,  0.5f,    1.0f,  0.0f,  0.0f,    0.0f, 1.0f,    // 22 右面 左上
+    // 0.5f,  0.5f,  0.5f,    1.0f,  0.0f,  0.0f,    1.0f, 1.0f,    // 23 右面 右上
+    //                                                                    
+    //-0.5f, -0.5f, -0.5f,    0.0f, -1.0f,  0.0f,    0.0f, 0.0f,    // 24 下面 左下
+    // 0.5f, -0.5f, -0.5f,    0.0f, -1.0f,  0.0f,    1.0f, 0.0f,    // 25 下面 右下
+    // 0.5f, -0.5f,  0.5f,    0.0f, -1.0f,  0.0f,    1.0f, 1.0f,    // 26 下面 右上
+    // 0.5f, -0.5f,  0.5f,    0.0f, -1.0f,  0.0f,    1.0f, 1.0f,    // 27 下面 右上
+    //-0.5f, -0.5f,  0.5f,    0.0f, -1.0f,  0.0f,    0.0f, 1.0f,    // 28 下面 左上
+    //-0.5f, -0.5f, -0.5f,    0.0f, -1.0f,  0.0f,    0.0f, 0.0f,    // 29 下面 左下
+    //                                                                    
+    //-0.5f,  0.5f, -0.5f,    0.0f,  1.0f,  0.0f,    0.0f, 0.0f,    // 30 上面 左下
+    // 0.5f,  0.5f, -0.5f,    0.0f,  1.0f,  0.0f,    1.0f, 0.0f,    // 31 上面 右下
+    // 0.5f,  0.5f,  0.5f,    0.0f,  1.0f,  0.0f,    1.0f, 1.0f,    // 32 上面 右上
+    // 0.5f,  0.5f,  0.5f,    0.0f,  1.0f,  0.0f,    1.0f, 1.0f,    // 33 上面 右上
+    //-0.5f,  0.5f,  0.5f,    0.0f,  1.0f,  0.0f,    0.0f, 1.0f,    // 34 上面 左上
+    //-0.5f,  0.5f, -0.5f,    0.0f,  1.0f,  0.0f,    0.0f, 0.0f,    // 35 上面 左下
+    //};
+    //glGenBuffers(1, &m_vbo_id);
+    //glBindBuffer(GL_ARRAY_BUFFER, m_vbo_id);
+    //glBufferData(GL_ARRAY_BUFFER, sizeof(cubeVertices), cubeVertices, GL_STATIC_DRAW);
+    //glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+    // 没有normal和uv时
+    //GLfloat cubeVertices[] =
+    //{
+    //    // vertex           
+    //    -0.2f, -0.2f,  0.2f, // 0 左下
+    //     0.2f, -0.2f,  0.2f, // 1 右下
+    //     0.2f,  0.2f,  0.2f, // 2 右上
+    //    -0.2f,  0.2f,  0.2f, // 3 左上
+    //    -0.2f, -0.2f, -0.2f, // 4 后：左下
+    //    -0.2f,  0.2f, -0.2f, // 5 后：左上
+    //     0.2f,  0.2f, -0.2f, // 6 后：右上
+    //     0.2f, -0.2f, -0.2f, // 7 后：右下
+    //};
+    //GLuint cubeIndices[] =
+    //{
+    //    0, 1, 2, 0, 2, 3, // Quad 0 前面
+    //    4, 5, 6, 4, 6, 7, // Quad 1 后面
+    //    5, 3, 2, 5, 2, 6, // Quad 2 上面
+    //    4, 7, 1, 4, 1, 0, // Quad 3 下面
+    //    7, 6, 2, 7, 2, 1, // Quad 4 右面
+    //    4, 0, 3, 4, 3, 5  // Quad 5 左面
+    //};
+}
+
+static void create_tetrahedron(std::vector<Triangle>& triangles, glm::vec3& center) {
+    float side_length = 1.0f;
+    glm::vec3 a = glm::vec3(0, 0, 0);
+    glm::vec3 b = glm::vec3(side_length, 0, 0);
+    glm::vec3 c = glm::vec3(side_length / 2.0f, 0, -side_length * sqrt(3.0f) / 2.0f);
+    glm::vec3 d = glm::vec3(side_length / 2.0f, side_length * sqrt(6.0f) / 3.0f, -side_length * sqrt(3.0f) / 2.0f / 3.0f);
+
+    center = glm::vec3(side_length / 2.0f, side_length * sqrt(6.0f) / 3.0f * (1.0f / 4.0f), -side_length * sqrt(3.0f) / 2.0f / 3.0f);
+
+    a -= center;
+    b -= center;
+    c -= center;
+    d -= center;
+    center -= center;
+
+    triangles = {
+        { c,b,a },
+        { a,b,d },
+        { b,c,d },
+        { c,a,d },
+    };
+}
+
+static std::vector<Triangle> subdivide(Triangle triangle) {
+    glm::vec3 new_vertex0 = (triangle.vertices[0] + triangle.vertices[1]) / 2.0f;
+    glm::vec3 new_vertex1 = (triangle.vertices[1] + triangle.vertices[2]) / 2.0f;
+    glm::vec3 new_vertex2 = (triangle.vertices[2] + triangle.vertices[0]) / 2.0f;
+
+    Triangle new_triangle0 = { triangle.vertices[0], new_vertex0, new_vertex2 };
+    Triangle new_triangle1 = { new_vertex0, triangle.vertices[1], new_vertex1 };
+    Triangle new_triangle2 = { new_vertex0, new_vertex1, new_vertex2 };
+    Triangle new_triangle3 = { new_vertex2, new_vertex1, triangle.vertices[2] };
+
+    return { new_triangle0, new_triangle1, new_triangle2, new_triangle3 };
+}
+
+Mesh Mesh::create_icosphere_mesh(int regression_depth) {
+    std::vector<Triangle> m_triangles;
+    glm::vec3 m_center;
+
+    // 0. 创建正四面体
+    create_tetrahedron(m_triangles, m_center);
+
+    // 1. 对每个面细分
+    for (int i = 0; i < regression_depth; i++) {
+        std::vector<Triangle> new_triangles;
+        for (int j = 0; j < m_triangles.size(); j++) {
+            auto divided_triangles = subdivide(m_triangles[j]);
+            new_triangles.insert(new_triangles.end(), divided_triangles.begin(), divided_triangles.end());
+        }
+        m_triangles = new_triangles;
+    }
+
+    // 2. 对所有细分顶点到中心的距离做归一化
+    std::vector<Vertex> all_vertices;
+    for (auto& triangle : m_triangles) {
+        for (auto& vertex : triangle.vertices) {
+            vertex = m_center + glm::normalize(vertex - m_center);
+        }
+        for (auto& vertex : triangle.vertices) {
+            glm::vec3 a = triangle.vertices[0] - triangle.vertices[1];
+            glm::vec3 b = triangle.vertices[0] - triangle.vertices[2];
+            glm::vec3 normal = glm::normalize(glm::cross(a, b));
+
+            Vertex v;
+            v.position = vertex;
+            v.normal = normal;
+            all_vertices.push_back(v);
+        }
+    }
+
+    // TODO 优化索引算法
+    // TODO Triangle数据结构改为 Vertex[3], 直接在里面存normal和uv
+    std::vector<unsigned int> indices;
+    indices.reserve(all_vertices.size() + 1);
+    for (int i = 0; i < all_vertices.size(); i++) {
+        indices.push_back(i);
+    }
+
+    return Mesh(all_vertices, indices);
+}
+
+Mesh Mesh::create_quad_mesh()
+{
+    std::vector<Vertex> vertices;
+    std::vector<unsigned int> indices;
+
+    GLfloat cubeVertices[] =
+    {
+        // vertex               // normal            // uv
+        -1.0f,  0.0f,  -1.0f,   0.0f, 1.0f, 0.0f,    0.0f, 1.0f,// 0
+        -1.0f,  0.0f,   1.0f,   0.0f, 1.0f, 0.0f,    0.0f, 0.0f,// 1
+         1.0f,  0.0f,   1.0f,   0.0f, 1.0f, 0.0f,    1.0f, 0.0f,// 2
+         1.0f,  0.0f,  -1.0f,   0.0f, 1.0f, 0.0f,    1.0f, 1.0f,// 3
+    };
+    for (int i = 0; i < sizeof(cubeVertices) / sizeof(cubeVertices[0]); i += 8) {
+        Vertex vertex;
+
+        glm::vec3 position;
+        position.x = cubeVertices[0 + i];
+        position.y = cubeVertices[1 + i];
+        position.z = cubeVertices[2 + i];
+        vertex.position = position;
+
+        glm::vec3 normal;
+        normal.x = cubeVertices[3 + i];
+        normal.y = cubeVertices[4 + i];
+        normal.z = cubeVertices[5 + i];
+        vertex.normal = normal;
+
+        glm::vec2 vec;
+        vec.x = cubeVertices[6 + i] * 2.0f;
+        vec.y = cubeVertices[7 + i] * 2.0f;
+        vertex.texture_uv = vec;
+
+        vertices.push_back(vertex);
+    }
+
+    GLuint cubeIndices[] =
+    {
+        0, 1, 2,
+        0, 2, 3,
+    };
+    for (int i = 0; i < sizeof(cubeIndices) / sizeof(cubeIndices[0]); i++) {
+        indices.push_back(cubeIndices[i]);
+    }
+
+    return Mesh(vertices, indices);
 }

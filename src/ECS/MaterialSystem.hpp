@@ -5,7 +5,8 @@ namespace ecs
 {
 
 struct MaterialSystem{
-
+    static void update();
+    static void update_shader();
 };
 
 }

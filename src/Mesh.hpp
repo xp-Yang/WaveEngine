@@ -11,6 +11,10 @@ struct Vertex {
 	glm::vec2 texture_uv;
 };
 
+struct Triangle {
+	glm::vec3 vertices[3];
+};
+
 class Mesh {
 public:
 	Mesh() = default;
@@ -34,6 +38,11 @@ protected:
 
 	void create_vbo();
 	void create_vao();
+
+public:
+	static Mesh create_cube_mesh();
+	static Mesh create_icosphere_mesh(int regression_depth);
+	static Mesh create_quad_mesh();
 };
 
 

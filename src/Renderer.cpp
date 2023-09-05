@@ -1,5 +1,6 @@
 #include "Renderer.hpp"
 #include "ECS/Components.hpp"
+#include "ECS/System.hpp"
 #include <windows.h>
 
 void Renderer::drawIndex(const Shader& shader, GLuint vao_id, size_t indices_count) const
@@ -45,9 +46,11 @@ void Renderer::render_ecs(const View& view)
 	}
 
     glm::vec3 light_pos;
+    glm::mat4 light_ref_matrix;
     for (auto entity : world.entityView<ecs::LightComponent>()) {
         auto& transform = *world.getComponent<ecs::TransformComponent>(entity);
         light_pos = transform.transform()[3];
+        light_ref_matrix = world.getComponent<ecs::LightComponent>(entity)->light_reference_matrix();
     }
 
     for (auto entity : world.entityView<ecs::MeshComponent, ecs::MaterialComponent, ecs::TransformComponent>()) {
@@ -79,11 +82,7 @@ void Renderer::render_ecs(const View& view)
             shader->setBool("enable_skybox_sample", /*obj->is_enable_reflection()*/false);
             shader->setFloat("magnitude", /*obj->get_explostion_ratio()*/0);
             if (view.is_shadow_map_enable()) {
-                // TODO
-                auto& scene = view.get_scene();
-                auto& light = *const_cast<MyLight*>(&scene.get_light());
-                auto light_mat = light.get_light_space_matrix();
-                shader->setMatrix("lightSpaceMatrix", 1, light_mat);
+                shader->setMatrix("lightSpaceMatrix", 1, light_ref_matrix);
                 glActiveTexture(GL_TEXTURE7);
                 glBindTexture(GL_TEXTURE_2D, view.get_shadow_map_id());
                 shader->setTexture("shadow_map", 7);
@@ -197,19 +196,13 @@ void Renderer::render_shadow_map(const View& view) {
 
     static Shader* depth_shader = new Shader("resource/shader/depth.vs", "resource/shader/depth.fs");
 
-    // TODO
-    //glm::vec3 light_pos;
-    //for (auto entity : world.entityView<ecs::LightComponent>()) {
-    //    auto& transform = *world.getComponent<ecs::TransformComponent>(entity);
-    //    light_pos = transform.transform()[3];
-    //}
-    auto& scene = view.get_scene();
-    auto& light = *const_cast<MyLight*>(&scene.get_light());
-
-    glm::mat4 lightSpaceMatrix = light.get_light_space_matrix();
+    glm::mat4 light_ref_matrix;
+    for (auto entity : world.entityView<ecs::LightComponent>()) {
+        light_ref_matrix = world.getComponent<ecs::LightComponent>(entity)->light_reference_matrix();
+    }
 
     depth_shader->start_using();
-    depth_shader->setMatrix("view", 1, lightSpaceMatrix);
+    depth_shader->setMatrix("view", 1, light_ref_matrix);
 
     for (auto entity : world.entityView<ecs::MeshComponent, ecs::MaterialComponent, ecs::TransformComponent>()) {
         auto& mesh = *world.getComponent<ecs::MeshComponent>(entity);

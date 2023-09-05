@@ -97,75 +97,27 @@ Material Model::load_material(aiMaterial* material) {
     aiString str;
     if (material->GetTextureCount(aiTextureType_DIFFUSE)) {
         material->GetTexture(aiTextureType_DIFFUSE, 0, &str);
-        res.diffuse_map = generate_texture_from_file(str.C_Str(), directory, false);
+        res.diffuse_map = Texture::generate_texture_from_file(str.C_Str(), directory, false);
         res.diffuse_map_path = directory + '/' + std::string(str.C_Str());
     }
 
     if (material->GetTextureCount(aiTextureType_SPECULAR)) {
         material->GetTexture(aiTextureType_SPECULAR, 0, &str);
-        res.specular_map = generate_texture_from_file(str.C_Str(), directory, false);
+        res.specular_map = Texture::generate_texture_from_file(str.C_Str(), directory, false);
         res.specular_map_path = directory + '/' + std::string(str.C_Str());
     }
 
     if (material->GetTextureCount(aiTextureType_NORMALS)) {
         material->GetTexture(aiTextureType_NORMALS, 0, &str);
-        res.normal_map = generate_texture_from_file(str.C_Str(), directory, false);
+        res.normal_map = Texture::generate_texture_from_file(str.C_Str(), directory, false);
         res.normal_map_path = directory + '/' + std::string(str.C_Str());
     }
 
     if (material->GetTextureCount(aiTextureType_HEIGHT)) {
         material->GetTexture(aiTextureType_HEIGHT, 0, &str);
-        res.height_map = generate_texture_from_file(str.C_Str(), directory, false);
+        res.height_map = Texture::generate_texture_from_file(str.C_Str(), directory, false);
         res.height_map_path = directory + '/' + std::string(str.C_Str());
     }
 
     return res;
-}
-
-void Model::draw(const Shader& shader, const Renderer& renderer)
-{
-    shader.start_using();
-    static unsigned int default_map = generate_texture_from_file("resource/images/default_map.png", false);
-    for (unsigned int i = 0; i < m_meshes.size(); i++) {
-        if (m_materials[i].diffuse_map != 0) {
-            glActiveTexture(GL_TEXTURE0);
-            glBindTexture(GL_TEXTURE_2D, m_materials[i].diffuse_map);
-            shader.setTexture("material.diffuse_map", 0);
-        }else{
-            glActiveTexture(GL_TEXTURE0);
-            glBindTexture(GL_TEXTURE_2D, default_map);
-            shader.setTexture("material.diffuse_map", 0);
-        }
-        if (m_materials[i].specular_map != 0) {
-            glActiveTexture(GL_TEXTURE0 + 1);
-            glBindTexture(GL_TEXTURE_2D, m_materials[i].specular_map);
-            shader.setTexture("material.specular_map", 1);
-        }else {
-            glActiveTexture(GL_TEXTURE0 + 1);
-            glBindTexture(GL_TEXTURE_2D, default_map);
-            shader.setTexture("material.specular_map", 0);
-        }
-        if (m_materials[i].normal_map != 0) {
-            glActiveTexture(GL_TEXTURE0 + 2);
-            glBindTexture(GL_TEXTURE_2D, m_materials[i].normal_map);
-            shader.setTexture("material.normal_map", 2);
-        }else {
-            glActiveTexture(GL_TEXTURE0 + 2);
-            glBindTexture(GL_TEXTURE_2D, default_map);
-            shader.setTexture("material.normal_map", 0);
-        }
-        if (m_materials[i].height_map != 0) {
-            glActiveTexture(GL_TEXTURE0 + 3);
-            glBindTexture(GL_TEXTURE_2D, m_materials[i].height_map);
-            shader.setTexture("material.height_map", 3);
-        }else {
-            glActiveTexture(GL_TEXTURE0 + 3);
-            glBindTexture(GL_TEXTURE_2D, default_map);
-            shader.setTexture("material.height_map", 0);
-        }
-        // always good practice to set everything back to defaults once configured.
-        glActiveTexture(GL_TEXTURE0);
-
-        renderer.drawIndex(shader, m_meshes[i].get_VAO(), m_meshes[i].get_indices_count());
-    }
 }
