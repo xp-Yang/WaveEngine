@@ -14,6 +14,7 @@ struct RenderParam {
     //色调映射和伽马编码(Tone-mapping & gamma encoding)
     //抖动显示(Dithering)
     //快速近似抗锯齿(FXAA, Fast Approximate Anti-Aliasing)
+    //帧缓冲区做卷积操作
     //picking
     //render style (low-poly 、pixel)
 };

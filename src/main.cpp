@@ -72,10 +72,13 @@ GLFWwindow* create_window(int size_x, int size_y) {
 // done: Model类Mesh和Material对应关系处理
 // done: picking
 // done: 实现ECS架构，Component数据驱动开发，main.cpp所有全局变量封装，所有逻辑分离
+// done: 阴影贴图(done)、帧缓冲(done)、法线贴图、tbn矩阵、天空盒(done)、反射(done)等知识学习
 // 10. 解决相机运动死锁问题(direction = (0,-1,0)时)
 // 21. depth_shader可以移出，直接用同一个shader传不同view矩阵即可
 // 11. 光源物理模型
-// 12. 阴影贴图(done)、帧缓冲(done)、法线贴图、tbn矩阵、天空盒(done)、反射(done)等知识学习
+// 12. tbn矩阵计算
+// 13. 理解peter panning 效应
+// 13. 抗锯齿
 // 13. 帧缓冲的附件?
 // 14. 看一下模型加载那篇文章，贴图文件是相对路径保存的或绝对路径保存的，Assimp的简单原理。
 // 16. 粒子系统
@@ -92,6 +95,8 @@ GLFWwindow* create_window(int size_x, int size_y) {
 // 27. main的逻辑放入SandBox中
 // 27. Material 频繁修改, 思考一下它的ECS架构
 // 27. RenderSystem, 思考一下它的ECS架构
+// 28. 实现gizmo
+// 28. 线程分离
 
 void start_render_loop(GLFWwindow* window) {
     FrameBufferQuad quad;

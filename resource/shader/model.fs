@@ -54,6 +54,7 @@ void main()
 {
     vec3 ambient_light = light.color * material.ambient * vec3(texture(material.diffuse_map, fs_in.pass_uv));
 
+    //TODO normal需要变换成世界空间，但要注意不能带平移
     vec3 normal = normalize(fs_in.pass_normal);
     vec3 light_direction = normalize(light.position - fs_in.pass_pos);
     float diffuse_coef = max(dot(light_direction, normal), 0.0);

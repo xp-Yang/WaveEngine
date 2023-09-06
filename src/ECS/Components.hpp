@@ -25,12 +25,13 @@ struct NameComponent {
 struct TransformComponent {
 	// 如果想实现先平移后旋转，那么一直更新 translation = rotate_matrix * translation 就好了
 	glm::vec3 translation = { 0.0f, 0.0f, 0.0f };
-	glm::vec3 rotation = { 0.0f, 0.0f, 0.0f };
+	glm::vec3 rotation = { 0.0f, 0.0f, 0.0f }; //角度制
 	glm::vec3 scale = { 1.0f, 1.0f, 1.0f };
 
 	glm::mat4 transform() const
 	{
-		glm::mat4 rotation = glm::mat4(1.0f);//glm::toMat4(glm::quat(rotation));
+		glm::qua<float> rotation_qua = glm::qua<float>(glm::radians(rotation));
+		glm::mat4 rotation = glm::mat4_cast(rotation_qua);
 		glm::mat4 result = glm::translate(glm::mat4(1.0f), translation)
 			* rotation
 			* glm::scale(glm::mat4(1.0f), scale);
