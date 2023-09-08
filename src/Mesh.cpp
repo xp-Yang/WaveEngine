@@ -1,4 +1,6 @@
 #include "Mesh.hpp"
+#include <windows.h>
+#include <iostream>
 
 Mesh::Mesh(std::vector<Vertex> vertices)
     : m_vertices(vertices)
@@ -290,22 +292,30 @@ Mesh Mesh::create_icosphere_mesh(int regression_depth) {
     // 0. 创建正四面体
     create_tetrahedron(m_triangles, m_center);
 
-    // 1. 对每个面细分
-    //for (int i = 0; i < regression_depth; i++) {
-    //    std::vector<Triangle> new_triangles;
-    //    for (int j = 0; j < m_triangles.size(); j++) {
-    //        auto divided_triangles = subdivide(m_triangles[j]);
-    //        new_triangles.insert(new_triangles.end(), divided_triangles.begin(), divided_triangles.end());
-    //    }
-    //    m_triangles = new_triangles;
-    //}
+    LARGE_INTEGER t1, t2, tc;
+    QueryPerformanceFrequency(&tc);
+    QueryPerformanceCounter(&t1);
 
-    std::vector<Triangle> new_triangles;
-    for (int i = 0; i < m_triangles.size(); i++) {
-        const auto& ret = recursive_subdivide(m_triangles[i], regression_depth);
-        new_triangles.insert(new_triangles.end(), ret.begin(), ret.end());
+    // 1. 对每个面细分
+    for (int i = 0; i < regression_depth; i++) {
+        std::vector<Triangle> new_triangles;
+        for (int j = 0; j < m_triangles.size(); j++) {
+            auto divided_triangles = subdivide(m_triangles[j]);
+            new_triangles.insert(new_triangles.end(), divided_triangles.begin(), divided_triangles.end());
+        }
+        m_triangles = new_triangles;
     }
-    m_triangles = new_triangles;
+
+    //std::vector<Triangle> new_triangles;
+    //for (int i = 0; i < m_triangles.size(); i++) {
+    //    const auto& ret = recursive_subdivide(m_triangles[i], regression_depth);
+    //    new_triangles.insert(new_triangles.end(), ret.begin(), ret.end());
+    //}
+    //m_triangles = new_triangles;
+
+    QueryPerformanceCounter(&t2);
+    auto time = (double)(t2.QuadPart - t1.QuadPart) / (double)tc.QuadPart;
+    std::cout << "create_icosphere_mesh(): regerssion: " << time << std::endl;
 
     // 2. 对所有细分顶点到中心的距离做归一化
     std::vector<Vertex> all_vertices;
