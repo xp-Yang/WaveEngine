@@ -57,7 +57,7 @@ struct CameraComponent {
 	glm::mat4 projection = glm::perspective(glm::radians(45.0f), WINDOW_WIDTH / WINDOW_HEIGHT, 0.1f, 100.0f);
 	float zoom = 1.0f;
 
-	glm::vec3 get_right_direction() const { // camera 的 x 轴
+	glm::vec3 getRightDirection() const { // camera 的 x 轴
 		glm::vec3 cameraRight = glm::normalize(glm::cross(direction, up));
 		for (int i = 0; i < 3; i++) {
 			if (abs(cameraRight[i] - 1) < 0.001f) {
@@ -68,8 +68,8 @@ struct CameraComponent {
 		return cameraRight;
 	}
 
-	glm::vec3 get_up_direction() const { // camera 的 y 轴
-		glm::vec3 cameraRight = get_right_direction();
+	glm::vec3 getUpDirection() const { // camera 的 y 轴
+		glm::vec3 cameraRight = getRightDirection();
 		glm::vec3 cameraUp = glm::cross(cameraRight, direction);
 		for (int i = 0; i < 3; i++) {
 			if (abs(cameraUp[i] - 1) < 0.001f) {
@@ -95,7 +95,7 @@ struct SkyboxComponent {
 };
 
 struct LightComponent {
-	glm::mat4 light_reference_matrix()
+	glm::mat4 lightReferenceMatrix()
 	{
 		auto& world = ecs::World::get();
 		glm::mat4 light_projection = glm::ortho(-15.0f * WINDOW_WIDTH / WINDOW_HEIGHT, 15.0f * WINDOW_WIDTH / WINDOW_HEIGHT, -15.0f, 15.0f, 0.1f, 100.0f);
@@ -127,6 +127,12 @@ struct BoxCollider2DComponent {
 
 struct TextureComponent {
 	unsigned int texture;
+};
+
+struct TransparentComponent {};
+
+struct ExplosionComponent {
+	float explosionRatio = 0.0f;
 };
 
 struct RendererComponent {

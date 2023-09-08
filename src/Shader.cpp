@@ -148,7 +148,18 @@ void Shader::setMatrix(const std::string& name, int count, const glm::mat4& mat_
     GLuint transformLoc = glGetUniformLocation(m_id, name.c_str());
     glUniformMatrix4fv(transformLoc, count, GL_FALSE, glm::value_ptr(mat_value));
 }
-void Shader::setTexture(const std::string& name, int texture_unit) const
+void Shader::setTexture(const std::string& name, int texture_unit, unsigned int texture_id) const
 {
+    glActiveTexture(GL_TEXTURE0 + texture_unit);
+    glBindTexture(GL_TEXTURE_2D, texture_id);
     setInt(name, texture_unit);
+    glActiveTexture(GL_TEXTURE0);
+}
+
+void Shader::setCubeTexture(const std::string& name, int texture_unit, unsigned int texture_id) const
+{
+    glActiveTexture(GL_TEXTURE0 + texture_unit);
+    glBindTexture(GL_TEXTURE_CUBE_MAP, texture_id);
+    setInt(name, texture_unit);
+    glActiveTexture(GL_TEXTURE0);
 }

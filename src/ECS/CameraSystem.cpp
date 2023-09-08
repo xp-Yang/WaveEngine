@@ -4,7 +4,7 @@
 
 namespace ecs {
 
-void CameraSystem::key_process(int key, float frame_time)
+void CameraSystem::onKeyUpdate(int key, float frame_time)
 {
 	auto& world = ecs::World::get();
     for (auto entity : world.entityView<ecs::CameraComponent>()) {
@@ -13,8 +13,8 @@ void CameraSystem::key_process(int key, float frame_time)
         // 每一帧持续时间越长，意味着上一帧的渲染花费了越多时间，所以这一帧的速度应该越大，来平衡渲染所花去的时间
         float frame_speed = ecs::CameraComponent::CameraMovementSpeed * frame_time;
 		auto camera_forward = camera.direction;
-		auto camera_right = camera.get_right_direction();
-		auto camera_up = camera.get_up_direction();
+		auto camera_right = camera.getRightDirection();
+		auto camera_up = camera.getUpDirection();
         switch (key) {
         case GLFW_KEY_W:
             camera.pos += camera_forward * frame_speed;
@@ -52,7 +52,7 @@ void CameraSystem::key_process(int key, float frame_time)
 
 }
 
-void CameraSystem::mouse_process(double delta_x, double delta_y, int mouse_button)
+void CameraSystem::onMouseUpdate(double delta_x, double delta_y, int mouse_button)
 {
 	auto& world = ecs::World::get();
     for (auto entity : world.entityView<ecs::CameraComponent>()) {
@@ -67,7 +67,7 @@ void CameraSystem::mouse_process(double delta_x, double delta_y, int mouse_butto
             camera.direction = rotate_z * glm::vec4(camera.direction, 1.0f);
             camera.direction = glm::normalize(camera.direction);
 
-            auto camera_right = camera.get_right_direction();
+            auto camera_right = camera.getRightDirection();
             auto rotate_x = glm::rotate(glm::mat4(1.0f), (float)(0.3f * delta_y * ecs::CameraComponent::Sensitivity), camera_right);
             camera.pos = rotate_x * glm::vec4(camera.pos, 1.0f);
             camera.direction = rotate_x * glm::vec4(camera.direction, 1.0f);
@@ -76,8 +76,8 @@ void CameraSystem::mouse_process(double delta_x, double delta_y, int mouse_butto
             camera.view = glm::lookAt(camera.pos, camera.pos + camera.direction, ecs::CameraComponent::up);
         }
         else if (mouse_button == 1) {
-            camera.pos += -(float)(delta_x * ecs::CameraComponent::Sensitivity) * camera.get_right_direction();
-            camera.pos += -(float)(delta_y * ecs::CameraComponent::Sensitivity) * camera.get_up_direction();
+            camera.pos += -(float)(delta_x * ecs::CameraComponent::Sensitivity) * camera.getRightDirection();
+            camera.pos += -(float)(delta_y * ecs::CameraComponent::Sensitivity) * camera.getUpDirection();
 
             camera.view = glm::lookAt(camera.pos, camera.pos + camera.direction, ecs::CameraComponent::up);
         }
@@ -106,7 +106,7 @@ void CameraSystem::mouse_process(double delta_x, double delta_y, int mouse_butto
     //}
 }
 
-void CameraSystem::mouse_scroll_process(double yoffset)
+void CameraSystem::onMouseWheelUpdate(double yoffset)
 {
 	auto& world = ecs::World::get();
     for (auto entity : world.entityView<ecs::CameraComponent>()) {

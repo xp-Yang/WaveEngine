@@ -4,9 +4,9 @@
 namespace ecs {
 
 struct CameraSystem{
-	static void key_process(int key, float frame_time);
-	static void mouse_process(double delta_x, double delta_y, int mouse_button);
-	static void mouse_scroll_process(double yoffset);
+	static void onKeyUpdate(int key, float frame_time);
+	static void onMouseUpdate(double delta_x, double delta_y, int mouse_button);
+	static void onMouseWheelUpdate(double yoffset);
 };
 
 }

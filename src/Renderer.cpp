@@ -46,17 +46,23 @@ void Renderer::render_ecs(const View& view)
 	}
 
     glm::vec3 light_pos;
+    glm::vec3 light_color;
     glm::mat4 light_ref_matrix;
     for (auto entity : world.entityView<ecs::LightComponent>()) {
         auto& transform = *world.getComponent<ecs::TransformComponent>(entity);
         light_pos = transform.transform()[3];
-        light_ref_matrix = world.getComponent<ecs::LightComponent>(entity)->light_reference_matrix();
+        light_color = world.getComponent<ecs::MaterialComponent>(entity)->materials[0].color;
+        light_ref_matrix = world.getComponent<ecs::LightComponent>(entity)->lightReferenceMatrix();
     }
 
     for (auto entity : world.entityView<ecs::MeshComponent, ecs::MaterialComponent, ecs::TransformComponent>()) {
         auto& mesh = *world.getComponent<ecs::MeshComponent>(entity);
         auto& material = *world.getComponent<ecs::MaterialComponent>(entity);
         auto& model_matrix = *world.getComponent<ecs::TransformComponent>(entity);
+        float explosion_ratio = 0.0f;
+        if (world.hasComponent<ecs::ExplosionComponent>(entity)) {
+            explosion_ratio = world.getComponent<ecs::ExplosionComponent>(entity)->explosionRatio;
+        }
 
         for (int i = 0; i < mesh.meshes.size(); i++) {
             Shader* shader = material.materials[i].shader;
@@ -67,28 +73,25 @@ void Renderer::render_ecs(const View& view)
                 glDepthMask(GL_FALSE);
                 shader->setMatrix("view", 1, skybox_view);
             }
-            else
+            else {
+                glDepthMask(GL_TRUE);
                 shader->setMatrix("view", 1, camera_view);
+            }
 
             // TODO 能不能想个好方法管理这些shader属性
             shader->setMatrix("model", 1, model_mat);
             shader->setMatrix("projection", 1, camera_projection);
             shader->setFloat3("camera_pos", camera_pos);
-            shader->setFloat3("light.color", { 1.0f, 1.0f, 1.0f }); // TODO light_color
+            shader->setFloat3("light.color", light_color);
             shader->setFloat3("light.position", light_pos);
-            glActiveTexture(GL_TEXTURE6);
-            glBindTexture(GL_TEXTURE_CUBE_MAP, skybox_texture_id);
-            shader->setTexture("skybox", 6);
+            shader->setCubeTexture("skybox", 6, skybox_texture_id);
             shader->setBool("enable_skybox_sample", /*obj->is_enable_reflection()*/false);
-            shader->setFloat("magnitude", /*obj->get_explostion_ratio()*/0);
+            shader->setFloat("explosionRatio", explosion_ratio);
             if (view.is_shadow_map_enable()) {
                 shader->setMatrix("lightSpaceMatrix", 1, light_ref_matrix);
-                glActiveTexture(GL_TEXTURE7);
-                glBindTexture(GL_TEXTURE_2D, view.get_shadow_map_id());
-                shader->setTexture("shadow_map", 7);
+                shader->setTexture("shadow_map", 7, view.get_shadow_map_id());
             }
             drawIndex(*shader, mesh.meshes[i].get_VAO(), mesh.meshes[i].get_indices_count());
-            glDepthMask(GL_TRUE);
             shader->stop_using();
         }
     }
@@ -191,6 +194,7 @@ void Renderer::render_normal(const View& view) {
 }
 
 void Renderer::render_shadow_map(const View& view) {
+    glEnable(GL_DEPTH_TEST);
     // TODO 想办法放进view开启shadow_map的逻辑
     auto& world = ecs::World::get();
 
@@ -198,7 +202,7 @@ void Renderer::render_shadow_map(const View& view) {
 
     glm::mat4 light_ref_matrix;
     for (auto entity : world.entityView<ecs::LightComponent>()) {
-        light_ref_matrix = world.getComponent<ecs::LightComponent>(entity)->light_reference_matrix();
+        light_ref_matrix = world.getComponent<ecs::LightComponent>(entity)->lightReferenceMatrix();
     }
 
     depth_shader->start_using();

@@ -9,16 +9,16 @@ unsigned int Texture::generate_texture_from_file(const std::string& full_path, b
     int width, height, nrComponents;
     unsigned char* data = stbi_load(filename.c_str(), &width, &height, &nrComponents, 0);
 
-    unsigned int pbo;
-    glGenBuffers(1, &pbo);
-    glBindBuffer(GL_PIXEL_UNPACK_BUFFER, pbo);
-    glBufferData(GL_PIXEL_UNPACK_BUFFER, width * height * nrComponents, 0, GL_STREAM_DRAW);
-    GLubyte* ptr = (GLubyte*)glMapBuffer(GL_PIXEL_UNPACK_BUFFER, GL_READ_WRITE);
-    if (ptr)
-    {
-        memcpy(ptr, data, width * height * nrComponents);
-        glUnmapBuffer(GL_PIXEL_UNPACK_BUFFER); // release the mapped buffer
-    }
+    //unsigned int pbo;
+    //glGenBuffers(1, &pbo);
+    //glBindBuffer(GL_PIXEL_UNPACK_BUFFER, pbo);
+    //glBufferData(GL_PIXEL_UNPACK_BUFFER, width * height * nrComponents, 0, GL_STREAM_DRAW);
+    //GLubyte* ptr = (GLubyte*)glMapBuffer(GL_PIXEL_UNPACK_BUFFER, GL_READ_WRITE);
+    //if (ptr)
+    //{
+    //    memcpy(ptr, data, width * height * nrComponents);
+    //    glUnmapBuffer(GL_PIXEL_UNPACK_BUFFER); // release the mapped buffer
+    //}
 
     unsigned int textureID;
     glGenTextures(1, &textureID);
@@ -34,11 +34,12 @@ unsigned int Texture::generate_texture_from_file(const std::string& full_path, b
             format = GL_RGBA;
 
         glBindTexture(GL_TEXTURE_2D, textureID);
-        glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, 0);
+        glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
         glGenerateMipmap(GL_TEXTURE_2D);
 
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+        //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
@@ -50,7 +51,7 @@ unsigned int Texture::generate_texture_from_file(const std::string& full_path, b
         stbi_image_free(data);
     }
 
-    glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
+    //glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
 
     return textureID;
 }

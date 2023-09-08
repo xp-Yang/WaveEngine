@@ -10,6 +10,8 @@ ImGuiEditor::ImGuiEditor()
 	pixel_style = false;
 	stop_rotate = false;
 	normal_debug = false;
+	enable_shadow = false;
+	enable_reflection = false;
     global_ambient_strength = 0.1f;
     icosphere_accuracy = 8;
 }
@@ -40,6 +42,7 @@ void ImGuiEditor::render_global_editor() {
     }
     ImGui::Checkbox("light: stop rotate", &stop_rotate);
     ImGui::Checkbox("enable normal debug", &normal_debug);
+    ImGui::Checkbox("enable shadow", &enable_shadow);
 
     ImGuiIO& io = ImGui::GetIO();
     ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / io.Framerate, io.Framerate);
@@ -80,23 +83,21 @@ void ImGuiEditor::render_camera_editor()
 
 void ImGuiEditor::render_entity_editor()
 {
+    // TODO 考虑对材质的编辑放入MaterialSystem
     auto& world = ecs::World::get();
 
-    for (auto entity : world.entityView<ecs::PickedComponent, ecs::MeshComponent, ecs::MaterialComponent, ecs::TransformComponent>()) {
+    for (auto entity : world.entityView<ecs::NameComponent, ecs::PickedComponent, ecs::MeshComponent, ecs::MaterialComponent, ecs::TransformComponent>()) {
         auto& mesh = *world.getComponent<ecs::MeshComponent>(entity);
         auto& material = *world.getComponent<ecs::MaterialComponent>(entity);
         auto& model_matrix = *world.getComponent<ecs::TransformComponent>(entity);
+        std::string obj_name = world.getComponent<ecs::NameComponent>(entity)->name;
 
 
         glm::vec3 color = material.materials[0].color;
         float shininess = material.materials[0].shininess;
-        //bool reflection = curr_entity->is_enable_reflection();
-        //float explosion_ratio = curr_entity->get_explostion_ratio();
 
-        std::string obj_name = world.getComponent<ecs::NameComponent>(entity)->name;
         ImGui::Begin((obj_name + " controller").c_str(), nullptr, ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse);
-        //ImGui::Checkbox((std::string("enable reflection") + "##" + obj_name).c_str(), &reflection);
-        //ImGui::SliderFloat((std::string("explosion ratio") + "##" + obj_name).c_str(), &explosion_ratio, 0.0f, 10.0f);
+        ImGui::Checkbox((std::string("enable reflection") + "##" + obj_name).c_str(), &enable_reflection);
         ImGui::ColorEdit3((std::string("color") + "##" + obj_name).c_str(), (float*)&color);
         ImGui::SliderFloat((std::string("shininess") + "##" + obj_name).c_str(), &shininess, 0.1f, 512.0f);
         ImGui::PushItemWidth(85.0f);
@@ -107,6 +108,7 @@ void ImGuiEditor::render_entity_editor()
         ImGui::SliderFloat((std::string("xyz") + "##" + obj_name).c_str(), &model_matrix.translation.z, -10.0f, 10.0f);
         ImGui::PopItemWidth();
         // 编辑对象材质属性
+        //ecs::MaterialSystem::onUpdate();
         for (int i = 0; i < material.materials.size(); i++) {
             //material.materials[i].ambient_strength;
             material.materials[i].color = color;
@@ -117,9 +119,17 @@ void ImGuiEditor::render_entity_editor()
         //// 是否开启法向量检查
         //;
         //// 编辑对象是否开启反射
-        //curr_entity->enable_reflection(reflection);
-        //// 编辑对象的explosion ratio
-        //curr_entity->set_explostion_ratio(explosion_ratio);
+        //if (enable_reflection) {
+        //    world.addComponent<ecs::ReceiveReflectionComponent>(entity);
+        //}
+        //else {
+        //    world.removeComponent<ecs::ReceiveReflectionComponent>(entity);
+        //}
+        // 编辑对象的explosion ratio
+        if (world.hasComponent<ecs::ExplosionComponent>(entity)) {
+            auto& explosion = *world.getComponent<ecs::ExplosionComponent>(entity);
+            ImGui::SliderFloat((std::string("explosion ratio") + "##" + obj_name).c_str(), &explosion.explosionRatio, 0.0f, 1.0f);
+        }
 
         // log
         {
@@ -132,8 +142,8 @@ void ImGuiEditor::render_entity_editor()
         //if (obj_name == "sphere") {
         //    ImGui::SliderInt("icosphere accuracy", &icosphere_accuracy, 0, 10);
         //    if (icosphere_accuracy != sphere->get_recursive_depth()) {
-        //        sphere->create_icosphere(icosphere_accuracy);
-        //        icosphere_accuracy = sphere->get_recursive_depth();
+        //        mesh.meshes.pop_back();
+        //        mesh.meshes.push_back(Mesh::create_icosphere_mesh(icosphere_accuracy));
         //    }
         //}
 

@@ -33,7 +33,7 @@ public:
 
     void set_render_quality();
     void set_render_style();
-    void enable_shadow_map(bool enable) { m_enable_shadow_map = enable; }
+    void enable_shadow_map(bool enable);
     bool is_shadow_map_enable() const { return m_enable_shadow_map; }
     void set_shadow_map_id(unsigned int id) { shadow_map_id = id; }
     unsigned int get_shadow_map_id() const { return shadow_map_id; }

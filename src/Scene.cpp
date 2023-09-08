@@ -76,6 +76,8 @@ void Scene::init() {
 	cube_material.set_diffuse_map("resource/images/default_white_map.png");
 	cube_material.set_specular_map("resource/images/cube_specular.png");
     world.addComponent<ecs::MaterialComponent>(cube_entity).materials.push_back(cube_material);
+    world.addComponent<ecs::TransparentComponent>(cube_entity);
+    world.addComponent<ecs::ExplosionComponent>(cube_entity);
 
 	auto sphere_entity = world.create_entity();
 	world.addComponent<ecs::NameComponent>(sphere_entity).name = "sphere";
@@ -87,17 +89,21 @@ void Scene::init() {
 	sphere_material.set_diffuse_map("resource/images/default_white_map.png");
 	sphere_material.set_specular_map("resource/images/default_white_map.png");
     world.addComponent<ecs::MaterialComponent>(sphere_entity).materials.push_back(sphere_material);
+	world.addComponent<ecs::TransparentComponent>(sphere_entity);
+	world.addComponent<ecs::ExplosionComponent>(sphere_entity);
 
     auto ground_entity = world.create_entity();
     world.addComponent<ecs::NameComponent>(ground_entity).name = "ground";
     auto& ground_transform = world.addComponent<ecs::TransformComponent>(ground_entity);
-	ground_transform.scale = glm::vec3(20.0f);
+	ground_transform.scale = glm::vec3(200.0f);
     world.addComponent<ecs::MeshComponent>(ground_entity).meshes.push_back(Mesh::create_quad_mesh());
     Material ground_material;
     ground_material.shader = new Shader("resource/shader/model.vs", "resource/shader/model.fs", "resource/shader/model.gs");
-    ground_material.set_diffuse_map("resource/images/default_white_map.png");
-    ground_material.set_specular_map("resource/images/default_white_map.png");
+    ground_material.set_diffuse_map("resource/images/grid.png");
+    ground_material.set_specular_map("resource/images/grid.png");
+	// 一种纹理网格， 一种自己绘制的网格
     world.addComponent<ecs::MaterialComponent>(ground_entity).materials.push_back(ground_material);
+	world.addComponent<ecs::TransparentComponent>(ground_entity);
 
 	auto nanosuit_entity = world.create_entity();
 	world.addComponent<ecs::NameComponent>(nanosuit_entity).name = "nanosuit";
@@ -110,6 +116,8 @@ void Scene::init() {
 		nanosuit->material(i).shader = nanosuit_shader;
 	}
 	world.addComponent<ecs::MaterialComponent>(nanosuit_entity).materials = object("nanosuit")->get_materials();
+	world.addComponent<ecs::TransparentComponent>(nanosuit_entity);
+	world.addComponent<ecs::ExplosionComponent>(nanosuit_entity);
 
 	auto yoko_entity = world.create_entity();
 	world.addComponent<ecs::NameComponent>(yoko_entity).name = "yoko";
@@ -122,6 +130,8 @@ void Scene::init() {
 		yoko->material(i).shader = yoko_shader;
 	}
 	world.addComponent<ecs::MaterialComponent>(yoko_entity).materials = object("yoko")->get_materials();
+	world.addComponent<ecs::TransparentComponent>(yoko_entity);
+	world.addComponent<ecs::ExplosionComponent>(yoko_entity);
 
 	auto camera = world.create_entity();
 	world.addComponent<ecs::NameComponent>(camera).name = "camera";

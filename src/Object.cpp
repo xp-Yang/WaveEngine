@@ -2,7 +2,6 @@
 
 Object::Object()
     : m_enable_relection(false)
-    , m_explosion_ratio(0.0f)
     , m_id(++id_count)
 {
 }

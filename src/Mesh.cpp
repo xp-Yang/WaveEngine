@@ -250,6 +250,39 @@ static std::vector<Triangle> subdivide(Triangle triangle) {
     return { new_triangle0, new_triangle1, new_triangle2, new_triangle3 };
 }
 
+static std::vector<Triangle> recursive_subdivide(const Triangle& triangle, int recursive_depth) {
+    //if (abs(triangle.vertices[0] - triangle.vertices[1]).x < 0.05 && 
+    //    abs(triangle.vertices[0] - triangle.vertices[1]).y < 0.05 &&
+    //    abs(triangle.vertices[0] - triangle.vertices[1]).z < 0.05) {
+    //    return { triangle };
+    //}
+    if (recursive_depth == 0) {
+        return { triangle };
+    }
+
+    glm::vec3 new_vertex0 = (triangle.vertices[0] + triangle.vertices[1]) / 2.0f;
+    glm::vec3 new_vertex1 = (triangle.vertices[1] + triangle.vertices[2]) / 2.0f;
+    glm::vec3 new_vertex2 = (triangle.vertices[2] + triangle.vertices[0]) / 2.0f;
+
+    Triangle new_triangle0 = { triangle.vertices[0], new_vertex0, new_vertex2 };
+    Triangle new_triangle1 = { new_vertex0, triangle.vertices[1], new_vertex1 };
+    Triangle new_triangle2 = { new_vertex0, new_vertex1, new_vertex2 };
+    Triangle new_triangle3 = { new_vertex2, new_vertex1, triangle.vertices[2] };
+
+    std::vector<Triangle> ret;
+    recursive_depth--;
+    const std::vector<Triangle>& ret1 = recursive_subdivide(new_triangle0, recursive_depth);
+    const std::vector<Triangle>& ret2 = recursive_subdivide(new_triangle1, recursive_depth);
+    const std::vector<Triangle>& ret3 = recursive_subdivide(new_triangle2, recursive_depth);
+    const std::vector<Triangle>& ret4 = recursive_subdivide(new_triangle3, recursive_depth);
+    ret.insert(ret.end(), ret1.begin(), ret1.end());
+    ret.insert(ret.end(), ret2.begin(), ret2.end());
+    ret.insert(ret.end(), ret3.begin(), ret3.end());
+    ret.insert(ret.end(), ret4.begin(), ret4.end());
+
+    return ret;
+}
+
 Mesh Mesh::create_icosphere_mesh(int regression_depth) {
     std::vector<Triangle> m_triangles;
     glm::vec3 m_center;
@@ -258,14 +291,21 @@ Mesh Mesh::create_icosphere_mesh(int regression_depth) {
     create_tetrahedron(m_triangles, m_center);
 
     // 1. 对每个面细分
-    for (int i = 0; i < regression_depth; i++) {
-        std::vector<Triangle> new_triangles;
-        for (int j = 0; j < m_triangles.size(); j++) {
-            auto divided_triangles = subdivide(m_triangles[j]);
-            new_triangles.insert(new_triangles.end(), divided_triangles.begin(), divided_triangles.end());
-        }
-        m_triangles = new_triangles;
+    //for (int i = 0; i < regression_depth; i++) {
+    //    std::vector<Triangle> new_triangles;
+    //    for (int j = 0; j < m_triangles.size(); j++) {
+    //        auto divided_triangles = subdivide(m_triangles[j]);
+    //        new_triangles.insert(new_triangles.end(), divided_triangles.begin(), divided_triangles.end());
+    //    }
+    //    m_triangles = new_triangles;
+    //}
+
+    std::vector<Triangle> new_triangles;
+    for (int i = 0; i < m_triangles.size(); i++) {
+        const auto& ret = recursive_subdivide(m_triangles[i], regression_depth);
+        new_triangles.insert(new_triangles.end(), ret.begin(), ret.end());
     }
+    m_triangles = new_triangles;
 
     // 2. 对所有细分顶点到中心的距离做归一化
     std::vector<Vertex> all_vertices;
@@ -324,9 +364,10 @@ Mesh Mesh::create_quad_mesh()
         normal.z = cubeVertices[5 + i];
         vertex.normal = normal;
 
+        // TODO uv 范围不要写死
         glm::vec2 vec;
-        vec.x = cubeVertices[6 + i] * 2.0f;
-        vec.y = cubeVertices[7 + i] * 2.0f;
+        vec.x = cubeVertices[6 + i] * 20.0f;
+        vec.y = cubeVertices[7 + i] * 20.0f;
         vertex.texture_uv = vec;
 
         vertices.push_back(vertex);

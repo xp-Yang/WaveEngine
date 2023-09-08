@@ -19,11 +19,11 @@ out GS_OUT{
     vec4 FragPosLightSpace;
 } gs_out;
 
-uniform float magnitude;
+uniform float explosionRatio;
 
 vec4 explode(vec3 position, vec3 dir)
 {
-    vec3 displacement = dir * magnitude; 
+    vec3 displacement = dir * explosionRatio; 
     return vec4(position + displacement, 1.0);
 }
 
