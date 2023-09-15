@@ -108,9 +108,9 @@ void start_render_loop(GLFWwindow* window) {
     Renderer renderer;
 
     // 创建帧缓冲
-    unsigned int color_buffer;
-    glGenFramebuffers(1, &color_buffer);
-    glBindFramebuffer(GL_FRAMEBUFFER, color_buffer);
+    unsigned int multiSampleFBO;
+    glGenFramebuffers(1, &multiSampleFBO);
+    glBindFramebuffer(GL_FRAMEBUFFER, multiSampleFBO);
     //unsigned int color_texture;
     //glGenTextures(1, &color_texture);
     //glBindTexture(GL_TEXTURE_2D, color_texture);
@@ -136,9 +136,9 @@ void start_render_loop(GLFWwindow* window) {
     glBindRenderbuffer(GL_RENDERBUFFER, 0);
     
 	// configure second post-processing framebuffer
-	unsigned int intermediateFBO;
-	glGenFramebuffers(1, &intermediateFBO);
-	glBindFramebuffer(GL_FRAMEBUFFER, intermediateFBO);
+	unsigned int postFBO;
+	glGenFramebuffers(1, &postFBO);
+	glBindFramebuffer(GL_FRAMEBUFFER, postFBO);
 	// create a color attachment texture
 	unsigned int screenTexture;
 	glGenTextures(1, &screenTexture);
@@ -200,6 +200,9 @@ void start_render_loop(GLFWwindow* window) {
     //glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, picking_depth_texture, 0);
     //glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
     while (!glfwWindowShouldClose(window))
     {
         ImGui_ImplOpenGL3_NewFrame();
@@ -210,7 +213,7 @@ void start_render_loop(GLFWwindow* window) {
         view.mouse_and_key_callback();
         view.enable_shadow_map(editor.enable_shadow);
 
-        // 1. 生成深度缓冲
+        // 1. 生成深度贴图
         if (view.is_shadow_map_enable()) {
             float depth_buffer_width = WINDOW_WIDTH * 16;
             float depth_buffer_height = WINDOW_HEIGHT * 16;
@@ -232,7 +235,7 @@ void start_render_loop(GLFWwindow* window) {
                 //renderer.draw(*frame_shader, quad_VAO, DrawMode::Arrays, 0, 6);
         }
 
-        // 2. 生成颜色缓冲
+        // 2. 生成msaa颜色贴图
         float color_buffer_width = WINDOW_WIDTH;
         float color_buffer_height = WINDOW_HEIGHT;
         if (editor.pixel_style) {
@@ -242,7 +245,7 @@ void start_render_loop(GLFWwindow* window) {
         //glBindTexture(GL_TEXTURE_2D, color_texture);
         //glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, color_buffer_width, color_buffer_height, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
         glViewport(0, 0, color_buffer_width, color_buffer_height);
-        glBindFramebuffer(GL_FRAMEBUFFER, color_buffer);
+        glBindFramebuffer(GL_FRAMEBUFFER, multiSampleFBO);
         glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
         renderer.render_ecs(view);
@@ -250,13 +253,13 @@ void start_render_loop(GLFWwindow* window) {
         if (editor.normal_debug)
             renderer.render_normal(view);
 
-        // 2.
+        // 3.生成后处理贴图
 		//因为多重采样缓冲有一点特别，我们不能直接将它们的缓冲图像用于其他运算，比如在着色器中对它们进行采样。
 		//一个多重采样的图像包含比普通图像更多的信息，我们所要做的是缩小或者还原(Resolve)图像。
         //now blit multisampled buffer(s) to normal colorbuffer of intermediate FBO. Image is stored in screenTexture
-        //glBindFramebuffer(GL_READ_FRAMEBUFFER, color_buffer);
-		//glBindFramebuffer(GL_DRAW_FRAMEBUFFER, intermediateFBO);
-		//glBlitFramebuffer(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT, 0, 0, WINDOW_WIDTH, WINDOW_HEIGHT, GL_COLOR_BUFFER_BIT, GL_NEAREST);
+        glBindFramebuffer(GL_READ_FRAMEBUFFER, multiSampleFBO);
+		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, postFBO);
+		glBlitFramebuffer(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT, 0, 0, WINDOW_WIDTH, WINDOW_HEIGHT, GL_COLOR_BUFFER_BIT, GL_NEAREST);
         // 不blit的话，直接使用 sampler2DMS 自定义抗锯齿算法
 
         // 3. 默认缓冲
@@ -265,8 +268,8 @@ void start_render_loop(GLFWwindow* window) {
         glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
         glDisable(GL_DEPTH_TEST);
-		//frame_shader->setTexture("Texture", 0, screenTexture);
-		frame_shader->setTexture("Texture", 0, multi_sample_texture);
+		frame_shader->setTexture("Texture", 0, screenTexture);
+		//frame_shader->setTexture("Texture", 0, multi_sample_texture);
 		renderer.drawTriangle(*frame_shader, quad_VAO, 6);
         glEnable(GL_DEPTH_TEST);
 

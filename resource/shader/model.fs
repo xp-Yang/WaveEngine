@@ -1,7 +1,7 @@
 #version 330 core
 
 in GS_OUT{
-    vec3 pass_color;
+    vec4 pass_color;
     vec3 pass_pos;
     vec2 pass_uv;
     vec3 pass_normal;
@@ -10,7 +10,7 @@ in GS_OUT{
 
 struct Light {
     vec3 position;
-    vec3 color;
+    vec4 color;
 };
 
 struct Material {
@@ -52,22 +52,22 @@ float ShadowCalculation(vec4 fragPosLightSpace)
 
 void main()
 {
-    vec3 ambient_light = light.color * material.ambient * vec3(texture(material.diffuse_map, fs_in.pass_uv));
+    vec3 ambient_light = light.color.xyz * material.ambient * vec3(texture(material.diffuse_map, fs_in.pass_uv));
 
     //TODO normal需要变换成世界空间，但要注意不能带平移
     vec3 normal = normalize(fs_in.pass_normal);
     vec3 light_direction = normalize(light.position - fs_in.pass_pos);
     float diffuse_coef = max(dot(light_direction, normal), 0.0);
-    vec3 diffuse_light = light.color * diffuse_coef * vec3(texture(material.diffuse_map, fs_in.pass_uv));
+    vec3 diffuse_light = light.color.xyz * diffuse_coef * vec3(texture(material.diffuse_map, fs_in.pass_uv));
 
     vec3 view_direction = normalize(camera_pos - fs_in.pass_pos);
     vec3 reflect_direction = reflect(-light_direction, normal);
     float spec_coef = pow(max(dot(view_direction, reflect_direction), 0.001), material.shininess);
-    vec3 specular_light = light.color * spec_coef * vec3(texture(material.specular_map, fs_in.pass_uv));
+    vec3 specular_light = light.color.xyz * spec_coef * vec3(texture(material.specular_map, fs_in.pass_uv));
 
     // 计算阴影
     float shadow = ShadowCalculation(fs_in.FragPosLightSpace);       
-    vec3 lighting = (ambient_light + (1.0 - shadow) * (diffuse_light + specular_light)) * fs_in.pass_color;    
+    vec3 lighting = (ambient_light + (1.0 - shadow) * (diffuse_light + specular_light)) * fs_in.pass_color.xyz;    
     out_color = vec4(lighting, 1.0);
 
     if(enable_skybox_sample){

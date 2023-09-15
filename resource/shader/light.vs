@@ -1,12 +1,12 @@
 #version 330 core
 layout (location = 0) in vec3 vertex_pos;
 
-uniform vec3 color;
+uniform vec4 color;
 uniform mat4 model;
 uniform mat4 view;
 uniform mat4 projection;
 
-out vec3 pass_color;
+out vec4 pass_color;
 
 void main()
 {

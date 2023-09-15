@@ -93,7 +93,7 @@ void ImGuiEditor::render_entity_editor()
         std::string obj_name = world.getComponent<ecs::NameComponent>(entity)->name;
 
 
-        glm::vec3 color = material.materials[0].color;
+        glm::vec4 color = material.materials[0].color;
         float shininess = material.materials[0].shininess;
 
         ImGui::Begin((obj_name + " controller").c_str(), nullptr, ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse);

@@ -72,6 +72,7 @@ void Scene::init() {
 	cube_transform.translation = { 0.0f, 1.0f, 0.0f };
 	world.addComponent<ecs::MeshComponent>(cube_entity).meshes.push_back(Mesh::create_cube_mesh());
 	Material cube_material;
+	cube_material.color = glm::vec4(1.0f, 1.0f, 1.0f, 0.1f);
     cube_material.shader = new Shader("resource/shader/model.vs", "resource/shader/model.fs", "resource/shader/model.gs");
 	cube_material.set_diffuse_map("resource/images/default_white_map.png");
 	cube_material.set_specular_map("resource/images/cube_specular.png");

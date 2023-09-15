@@ -4,7 +4,7 @@ layout (triangle_strip, max_vertices = 3) out;
 
 in VS_OUT {
     mat4 vp;
-    vec3 pass_color;
+    vec4 pass_color;
     vec3 pass_pos;
     vec2 pass_uv;
     vec3 pass_normal;
@@ -12,7 +12,7 @@ in VS_OUT {
 } gs_in[];
 
 out GS_OUT{
-    vec3 pass_color;
+    vec4 pass_color;
     vec3 pass_pos;
     vec2 pass_uv;
     vec3 pass_normal;

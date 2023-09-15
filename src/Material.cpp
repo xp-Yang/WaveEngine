@@ -6,7 +6,7 @@ void Material::update_shader_binding() const {
         // TODO location不存在则返回-1
         shader->start_using();
 
-        shader->setFloat3("color", color);
+        shader->setFloat4("color", color);
         shader->setFloat("material.ambient", ambient_strength);
         shader->setFloat("material.shininess", shininess);
 

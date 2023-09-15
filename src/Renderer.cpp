@@ -46,7 +46,7 @@ void Renderer::render_ecs(const View& view)
 	}
 
     glm::vec3 light_pos;
-    glm::vec3 light_color;
+    glm::vec4 light_color;
     glm::mat4 light_ref_matrix;
     for (auto entity : world.entityView<ecs::LightComponent>()) {
         auto& transform = *world.getComponent<ecs::TransformComponent>(entity);
@@ -82,7 +82,7 @@ void Renderer::render_ecs(const View& view)
             shader->setMatrix("model", 1, model_mat);
             shader->setMatrix("projection", 1, camera_projection);
             shader->setFloat3("camera_pos", camera_pos);
-            shader->setFloat3("light.color", light_color);
+            shader->setFloat4("light.color", light_color);
             shader->setFloat3("light.position", light_pos);
             shader->setCubeTexture("skybox", 6, skybox_texture_id);
             shader->setBool("enable_skybox_sample", /*obj->is_enable_reflection()*/false);

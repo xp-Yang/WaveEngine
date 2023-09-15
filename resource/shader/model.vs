@@ -4,7 +4,7 @@ layout (location = 0) in vec3 vertex_pos;
 layout (location = 1) in vec3 vertex_normal;
 layout (location = 2) in vec2 vertex_uv;
 
-uniform vec3 color;
+uniform vec4 color;
 uniform mat4 model;
 uniform mat4 view;
 uniform mat4 projection;
@@ -12,7 +12,7 @@ uniform mat4 lightSpaceMatrix;
 
 out VS_OUT {
     mat4 vp;
-    vec3 pass_color;
+    vec4 pass_color;
     vec3 pass_pos;          //世界坐标
     vec2 pass_uv;
     vec3 pass_normal;       //局部坐标
