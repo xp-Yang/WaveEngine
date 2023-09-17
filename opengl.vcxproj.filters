@@ -111,6 +111,9 @@
     <ClCompile Include="src\Editor\ImGuiGizmo.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="src\Application.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Renderer.hpp">
@@ -198,6 +201,9 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="src\Editor\ImGuiGizmo.hpp">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Application.hpp">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>
