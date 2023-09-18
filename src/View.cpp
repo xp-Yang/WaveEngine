@@ -136,13 +136,13 @@ void View::render_for_picking() {
     picking_shader->setMatrix("view", 1, camera_view);
     picking_shader->setMatrix("projection", 1, camera_projection);
 
-    for (auto entity : world.entityView<ecs::MeshComponent, ecs::MaterialComponent, ecs::TransformComponent>()) {
-        auto& mesh = *world.getComponent<ecs::MeshComponent>(entity);
+    for (auto entity : world.entityView<ecs::RenderableComponent, ecs::TransformComponent>()) {
+        auto& renderable = *world.getComponent<ecs::RenderableComponent>(entity);
         auto& model_matrix = *world.getComponent<ecs::TransformComponent>(entity);
 
-        auto model_mat = model_matrix.transform();
-        picking_shader->setMatrix("model", 1, model_mat);
-        for (int i = 0; i < mesh.meshes.size(); i++) {
+        picking_shader->setMatrix("model", 1, model_matrix.transform());
+        for (int i = 0; i < renderable.primitives.size(); i++) {
+            auto& mesh = renderable.primitives[i].mesh;
             int id = entity.getId();
             int r = (id & 0x000000FF) >> 0;
             int g = (id & 0x0000FF00) >> 8;
@@ -150,7 +150,7 @@ void View::render_for_picking() {
             glm::vec4 color(r / 255.0f, g / 255.0f, b / 255.0f, 1.0f);
             picking_shader->setFloat4("picking_color", color);
 
-            renderer.drawIndex(*picking_shader, mesh.meshes[i].get_VAO(), mesh.meshes[i].get_indices_count());
+            renderer.drawIndex(*picking_shader, mesh.get_VAO(), mesh.get_indices_count());
         }
 
         // TODO skybox 的模型矩阵是mat4(1.0f)，picking也是按照这个位置记录的
@@ -174,7 +174,7 @@ void View::render_for_picking() {
         glReadPixels(x, y, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, data);
         int picked_id = (int)data[0] + (((int)data[1]) << 8) + (((int)data[2]) << 16);
 
-        for (auto entity : world.entityView<ecs::MeshComponent, ecs::MaterialComponent, ecs::TransformComponent>()) {
+        for (auto entity : world.entityView<ecs::RenderableComponent, ecs::TransformComponent>()) {
             if (entity.getId() == picked_id) {
                 world.addComponent<ecs::PickedComponent>(entity);
             }

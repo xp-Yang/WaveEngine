@@ -51,22 +51,23 @@ void Renderer::render_ecs(const View& view)
     for (auto entity : world.entityView<ecs::LightComponent>()) {
         auto& transform = *world.getComponent<ecs::TransformComponent>(entity);
         light_pos = transform.transform()[3];
-        light_color = world.getComponent<ecs::MaterialComponent>(entity)->materials[0].color;
+        light_color = world.getComponent<ecs::RenderableComponent>(entity)->primitives[0].material.color;
         light_ref_matrix = world.getComponent<ecs::LightComponent>(entity)->lightReferenceMatrix();
     }
 
-    for (auto entity : world.entityView<ecs::MeshComponent, ecs::MaterialComponent, ecs::TransformComponent>()) {
-        auto& mesh = *world.getComponent<ecs::MeshComponent>(entity);
-        auto& material = *world.getComponent<ecs::MaterialComponent>(entity);
+    for (auto entity : world.entityView<ecs::RenderableComponent, ecs::TransformComponent>()) {
+        auto& renderable = *world.getComponent<ecs::RenderableComponent>(entity);
         auto& model_matrix = *world.getComponent<ecs::TransformComponent>(entity);
         float explosion_ratio = 0.0f;
         if (world.hasComponent<ecs::ExplosionComponent>(entity)) {
             explosion_ratio = world.getComponent<ecs::ExplosionComponent>(entity)->explosionRatio;
         }
 
-        for (int i = 0; i < mesh.meshes.size(); i++) {
-            Shader* shader = material.materials[i].shader;
-            material.materials[i].update_shader_binding();
+        for (int i = 0; i < renderable.primitives.size(); i++) {
+            auto& mesh = renderable.primitives[i].mesh;
+            auto& material = renderable.primitives[i].material;
+            Shader* shader = material.shader;
+            material.update_shader_binding();
             shader->start_using();
             auto model_mat = model_matrix.transform();
             if (world.hasComponent<ecs::SkyboxComponent>(entity)) {
@@ -91,7 +92,7 @@ void Renderer::render_ecs(const View& view)
                 shader->setMatrix("lightSpaceMatrix", 1, light_ref_matrix);
                 shader->setTexture("shadow_map", 7, view.get_shadow_map_id());
             }
-            drawIndex(*shader, mesh.meshes[i].get_VAO(), mesh.meshes[i].get_indices_count());
+            drawIndex(*shader, mesh.get_VAO(), mesh.get_indices_count());
             shader->stop_using();
         }
     }
@@ -118,11 +119,9 @@ void Renderer::render_picking_border()
         camera_projection = camera.projection;
     }
 
-    for (auto entity : world.entityView<ecs::PickedComponent, ecs::MeshComponent, ecs::MaterialComponent, ecs::TransformComponent>()) {
-        auto& mesh = *world.getComponent<ecs::MeshComponent>(entity);
-        auto& material = *world.getComponent<ecs::MaterialComponent>(entity);
+    for (auto entity : world.entityView<ecs::PickedComponent, ecs::RenderableComponent, ecs::TransformComponent>()) {
+        auto& renderable = *world.getComponent<ecs::RenderableComponent>(entity);
         auto& model_matrix = *world.getComponent<ecs::TransformComponent>(entity);
-        auto model_mat = model_matrix.transform();
 
         // render border
         glClear(/*GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | */GL_STENCIL_BUFFER_BIT);
@@ -133,11 +132,13 @@ void Renderer::render_picking_border()
         glStencilOp(GL_KEEP, GL_REPLACE, GL_REPLACE); //如果模板测试通过了，设置模板缓冲区为1
         glStencilMask(0xFF);
 
-        for (int i = 0; i < mesh.meshes.size(); i++) {
-            Shader* shader = material.materials[i].shader; // TODO 怎么不是const Shader *, 编译器没报错
+        for (int i = 0; i < renderable.primitives.size(); i++) {
+            auto& mesh = renderable.primitives[i].mesh;
+            auto& material = renderable.primitives[i].material;
+            Shader* shader = material.shader; // TODO 怎么不是const Shader *, 编译器没报错
             shader->start_using();
 
-            drawIndex(*shader, mesh.meshes[i].get_VAO(), mesh.meshes[i].get_indices_count());
+            drawIndex(*shader, mesh.get_VAO(), mesh.get_indices_count());
             shader->stop_using();
         }
 
@@ -154,11 +155,12 @@ void Renderer::render_picking_border()
 
         border_shader->start_using();
         auto scale = glm::scale(glm::mat4(1.0f), glm::vec3(1.05f));
-        border_shader->setMatrix("model", 1, model_mat * scale * glm::mat4(1.0f));
+        border_shader->setMatrix("model", 1, model_matrix.transform() * scale * glm::mat4(1.0f));
         border_shader->setMatrix("view", 1, camera_view);
         border_shader->setMatrix("projection", 1, camera_projection);
-        for (int i = 0; i < mesh.meshes.size(); i++) {
-            drawIndex(*border_shader, mesh.meshes[i].get_VAO(), mesh.meshes[i].get_indices_count());
+        for (int i = 0; i < renderable.primitives.size(); i++) {
+            auto& mesh = renderable.primitives[i].mesh;
+            drawIndex(*border_shader, mesh.get_VAO(), mesh.get_indices_count());
         }
         glStencilMask(0xFF);
     }
@@ -180,15 +182,15 @@ void Renderer::render_normal(const View& view) {
     normal_shader->setMatrix("view", 1, camera_view);
     normal_shader->setMatrix("projection", 1, camera_projection);
     Renderer renderer;
-    for (auto entity : world.entityView<ecs::MeshComponent, ecs::MaterialComponent, ecs::TransformComponent>()) {
-        auto& mesh = *world.getComponent<ecs::MeshComponent>(entity);
+    for (auto entity : world.entityView<ecs::RenderableComponent, ecs::TransformComponent>()) {
+        auto& renderable = *world.getComponent<ecs::RenderableComponent>(entity);
         auto& model_matrix = *world.getComponent<ecs::TransformComponent>(entity);
-        auto model_mat = model_matrix.transform();
 
         normal_shader->start_using();
-        normal_shader->setMatrix("model", 1, model_mat);
-        for (int i = 0; i < mesh.meshes.size(); i++) {
-            renderer.drawIndex(*normal_shader, mesh.meshes[i].get_VAO(), mesh.meshes[i].get_indices_count());
+        normal_shader->setMatrix("model", 1, model_matrix.transform());
+        for (int i = 0; i < renderable.primitives.size(); i++) {
+            auto& mesh = renderable.primitives[i].mesh;
+            renderer.drawIndex(*normal_shader, mesh.get_VAO(), mesh.get_indices_count());
         }
     }
 }
@@ -208,15 +210,15 @@ void Renderer::render_shadow_map(const View& view) {
     depth_shader->start_using();
     depth_shader->setMatrix("view", 1, light_ref_matrix);
 
-    for (auto entity : world.entityView<ecs::MeshComponent, ecs::MaterialComponent, ecs::TransformComponent>()) {
-        auto& mesh = *world.getComponent<ecs::MeshComponent>(entity);
+    for (auto entity : world.entityView<ecs::RenderableComponent, ecs::TransformComponent>()) {
+        auto& renderable = *world.getComponent<ecs::RenderableComponent>(entity);
         auto& model_matrix = *world.getComponent<ecs::TransformComponent>(entity);
-        auto model_mat = model_matrix.transform();
 
         depth_shader->start_using();
-        depth_shader->setMatrix("model", 1, model_mat);
-        for (int i = 0; i < mesh.meshes.size(); i++) {
-            drawIndex(*depth_shader, mesh.meshes[i].get_VAO(), mesh.meshes[i].get_indices_count());
+        depth_shader->setMatrix("model", 1, model_matrix.transform());
+        for (int i = 0; i < renderable.primitives.size(); i++) {
+            auto& mesh = renderable.primitives[i].mesh;
+            drawIndex(*depth_shader, mesh.get_VAO(), mesh.get_indices_count());
         }
     }
 }

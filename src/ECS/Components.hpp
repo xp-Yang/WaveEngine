@@ -81,12 +81,29 @@ struct CameraComponent {
 	}
 };
 
-struct MeshComponent {
-    std::vector<Mesh> meshes;
+enum class PrimitiveType {
+	POINTS         = 0,    //!< points
+    LINES          = 1,    //!< lines
+    LINE_STRIP     = 3,    //!< line strip
+    TRIANGLES      = 4,    //!< triangles
+    TRIANGLE_STRIP = 5     //!< triangle strip
 };
 
-struct MaterialComponent {
-    std::vector<Material> materials;
+struct Primitive {
+	PrimitiveType primitiveType = PrimitiveType::TRIANGLES;
+	Mesh mesh;
+	Material material;
+};
+
+struct RenderableComponent {
+	std::vector<Primitive> primitives;
+	void setPrimitives(const std::vector<Primitive>& _primitives) {
+		primitives = _primitives;
+	}
+	//BoundingBox boundingBox;
+	//bool culling;
+	//int priority;
+	//骨骼
 };
 
 // 不需要数据，仅用作标记天空盒
@@ -110,12 +127,13 @@ struct LightComponent {
 	}
 };
 
+// TODO 决定一个data是放在component的属性里还是单独作为一个component的关键判据是什么
 // 不需要数据，仅用作标记选中的entity
 struct PickedComponent {};
 
-struct ReceiveShadowComponent {};
-
-struct ReceiveReflectionComponent {};
+//struct ReceiveShadowComponent {};
+//
+//struct ReceiveReflectionComponent {};
 
 struct BoxCollider3DComponent {
 
@@ -129,14 +147,8 @@ struct TextureComponent {
 	unsigned int texture;
 };
 
-struct TransparentComponent {};
-
 struct ExplosionComponent {
 	float explosionRatio = 0.0f;
-};
-
-struct RendererComponent {
-
 };
 
 

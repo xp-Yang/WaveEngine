@@ -86,15 +86,14 @@ void ImGuiEditor::render_entity_editor()
     // TODO 考虑对材质的编辑放入MaterialSystem
     auto& world = ecs::World::get();
 
-    for (auto entity : world.entityView<ecs::NameComponent, ecs::PickedComponent, ecs::MeshComponent, ecs::MaterialComponent, ecs::TransformComponent>()) {
-        auto& mesh = *world.getComponent<ecs::MeshComponent>(entity);
-        auto& material = *world.getComponent<ecs::MaterialComponent>(entity);
+    for (auto entity : world.entityView<ecs::NameComponent, ecs::PickedComponent, ecs::RenderableComponent, ecs::TransformComponent>()) {
+        auto& renderable = *world.getComponent<ecs::RenderableComponent>(entity);
         auto& model_matrix = *world.getComponent<ecs::TransformComponent>(entity);
         std::string obj_name = world.getComponent<ecs::NameComponent>(entity)->name;
 
 
-        glm::vec4 color = material.materials[0].color;
-        float shininess = material.materials[0].shininess;
+        glm::vec4 color = renderable.primitives[0].material.color;
+        float shininess = renderable.primitives[0].material.shininess;
 
         ImGui::Begin((obj_name + " controller").c_str(), nullptr, ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse);
         ImGui::Checkbox((std::string("enable reflection") + "##" + obj_name).c_str(), &enable_reflection);
@@ -109,10 +108,11 @@ void ImGuiEditor::render_entity_editor()
         ImGui::PopItemWidth();
         // 编辑对象材质属性
         //ecs::MaterialSystem::onUpdate();
-        for (int i = 0; i < material.materials.size(); i++) {
+        for (int i = 0; i < renderable.primitives.size(); i++) {
+            auto& material = renderable.primitives[i].material;
             //material.materials[i].ambient_strength;
-            material.materials[i].color = color;
-            material.materials[i].shininess = shininess;
+            material.color = color;
+            material.shininess = shininess;
             //curr_entity->material(i).set_diffuse_map();
             //curr_entity->material(i).set_specular_map();
         }
