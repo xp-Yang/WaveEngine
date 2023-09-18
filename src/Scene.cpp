@@ -26,13 +26,7 @@
 //    //stbi_write_jpg("jpg_test_.jpg", w, h, channels_num, data, w * channels_num);
 //}
 
-void Scene::init() {
-    Model* nanosuit = new Model("resource/model/nanosuit/nanosuit.obj");
-    Model* yoko = new Model("resource/model/yoko/008.obj");
-    
-    insert_object("nanosuit", nanosuit);
-    insert_object("yoko", yoko);
-
+void Scene::init() {    
     // TODO 这些需要被scene管理吗，参考filament
 	auto& world = ecs::World::get();
 
@@ -117,6 +111,7 @@ void Scene::init() {
 	ground_primitive.material = ground_material;
 	ground_renderable.setPrimitives({ ground_primitive });
 
+	Model* nanosuit = new Model("resource/model/nanosuit/nanosuit.obj");
 	auto nanosuit_entity = world.create_entity();
 	world.addComponent<ecs::NameComponent>(nanosuit_entity).name = "nanosuit";
 	auto& nanosuit_transform = world.addComponent<ecs::TransformComponent>(nanosuit_entity);
@@ -125,16 +120,17 @@ void Scene::init() {
 	auto& nanosuit_renderable = world.addComponent<ecs::RenderableComponent>(nanosuit_entity);
 	std::vector<ecs::Primitive> nanosuit_primitives;
 	Shader* nanosuit_shader = new Shader("resource/shader/model.vs", "resource/shader/model.fs", "resource/shader/model.gs");
-	for (int i = 0; i < object("nanosuit")->get_meshes().size(); i++) {
+	for (int i = 0; i < nanosuit->get_datas().size(); i++) {
 		ecs::Primitive primitive;
-		primitive.mesh = object("nanosuit")->get_meshes().at(i);
-		primitive.material = object("nanosuit")->get_materials().at(i);
+		primitive.mesh = nanosuit->get_datas().at(i).mesh;
+		primitive.material = nanosuit->get_datas().at(i).material;
 		primitive.material.shader = nanosuit_shader;
 		nanosuit_primitives.push_back(primitive);
 	}
 	nanosuit_renderable.setPrimitives({ nanosuit_primitives });
 	world.addComponent<ecs::ExplosionComponent>(nanosuit_entity);
 
+	Model* yoko = new Model("resource/model/yoko/008.obj");
 	auto yoko_entity = world.create_entity();
 	world.addComponent<ecs::NameComponent>(yoko_entity).name = "yoko";
 	auto& yoko_transform = world.addComponent<ecs::TransformComponent>(yoko_entity);
@@ -143,12 +139,12 @@ void Scene::init() {
 	auto& yoko_renderable = world.addComponent<ecs::RenderableComponent>(yoko_entity);
 	std::vector<ecs::Primitive> yoko_primitives;
 	Shader* yoko_shader = new Shader("resource/shader/model.vs", "resource/shader/model.fs", "resource/shader/model.gs");
-	for (int i = 0; i < object("yoko")->get_meshes().size(); i++) {
+	for (int i = 0; i < yoko->get_datas().size(); i++) {
 		ecs::Primitive primitive;
-		primitive.mesh = object("yoko")->get_meshes().at(i);
-		primitive.material = object("yoko")->get_materials().at(i);
+		primitive.mesh = yoko->get_datas().at(i).mesh;
+		primitive.material = yoko->get_datas().at(i).material;
 		primitive.material.shader = yoko_shader;
-		nanosuit_primitives.push_back(primitive);
+		yoko_primitives.push_back(primitive);
 	}
 	yoko_renderable.setPrimitives({ yoko_primitives });
 	world.addComponent<ecs::ExplosionComponent>(yoko_entity);

@@ -17,12 +17,12 @@ struct Material {
     unsigned int specular_map{ 0 };
     unsigned int normal_map{ 0 };
     unsigned int height_map{ 0 };
-    std::string diffuse_map_path = "";
-    std::string specular_map_path = "";
-    std::string normal_map_path = "";
-    std::string height_map_path = "";
+        //debug
+        std::string diffuse_map_path = "";
+        std::string specular_map_path = "";
+        std::string normal_map_path = "";
+        std::string height_map_path = "";
     float shininess{ 1.0f };
-    //std::vector<Texture> textures;
 
     Shader* shader{ nullptr };
 

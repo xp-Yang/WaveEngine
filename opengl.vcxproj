@@ -35,7 +35,6 @@
     <ClCompile Include="src\Editor\ImGuiGizmo.cpp" />
     <ClCompile Include="src\FrameBufferQuad.cpp" />
     <ClCompile Include="src\Logger.cpp" />
-    <ClCompile Include="src\Object.cpp" />
     <ClCompile Include="src\glad.c" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\Material.cpp" />
@@ -70,7 +69,6 @@
     <ClInclude Include="src\Editor\ImGuiGizmo.hpp" />
     <ClInclude Include="src\FrameBufferQuad.hpp" />
     <ClInclude Include="src\Logger.hpp" />
-    <ClInclude Include="src\Object.hpp" />
     <ClInclude Include="resource\shader\light.vs" />
     <ClInclude Include="src\Material.hpp" />
     <ClInclude Include="src\Mesh.hpp" />

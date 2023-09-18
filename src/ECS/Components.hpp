@@ -23,7 +23,6 @@ struct NameComponent {
 };
 
 struct TransformComponent {
-	// 如果想实现先平移后旋转，那么一直更新 translation = rotate_matrix * translation 就好了
 	glm::vec3 translation = { 0.0f, 0.0f, 0.0f };
 	glm::vec3 rotation = { 0.0f, 0.0f, 0.0f }; //角度制
 	glm::vec3 scale = { 1.0f, 1.0f, 1.0f };
@@ -106,7 +105,6 @@ struct RenderableComponent {
 	//骨骼
 };
 
-// 不需要数据，仅用作标记天空盒
 struct SkyboxComponent {
 	unsigned int texture;
 };
@@ -128,6 +126,8 @@ struct LightComponent {
 };
 
 // TODO 决定一个data是放在component的属性里还是单独作为一个component的关键判据是什么
+// 为什么Transform总是与Renderable分离
+
 // 不需要数据，仅用作标记选中的entity
 struct PickedComponent {};
 
@@ -141,10 +141,6 @@ struct BoxCollider3DComponent {
 
 struct BoxCollider2DComponent {
 
-};
-
-struct TextureComponent {
-	unsigned int texture;
 };
 
 struct ExplosionComponent {

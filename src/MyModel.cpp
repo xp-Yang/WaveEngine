@@ -26,7 +26,7 @@ void Model::processNode(aiNode* node, const aiScene* scene)
     for (unsigned int i = 0; i < node->mNumMeshes; i++)
     {
         aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];
-        m_meshes.push_back(load_mesh(mesh, scene));
+        m_datas.push_back(load_mesh(mesh, scene));
     }
     for (unsigned int i = 0; i < node->mNumChildren; i++)
     {
@@ -34,8 +34,10 @@ void Model::processNode(aiNode* node, const aiScene* scene)
     }
 }
 
-Mesh Model::load_mesh(aiMesh* mesh, const aiScene* scene)
+SubModelData Model::load_mesh(aiMesh* mesh, const aiScene* scene)
 {
+    SubModelData sub;
+
     std::vector<Vertex> vertices;
     std::vector<unsigned int> indices;
 
@@ -74,9 +76,10 @@ Mesh Model::load_mesh(aiMesh* mesh, const aiScene* scene)
     if (mesh->mMaterialIndex >= 0)
     {
         aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
-        m_materials.push_back(load_material(material));
+        sub.material = (load_material(material));
     }
     else {
+        sub.material = Material();
         assert(false);
     }
 
@@ -87,8 +90,9 @@ Mesh Model::load_mesh(aiMesh* mesh, const aiScene* scene)
         for (unsigned int j = 0; j < face.mNumIndices; j++)
             indices.push_back(face.mIndices[j]);
     }
+    sub.mesh = Mesh(vertices, indices);
 
-    return Mesh(vertices, indices);
+    return sub;
 }
 
 Material Model::load_material(aiMaterial* material) {
