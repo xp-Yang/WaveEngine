@@ -3,8 +3,8 @@
 
 #include <string>
 #include <vector>
-#include "../Mesh.hpp"
-#include "../Material.hpp"
+#include "../../Mesh.hpp"
+#include "../../Material.hpp"
 #include "World.hpp"
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>

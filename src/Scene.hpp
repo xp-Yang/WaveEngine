@@ -1,7 +1,7 @@
 #ifndef Scene_hpp
 #define Scene_hpp
 
-#include "ECS/World.hpp"
+#include "GamePlay/ECS/World.hpp"
 #include <unordered_map>
 
 class Scene {

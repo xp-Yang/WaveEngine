@@ -10,7 +10,6 @@ ImGuiEditor::ImGuiEditor()
 	pixel_style = false;
 	stop_rotate = false;
 	normal_debug = false;
-	enable_shadow = false;
 	enable_reflection = false;
     global_ambient_strength = 0.1f;
     icosphere_accuracy = 8;
@@ -42,7 +41,6 @@ void ImGuiEditor::render_global_editor() {
     }
     ImGui::Checkbox("light: stop rotate", &stop_rotate);
     ImGui::Checkbox("enable normal debug", &normal_debug);
-    ImGui::Checkbox("enable shadow", &enable_shadow);
 
     ImGuiIO& io = ImGui::GetIO();
     ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / io.Framerate, io.Framerate);

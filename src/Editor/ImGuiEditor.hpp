@@ -15,7 +15,6 @@ public:
 	bool pixel_style;
 	bool stop_rotate;
 	bool normal_debug;
-	bool enable_shadow;
 	bool enable_reflection;
 	float global_ambient_strength;
 	int icosphere_accuracy;

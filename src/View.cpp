@@ -5,8 +5,6 @@ void View::enable_shadow_map(bool enable)
 {
     m_enable_shadow_map = enable;
 
-    Renderer renderer;
-
     ////创建深度缓冲（阴影）
     //unsigned int depth_FBO;
     //glGenFramebuffers(1, &depth_FBO);
@@ -94,26 +92,24 @@ void View::mouse_and_key_callback()
 
     ecs::CameraSystem::onMouseWheelUpdate(io.MouseWheel);
 
-    float delta_time = 1.0f / io.Framerate;
+    float avrg_frame_time = 1.0f / io.Framerate;
     if (io.KeyShift)
-        delta_time /= 10.0f;
+        avrg_frame_time /= 10.0f;
     if (io.KeysDown['W']) {
-        ecs::CameraSystem::onKeyUpdate('W', delta_time);
+        ecs::CameraSystem::onKeyUpdate('W', avrg_frame_time);
     }
     if (io.KeysDown['A']) {
-        ecs::CameraSystem::onKeyUpdate('A', delta_time);
+        ecs::CameraSystem::onKeyUpdate('A', avrg_frame_time);
     }
     if (io.KeysDown['S']) {
-        ecs::CameraSystem::onKeyUpdate('S', delta_time);
+        ecs::CameraSystem::onKeyUpdate('S', avrg_frame_time);
     }
     if (io.KeysDown['D']) {
-        ecs::CameraSystem::onKeyUpdate('D', delta_time);
+        ecs::CameraSystem::onKeyUpdate('D', avrg_frame_time);
     }
 }
 
 void View::render_for_picking() {
-    Renderer renderer;
-
     static Shader* picking_shader = new Shader("resource/shader/picking.vs", "resource/shader/picking.fs");
 
     glViewport(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
@@ -150,7 +146,7 @@ void View::render_for_picking() {
             glm::vec4 color(r / 255.0f, g / 255.0f, b / 255.0f, 1.0f);
             picking_shader->setFloat4("picking_color", color);
 
-            renderer.drawIndex(*picking_shader, mesh.get_VAO(), mesh.get_indices_count());
+            Renderer::drawIndex(*picking_shader, mesh.get_VAO(), mesh.get_indices_count());
         }
 
         // TODO skybox 的模型矩阵是mat4(1.0f)，picking也是按照这个位置记录的

@@ -1,9 +1,9 @@
 #ifndef View_hpp
 #define View_hpp
 
-#include "ECS/World.hpp"
-#include "ECS/CameraSystem.hpp"
-#include "ECS/Components.hpp"
+#include "GamePlay/ECS/World.hpp"
+#include "GamePlay/ECS/CameraSystem.hpp"
+#include "GamePlay/ECS/Components.hpp"
 #include "Scene.hpp"
 
 struct RenderParam {

@@ -1,7 +1,7 @@
 #include "Scene.hpp"
 #include "MyModel.hpp"
-#include "ECS/World.hpp"
-#include "ECS/Components.hpp"
+#include "GamePlay/ECS/World.hpp"
+#include "GamePlay/ECS/Components.hpp"
 
 //void screen_shot() {
 //    const int channels_num = 3;

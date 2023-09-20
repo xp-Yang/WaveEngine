@@ -1,25 +1,89 @@
-#include "Renderer.hpp"
-#include "GamePlay/ECS/Components.hpp"
-#include "GamePlay/ECS/System.hpp"
-#include <windows.h>
+#include "RenderSystem.hpp"
+#include "Components.hpp"
+#include "../../Renderer.hpp"
 
-void Renderer::drawIndex(const Shader& shader, GLuint vao_id, size_t indices_count)
+namespace ecs {
+
+void RenderSystem::onUpdate(/*const View& view*/)
 {
-    shader.start_using();
-    glBindVertexArray(vao_id);
-    glDrawElements(GL_TRIANGLES, (int)indices_count, GL_UNSIGNED_INT, 0);
-    glBindVertexArray(0);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+    auto& world = ecs::World::get();
+
+    glm::mat4 camera_view = glm::mat4(1.0f);
+    glm::mat4 camera_projection;
+    glm::vec3 camera_pos;
+    for (auto entity : world.entityView<ecs::CameraComponent>()) {
+        ecs::CameraComponent& camera = *world.getComponent<ecs::CameraComponent>(entity);
+        camera_view = camera.view;
+        camera_projection = camera.projection;
+        camera_pos = camera.pos;
+    }
+
+    unsigned int skybox_texture_id = -1;
+	auto skybox_view = camera_view;
+	for (auto entity : world.entityView<ecs::SkyboxComponent>()) {
+        skybox_view = glm::mat4(glm::mat3(skybox_view));
+        skybox_texture_id = world.getComponent<ecs::SkyboxComponent>(entity)->texture;
+	}
+
+    glm::vec3 light_pos;
+    glm::vec4 light_color;
+    glm::mat4 light_ref_matrix;
+    for (auto entity : world.entityView<ecs::LightComponent>()) {
+        auto& transform = *world.getComponent<ecs::TransformComponent>(entity);
+        light_pos = transform.transform()[3];
+        light_color = world.getComponent<ecs::RenderableComponent>(entity)->primitives[0].material.color;
+        light_ref_matrix = world.getComponent<ecs::LightComponent>(entity)->lightReferenceMatrix();
+    }
+
+    for (auto entity : world.entityView<ecs::RenderableComponent, ecs::TransformComponent>()) {
+        auto& renderable = *world.getComponent<ecs::RenderableComponent>(entity);
+        auto& model_matrix = *world.getComponent<ecs::TransformComponent>(entity);
+        float explosion_ratio = 0.0f;
+        if (world.hasComponent<ecs::ExplosionComponent>(entity)) {
+            explosion_ratio = world.getComponent<ecs::ExplosionComponent>(entity)->explosionRatio;
+        }
+
+        for (int i = 0; i < renderable.primitives.size(); i++) {
+            auto& mesh = renderable.primitives[i].mesh;
+            auto& material = renderable.primitives[i].material;
+            Shader* shader = material.shader;
+            material.update_shader_binding();
+            shader->start_using();
+            auto model_mat = model_matrix.transform();
+            if (world.hasComponent<ecs::SkyboxComponent>(entity)) {
+                glDepthMask(GL_FALSE);
+                shader->setMatrix("view", 1, skybox_view);
+            }
+            else {
+                glDepthMask(GL_TRUE);
+                shader->setMatrix("view", 1, camera_view);
+            }
+
+            // TODO 能不能想个好方法管理这些shader属性
+            shader->setMatrix("model", 1, model_mat);
+            shader->setMatrix("projection", 1, camera_projection);
+            shader->setFloat3("camera_pos", camera_pos);
+            shader->setFloat4("light.color", light_color);
+            shader->setFloat3("light.position", light_pos);
+            shader->setCubeTexture("skybox", 6, skybox_texture_id);
+            shader->setBool("enable_skybox_sample", /*obj->is_enable_reflection()*/false);
+            shader->setFloat("explosionRatio", explosion_ratio);
+            //if (view.is_shadow_map_enable()) {
+            //    shader->setMatrix("lightSpaceMatrix", 1, light_ref_matrix);
+            //    shader->setTexture("shadow_map", 7, view.get_shadow_map_id());
+            //}
+            Renderer::drawIndex(*shader, mesh.get_VAO(), mesh.get_indices_count());
+            shader->stop_using();
+        }
+    }
+
+    render_picking_border();
 }
 
-void Renderer::drawTriangle(const Shader& shader, GLuint vao_id, size_t array_count)
-{
-    shader.start_using();
-    glBindVertexArray(vao_id);
-    glDrawArrays(GL_TRIANGLES, 0, (int)array_count);
-    glBindVertexArray(0);
-}
-
-void Renderer::render_picking_border()
+void RenderSystem::render_picking_border()
 {
     glEnable(GL_STENCIL_TEST);// 为了渲染border
     glStencilMask(0xFF);
@@ -53,7 +117,7 @@ void Renderer::render_picking_border()
             Shader* shader = material.shader; // TODO 怎么不是const Shader *, 编译器没报错
             shader->start_using();
 
-            drawIndex(*shader, mesh.get_VAO(), mesh.get_indices_count());
+            Renderer::drawIndex(*shader, mesh.get_VAO(), mesh.get_indices_count());
             shader->stop_using();
         }
 
@@ -75,13 +139,13 @@ void Renderer::render_picking_border()
         border_shader->setMatrix("projection", 1, camera_projection);
         for (int i = 0; i < renderable.primitives.size(); i++) {
             auto& mesh = renderable.primitives[i].mesh;
-            drawIndex(*border_shader, mesh.get_VAO(), mesh.get_indices_count());
+            Renderer::drawIndex(*border_shader, mesh.get_VAO(), mesh.get_indices_count());
         }
         glStencilMask(0xFF);
     }
 }
 
-void Renderer::render_normal() {
+void RenderSystem::render_normal() {
     static Shader* normal_shader = new Shader("resource/shader/model.vs", "resource/shader/normal.fs", "resource/shader/normal.gs");
 
     auto& world = ecs::World::get();
@@ -104,12 +168,12 @@ void Renderer::render_normal() {
         normal_shader->setMatrix("model", 1, model_matrix.transform());
         for (int i = 0; i < renderable.primitives.size(); i++) {
             auto& mesh = renderable.primitives[i].mesh;
-            drawIndex(*normal_shader, mesh.get_VAO(), mesh.get_indices_count());
+            Renderer::drawIndex(*normal_shader, mesh.get_VAO(), mesh.get_indices_count());
         }
     }
 }
 
-void Renderer::render_shadow_map() {
+void RenderSystem::render_shadow_map() {
     glEnable(GL_DEPTH_TEST);
     // TODO 想办法放进view开启shadow_map的逻辑
     auto& world = ecs::World::get();
@@ -132,7 +196,8 @@ void Renderer::render_shadow_map() {
         depth_shader->setMatrix("model", 1, model_matrix.transform());
         for (int i = 0; i < renderable.primitives.size(); i++) {
             auto& mesh = renderable.primitives[i].mesh;
-            drawIndex(*depth_shader, mesh.get_VAO(), mesh.get_indices_count());
+            Renderer::drawIndex(*depth_shader, mesh.get_VAO(), mesh.get_indices_count());
         }
     }
+}
 }
