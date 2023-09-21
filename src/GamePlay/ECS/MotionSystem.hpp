@@ -3,8 +3,9 @@
 
 namespace ecs {
 
-struct MotionSystem{
-	static void onUpdate();
+class MotionSystem{
+public:
+	void onUpdate();
 };
 
 }

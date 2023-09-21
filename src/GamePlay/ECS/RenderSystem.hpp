@@ -8,7 +8,7 @@ namespace ecs {
 class RenderSystem {
 public:
     void initPipeline();
-    void onUpdate(/*const View& view*/);
+    void onUpdate();
 
 private:
     RenderPipeline* m_render_pipeline{ nullptr };

@@ -27,19 +27,7 @@ void ImGuiEditor::render_global_editor() {
 
     ImGui::Checkbox("pixel style", &pixel_style);
     //ImGui::SliderFloat("global ambient strength", &global_ambient_strength, 0.0f, 1.0f);
-
-	static float time_value = 0.0f;
-	if (!stop_rotate) {
-	    time_value = (float)glfwGetTime();
-	}
-	glm::mat4 rotate = glm::rotate(glm::mat4(1.0f), time_value, glm::vec3(0.0f, 1.0f, 0.0f));
-    auto& world = ecs::World::get();
-    for (auto entity : world.entityView<ecs::LightComponent>()) {
-        auto& light_transform = *world.getComponent<ecs::TransformComponent>(entity);
-        static auto original_translate = glm::vec4(light_transform.translation, 1.0f);
-        light_transform.translation = rotate * original_translate;
-    }
-    ImGui::Checkbox("light: stop rotate", &stop_rotate);
+    //ImGui::Checkbox("light: stop rotate", &stop_rotate);
     ImGui::Checkbox("enable normal debug", &normal_debug);
 
     ImGuiIO& io = ImGui::GetIO();

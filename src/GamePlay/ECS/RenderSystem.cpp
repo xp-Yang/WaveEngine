@@ -11,7 +11,7 @@ void RenderSystem::initPipeline()
     m_render_pipeline->init();
 }
 
-void RenderSystem::onUpdate(/*const View& view*/)
+void RenderSystem::onUpdate()
 {
     m_render_pipeline->render();
 }

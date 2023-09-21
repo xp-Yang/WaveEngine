@@ -14,6 +14,7 @@ private:
     std::shared_ptr<RenderPass> m_picking_pass;
     //std::shared_ptr<RenderPass> m_post_processing_pass;
     std::shared_ptr<RenderPass> m_screen_pass;
+    std::shared_ptr<RenderPass> m_ui_pass;
 };
 
 #endif // !RenderPipeline_hpp

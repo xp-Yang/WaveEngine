@@ -46,7 +46,7 @@
 // 28. œﬂ≥Ã∑÷¿Î
 int main()
 {
-    auto app = App::GetApp();
+    auto app = Application::GetApp();
     app.init();
     app.run();
     app.shutdown();

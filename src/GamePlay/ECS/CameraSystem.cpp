@@ -1,6 +1,7 @@
 #include "CameraSystem.hpp"
 #include "World.hpp"
 #include "Components.hpp"
+#include <GLFW/glfw3.h>
 
 namespace ecs {
 
