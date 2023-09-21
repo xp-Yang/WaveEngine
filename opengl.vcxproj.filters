@@ -75,28 +75,10 @@
     <ClCompile Include="src\stb_image.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="src\ECS\System.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="src\ECS\World.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="src\ECS\Components.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
     <ClCompile Include="src\Editor\ImGuiEditor.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="src\Logger.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="src\ECS\CameraSystem.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="src\ECS\RenderSystem.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="src\ECS\MaterialSystem.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="src\FrameBufferQuad.cpp">
@@ -109,6 +91,57 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="src\Application.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Core\Math.hpp">
+      <Filter>头文件</Filter>
+    </ClCompile>
+    <ClCompile Include="src\GamePlay\ECS\AnimationSystem.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="src\GamePlay\ECS\CameraSystem.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="src\GamePlay\ECS\Components.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="src\GamePlay\ECS\MaterialSystem.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="src\GamePlay\ECS\MotionSystem.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="src\GamePlay\ECS\PhysicsSystem.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="src\GamePlay\ECS\RenderSystem.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="src\GamePlay\ECS\JobSystem.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="src\GamePlay\Render\RenderPass.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="src\GamePlay\Render\RenderPipeline.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="src\GamePlay\ECS\System.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="src\GamePlay\ECS\World.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="src\GamePlay\Render\MainCameraPass.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="src\GamePlay\Render\ShadowPass.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="src\GamePlay\Render\PickingPass.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="src\GamePlay\Render\ScreenPass.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>
@@ -164,28 +197,10 @@
     <ClInclude Include="src\Material.hpp">
       <Filter>源文件\src</Filter>
     </ClInclude>
-    <ClInclude Include="src\ECS\System.hpp">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="src\ECS\World.hpp">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="src\ECS\Components.hpp">
-      <Filter>头文件</Filter>
-    </ClInclude>
     <ClInclude Include="src\Editor\ImGuiEditor.hpp">
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="src\Logger.hpp">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="src\ECS\CameraSystem.hpp">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="src\ECS\RenderSystem.hpp">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="src\ECS\MaterialSystem.hpp">
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="src\FrameBufferQuad.hpp">
@@ -198,6 +213,48 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="src\Application.hpp">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Core\Memory.hpp">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\GamePlay\ECS\Components.hpp">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\GamePlay\ECS\CameraSystem.hpp">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\GamePlay\ECS\MaterialSystem.hpp">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\GamePlay\ECS\MotionSystem.hpp">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\GamePlay\ECS\RenderSystem.hpp">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\GamePlay\Render\RenderPass.hpp">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\GamePlay\Render\RenderPipeline.hpp">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\GamePlay\ECS\System.hpp">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\GamePlay\ECS\World.hpp">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\GamePlay\Render\MainCameraPass.hpp">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\GamePlay\Render\ShadowPass.hpp">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\GamePlay\Render\PickingPass.hpp">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\GamePlay\Render\ScreenPass.hpp">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>
@@ -236,10 +293,5 @@
     <None Include="resource\shader\skybox.fs" />
     <None Include="resource\shader\picking.vs" />
     <None Include="resource\shader\picking.fs" />
-  </ItemGroup>
-  <ItemGroup>
-    <Image Include="resource\images\cube_specular.png">
-      <Filter>资源文件</Filter>
-    </Image>
   </ItemGroup>
 </Project>

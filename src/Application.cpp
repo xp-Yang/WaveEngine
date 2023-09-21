@@ -9,21 +9,12 @@
 #define PERFORMANCE_TEST
 
 void App::run() {
-	create_multisample_fbo();
-	create_depth_fbo();
-	//create_post_processing_fbo();
-	create_screen_fbo();
-	//create_picking_fbo();
-
-	unsigned int quad_VAO = FrameBufferQuad().get_quad_VAO();
-
 	while (!glfwWindowShouldClose(m_window)) {
 #ifdef PERFORMANCE_TEST
 		LARGE_INTEGER t1, t2, tc;
 		QueryPerformanceFrequency(&tc);
 		QueryPerformanceCounter(&t1);
 #endif
-
 		new_frame();
 
 		// input System
@@ -32,62 +23,15 @@ void App::run() {
 		// motion System
 		ecs::MotionSystem::onUpdate();
 
-		//logic.onUpdate();
-
-		//ecs::RenderSystem::onUpdate();
-
-		// 1. 生成深度贴图
-		float depth_buffer_width = WINDOW_WIDTH * 16;
-		float depth_buffer_height = WINDOW_HEIGHT * 16;
-		glBindTexture(GL_TEXTURE_2D, depth_texture);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, depth_buffer_width, depth_buffer_height, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
-		glViewport(0, 0, depth_buffer_width, depth_buffer_height);
-		glBindFramebuffer(GL_FRAMEBUFFER, depth_fbo);
-		glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-		Renderer::render_shadow_map();
-			// debug depth
-			//glViewport(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
-			//glBindFramebuffer(GL_FRAMEBUFFER, 0);
-			//glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
-			//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-			//glBindTexture(GL_TEXTURE_2D, view.get_shadow_map_id());
-			//renderer.draw(*frame_shader, quad_VAO, DrawMode::Arrays, 0, 6);
-
-		// 2. 生成msaa颜色贴图
-		glViewport(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
-		glBindFramebuffer(GL_FRAMEBUFFER, multisample_fbo);
-		glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-		ecs::RenderSystem::onUpdate();
+		// render System
+		m_render_system.onUpdate();
 		// 法线渲染也做msaa
-		if (m_editor.normal_debug)
-			Renderer::render_normal();
-
-		// 3.生成后处理贴图
-		if (m_editor.pixel_style) {
-
-		}
-		glBindFramebuffer(GL_READ_FRAMEBUFFER, multisample_fbo);
-		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, screen_fbo);
-		glBlitFramebuffer(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT, 0, 0, WINDOW_WIDTH, WINDOW_HEIGHT, GL_COLOR_BUFFER_BIT, GL_NEAREST);
-		// 不blit的话，直接使用 sampler2DMS 自定义抗锯齿算法
-
-		// 4. 默认缓冲
-		glViewport(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
-		glBindFramebuffer(GL_FRAMEBUFFER, 0);
-		glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-		glDisable(GL_DEPTH_TEST);
-		frame_shader->setTexture("Texture", 0, screen_texture);
-		Renderer::drawTriangle(*frame_shader, quad_VAO, 6);
-		glEnable(GL_DEPTH_TEST);
-
+		//if (m_editor.normal_debug)
+		//	Renderer::render_normal();
 		// render imgui
 		m_editor.render();
 
 		end_frame();
-
 #ifdef PERFORMANCE_TEST
 		QueryPerformanceCounter(&t2);
 		auto time = (double)(t2.QuadPart - t1.QuadPart) / (double)tc.QuadPart;
@@ -109,8 +53,7 @@ void App::init()
 
 	m_scene.init();
 	m_view.set_scene(&m_scene);
-
-	frame_shader = new Shader("resource/shader/frame.vs", "resource/shader/frame.fs");
+	m_render_system.initPipeline();
 }
 
 void App::shutdown()
@@ -164,112 +107,4 @@ void App::create_window(int size_x, int size_y) {
 		std::cout << "Failed to initialize GLAD" << std::endl;
 		return;
 	}
-}
-
-void App::create_multisample_fbo()
-{
-	glGenFramebuffers(1, &multisample_fbo);
-	glBindFramebuffer(GL_FRAMEBUFFER, multisample_fbo);
-	int samples_count = 16;
-	if(samples_count == 1)
-	{
-		unsigned int color_texture;
-		glGenTextures(1, &color_texture);
-		glBindTexture(GL_TEXTURE_2D, color_texture);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, WINDOW_WIDTH, WINDOW_HEIGHT, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, color_texture, 0);
-		// 为什么要绑上深度缓冲才能work? tex_buffer不是已经被深度测试过的一张纹理吗
-		// 为什么只绑定了stencil，阴影就会有问题？
-		unsigned int rbo;
-		glGenRenderbuffers(1, &rbo);
-		glBindRenderbuffer(GL_RENDERBUFFER, rbo);
-		glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, WINDOW_WIDTH, WINDOW_HEIGHT); // use a single renderbuffer object for both a depth AND stencil buffer.
-		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, rbo); // now actually attach it
-		//glRenderbufferStorage(GL_RENDERBUFFER, /*GL_DEPTH24_STENCIL8*/GL_STENCIL_INDEX, WINDOW_WIDTH, WINDOW_HEIGHT); 
-		//glFramebufferRenderbuffer(GL_FRAMEBUFFER, /*GL_DEPTH_STENCIL_ATTACHMENT*/GL_STENCIL_ATTACHMENT, GL_RENDERBUFFER, rbo); 
-	}
-	else {
-		unsigned int multi_sample_texture;
-		glGenTextures(1, &multi_sample_texture);
-		glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, multi_sample_texture);
-		glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, samples_count, GL_RGB, WINDOW_WIDTH, WINDOW_HEIGHT, GL_TRUE);
-		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D_MULTISAMPLE, multi_sample_texture, 0);
-		unsigned int rbo;
-		glGenRenderbuffers(1, &rbo);
-		glBindRenderbuffer(GL_RENDERBUFFER, rbo);
-		glRenderbufferStorageMultisample(GL_RENDERBUFFER, samples_count, GL_DEPTH24_STENCIL8, WINDOW_WIDTH, WINDOW_HEIGHT);
-		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, rbo);
-	}
-	glBindRenderbuffer(GL_RENDERBUFFER, 0);
-}
-
-void App::create_depth_fbo()
-{
-	glGenFramebuffers(1, &depth_fbo);
-	glBindFramebuffer(GL_FRAMEBUFFER, depth_fbo);
-	glGenTextures(1, &depth_texture);
-	glActiveTexture(GL_TEXTURE7);
-	glBindTexture(GL_TEXTURE_2D, depth_texture);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, WINDOW_WIDTH, WINDOW_HEIGHT, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
-	GLfloat borderColor[] = { 1.0, 1.0, 1.0, 1.0 };
-	glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor);
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depth_texture, 0);
-	m_view.set_shadow_map_id(depth_texture);
-	//不包含颜色缓冲的帧缓冲对象是不完整的，所以我们需要显式告诉OpenGL我们不适用任何颜色数据进行渲染。
-	glDrawBuffer(GL_NONE);
-	glReadBuffer(GL_NONE);
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-}
-
-void App::create_post_processing_fbo()
-{
-	// configure second post-processing framebuffer
-}
-
-void App::create_screen_fbo()
-{
-	glGenFramebuffers(1, &screen_fbo);
-	glBindFramebuffer(GL_FRAMEBUFFER, screen_fbo);
-	glGenTextures(1, &screen_texture);
-	glBindTexture(GL_TEXTURE_2D, screen_texture);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, WINDOW_WIDTH, WINDOW_HEIGHT, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, screen_texture, 0);
-}
-
-void App::create_picking_fbo()
-{
-	// 创建picking帧缓冲
-	//unsigned int picking_FBO;
-	//glGenFramebuffers(1, &picking_FBO);
-	//glBindFramebuffer(GL_FRAMEBUFFER, picking_FBO);
-	//view.set_picking_FBO(picking_FBO);
-	//unsigned int picking_texture;
-	//glActiveTexture(GL_TEXTURE8);
-	//glGenTextures(1, &picking_texture);
-	//glBindTexture(GL_TEXTURE_2D, picking_texture);
-	//glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, WINDOW_WIDTH, WINDOW_HEIGHT, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
-	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
-	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
-	//glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, picking_texture, 0);
-	//unsigned int picking_depth_texture;
-	//glGenTextures(1, &picking_depth_texture);
-	//glActiveTexture(GL_TEXTURE7);
-	//glBindTexture(GL_TEXTURE_2D, picking_depth_texture);
-	//glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, WINDOW_WIDTH, WINDOW_HEIGHT, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
-	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
-	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
-	//glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, picking_depth_texture, 0);
-	//glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }

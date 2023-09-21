@@ -5,9 +5,10 @@
 
 enum class PassType {
 	SHADOW_PASS,
-	MAIN_CAMERA_PASS, // do msaa
+	MAIN_CAMERA_PASS, // where do msaa
 	PICKING_PASS,
 	POST_PROCESSING_PASS,
+	SCREEN_PASS,
 };
 
 struct FrameBuffer {
@@ -16,11 +17,19 @@ struct FrameBuffer {
 
 class RenderPass {
 public:
-	void prepare_data();
-	void draw();
+	virtual void init() = 0;
+	// TODO
+	// virtual void prepare_data(const FrameBuffer& fb);
+	virtual void prepare_data(unsigned int fbo = -1, unsigned int map = -1) = 0;
+	virtual void draw() = 0;
+	// TODO
+	// map 和 fbo 封装在FrameBuffer里
+	virtual unsigned int get_fbo() { return m_fbo; }
+	virtual unsigned int get_map() { return m_map; }
 
-private:
-	FrameBuffer m_frame_buffer;
+protected:
+	unsigned int m_fbo = -1;
+	unsigned int m_map = -1;
 };
 
 #endif // !RenderPass_hpp

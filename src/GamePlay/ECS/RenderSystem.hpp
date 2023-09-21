@@ -1,13 +1,17 @@
 #ifndef RenderSystem_hpp
 #define RenderSystem_hpp
 
+class RenderPipeline;
+
 namespace ecs {
 
-struct RenderSystem {
-    static void onUpdate(/*const View& view*/);
-    static void render_picking_border();
-    static void render_normal();
-    static void render_shadow_map();
+class RenderSystem {
+public:
+    void initPipeline();
+    void onUpdate(/*const View& view*/);
+
+private:
+    RenderPipeline* m_render_pipeline{ nullptr };
 };
 
 }
