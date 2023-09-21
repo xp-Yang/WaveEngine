@@ -2,12 +2,8 @@
 #define MyModel_hpp
 #include <string>
 #include <vector>
-#include <assimp/Importer.hpp>
-#include <assimp/scene.h>
-#include <assimp/postprocess.h>
 #include "Mesh.hpp"
 #include "Material.hpp"
-#include "Renderer.hpp"
 
 struct SubModelData
 {
@@ -15,6 +11,10 @@ struct SubModelData
 	Material material;
 };
 
+class aiNode;
+class aiScene;
+class aiMesh;
+class aiMaterial;
 class Model {
 public:
 	Model(const std::string& file_path);

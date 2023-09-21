@@ -1,5 +1,6 @@
 #ifndef RenderPipeline_hpp
 #define RenderPipeline_hpp
+
 #include <memory>
 
 class RenderPass;

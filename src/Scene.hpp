@@ -1,9 +1,6 @@
 #ifndef Scene_hpp
 #define Scene_hpp
 
-#include "GamePlay/ECS/World.hpp"
-#include <unordered_map>
-
 class Scene {
 public:
 	Scene() = default;

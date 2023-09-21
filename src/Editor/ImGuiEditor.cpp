@@ -1,8 +1,10 @@
 #include "ImGuiEditor.hpp"
 #include <string>
 #include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
+#include "../../imgui/imgui.h"
+#include "../GamePlay/ECS/Components.hpp"
+#include "../GamePlay/ECS/RenderSystem.hpp"
+#include "../GamePlay/ECS/MotionSystem.hpp"
 #include "../Logger.hpp"
 
 ImGuiEditor::ImGuiEditor()
@@ -13,6 +15,8 @@ ImGuiEditor::ImGuiEditor()
 	enable_reflection = false;
     global_ambient_strength = 0.1f;
     icosphere_accuracy = 8;
+
+    // TODO: editor依赖system，能操控管线，能操控运动，能编辑transform，能编辑mesh，能编辑材质...
 }
 
 void ImGuiEditor::render()

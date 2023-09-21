@@ -1,5 +1,6 @@
 #include "Material.hpp"
-#include "stb_image.h"
+#include "Shader.hpp"
+#include "Texture.hpp"
 
 void Material::update_shader_binding() const {
 	if (shader) {
@@ -16,8 +17,6 @@ void Material::update_shader_binding() const {
         shader->setTexture("material.specular_map", 1, specular_map != 0 ? specular_map : default_map);
         shader->setTexture("material.normal_map", 2, normal_map != 0 ? normal_map : default_map);
         shader->setTexture("material.height_map", 3, height_map != 0 ? height_map : default_map);
-        
-        glActiveTexture(GL_TEXTURE0);
 
         shader->stop_using();
 	}

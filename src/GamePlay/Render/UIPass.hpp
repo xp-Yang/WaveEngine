@@ -6,8 +6,9 @@
 class UIPass : public RenderPass {
 public:
     void init();
-    // TODO “¿¿µµπ÷√
+    // TODO “¿¿µ
     //void initialize_imgui(ImGuiEditor* editor);
+    void prepare_data(unsigned int fbo = -1, unsigned int map = -1);
     void draw();
 };
 

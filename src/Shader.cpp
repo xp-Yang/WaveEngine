@@ -2,6 +2,8 @@
 #include <string>
 #include <fstream>
 #include <sstream>
+#include <iostream>
+#include "Platform/OpenGL/rhi_opengl.hpp"
 
 Shader::Shader(const char* vertexPath, const char* fragmentPath, const char* geometryPath)
 {
@@ -42,13 +44,14 @@ Shader::Shader(const char* vertexPath, const char* fragmentPath, const char* geo
     catch (std::ifstream::failure e)
     {
         std::cout << "ERROR::SHADER::FILE_NOT_SUCCESFULLY_READ" << std::endl;
+        assert(false);
     }
     const char* vShaderCode = vertexCode.c_str();
     const char* fShaderCode = fragmentCode.c_str();
     const char* gShaderCode = geometryCode.c_str();
 
     // 2. 编译着色器
-    GLuint vertex, fragment, geometry;
+    unsigned int vertex, fragment, geometry;
     int success;
     char infoLog[512];
 
@@ -62,6 +65,7 @@ Shader::Shader(const char* vertexPath, const char* fragmentPath, const char* geo
     {
         glGetShaderInfoLog(vertex, 512, NULL, infoLog);
         std::cout << "ERROR::SHADER::VERTEX::COMPILATION_FAILED\n" << infoLog << std::endl;
+        assert(false);
     };
 
     //
@@ -74,6 +78,7 @@ Shader::Shader(const char* vertexPath, const char* fragmentPath, const char* geo
         {
             glGetShaderInfoLog(geometry, 512, NULL, infoLog);
             std::cout << "ERROR::SHADER::GEOMETRY::COMPILATION_FAILED\n" << infoLog << std::endl;
+            assert(false);
         };
     }
 
@@ -86,6 +91,7 @@ Shader::Shader(const char* vertexPath, const char* fragmentPath, const char* geo
     {
         glGetShaderInfoLog(fragment, 512, NULL, infoLog);
         std::cout << "ERROR::SHADER::FRAGMENT::COMPILATION_FAILED\n"<< infoLog << std::endl;
+        assert(false);
     };
 
     // 着色器程序
@@ -101,6 +107,7 @@ Shader::Shader(const char* vertexPath, const char* fragmentPath, const char* geo
     {
         glGetProgramInfoLog(m_id, 512, NULL, infoLog);
         std::cout << "ERROR::SHADER::PROGRAM::LINKING_FAILED\n" << infoLog << std::endl;
+        assert(false);
     }
     glDeleteShader(vertex);
     glDeleteShader(fragment);

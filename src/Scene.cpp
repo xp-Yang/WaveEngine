@@ -1,7 +1,8 @@
 #include "Scene.hpp"
 #include "MyModel.hpp"
-#include "GamePlay/ECS/World.hpp"
 #include "GamePlay/ECS/Components.hpp"
+#include "Texture.hpp"
+#include "Shader.hpp"
 
 //void screen_shot() {
 //    const int channels_num = 3;
@@ -46,6 +47,7 @@ void Scene::init() {
 		"resource/images/skybox/back.jpg"
 	};
 	// TODO 是否可以放到material中
+	// TODO component size crash
 	world.addComponent<ecs::SkyboxComponent>(skybox_entity).texture = Texture::generate_cube_map(faces);
 	Material skybox_material;
 	skybox_material.shader = new Shader("resource/shader/skybox.vs", "resource/shader/skybox.fs");

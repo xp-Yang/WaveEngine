@@ -1,8 +1,9 @@
 #ifndef ImGuiEditor_hpp
 #define ImGuiEditor_hpp
 
-#include "../../imgui/imgui.h"
-#include "../View.hpp"
+namespace ecs {
+	class RenderSystem;
+}
 
 class ImGuiEditor {
 public:
@@ -18,6 +19,9 @@ public:
 	bool enable_reflection;
 	float global_ambient_strength;
 	int icosphere_accuracy;
+
+private:
+	ecs::RenderSystem* ref_render_system;
 };
 
 #endif

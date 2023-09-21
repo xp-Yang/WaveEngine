@@ -1,15 +1,13 @@
 #ifndef Application_hpp
 #define Application_hpp
 
-#define GL_SILENCE_DEPRECATION
-#include <glad/glad.h>
-#include <GLFW/glfw3.h>
 #include "View.hpp"
 #include "Scene.hpp"
 #include "Editor/ImGuiEditor.hpp"
 #include "GamePlay/ECS/RenderSystem.hpp"
 #include "GamePlay/ECS/MotionSystem.hpp"
 
+class GLFWwindow;
 class Application {
 public:
 	static Application& GetApp() {

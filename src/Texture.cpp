@@ -1,6 +1,5 @@
 #include "Texture.hpp"
-#include <glad/glad.h> 
-#include <GLFW/glfw3.h>
+#include "Platform/OpenGL/rhi_opengl.hpp"
 #include "stb_image.h"
 #include <assert.h>
 

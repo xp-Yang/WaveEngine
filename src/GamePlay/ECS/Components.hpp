@@ -3,13 +3,12 @@
 
 #include <string>
 #include <vector>
-#include "../../Mesh.hpp"
-#include "../../Material.hpp"
-#include "World.hpp"
 #include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/quaternion.hpp>
+#include "World.hpp"
+#include "../../Mesh.hpp"
+#include "../../Material.hpp"
 
 #define WINDOW_WIDTH 1600.0f
 #define WINDOW_HEIGHT 900.0f

@@ -20,7 +20,7 @@ public:
 	virtual void init() = 0;
 	// TODO
 	// virtual void prepare_data(const FrameBuffer& fb);
-	virtual void prepare_data(unsigned int fbo = -1, unsigned int map = -1) {}
+	virtual void prepare_data(unsigned int fbo = -1, unsigned int map = -1) = 0;
 	virtual void draw() = 0;
 	// TODO
 	// map 和 fbo 封装在FrameBuffer里

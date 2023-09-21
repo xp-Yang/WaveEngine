@@ -92,6 +92,7 @@
     <ClInclude Include="src\Material.hpp" />
     <ClInclude Include="src\Mesh.hpp" />
     <ClInclude Include="src\MyModel.hpp" />
+    <ClInclude Include="src\Platform\OpenGL\rhi_opengl.hpp" />
     <ClInclude Include="src\Renderer.hpp" />
     <ClInclude Include="src\GamePlay\Render\RenderPass.hpp" />
     <ClInclude Include="src\GamePlay\Render\RenderPipeline.hpp" />
@@ -119,6 +120,7 @@
     <None Include="resource\shader\picking.vs" />
     <None Include="resource\shader\skybox.fs" />
     <None Include="resource\shader\skybox.vs" />
+    <None Include="src\ResourceManager\Resource.placeholder" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>

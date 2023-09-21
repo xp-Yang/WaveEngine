@@ -1,8 +1,11 @@
+#include "Platform/OpenGL/rhi_opengl.hpp"
+#include <GLFW/glfw3.h>
 #include "Application.hpp"
 #include "../imgui/imgui_impl_glfw.h"
 #include "../imgui/imgui_impl_opengl3.h"
 #include "GamePlay/ECS/Components.hpp"
 #include <windows.h>
+#include <iostream>
 
 #define PERFORMANCE_TEST
 
@@ -23,9 +26,6 @@ void Application::run() {
 
 		// render System
 		m_render_system.onUpdate();
-		// 法线渲染也做msaa
-		//if (m_editor.normal_debug)
-		//	Renderer::render_normal();
 		// render imgui
 		m_editor.render();
 
@@ -93,7 +93,7 @@ void Application::create_window(int size_x, int size_y) {
 	m_window = glfwCreateWindow(size_x, size_y, "RenderEngine", nullptr, nullptr);
 	if (m_window == nullptr)
 	{
-		std::cout << "Failed to create GLFW window" << std::endl;
+		assert(false);
 		glfwTerminate();
 		return;
 	}
@@ -102,7 +102,7 @@ void Application::create_window(int size_x, int size_y) {
 	//初始化GLAD，使其可以管理OpenGL函数指针
 	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
 	{
-		std::cout << "Failed to initialize GLAD" << std::endl;
+		assert(false);
 		return;
 	}
 }

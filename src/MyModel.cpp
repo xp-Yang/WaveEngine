@@ -1,5 +1,8 @@
+#include <assimp/Importer.hpp>
+#include <assimp/scene.h>
+#include <assimp/postprocess.h>
 #include "MyModel.hpp"
-#include "stb_image.h"
+#include "Texture.hpp"
 
 Model::Model(const std::string& file_path)
 {

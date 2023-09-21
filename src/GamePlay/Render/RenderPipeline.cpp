@@ -4,6 +4,7 @@
 #include "PickingPass.hpp"
 #include "ScreenPass.hpp"
 #include "UIPass.hpp"
+#include "../../../imgui/imgui.h"
 
 void RenderPipeline::init()
 {
@@ -23,10 +24,13 @@ void RenderPipeline::render()
 {
     m_shadow_pass->prepare_data();
     m_shadow_pass->draw();
+    if (!ImGui::GetIO().WantCaptureMouse) {
+        m_picking_pass->prepare_data();
+        m_picking_pass->draw();
+    }
     m_main_camera_pass->prepare_data(m_shadow_pass->get_fbo(), m_shadow_pass->get_map());
     m_main_camera_pass->draw();
     m_screen_pass->prepare_data(m_main_camera_pass->get_fbo(), m_main_camera_pass->get_map());
     m_screen_pass->draw();
     m_ui_pass->draw();
-    //m_picking_pass->draw();
 }

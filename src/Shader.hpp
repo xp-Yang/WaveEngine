@@ -1,10 +1,8 @@
 #ifndef Shader_hpp
 #define Shader_hpp
-#include <glad/glad.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
-#include "../imgui/imgui.h"
-#include <iostream>
+#include <string>
 
 class Shader{
 public:
@@ -12,7 +10,7 @@ public:
 
 	void start_using() const;
 	void stop_using() const;
-	GLuint get_id() const { return m_id; }
+	unsigned int get_id() const { return m_id; }
 	// uniform ¹¤¾ßº¯Êý
 	void setBool(const std::string& name, bool value) const;
 	void setInt(const std::string& name, int value) const;
@@ -25,7 +23,7 @@ public:
 	void setCubeTexture(const std::string& name, int texture_unit, unsigned int texture_id) const;
 
 private:
-	GLuint m_id;
+	unsigned int m_id;
 };
 
 #endif

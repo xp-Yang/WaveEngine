@@ -1,5 +1,15 @@
 #include "View.hpp"
+#include "Platform/OpenGL/rhi_opengl.hpp"
+#include "../imgui/imgui.h"
 #include "Renderer.hpp"
+#include "GamePlay/ECS/Components.hpp"
+#include "GamePlay/ECS/CameraSystem.hpp"
+#include "Scene.hpp"
+
+void View::set_view_port(int width, int height)
+{
+    glViewport(0, 0, width, height);
+}
 
 void View::mouse_and_key_callback()
 {

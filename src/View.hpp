@@ -1,11 +1,7 @@
 #ifndef View_hpp
 #define View_hpp
 
-#include "GamePlay/ECS/World.hpp"
-#include "GamePlay/ECS/CameraSystem.hpp"
-#include "GamePlay/ECS/Components.hpp"
-#include "Scene.hpp"
-
+class Scene;
 struct RenderParam {
     //多重采样抗锯齿(MSAA , MultiSampling Anti-Aliasing)
     //阴影贴图(shadow mapping)
@@ -25,7 +21,7 @@ public:
 
     //void set_camera(Camera* camera) { this->camera = camera; } //View 并不拥有 Camera
     void set_scene(Scene* scene) { this->scene = scene; }    //View 并不拥有 Scene
-    void set_view_port(int width, int height) { glViewport(0, 0, width, height); }
+    void set_view_port(int width, int height);
     //const Camera& get_camera() const { return *camera; }
     //Camera& get_camera() { return *camera; }
     const Scene& get_scene() const { return *scene; }

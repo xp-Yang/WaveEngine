@@ -2,12 +2,10 @@
 #define Material_hpp
 
 #include <glm/glm.hpp>
-#include <assimp/material.h>
 #include <string>
 #include <vector>
-#include "Shader.hpp"
-#include "Texture.hpp"
 
+class Shader;
 struct Material {
     glm::vec4 color{ 1.0f, 1.0f, 1.0f, 1.0f };
     //float diffuse_strength{ 1.0f };
