@@ -24,11 +24,16 @@ void ShadowPass::init()
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
+void ShadowPass::config(int shadow_map_sample_count)
+{
+	m_shadow_map_sample_count = shadow_map_sample_count;
+}
+
 void ShadowPass::prepare_data(unsigned int fbo, unsigned int map)
 {
 	glBindFramebuffer(GL_FRAMEBUFFER, m_fbo);
-	float depth_buffer_width = WINDOW_WIDTH * 4;
-	float depth_buffer_height = WINDOW_HEIGHT * 4;
+	float depth_buffer_width = WINDOW_WIDTH * m_shadow_map_sample_count;
+	float depth_buffer_height = WINDOW_HEIGHT * m_shadow_map_sample_count;
 	glBindTexture(GL_TEXTURE_2D, m_map);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, depth_buffer_width, depth_buffer_height, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
 	glViewport(0, 0, depth_buffer_width, depth_buffer_height);

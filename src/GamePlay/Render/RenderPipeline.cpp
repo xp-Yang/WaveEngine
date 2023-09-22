@@ -28,8 +28,9 @@ void RenderPipeline::render()
         m_picking_pass->prepare_data();
         m_picking_pass->draw();
     }
-    static_cast<MainCameraPass*>(m_main_camera_pass.get())->config(m_render_params.msaa_sample_count, m_render_params.reflection, m_render_params.normal_debug);
+    static_cast<MainCameraPass*>(m_main_camera_pass.get())->config(m_render_params.msaa_sample_count, m_render_params.reflection, m_render_params.normal_debug, m_render_params.wireframe);
     if (m_render_params.shadow) {
+        static_cast<ShadowPass*>(m_shadow_pass.get())->config(m_render_params.shadow_map_sample_count);
         m_shadow_pass->prepare_data();
         m_shadow_pass->draw();
         m_main_camera_pass->prepare_data(m_shadow_pass->get_fbo(), m_shadow_pass->get_map());

@@ -6,8 +6,10 @@
 struct RenderParams {
     int     msaa_sample_count = 1;
     bool    shadow = true;
+    int     shadow_map_sample_count = 1;
     bool    reflection = false;
     bool    normal_debug = false;
+    bool    wireframe = false;
     int     pixelate_level = 1;
 };
 

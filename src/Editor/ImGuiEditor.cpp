@@ -43,9 +43,22 @@ void ImGuiEditor::render_global_editor() {
         }
         ImGui::EndCombo();
     }
+    static unsigned int shadow_curr_item = 0;
+    if (ImGui::BeginCombo("Shadow Map Resolution", (std::to_string((int)std::pow(4, shadow_curr_item)) + "x").c_str())) {
+        for (int i = 0; i < 3; i++) {
+            bool selected = shadow_curr_item == i;
+            std::string label = std::to_string((int)std::pow(4, i)) + "x";
+            if (ImGui::Selectable(label.c_str(), selected)) {
+                shadow_curr_item = i;
+                m_render_params.shadow_map_sample_count = (int)std::pow(4, i);
+            }
+        }
+        ImGui::EndCombo();
+    }
     ImGui::Checkbox("shadow", &m_render_params.shadow);
     ImGui::Checkbox("reflection", &m_render_params.reflection);
-    ImGui::Checkbox("normal debug", &m_render_params.normal_debug);
+    ImGui::Checkbox("normal", &m_render_params.normal_debug);
+    ImGui::Checkbox("wireframe", &m_render_params.wireframe);
     ImGui::SliderInt("pixel style", &m_render_params.pixelate_level, 1, 16);
     
     ImGuiIO& io = ImGui::GetIO();

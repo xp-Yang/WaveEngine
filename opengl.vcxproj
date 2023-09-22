@@ -118,6 +118,8 @@
     <None Include="resource\shader\picking.vs" />
     <None Include="resource\shader\skybox.fs" />
     <None Include="resource\shader\skybox.vs" />
+    <None Include="resource\shader\wireframe.fs" />
+    <None Include="resource\shader\wireframe.gs" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
