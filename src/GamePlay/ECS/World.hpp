@@ -45,6 +45,7 @@ public:
     size_t m_componentTypeSize{ 0 };
 };
 
+// TODO 更改实现，有bug：get的不一定是已创建
 extern int g_componentCounter;
 template <class T>
 int getComponentId()

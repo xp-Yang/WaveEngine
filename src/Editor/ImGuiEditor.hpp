@@ -1,27 +1,27 @@
 #ifndef ImGuiEditor_hpp
 #define ImGuiEditor_hpp
 
-namespace ecs {
-	class RenderSystem;
-}
+#include "../GamePlay/ECS/RenderSystem.hpp"
+#include "../GamePlay/ECS/MotionSystem.hpp"
 
 class ImGuiEditor {
 public:
 	ImGuiEditor();
+	void init(ecs::RenderSystem* render_system, ecs::MotionSystem* motion_system);
 	void render();
 	void render_global_editor();
 	void render_camera_editor();
 	void render_entity_editor();
+	void update_render_params();
 
-	bool pixel_style;
 	bool stop_rotate;
-	bool normal_debug;
-	bool enable_reflection;
 	float global_ambient_strength;
 	int icosphere_accuracy;
 
 private:
 	ecs::RenderSystem* ref_render_system;
+	ecs::MotionSystem* ref_motion_system;
+	RenderParams m_render_params;
 };
 
 #endif

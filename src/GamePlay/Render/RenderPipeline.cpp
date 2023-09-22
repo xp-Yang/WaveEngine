@@ -3,7 +3,6 @@
 #include "ShadowPass.hpp"
 #include "PickingPass.hpp"
 #include "ScreenPass.hpp"
-#include "UIPass.hpp"
 #include "../../../imgui/imgui.h"
 
 void RenderPipeline::init()
@@ -12,25 +11,33 @@ void RenderPipeline::init()
     m_shadow_pass = std::make_shared<ShadowPass>();
     m_picking_pass = std::make_shared<PickingPass>();
     m_screen_pass = std::make_shared<ScreenPass>();
-    m_ui_pass = std::make_shared<UIPass>();
     m_main_camera_pass->init();
     m_shadow_pass->init();
     m_picking_pass->init();
     m_screen_pass->init();
-    m_ui_pass->init();
+}
+
+void RenderPipeline::setRenderParams(const RenderParams& params)
+{
+    m_render_params = params;
 }
 
 void RenderPipeline::render()
 {
-    m_shadow_pass->prepare_data();
-    m_shadow_pass->draw();
     if (!ImGui::GetIO().WantCaptureMouse) {
         m_picking_pass->prepare_data();
         m_picking_pass->draw();
     }
-    m_main_camera_pass->prepare_data(m_shadow_pass->get_fbo(), m_shadow_pass->get_map());
+    static_cast<MainCameraPass*>(m_main_camera_pass.get())->config(m_render_params.msaa_sample_count, m_render_params.reflection, m_render_params.normal_debug);
+    if (m_render_params.shadow) {
+        m_shadow_pass->prepare_data();
+        m_shadow_pass->draw();
+        m_main_camera_pass->prepare_data(m_shadow_pass->get_fbo(), m_shadow_pass->get_map());
+    }
+    else {
+        m_main_camera_pass->prepare_data();
+    }
     m_main_camera_pass->draw();
     m_screen_pass->prepare_data(m_main_camera_pass->get_fbo(), m_main_camera_pass->get_map());
     m_screen_pass->draw();
-    m_ui_pass->draw();
 }

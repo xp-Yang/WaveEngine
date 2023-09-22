@@ -52,6 +52,7 @@ void Application::init()
 	m_scene.init();
 	m_view.set_scene(&m_scene);
 	m_render_system.initPipeline();
+	m_editor.init(&m_render_system, &m_motion_system);
 }
 
 void Application::shutdown()

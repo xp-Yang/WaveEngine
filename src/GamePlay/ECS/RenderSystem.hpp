@@ -1,13 +1,14 @@
 #ifndef RenderSystem_hpp
 #define RenderSystem_hpp
 
-class RenderPipeline;
+#include "../Render/RenderPipeline.hpp"
 
 namespace ecs {
 
 class RenderSystem {
 public:
     void initPipeline();
+    void setRenderParams(const RenderParams& params);
     void onUpdate();
 
 private:

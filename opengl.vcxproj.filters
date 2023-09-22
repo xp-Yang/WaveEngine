@@ -141,9 +141,6 @@
     <ClCompile Include="src\GamePlay\Render\ScreenPass.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="src\GamePlay\Render\UIPass.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Renderer.hpp">
@@ -254,13 +251,13 @@
     <ClInclude Include="src\GamePlay\Render\ScreenPass.hpp">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="src\GamePlay\Render\UIPass.hpp">
-      <Filter>头文件</Filter>
-    </ClInclude>
     <ClInclude Include="src\GamePlay\ECS\AnimationSystem.hpp">
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="src\GamePlay\ECS\PhysicsSystem.hpp">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Platform\OpenGL\rhi_opengl.hpp">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>
@@ -299,5 +296,6 @@
     <None Include="resource\shader\skybox.fs" />
     <None Include="resource\shader\picking.vs" />
     <None Include="resource\shader\picking.fs" />
+    <None Include="src\ResourceManager\Resource.placeholder" />
   </ItemGroup>
 </Project>

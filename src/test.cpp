@@ -1,16 +1,5 @@
-#include "../imgui/imgui.h"
-#include "../imgui/imgui_impl_glfw.h"
-#include "../imgui/imgui_impl_opengl3.h"
-#include <stdio.h>
-
-#include <glad/glad.h> 
-#include <GLFW/glfw3.h>
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
-
-GLuint test_vao()
-{
+//GLuint test_vao()
+//{
     //   GLfloat triVertex[] =
     //   {
     //       -1.0f, -1.0f, 0.0f,
@@ -66,8 +55,8 @@ GLuint test_vao()
     //   glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (GLvoid*)(6 * sizeof(float)));
     //   glEnableVertexAttribArray(2);
 
-    return 0;
-}
+//    return 0;
+//}
 
 //unsigned int generate_texture(int width, int height, unsigned char* data) {
 //    unsigned int texture_id;
@@ -104,10 +93,3 @@ GLuint test_vao()
 //它的第一个参数定义了fov的值。如果想要一个真实的观察效果，它的值通常设置为45.0f，但想要一个末日风格的结果你可以将其设置一个更大的值。
 //第二个参数设置了宽高比，由视口的宽除以高所得。宽高比为1的话，视口的宽高比影响了渲染出来的立方体的宽高比。
 //第三和第四个参数设置了平截头体的近和远平面。我们通常设置近距离为0.1f，而远距离设为100.0f。所有在近平面和远平面内且处于平截头体内的顶点都会被渲染。
-
-
-static glm::vec3 cubePositions[] = {
-    glm::vec3(0.0f,  0.0f,  0.0f),
-    glm::vec3(0.6f,  0.3f, -0.4f),
-    glm::vec3(-0.3f, -0.2f, -0.3f),
-};

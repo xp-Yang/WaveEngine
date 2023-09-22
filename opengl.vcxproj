@@ -42,7 +42,6 @@
     <ClCompile Include="src\GamePlay\Render\PickingPass.cpp" />
     <ClCompile Include="src\GamePlay\Render\ScreenPass.cpp" />
     <ClCompile Include="src\GamePlay\Render\ShadowPass.cpp" />
-    <ClCompile Include="src\GamePlay\Render\UIPass.cpp" />
     <ClCompile Include="src\Logger.cpp" />
     <ClCompile Include="src\glad.c" />
     <ClCompile Include="src\main.cpp" />
@@ -86,7 +85,6 @@
     <ClInclude Include="src\GamePlay\Render\PickingPass.hpp" />
     <ClInclude Include="src\GamePlay\Render\ScreenPass.hpp" />
     <ClInclude Include="src\GamePlay\Render\ShadowPass.hpp" />
-    <ClInclude Include="src\GamePlay\Render\UIPass.hpp" />
     <ClInclude Include="src\Logger.hpp" />
     <ClInclude Include="resource\shader\light.vs" />
     <ClInclude Include="src\Material.hpp" />

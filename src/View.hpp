@@ -2,19 +2,6 @@
 #define View_hpp
 
 class Scene;
-struct RenderParam {
-    //多重采样抗锯齿(MSAA , MultiSampling Anti-Aliasing)
-    //阴影贴图(shadow mapping)
-    //动态分辨率（dynamic resolution)
-    //渲染质量等级(QualityLevel)
-    //色调映射和伽马编码(Tone-mapping & gamma encoding)
-    //抖动显示(Dithering)
-    //快速近似抗锯齿(FXAA, Fast Approximate Anti-Aliasing)
-    //帧缓冲区做卷积操作
-    //picking
-    //render style (low-poly 、pixel)
-};
-
 class View {
 public:
     View() = default;

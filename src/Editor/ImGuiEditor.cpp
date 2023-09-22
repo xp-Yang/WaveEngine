@@ -3,20 +3,21 @@
 #include <glm/glm.hpp>
 #include "../../imgui/imgui.h"
 #include "../GamePlay/ECS/Components.hpp"
-#include "../GamePlay/ECS/RenderSystem.hpp"
-#include "../GamePlay/ECS/MotionSystem.hpp"
 #include "../Logger.hpp"
 
 ImGuiEditor::ImGuiEditor()
 {
-	pixel_style = false;
 	stop_rotate = false;
-	normal_debug = false;
-	enable_reflection = false;
     global_ambient_strength = 0.1f;
     icosphere_accuracy = 8;
 
-    // TODO: editor依赖system，能操控管线，能操控运动，能编辑transform，能编辑mesh，能编辑材质...
+    // TODO: editor依赖system，能操控渲染管线，能操控运动，能编辑transform，能编辑mesh，能编辑material...
+}
+
+void ImGuiEditor::init(ecs::RenderSystem* render_system, ecs::MotionSystem* motion_system)
+{
+    ref_render_system = render_system;
+    ref_motion_system = motion_system;
 }
 
 void ImGuiEditor::render()
@@ -24,16 +25,29 @@ void ImGuiEditor::render()
    render_global_editor();
    render_camera_editor();
    render_entity_editor();
+   update_render_params();
 }
 
 void ImGuiEditor::render_global_editor() {
     ImGui::Begin("Global Controller", nullptr, ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse);
 
-    ImGui::Checkbox("pixel style", &pixel_style);
-    //ImGui::SliderFloat("global ambient strength", &global_ambient_strength, 0.0f, 1.0f);
-    //ImGui::Checkbox("light: stop rotate", &stop_rotate);
-    ImGui::Checkbox("enable normal debug", &normal_debug);
-
+    static unsigned int curr_item = 0;
+    if (ImGui::BeginCombo("MSAA", (std::to_string((int)std::pow(4, curr_item)) + "x").c_str())) {
+        for (int i = 0; i < 3; i++) {
+            bool selected = curr_item == i;
+            std::string label = std::to_string((int)std::pow(4, i)) + "x";
+            if (ImGui::Selectable(label.c_str(), selected)) {
+                curr_item = i;
+                m_render_params.msaa_sample_count = (int)std::pow(4, i);
+            }
+        }
+        ImGui::EndCombo();
+    }
+    ImGui::Checkbox("shadow", &m_render_params.shadow);
+    ImGui::Checkbox("reflection", &m_render_params.reflection);
+    ImGui::Checkbox("normal debug", &m_render_params.normal_debug);
+    ImGui::SliderInt("pixel style", &m_render_params.pixelate_level, 1, 16);
+    
     ImGuiIO& io = ImGui::GetIO();
     ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / io.Framerate, io.Framerate);
 
@@ -86,7 +100,6 @@ void ImGuiEditor::render_entity_editor()
         float shininess = renderable.primitives[0].material.shininess;
 
         ImGui::Begin((obj_name + " controller").c_str(), nullptr, ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse);
-        ImGui::Checkbox((std::string("enable reflection") + "##" + obj_name).c_str(), &enable_reflection);
         ImGui::ColorEdit3((std::string("color") + "##" + obj_name).c_str(), (float*)&color);
         ImGui::SliderFloat((std::string("shininess") + "##" + obj_name).c_str(), &shininess, 0.1f, 512.0f);
         ImGui::PushItemWidth(85.0f);
@@ -140,4 +153,9 @@ void ImGuiEditor::render_entity_editor()
         ImGui::End();
         break; //只选择一个
     }
+}
+
+void ImGuiEditor::update_render_params()
+{
+    ref_render_system->setRenderParams(m_render_params);
 }

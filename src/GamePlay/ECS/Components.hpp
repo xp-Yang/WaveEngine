@@ -78,11 +78,11 @@ struct CameraComponent {
 };
 
 enum class PrimitiveType {
-	POINTS         = 0,    //!< points
-    LINES          = 1,    //!< lines
-    LINE_STRIP     = 3,    //!< line strip
-    TRIANGLES      = 4,    //!< triangles
-    TRIANGLE_STRIP = 5     //!< triangle strip
+	POINTS         = 0,
+    LINES          = 1,
+    LINE_STRIP     = 3,
+    TRIANGLES      = 4,
+    TRIANGLE_STRIP = 5 
 };
 
 struct Primitive {

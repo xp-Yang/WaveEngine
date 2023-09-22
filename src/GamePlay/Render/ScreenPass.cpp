@@ -43,8 +43,8 @@ void ScreenPass::prepare_data(unsigned int fbo, unsigned int map)
 	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, m_fbo);
 	glBlitFramebuffer(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT, 0, 0, WINDOW_WIDTH, WINDOW_HEIGHT, GL_COLOR_BUFFER_BIT, GL_NEAREST);
 
-	glViewport(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	glViewport(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
 	glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 }
@@ -56,4 +56,11 @@ void ScreenPass::draw()
 	frame_shader->setTexture("Texture", 0, m_map);
 	Renderer::drawTriangle(*frame_shader, quad_vao, 6);
 	glEnable(GL_DEPTH_TEST);
+
+
+	//// debug depth
+	//glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+	//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+	//frame_shader->setTexture("Texture", 0, 57); // shadow map
+	//Renderer::drawTriangle(*frame_shader, quad_vao, 6);
 }

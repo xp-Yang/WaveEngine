@@ -26,12 +26,12 @@ void ShadowPass::init()
 
 void ShadowPass::prepare_data(unsigned int fbo, unsigned int map)
 {
-	float depth_buffer_width = WINDOW_WIDTH * 16;
-	float depth_buffer_height = WINDOW_HEIGHT * 16;
+	glBindFramebuffer(GL_FRAMEBUFFER, m_fbo);
+	float depth_buffer_width = WINDOW_WIDTH * 4;
+	float depth_buffer_height = WINDOW_HEIGHT * 4;
 	glBindTexture(GL_TEXTURE_2D, m_map);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, depth_buffer_width, depth_buffer_height, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
 	glViewport(0, 0, depth_buffer_width, depth_buffer_height);
-	glBindFramebuffer(GL_FRAMEBUFFER, m_fbo);
 	glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 }
@@ -49,7 +49,7 @@ void ShadowPass::draw() {
     }
 
     depth_shader->start_using();
-    depth_shader->setMatrix("view", 1, light_ref_matrix);
+    depth_shader->setMatrix("vp", 1, light_ref_matrix);
 
     for (auto entity : world.entityView<ecs::RenderableComponent, ecs::TransformComponent>()) {
         auto& renderable = *world.getComponent<ecs::RenderableComponent>(entity);
@@ -62,12 +62,4 @@ void ShadowPass::draw() {
             Renderer::drawIndex(*depth_shader, mesh.get_VAO(), mesh.get_indices_count());
         }
     }
-
-	// debug depth
-	//glViewport(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
-	//glBindFramebuffer(GL_FRAMEBUFFER, 0);
-	//glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
-	//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-	//glBindTexture(GL_TEXTURE_2D, view.get_shadow_map_id());
-	//renderer.draw(*frame_shader, quad_VAO, DrawMode::Arrays, 0, 6);
 }

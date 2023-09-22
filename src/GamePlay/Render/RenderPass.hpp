@@ -3,14 +3,6 @@
 
 #include <vector>
 
-enum class PassType {
-	SHADOW_PASS,
-	MAIN_CAMERA_PASS, // where do msaa
-	PICKING_PASS,
-	POST_PROCESSING_PASS,
-	SCREEN_PASS,
-};
-
 struct FrameBuffer {
 	std::vector<int> attachments;
 };

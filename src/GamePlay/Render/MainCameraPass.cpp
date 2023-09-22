@@ -10,13 +10,12 @@ void MainCameraPass::init()
     int samples_count = 16;
     if (samples_count == 1)
     {
-        unsigned int color_texture;
-        glGenTextures(1, &color_texture);
-        glBindTexture(GL_TEXTURE_2D, color_texture);
+        glGenTextures(1, &m_map);
+        glBindTexture(GL_TEXTURE_2D, m_map);
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, WINDOW_WIDTH, WINDOW_HEIGHT, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, color_texture, 0);
+        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_map, 0);
         // 为什么要绑上深度缓冲才能work? tex_buffer不是已经被深度测试过的一张纹理吗
         // 为什么只绑定了stencil，阴影就会有问题？
         unsigned int rbo;
@@ -28,26 +27,35 @@ void MainCameraPass::init()
         //glFramebufferRenderbuffer(GL_FRAMEBUFFER, /*GL_DEPTH_STENCIL_ATTACHMENT*/GL_STENCIL_ATTACHMENT, GL_RENDERBUFFER, rbo); 
     }
     else {
-        unsigned int multi_sample_texture;
-        glGenTextures(1, &multi_sample_texture);
-        glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, multi_sample_texture);
+        glGenTextures(1, &m_map);
+        glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, m_map);
         glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, samples_count, GL_RGB, WINDOW_WIDTH, WINDOW_HEIGHT, GL_TRUE);
-        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D_MULTISAMPLE, multi_sample_texture, 0);
-        unsigned int rbo;
-        glGenRenderbuffers(1, &rbo);
-        glBindRenderbuffer(GL_RENDERBUFFER, rbo);
+        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D_MULTISAMPLE, m_map, 0);
+        glGenRenderbuffers(1, &m_rbo);
+        glBindRenderbuffer(GL_RENDERBUFFER, m_rbo);
         glRenderbufferStorageMultisample(GL_RENDERBUFFER, samples_count, GL_DEPTH24_STENCIL8, WINDOW_WIDTH, WINDOW_HEIGHT);
-        glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, rbo);
+        glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, m_rbo);
     }
     glBindRenderbuffer(GL_RENDERBUFFER, 0);
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
+void MainCameraPass::config(int msaa_sample_count, bool reflection, bool normal_debug)
+{
+    m_msaa_sample_count = msaa_sample_count;
+    m_reflection = reflection;
+    m_normal_debug = normal_debug;
+}
+
 void MainCameraPass::prepare_data(unsigned int fbo, unsigned int map)
 {
-    shadow_map = map;
-    glViewport(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
+    m_shadow_map = map;
     glBindFramebuffer(GL_FRAMEBUFFER, m_fbo);
+    glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, m_map);
+    glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, m_msaa_sample_count, GL_RGB, WINDOW_WIDTH, WINDOW_HEIGHT, GL_TRUE);
+    glBindRenderbuffer(GL_RENDERBUFFER, m_rbo);
+    glRenderbufferStorageMultisample(GL_RENDERBUFFER, m_msaa_sample_count, GL_DEPTH24_STENCIL8, WINDOW_WIDTH, WINDOW_HEIGHT);
+    glViewport(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
     glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 }
@@ -117,17 +125,19 @@ void MainCameraPass::draw()
             shader->setFloat4("light.color", light_color);
             shader->setFloat3("light.position", light_pos);
             shader->setCubeTexture("skybox", 6, skybox_texture_id);
-            shader->setBool("enable_skybox_sample", /*obj->is_enable_reflection()*/false);
+            shader->setBool("enable_skybox_sample", m_reflection);
             shader->setFloat("explosionRatio", explosion_ratio);
-            if (shadow_map != -1) {
+            if (m_shadow_map != -1) {
                 shader->setMatrix("lightSpaceMatrix", 1, light_ref_matrix);
-                shader->setTexture("shadow_map", 7, shadow_map);
+                shader->setTexture("shadow_map", 7, m_shadow_map);
             }
             Renderer::drawIndex(*shader, mesh.get_VAO(), mesh.get_indices_count());
             shader->stop_using();
         }
     }
 
+    auto it = world.entityView<ecs::PickedComponent>();
+    if(it.begin() != it.end())
     {
         // render border
         glEnable(GL_STENCIL_TEST);// 为了渲染border
@@ -190,32 +200,32 @@ void MainCameraPass::draw()
         }
     }
 
-    //{
-    //    // render normal
-    //    static Shader* normal_shader = new Shader("resource/shader/model.vs", "resource/shader/normal.fs", "resource/shader/normal.gs");
+    if(m_normal_debug)
+    {
+        static Shader* normal_shader = new Shader("resource/shader/model.vs", "resource/shader/normal.fs", "resource/shader/normal.gs");
 
-    //    auto& world = ecs::World::get();
-    //    glm::mat4 camera_view;
-    //    glm::mat4 camera_projection;
-    //    for (auto entity : world.entityView<ecs::CameraComponent>()) {
-    //        ecs::CameraComponent& camera = *world.getComponent<ecs::CameraComponent>(entity);
-    //        camera_view = camera.view;
-    //        camera_projection = camera.projection;
-    //    }
+        auto& world = ecs::World::get();
+        glm::mat4 camera_view;
+        glm::mat4 camera_projection;
+        for (auto entity : world.entityView<ecs::CameraComponent>()) {
+            ecs::CameraComponent& camera = *world.getComponent<ecs::CameraComponent>(entity);
+            camera_view = camera.view;
+            camera_projection = camera.projection;
+        }
 
-    //    normal_shader->start_using();
-    //    normal_shader->setMatrix("view", 1, camera_view);
-    //    normal_shader->setMatrix("projection", 1, camera_projection);
-    //    for (auto entity : world.entityView<ecs::RenderableComponent, ecs::TransformComponent>()) {
-    //        auto& renderable = *world.getComponent<ecs::RenderableComponent>(entity);
-    //        auto& model_matrix = *world.getComponent<ecs::TransformComponent>(entity);
+        normal_shader->start_using();
+        normal_shader->setMatrix("view", 1, camera_view);
+        normal_shader->setMatrix("projection", 1, camera_projection);
+        for (auto entity : world.entityView<ecs::RenderableComponent, ecs::TransformComponent>()) {
+            auto& renderable = *world.getComponent<ecs::RenderableComponent>(entity);
+            auto& model_matrix = *world.getComponent<ecs::TransformComponent>(entity);
 
-    //        normal_shader->start_using();
-    //        normal_shader->setMatrix("model", 1, model_matrix.transform());
-    //        for (int i = 0; i < renderable.primitives.size(); i++) {
-    //            auto& mesh = renderable.primitives[i].mesh;
-    //            Renderer::drawIndex(*normal_shader, mesh.get_VAO(), mesh.get_indices_count());
-    //        }
-    //    }
-    //}
+            normal_shader->start_using();
+            normal_shader->setMatrix("model", 1, model_matrix.transform());
+            for (int i = 0; i < renderable.primitives.size(); i++) {
+                auto& mesh = renderable.primitives[i].mesh;
+                Renderer::drawIndex(*normal_shader, mesh.get_VAO(), mesh.get_indices_count());
+            }
+        }
+    }
 }
