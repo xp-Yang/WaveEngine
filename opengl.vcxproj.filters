@@ -1,301 +1,331 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <Filter Include="源文件">
-      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
-      <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
-    </Filter>
-    <Filter Include="头文件">
-      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
-      <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
-    </Filter>
-    <Filter Include="资源文件">
+    <Filter Include="shaders">
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
-    <Filter Include="源文件\src">
+    <Filter Include="engine">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="engine\src">
       <UniqueIdentifier>{54ca613e-c1aa-4735-bb8d-1b25d6663d10}</UniqueIdentifier>
     </Filter>
-    <Filter Include="源文件\imgui">
+    <Filter Include="engine\src\PlatForm">
+      <UniqueIdentifier>{15fd420e-33c9-4ec1-8e8f-de0b914ad34b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="engine\src\Core">
+      <UniqueIdentifier>{7dca4a4a-07d2-4986-a16f-c9a2d7484c5c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="engine\src\ResourceManager">
+      <UniqueIdentifier>{179e86b3-031c-4ca4-b314-3b769737e789}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="engine\src\Editor">
+      <UniqueIdentifier>{b0260cde-0859-4f61-8789-ec01e207198e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="engine\src\GamePlay">
+      <UniqueIdentifier>{09cd7443-760e-4011-801a-c23f101c3f03}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="engine\src\GamePlay\ECS">
+      <UniqueIdentifier>{825f7d9b-314d-4481-801d-f72b112fd957}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="engine\src\GamePlay\Render">
+      <UniqueIdentifier>{6cea49c1-efe9-424b-a1ef-aa1b7d0478e3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="engine\imgui">
       <UniqueIdentifier>{d2d91617-6717-4c4c-a589-7d5264001ffe}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Renderer.cpp">
-      <Filter>源文件\src</Filter>
+      <Filter>engine\src</Filter>
     </ClCompile>
     <ClCompile Include="src\Shader.cpp">
-      <Filter>源文件\src</Filter>
+      <Filter>engine\src</Filter>
     </ClCompile>
     <ClCompile Include="imgui\imgui.cpp">
-      <Filter>源文件\imgui</Filter>
+      <Filter>engine\imgui</Filter>
     </ClCompile>
     <ClCompile Include="imgui\imgui_demo.cpp">
-      <Filter>源文件\imgui</Filter>
+      <Filter>engine\imgui</Filter>
     </ClCompile>
     <ClCompile Include="imgui\imgui_draw.cpp">
-      <Filter>源文件\imgui</Filter>
+      <Filter>engine\imgui</Filter>
     </ClCompile>
     <ClCompile Include="imgui\imgui_impl_glfw.cpp">
-      <Filter>源文件\imgui</Filter>
+      <Filter>engine\imgui</Filter>
     </ClCompile>
     <ClCompile Include="imgui\imgui_impl_opengl3.cpp">
-      <Filter>源文件\imgui</Filter>
+      <Filter>engine\imgui</Filter>
     </ClCompile>
     <ClCompile Include="imgui\imgui_tables.cpp">
-      <Filter>源文件\imgui</Filter>
+      <Filter>engine\imgui</Filter>
     </ClCompile>
     <ClCompile Include="imgui\imgui_widgets.cpp">
-      <Filter>源文件\imgui</Filter>
+      <Filter>engine\imgui</Filter>
     </ClCompile>
     <ClCompile Include="src\main.cpp">
-      <Filter>源文件\src</Filter>
+      <Filter>engine\src</Filter>
     </ClCompile>
     <ClCompile Include="src\Material.cpp">
-      <Filter>源文件\src</Filter>
+      <Filter>engine\src</Filter>
     </ClCompile>
     <ClCompile Include="src\Mesh.cpp">
-      <Filter>源文件\src</Filter>
+      <Filter>engine\src</Filter>
     </ClCompile>
     <ClCompile Include="src\MyModel.cpp">
-      <Filter>源文件\src</Filter>
+      <Filter>engine\src</Filter>
     </ClCompile>
     <ClCompile Include="src\Scene.cpp">
-      <Filter>源文件\src</Filter>
+      <Filter>engine\src</Filter>
     </ClCompile>
     <ClCompile Include="src\test.cpp">
-      <Filter>源文件\src</Filter>
+      <Filter>engine\src</Filter>
     </ClCompile>
     <ClCompile Include="src\View.cpp">
-      <Filter>源文件\src</Filter>
-    </ClCompile>
-    <ClCompile Include="src\glad.c">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="src\stb_image.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Editor\ImGuiEditor.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Logger.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Texture.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Editor\ImGuiGizmo.cpp">
-      <Filter>源文件</Filter>
+      <Filter>engine\src</Filter>
     </ClCompile>
     <ClCompile Include="src\Application.cpp">
-      <Filter>源文件</Filter>
+      <Filter>engine\src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\glad.c">
+      <Filter>engine\src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Logger.cpp">
+      <Filter>engine\src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\stb_image.cpp">
+      <Filter>engine\src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Texture.cpp">
+      <Filter>engine\src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Editor\ImGuiEditor.cpp">
+      <Filter>engine\src\Editor</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Editor\ImGuiGizmo.cpp">
+      <Filter>engine\src\Editor</Filter>
     </ClCompile>
     <ClCompile Include="src\Core\Math.hpp">
-      <Filter>头文件</Filter>
+      <Filter>engine\src\Core</Filter>
     </ClCompile>
     <ClCompile Include="src\GamePlay\ECS\AnimationSystem.cpp">
-      <Filter>源文件</Filter>
+      <Filter>engine\src\GamePlay\ECS</Filter>
     </ClCompile>
     <ClCompile Include="src\GamePlay\ECS\CameraSystem.cpp">
-      <Filter>源文件</Filter>
+      <Filter>engine\src\GamePlay\ECS</Filter>
     </ClCompile>
     <ClCompile Include="src\GamePlay\ECS\Components.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="src\GamePlay\ECS\MaterialSystem.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="src\GamePlay\ECS\MotionSystem.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="src\GamePlay\ECS\PhysicsSystem.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="src\GamePlay\ECS\RenderSystem.cpp">
-      <Filter>源文件</Filter>
+      <Filter>engine\src\GamePlay\ECS</Filter>
     </ClCompile>
     <ClCompile Include="src\GamePlay\ECS\JobSystem.cpp">
-      <Filter>源文件</Filter>
+      <Filter>engine\src\GamePlay\ECS</Filter>
     </ClCompile>
-    <ClCompile Include="src\GamePlay\Render\RenderPass.cpp">
-      <Filter>源文件</Filter>
+    <ClCompile Include="src\GamePlay\ECS\MotionSystem.cpp">
+      <Filter>engine\src\GamePlay\ECS</Filter>
     </ClCompile>
-    <ClCompile Include="src\GamePlay\Render\RenderPipeline.cpp">
-      <Filter>源文件</Filter>
+    <ClCompile Include="src\GamePlay\ECS\PhysicsSystem.cpp">
+      <Filter>engine\src\GamePlay\ECS</Filter>
+    </ClCompile>
+    <ClCompile Include="src\GamePlay\ECS\RenderSystem.cpp">
+      <Filter>engine\src\GamePlay\ECS</Filter>
     </ClCompile>
     <ClCompile Include="src\GamePlay\ECS\System.cpp">
-      <Filter>源文件</Filter>
+      <Filter>engine\src\GamePlay\ECS</Filter>
     </ClCompile>
-    <ClCompile Include="src\GamePlay\ECS\World.cpp">
-      <Filter>源文件</Filter>
+    <ClCompile Include="src\GamePlay\ECS\MaterialSystem.cpp">
+      <Filter>engine\src\GamePlay\ECS</Filter>
     </ClCompile>
-    <ClCompile Include="src\GamePlay\Render\MainCameraPass.cpp">
-      <Filter>源文件</Filter>
+    <ClCompile Include="src\GamePlay\Render\RenderPass.cpp">
+      <Filter>engine\src\GamePlay\Render</Filter>
     </ClCompile>
-    <ClCompile Include="src\GamePlay\Render\ShadowPass.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="src\GamePlay\Render\PickingPass.cpp">
-      <Filter>源文件</Filter>
+    <ClCompile Include="src\GamePlay\Render\RenderPipeline.cpp">
+      <Filter>engine\src\GamePlay\Render</Filter>
     </ClCompile>
     <ClCompile Include="src\GamePlay\Render\ScreenPass.cpp">
-      <Filter>源文件</Filter>
+      <Filter>engine\src\GamePlay\Render</Filter>
+    </ClCompile>
+    <ClCompile Include="src\GamePlay\Render\ShadowPass.cpp">
+      <Filter>engine\src\GamePlay\Render</Filter>
+    </ClCompile>
+    <ClCompile Include="src\GamePlay\Render\PickingPass.cpp">
+      <Filter>engine\src\GamePlay\Render</Filter>
+    </ClCompile>
+    <ClCompile Include="src\GamePlay\Render\MainCameraPass.cpp">
+      <Filter>engine\src\GamePlay\Render</Filter>
+    </ClCompile>
+    <ClCompile Include="src\GamePlay\ECS\World.cpp">
+      <Filter>engine\src\GamePlay\ECS</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Renderer.hpp">
-      <Filter>源文件\src</Filter>
+      <Filter>engine\src</Filter>
     </ClInclude>
     <ClInclude Include="src\Shader.hpp">
-      <Filter>源文件\src</Filter>
-    </ClInclude>
-    <ClInclude Include="imgui\imconfig.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="imgui\imgui.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="imgui\imgui_internal.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="imgui\imstb_rectpack.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="imgui\imstb_textedit.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="imgui\imstb_truetype.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="imgui\imgui_impl_glfw.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="imgui\imgui_impl_opengl3.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="imgui\imgui_impl_opengl3_loader.h">
-      <Filter>头文件</Filter>
+      <Filter>engine\src</Filter>
     </ClInclude>
     <ClInclude Include="resource\shader\light.vs">
-      <Filter>资源文件</Filter>
+      <Filter>shaders</Filter>
     </ClInclude>
     <ClInclude Include="src\Mesh.hpp">
-      <Filter>源文件\src</Filter>
+      <Filter>engine\src</Filter>
     </ClInclude>
     <ClInclude Include="src\MyModel.hpp">
-      <Filter>源文件\src</Filter>
+      <Filter>engine\src</Filter>
     </ClInclude>
     <ClInclude Include="src\Scene.hpp">
-      <Filter>源文件\src</Filter>
+      <Filter>engine\src</Filter>
     </ClInclude>
     <ClInclude Include="src\View.hpp">
-      <Filter>源文件\src</Filter>
+      <Filter>engine\src</Filter>
     </ClInclude>
     <ClInclude Include="src\Material.hpp">
-      <Filter>源文件\src</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Editor\ImGuiEditor.hpp">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Logger.hpp">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Texture.hpp">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Editor\ImGuiGizmo.hpp">
-      <Filter>头文件</Filter>
+      <Filter>engine\src</Filter>
     </ClInclude>
     <ClInclude Include="src\Application.hpp">
-      <Filter>头文件</Filter>
+      <Filter>engine\src</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Logger.hpp">
+      <Filter>engine\src</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Texture.hpp">
+      <Filter>engine\src</Filter>
+    </ClInclude>
+    <ClInclude Include="imgui\imconfig.h">
+      <Filter>engine\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="imgui\imgui.h">
+      <Filter>engine\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="imgui\imgui_impl_glfw.h">
+      <Filter>engine\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="imgui\imgui_impl_opengl3.h">
+      <Filter>engine\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="imgui\imgui_impl_opengl3_loader.h">
+      <Filter>engine\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="imgui\imgui_internal.h">
+      <Filter>engine\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="imgui\imstb_rectpack.h">
+      <Filter>engine\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="imgui\imstb_textedit.h">
+      <Filter>engine\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="imgui\imstb_truetype.h">
+      <Filter>engine\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Editor\ImGuiEditor.hpp">
+      <Filter>engine\src\Editor</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Editor\ImGuiGizmo.hpp">
+      <Filter>engine\src\Editor</Filter>
     </ClInclude>
     <ClInclude Include="src\Core\Memory.hpp">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="src\GamePlay\ECS\Components.hpp">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="src\GamePlay\ECS\CameraSystem.hpp">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="src\GamePlay\ECS\MaterialSystem.hpp">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="src\GamePlay\ECS\MotionSystem.hpp">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="src\GamePlay\ECS\RenderSystem.hpp">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="src\GamePlay\Render\RenderPass.hpp">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="src\GamePlay\Render\RenderPipeline.hpp">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="src\GamePlay\ECS\System.hpp">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="src\GamePlay\ECS\World.hpp">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="src\GamePlay\Render\MainCameraPass.hpp">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="src\GamePlay\Render\ShadowPass.hpp">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="src\GamePlay\Render\PickingPass.hpp">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="src\GamePlay\Render\ScreenPass.hpp">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="src\GamePlay\ECS\AnimationSystem.hpp">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="src\GamePlay\ECS\PhysicsSystem.hpp">
-      <Filter>头文件</Filter>
+      <Filter>engine\src\Core</Filter>
     </ClInclude>
     <ClInclude Include="src\Platform\OpenGL\rhi_opengl.hpp">
-      <Filter>头文件</Filter>
+      <Filter>engine\src\PlatForm</Filter>
+    </ClInclude>
+    <ClInclude Include="src\GamePlay\ECS\AnimationSystem.hpp">
+      <Filter>engine\src\GamePlay\ECS</Filter>
+    </ClInclude>
+    <ClInclude Include="src\GamePlay\ECS\CameraSystem.hpp">
+      <Filter>engine\src\GamePlay\ECS</Filter>
+    </ClInclude>
+    <ClInclude Include="src\GamePlay\ECS\Components.hpp">
+      <Filter>engine\src\GamePlay\ECS</Filter>
+    </ClInclude>
+    <ClInclude Include="src\GamePlay\ECS\MotionSystem.hpp">
+      <Filter>engine\src\GamePlay\ECS</Filter>
+    </ClInclude>
+    <ClInclude Include="src\GamePlay\ECS\PhysicsSystem.hpp">
+      <Filter>engine\src\GamePlay\ECS</Filter>
+    </ClInclude>
+    <ClInclude Include="src\GamePlay\ECS\RenderSystem.hpp">
+      <Filter>engine\src\GamePlay\ECS</Filter>
+    </ClInclude>
+    <ClInclude Include="src\GamePlay\ECS\System.hpp">
+      <Filter>engine\src\GamePlay\ECS</Filter>
+    </ClInclude>
+    <ClInclude Include="src\GamePlay\ECS\MaterialSystem.hpp">
+      <Filter>engine\src\GamePlay\ECS</Filter>
+    </ClInclude>
+    <ClInclude Include="src\GamePlay\Render\RenderPass.hpp">
+      <Filter>engine\src\GamePlay\Render</Filter>
+    </ClInclude>
+    <ClInclude Include="src\GamePlay\Render\RenderPipeline.hpp">
+      <Filter>engine\src\GamePlay\Render</Filter>
+    </ClInclude>
+    <ClInclude Include="src\GamePlay\Render\ScreenPass.hpp">
+      <Filter>engine\src\GamePlay\Render</Filter>
+    </ClInclude>
+    <ClInclude Include="src\GamePlay\Render\ShadowPass.hpp">
+      <Filter>engine\src\GamePlay\Render</Filter>
+    </ClInclude>
+    <ClInclude Include="src\GamePlay\Render\PickingPass.hpp">
+      <Filter>engine\src\GamePlay\Render</Filter>
+    </ClInclude>
+    <ClInclude Include="src\GamePlay\Render\MainCameraPass.hpp">
+      <Filter>engine\src\GamePlay\Render</Filter>
+    </ClInclude>
+    <ClInclude Include="src\GamePlay\ECS\World.hpp">
+      <Filter>engine\src\GamePlay\ECS</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="resource\shader\light.fs">
-      <Filter>资源文件</Filter>
+      <Filter>shaders</Filter>
     </None>
     <None Include="resource\shader\model.fs">
-      <Filter>资源文件</Filter>
+      <Filter>shaders</Filter>
     </None>
     <None Include="resource\shader\model.vs">
-      <Filter>资源文件</Filter>
+      <Filter>shaders</Filter>
     </None>
     <None Include="resource\shader\border.fs">
-      <Filter>资源文件</Filter>
+      <Filter>shaders</Filter>
     </None>
     <None Include="resource\shader\border.vs">
-      <Filter>资源文件</Filter>
+      <Filter>shaders</Filter>
     </None>
     <None Include="resource\shader\frame.fs">
-      <Filter>资源文件</Filter>
+      <Filter>shaders</Filter>
     </None>
     <None Include="resource\shader\frame.vs">
-      <Filter>资源文件</Filter>
+      <Filter>shaders</Filter>
     </None>
     <None Include="resource\shader\model.gs">
-      <Filter>资源文件</Filter>
+      <Filter>shaders</Filter>
     </None>
     <None Include="resource\shader\normal.gs">
-      <Filter>资源文件</Filter>
+      <Filter>shaders</Filter>
     </None>
-    <None Include="resource\shader\depth.vs" />
-    <None Include="resource\shader\depth.fs" />
-    <None Include="resource\shader\normal.fs" />
-    <None Include="resource\shader\skybox.vs" />
-    <None Include="resource\shader\skybox.fs" />
-    <None Include="resource\shader\picking.vs" />
-    <None Include="resource\shader\picking.fs" />
-    <None Include="src\ResourceManager\Resource.placeholder" />
+    <None Include="resource\shader\depth.fs">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="resource\shader\depth.vs">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="resource\shader\normal.fs">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="resource\shader\picking.fs">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="resource\shader\picking.vs">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="resource\shader\skybox.fs">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="resource\shader\skybox.vs">
+      <Filter>shaders</Filter>
+    </None>
   </ItemGroup>
 </Project>

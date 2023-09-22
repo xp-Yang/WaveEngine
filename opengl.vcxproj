@@ -118,7 +118,6 @@
     <None Include="resource\shader\picking.vs" />
     <None Include="resource\shader\skybox.fs" />
     <None Include="resource\shader\skybox.vs" />
-    <None Include="src\ResourceManager\Resource.placeholder" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
