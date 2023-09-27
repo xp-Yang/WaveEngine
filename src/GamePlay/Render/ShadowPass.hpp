@@ -5,13 +5,15 @@
 
 class ShadowPass : public RenderPass {
 public:
-    void init();
-    void config(int shadow_map_sample_count);
-    void prepare_data(unsigned int fbo = -1, unsigned int map = -1);
-    void draw();
+    void init() override;
+    void prepare(FrameBuffer* framebuffer) override;
+    void config() override;
+    void config_samples(int samples) override;
+    void draw() override;
+    FrameBuffer* getFrameBuffer() override;
 
 private:
-    int m_shadow_map_sample_count = 1;
+    FrameBuffer* m_framebuffer{ nullptr };
 };
 
 #endif

@@ -5,11 +5,24 @@
 
 class ScreenPass : public RenderPass {
 public:
-    void init();
-    void prepare_data(unsigned int fbo = -1, unsigned int map = -1);
-    void draw();
+    void init() override;
+    void prepare(FrameBuffer* framebuffer) override;
+    //void config() override;
+    void config_samples(int samples) override {}
+    void draw() override;
+    FrameBuffer* getFrameBuffer() override;
+
 private:
-    unsigned int quad_vao;
+    FrameBuffer* m_framebuffer{ nullptr };
+
+    class ScreenQuad {
+    public:
+        unsigned int create();
+        unsigned int getVAO();
+    private:
+        unsigned int m_vao = 0;
+    };
+    ScreenQuad* m_screen_quad;
 };
 
 #endif

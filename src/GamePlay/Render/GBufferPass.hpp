@@ -5,11 +5,14 @@
 
 class GBufferPass : public RenderPass {
 public:
-    void init();
-    void prepare_data(unsigned int fbo = -1, unsigned int map = -1);
-    void draw();
+    void init() override;
+    void prepare(FrameBuffer* framebuffer) override;
+    void config_samples(int samples) override {}
+    void draw() override;
+    FrameBuffer* getFrameBuffer() override;
 
 private:
+    FrameBuffer* m_frame_buffer{ nullptr };
     unsigned int m_position_map;
     unsigned int m_normal_map;
     unsigned int m_color_spec_map;

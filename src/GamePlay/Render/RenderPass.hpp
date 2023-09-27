@@ -2,22 +2,17 @@
 #define RenderPass_hpp
 
 #include <vector>
+#include "../../Platform/OpenGL/FrameBuffer.hpp"
 
+// 接口类
 class RenderPass {
 public:
 	virtual void init() = 0;
-	// TODO
-	// virtual void prepare_data(const FrameBuffer& fb);
-	virtual void prepare_data(unsigned int fbo = -1, unsigned int map = -1) = 0;
+	virtual void config() {} // TODO
+	virtual void config_samples(int samples) = 0;
+	virtual void prepare(FrameBuffer* framebuffer) = 0;
 	virtual void draw() = 0;
-	// TODO
-	// map 和 fbo 封装在FrameBuffer里
-	virtual unsigned int get_fbo() { return m_fbo; }
-	virtual unsigned int get_map() { return m_map; }
-
-protected:
-	unsigned int m_fbo = -1;
-	unsigned int m_map = -1;
+	virtual FrameBuffer* getFrameBuffer() = 0;
 };
 
 #endif // !RenderPass_hpp

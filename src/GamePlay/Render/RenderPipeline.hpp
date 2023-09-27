@@ -9,9 +9,9 @@ enum class PIPELINE_TYPE{
 };
 struct RenderParams {
     PIPELINE_TYPE pipeline_type = PIPELINE_TYPE::FORWARD;
-    int     msaa_sample_count = 1;
+    int     msaa_sample_count = 4;
     bool    shadow = true;
-    int     shadow_map_sample_count = 1;
+    int     shadow_map_sample_count = 4;
     bool    reflection = false;
     bool    normal_debug = false;
     bool    wireframe = false;

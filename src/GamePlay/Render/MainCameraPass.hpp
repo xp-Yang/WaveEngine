@@ -5,15 +5,18 @@
 
 class MainCameraPass : public RenderPass {
 public:
-    void init();
-    void config(int msaa_sample_count, bool reflection, bool normal_debug, bool wireframe);
-    void prepare_data(unsigned int fbo = -1, unsigned int map = -1);
-    void draw();
+    void init() override;
+    void prepare(FrameBuffer* framebuffer) override;
+    void config() override;
+    void config_samples(int samples) override;
+    void draw() override;
+    FrameBuffer* getFrameBuffer() override;
 
 private:
-    unsigned int m_rbo;
-    unsigned int m_shadow_map = -1;
-    int m_msaa_sample_count = 1;
+    FrameBuffer* m_framebuffer{ nullptr };
+    unsigned int m_shadow_map = 0;
+
+    //params
     bool m_reflection = false;
     bool m_normal_debug = false;
     bool m_wireframe = false;

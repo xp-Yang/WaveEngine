@@ -5,9 +5,15 @@
 
 class PickingPass : public RenderPass {
 public:
-    void init();
-    void prepare_data(unsigned int fbo = -1, unsigned int map = -1);
-    void draw();
+    void init() override;
+    void prepare(FrameBuffer* framebuffer) override;
+    void config_samples(int samples) override {}
+    void draw() override;
+    FrameBuffer* getFrameBuffer() override;
+
+private:
+    FrameBuffer* m_framebuffer{ nullptr };
+    unsigned int m_fbo;
 };
 
 #endif

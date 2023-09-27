@@ -5,64 +5,48 @@
 
 void MainCameraPass::init()
 {
-    glGenFramebuffers(1, &m_fbo);
-    glBindFramebuffer(GL_FRAMEBUFFER, m_fbo);
-    int samples_count = 16;
-    if (samples_count == 1)
-    {
-        glGenTextures(1, &m_map);
-        glBindTexture(GL_TEXTURE_2D, m_map);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, WINDOW_WIDTH, WINDOW_HEIGHT, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_map, 0);
-        // 为什么要绑上深度缓冲才能work? tex_buffer不是已经被深度测试过的一张纹理吗
-        // 为什么只绑定了stencil，阴影就会有问题？
-        unsigned int m_rbo;
-        glGenRenderbuffers(1, &m_rbo);
-        glBindRenderbuffer(GL_RENDERBUFFER, m_rbo);
-        glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, WINDOW_WIDTH, WINDOW_HEIGHT); // use a single renderbuffer object for both a depth AND stencil buffer.
-        glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, m_rbo); // now actually attach it
-        //glRenderbufferStorage(GL_RENDERBUFFER, /*GL_DEPTH24_STENCIL8*/GL_STENCIL_INDEX, WINDOW_WIDTH, WINDOW_HEIGHT); 
-        //glFramebufferRenderbuffer(GL_FRAMEBUFFER, /*GL_DEPTH_STENCIL_ATTACHMENT*/GL_STENCIL_ATTACHMENT, GL_RENDERBUFFER, rbo); 
-    }
-    else {
-        glGenTextures(1, &m_map);
-        glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, m_map);
-        glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, samples_count, GL_RGB, WINDOW_WIDTH, WINDOW_HEIGHT, GL_TRUE);
-        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D_MULTISAMPLE, m_map, 0);
-        glGenRenderbuffers(1, &m_rbo);
-        glBindRenderbuffer(GL_RENDERBUFFER, m_rbo);
-        glRenderbufferStorageMultisample(GL_RENDERBUFFER, samples_count, GL_DEPTH24_STENCIL8, WINDOW_WIDTH, WINDOW_HEIGHT);
-        glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, m_rbo);
-    }
-    glBindRenderbuffer(GL_RENDERBUFFER, 0);
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    m_framebuffer = new FrameBuffer(WINDOW_WIDTH, WINDOW_HEIGHT, 4);
+    m_framebuffer->create({ AttachmentType::RGB, AttachmentType::DEPTH24STENCIL8 });
 }
 
-void MainCameraPass::config(int msaa_sample_count, bool reflection, bool normal_debug, bool wireframe)
+void MainCameraPass::prepare(FrameBuffer* framebuffer)
 {
-    m_msaa_sample_count = msaa_sample_count;
-    m_reflection = reflection;
-    m_normal_debug = normal_debug;
-    m_wireframe = wireframe;
+    if (framebuffer)
+        m_shadow_map = framebuffer->getFirstAttachmentOf(AttachmentType::Depth).getMap();
+    else
+        m_shadow_map = 0;
 }
 
-void MainCameraPass::prepare_data(unsigned int fbo, unsigned int map)
+void MainCameraPass::config()
 {
-    m_shadow_map = map;
-    glBindFramebuffer(GL_FRAMEBUFFER, m_fbo);
-    glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, m_map);
-    glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, m_msaa_sample_count, GL_RGB, WINDOW_WIDTH, WINDOW_HEIGHT, GL_TRUE);
-    glBindRenderbuffer(GL_RENDERBUFFER, m_rbo);
-    glRenderbufferStorageMultisample(GL_RENDERBUFFER, m_msaa_sample_count, GL_DEPTH24_STENCIL8, WINDOW_WIDTH, WINDOW_HEIGHT);
-    glViewport(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
-    glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+    //config shader 参数
+    //    m_msaa_sample_count = msaa_sample_count;
+    //    m_reflection = reflection;
+    //    m_normal_debug = normal_debug;
+    //    m_wireframe = wireframe;
 }
+
+void MainCameraPass::config_samples(int samples)
+{
+    //config FrameBuffer
+    m_framebuffer->bind();
+    m_framebuffer->setSamples(samples);
+}
+
+//void MainCameraPass::config(int msaa_sample_count, bool reflection, bool normal_debug, bool wireframe)
+//{
+//    m_msaa_sample_count = msaa_sample_count;
+//    m_reflection = reflection;
+//    m_normal_debug = normal_debug;
+//    m_wireframe = wireframe;
+//}
 
 void MainCameraPass::draw()
 {
+    glViewport(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
+    m_framebuffer->bind();
+    m_framebuffer->clear();
+
     //glEnable(GL_BLEND);
     //glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
@@ -128,7 +112,7 @@ void MainCameraPass::draw()
             shader->setCubeTexture("skybox", 6, skybox_texture_id);
             shader->setBool("enable_skybox_sample", m_reflection);
             shader->setFloat("explosionRatio", explosion_ratio);
-            if (m_shadow_map != -1) {
+            if (m_shadow_map != 0) {
                 shader->setMatrix("lightSpaceMatrix", 1, light_ref_matrix);
                 shader->setTexture("shadow_map", 7, m_shadow_map);
             }
@@ -258,4 +242,9 @@ void MainCameraPass::draw()
             }
         }
     }
+}
+
+FrameBuffer* MainCameraPass::getFrameBuffer()
+{
+    return m_framebuffer;
 }
