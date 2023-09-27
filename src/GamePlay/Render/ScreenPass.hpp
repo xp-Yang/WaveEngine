@@ -7,8 +7,7 @@ class ScreenPass : public RenderPass {
 public:
     void init() override;
     void prepare(FrameBuffer* framebuffer) override;
-    //void config() override;
-    void config_samples(int samples) override {}
+    void configSamples(int samples) override {}
     void draw() override;
     FrameBuffer* getFrameBuffer() override;
 

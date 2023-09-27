@@ -17,16 +17,15 @@ void MainCameraPass::prepare(FrameBuffer* framebuffer)
         m_shadow_map = 0;
 }
 
-void MainCameraPass::config()
+void MainCameraPass::configShader(bool reflection, bool normal_debug, bool wireframe)
 {
     //config shader ²ÎÊı
-    //    m_msaa_sample_count = msaa_sample_count;
-    //    m_reflection = reflection;
-    //    m_normal_debug = normal_debug;
-    //    m_wireframe = wireframe;
+    m_reflection = reflection;
+    m_normal_debug = normal_debug;
+    m_wireframe = wireframe;
 }
 
-void MainCameraPass::config_samples(int samples)
+void MainCameraPass::configSamples(int samples)
 {
     //config FrameBuffer
     m_framebuffer->bind();

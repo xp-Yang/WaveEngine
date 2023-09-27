@@ -59,7 +59,7 @@ const Attachment& FrameBuffer::getFirstAttachmentOf(AttachmentType type) const
 
 void FrameBuffer::setSamples(int samples)
 {
-    // 如果创建的时候不是multi-sample ，就不能更改采样数
+    // 如果创建的时候纹理对象不是multi-sample，就不能更改采样数
     if (!isMultiSampled())
         return;
 
@@ -72,6 +72,10 @@ void FrameBuffer::setSamples(int samples)
         if (attachment.getType() == AttachmentType::DEPTH24STENCIL8) {
             glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, attachment.getMap());
             glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, m_samples, GL_DEPTH24_STENCIL8, m_width, m_height, GL_TRUE);
+        }
+        if (attachment.getType() == AttachmentType::Depth) {
+            glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, attachment.getMap());
+            glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, m_samples, GL_DEPTH_COMPONENT, m_width, m_height, GL_TRUE);
         }
     }
 }
@@ -86,6 +90,14 @@ void FrameBuffer::blitColorMapTo(FrameBuffer* dest)
     glBindFramebuffer(GL_READ_FRAMEBUFFER, getFBO());
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, dest->getFBO());
     glBlitFramebuffer(0, 0, m_width, m_height, 0, 0, dest->getWidth(), dest->getHeight(), GL_COLOR_BUFFER_BIT, GL_NEAREST);
+}
+
+void FrameBuffer::blitShadowMapTo(FrameBuffer* dest)
+{
+    glBindFramebuffer(GL_READ_FRAMEBUFFER, getFBO());
+    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, dest->getFBO());
+    glBlitFramebuffer(0, 0, m_width, m_height, 0, 0, dest->getWidth(), dest->getHeight(), GL_DEPTH_BUFFER_BIT, GL_NEAREST);
+
 }
 
 void FrameBuffer::bind()
@@ -114,7 +126,6 @@ void Attachment::create(AttachmentType type, int color_attachment_index, int sam
             glGenTextures(1, &m_map);
             glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, m_map);
             glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, samples, GL_RGB, width, height, GL_TRUE);
-            // TODO: TexParameter起到的作用对multisample和非multisample纹理对象有何区别，可以使用mipmap吗？
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
             glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + color_attachment_index, GL_TEXTURE_2D_MULTISAMPLE, m_map, 0);
@@ -155,17 +166,30 @@ void Attachment::create(AttachmentType type, int color_attachment_index, int sam
         break;
     }
     case AttachmentType::Depth: {
-        glGenTextures(1, &m_map);
-        glActiveTexture(GL_TEXTURE7); // TODO GL_TEXTURE7?
-        glBindTexture(GL_TEXTURE_2D, m_map);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, width, height, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
-        GLfloat borderColor[] = { 1.0, 1.0, 1.0, 1.0 };
-        glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor);
-        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, m_map, 0);
+        if (samples > 1) {
+            glGenTextures(1, &m_map);
+            glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, m_map);
+            glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, samples, GL_DEPTH_COMPONENT, width, height, GL_TRUE);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+            GLfloat borderColor[] = { 1.0, 1.0, 1.0, 1.0 };
+            glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor);
+            glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D_MULTISAMPLE, m_map, 0);
+        }
+        else {
+            glGenTextures(1, &m_map);
+            glBindTexture(GL_TEXTURE_2D, m_map);
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, width, height, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+            GLfloat borderColor[] = { 1.0, 1.0, 1.0, 1.0 };
+            glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor);
+            glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, m_map, 0);
+        }
 
         // if depth only:
         //不包含颜色缓冲的帧缓冲对象是不完整的，所以我们需要显式告诉OpenGL我们不适用任何颜色数据进行渲染。

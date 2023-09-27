@@ -1,7 +1,7 @@
 #include "Scene.hpp"
-#include "MyModel.hpp"
 #include "GamePlay/ECS/Components.hpp"
-#include "Texture.hpp"
+#include "ResourceManager/MyModel.hpp"
+#include "ResourceManager/Texture.hpp"
 #include "Platform/OpenGL/Shader.hpp"
 
 //void screen_shot() {
@@ -83,7 +83,7 @@ void Scene::init() {
 	//directional_light_primitive.material = directional_light_material;
 	//directional_light_renderable.setPrimitives({ directional_light_primitive });
 
-	static const int LIGHT_COUNT = 10;
+	static const int LIGHT_COUNT = 20;
 	static Shader* light_shader = new Shader("resource/shader/light.vs", "resource/shader/light.fs");
 	for (int i = 0; i < LIGHT_COUNT; i++) {
 		auto light_entity = world.create_entity();

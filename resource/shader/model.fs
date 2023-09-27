@@ -23,7 +23,7 @@ struct Material {
 };
 
 uniform Material material;
-#define LIGHT_COUNT 10
+#define LIGHT_COUNT 20
 uniform Light light[LIGHT_COUNT];
 uniform vec3 camera_pos;
 

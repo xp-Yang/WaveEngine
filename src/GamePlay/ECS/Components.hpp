@@ -7,8 +7,8 @@
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/quaternion.hpp>
 #include "World.hpp"
-#include "../../Mesh.hpp"
-#include "../../Material.hpp"
+#include "../../ResourceManager/Mesh.hpp"
+#include "../../ResourceManager/Material.hpp"
 
 #define WINDOW_WIDTH 1600.0f
 #define WINDOW_HEIGHT 900.0f

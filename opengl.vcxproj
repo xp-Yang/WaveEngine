@@ -47,9 +47,9 @@
     <ClCompile Include="src\Core\Logger.cpp" />
     <ClCompile Include="src\glad.c" />
     <ClCompile Include="src\main.cpp" />
-    <ClCompile Include="src\Material.cpp" />
-    <ClCompile Include="src\Mesh.cpp" />
-    <ClCompile Include="src\MyModel.cpp" />
+    <ClCompile Include="src\ResourceManager\Material.cpp" />
+    <ClCompile Include="src\ResourceManager\Mesh.cpp" />
+    <ClCompile Include="src\ResourceManager\MyModel.cpp" />
     <ClCompile Include="src\Platform\OpenGL\FrameBuffer.cpp" />
     <ClCompile Include="src\Platform\OpenGL\Renderer.cpp" />
     <ClCompile Include="src\GamePlay\Render\RenderPass.cpp" />
@@ -59,7 +59,7 @@
     <ClCompile Include="src\stb_image.cpp" />
     <ClCompile Include="src\GamePlay\ECS\System.cpp" />
     <ClCompile Include="src\test\test.cpp" />
-    <ClCompile Include="src\Texture.cpp" />
+    <ClCompile Include="src\ResourceManager\Texture.cpp" />
     <ClCompile Include="src\View.cpp" />
     <ClCompile Include="src\GamePlay\ECS\World.cpp" />
   </ItemGroup>
@@ -91,9 +91,9 @@
     <ClInclude Include="src\GamePlay\Render\ShadowPass.hpp" />
     <ClInclude Include="src\Core\Logger.hpp" />
     <ClInclude Include="resource\shader\light.vs" />
-    <ClInclude Include="src\Material.hpp" />
-    <ClInclude Include="src\Mesh.hpp" />
-    <ClInclude Include="src\MyModel.hpp" />
+    <ClInclude Include="src\ResourceManager\Material.hpp" />
+    <ClInclude Include="src\ResourceManager\Mesh.hpp" />
+    <ClInclude Include="src\ResourceManager\MyModel.hpp" />
     <ClInclude Include="src\Platform\OpenGL\FrameBuffer.hpp" />
     <ClInclude Include="src\Platform\OpenGL\rhi_opengl.hpp" />
     <ClInclude Include="src\Platform\OpenGL\Renderer.hpp" />
@@ -103,7 +103,7 @@
     <ClInclude Include="src\Platform\rhi.hpp" />
     <ClInclude Include="src\Scene.hpp" />
     <ClInclude Include="src\GamePlay\ECS\System.hpp" />
-    <ClInclude Include="src\Texture.hpp" />
+    <ClInclude Include="src\ResourceManager\Texture.hpp" />
     <ClInclude Include="src\View.hpp" />
     <ClInclude Include="src\GamePlay\ECS\World.hpp" />
   </ItemGroup>

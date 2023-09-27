@@ -12,6 +12,7 @@ struct RenderParams {
     int     msaa_sample_count = 4;
     bool    shadow = true;
     int     shadow_map_sample_count = 4;
+    // for MainCameraPass
     bool    reflection = false;
     bool    normal_debug = false;
     bool    wireframe = false;

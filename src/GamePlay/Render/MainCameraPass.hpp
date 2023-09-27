@@ -7,8 +7,8 @@ class MainCameraPass : public RenderPass {
 public:
     void init() override;
     void prepare(FrameBuffer* framebuffer) override;
-    void config() override;
-    void config_samples(int samples) override;
+    void configShader(bool reflection, bool normal_debug, bool wireframe);
+    void configSamples(int samples) override;
     void draw() override;
     FrameBuffer* getFrameBuffer() override;
 

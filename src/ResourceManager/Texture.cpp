@@ -1,5 +1,5 @@
 #include "Texture.hpp"
-#include "Platform/OpenGL/rhi_opengl.hpp"
+#include "../Platform/OpenGL/rhi_opengl.hpp"
 #include "stb_image.h"
 #include <assert.h>
 

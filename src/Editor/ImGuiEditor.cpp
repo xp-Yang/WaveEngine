@@ -31,7 +31,7 @@ void ImGuiEditor::render()
 void ImGuiEditor::render_global_editor() {
     ImGui::Begin("Global Controller", nullptr, ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse);
 
-    static unsigned int curr_item = 0;
+    static unsigned int curr_item = 1;
     if (ImGui::BeginCombo("MSAA", (std::to_string((int)std::pow(4, curr_item)) + "x").c_str())) {
         for (int i = 0; i < 3; i++) {
             bool selected = curr_item == i;
@@ -43,7 +43,7 @@ void ImGuiEditor::render_global_editor() {
         }
         ImGui::EndCombo();
     }
-    static unsigned int shadow_curr_item = 0;
+    static unsigned int shadow_curr_item = 1;
     if (ImGui::BeginCombo("Shadow Map Resolution", (std::to_string((int)std::pow(4, shadow_curr_item)) + "x").c_str())) {
         for (int i = 0; i < 3; i++) {
             bool selected = shadow_curr_item == i;

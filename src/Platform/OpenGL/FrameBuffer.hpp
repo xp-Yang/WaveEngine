@@ -35,6 +35,7 @@ public:
 	void setSamples(int samples);
 	bool isMultiSampled() const;
 	void blitColorMapTo(FrameBuffer* dest);
+	void blitShadowMapTo(FrameBuffer* dest);
 	void bind();
 	void unBind();
 	void clear();
