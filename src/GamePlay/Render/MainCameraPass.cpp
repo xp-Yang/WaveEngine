@@ -1,6 +1,6 @@
 #include "MainCameraPass.hpp"
 #include "../ECS/Components.hpp"
-#include "../../Renderer.hpp"
+#include "../../Platform/OpenGL/Renderer.hpp"
 #include "../../Platform/OpenGL/rhi_opengl.hpp"
 
 void MainCameraPass::init()
@@ -18,11 +18,11 @@ void MainCameraPass::init()
         glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_map, 0);
         // 为什么要绑上深度缓冲才能work? tex_buffer不是已经被深度测试过的一张纹理吗
         // 为什么只绑定了stencil，阴影就会有问题？
-        unsigned int rbo;
-        glGenRenderbuffers(1, &rbo);
-        glBindRenderbuffer(GL_RENDERBUFFER, rbo);
+        unsigned int m_rbo;
+        glGenRenderbuffers(1, &m_rbo);
+        glBindRenderbuffer(GL_RENDERBUFFER, m_rbo);
         glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, WINDOW_WIDTH, WINDOW_HEIGHT); // use a single renderbuffer object for both a depth AND stencil buffer.
-        glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, rbo); // now actually attach it
+        glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, m_rbo); // now actually attach it
         //glRenderbufferStorage(GL_RENDERBUFFER, /*GL_DEPTH24_STENCIL8*/GL_STENCIL_INDEX, WINDOW_WIDTH, WINDOW_HEIGHT); 
         //glFramebufferRenderbuffer(GL_FRAMEBUFFER, /*GL_DEPTH_STENCIL_ATTACHMENT*/GL_STENCIL_ATTACHMENT, GL_RENDERBUFFER, rbo); 
     }
@@ -85,16 +85,6 @@ void MainCameraPass::draw()
         skybox_texture_id = world.getComponent<ecs::SkyboxComponent>(entity)->texture;
     }
 
-    glm::vec3 light_pos;
-    glm::vec4 light_color;
-    glm::mat4 light_ref_matrix;
-    for (auto entity : world.entityView<ecs::LightComponent>()) {
-        auto& transform = *world.getComponent<ecs::TransformComponent>(entity);
-        light_pos = transform.transform()[3];
-        light_color = world.getComponent<ecs::RenderableComponent>(entity)->primitives[0].material.color;
-        light_ref_matrix = world.getComponent<ecs::LightComponent>(entity)->lightReferenceMatrix();
-    }
-
     for (auto entity : world.entityView<ecs::RenderableComponent, ecs::TransformComponent>()) {
         auto& renderable = *world.getComponent<ecs::RenderableComponent>(entity);
         auto& model_matrix = *world.getComponent<ecs::TransformComponent>(entity);
@@ -123,8 +113,18 @@ void MainCameraPass::draw()
             shader->setMatrix("model", 1, model_mat);
             shader->setMatrix("projection", 1, camera_projection);
             shader->setFloat3("camera_pos", camera_pos);
-            shader->setFloat4("light.color", light_color);
-            shader->setFloat3("light.position", light_pos);
+            glm::mat4 light_ref_matrix;
+            int k = 0;
+            for (auto entity : world.entityView<ecs::LightComponent>()) {
+                auto& transform = *world.getComponent<ecs::TransformComponent>(entity);
+                glm::vec3 light_pos = transform.transform()[3];
+                glm::vec4 light_color = world.getComponent<ecs::RenderableComponent>(entity)->primitives[0].material.color;
+                light_ref_matrix = world.getComponent<ecs::LightComponent>(entity)->lightReferenceMatrix();
+                std::string light_id = std::string("light[") + std::to_string(k) + "]";
+                shader->setFloat4(light_id + ".color", light_color);
+                shader->setFloat3(light_id + ".position", light_pos);
+                k++;
+            }
             shader->setCubeTexture("skybox", 6, skybox_texture_id);
             shader->setBool("enable_skybox_sample", m_reflection);
             shader->setFloat("explosionRatio", explosion_ratio);

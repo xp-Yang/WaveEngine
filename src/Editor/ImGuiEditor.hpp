@@ -7,7 +7,7 @@
 class ImGuiEditor {
 public:
 	ImGuiEditor();
-	void init(ecs::RenderSystem* render_system, ecs::MotionSystem* motion_system);
+	void init(std::shared_ptr<ecs::RenderSystem> render_system, std::shared_ptr<ecs::MotionSystem> motion_system);
 	void render();
 	void render_global_editor();
 	void render_camera_editor();
@@ -19,8 +19,8 @@ public:
 	int icosphere_accuracy;
 
 private:
-	ecs::RenderSystem* ref_render_system;
-	ecs::MotionSystem* ref_motion_system;
+	std::shared_ptr<ecs::RenderSystem> ref_render_system;
+	std::shared_ptr<ecs::MotionSystem> ref_motion_system;
 	RenderParams m_render_params;
 };
 

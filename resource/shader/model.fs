@@ -23,7 +23,8 @@ struct Material {
 };
 
 uniform Material material;
-uniform Light light;
+#define LIGHT_COUNT 50
+uniform Light light[LIGHT_COUNT];
 uniform vec3 camera_pos;
 
 uniform sampler2D shadow_map;
@@ -50,30 +51,43 @@ float ShadowCalculation(vec4 fragPosLightSpace)
     return shadow;
 }
 
+vec3 LightCalculation(Light light, vec3 normal, vec3 view_dir)
+{
+    vec3 incidence_dir = normalize(light.position - fs_in.pass_pos);
+
+    float diff_coef = max(dot(incidence_dir, normal), 0.0);
+    vec3 diffuse_light = light.color.xyz * diff_coef * vec3(texture(material.diffuse_map, fs_in.pass_uv));
+    
+    vec3 reflect_dir = reflect(-incidence_dir, normal);
+    float spec_coef = pow(max(dot(view_dir, reflect_dir), 0.001), material.shininess);
+    vec3 specular_light = light.color.xyz * spec_coef * vec3(texture(material.specular_map, fs_in.pass_uv));
+
+    return diffuse_light + specular_light;
+}
+
 void main()
 {
-    vec3 ambient_light = light.color.xyz * material.ambient * vec3(texture(material.diffuse_map, fs_in.pass_uv));
-
-    //TODO normal需要变换成世界空间，但要注意不能带平移
-    vec3 normal = normalize(fs_in.pass_normal);
-    vec3 light_direction = normalize(light.position - fs_in.pass_pos);
-    float diffuse_coef = max(dot(light_direction, normal), 0.0);
-    vec3 diffuse_light = light.color.xyz * diffuse_coef * vec3(texture(material.diffuse_map, fs_in.pass_uv));
-
+    vec3 normal = normalize(fs_in.pass_normal);//TODO normal需要变换成世界空间，但要注意不能带平移
     vec3 view_direction = normalize(camera_pos - fs_in.pass_pos);
-    vec3 reflect_direction = reflect(-light_direction, normal);
-    float spec_coef = pow(max(dot(view_direction, reflect_direction), 0.001), material.shininess);
-    vec3 specular_light = light.color.xyz * spec_coef * vec3(texture(material.specular_map, fs_in.pass_uv));
+
+    // 计算光照
+    vec3 ambient_light = vec3(0);
+    vec3 lighting = vec3(0);
+    for(int i = 0; i < LIGHT_COUNT; i++){
+        ambient_light += light[i].color.xyz * material.ambient * vec3(texture(material.diffuse_map, fs_in.pass_uv));
+        lighting += LightCalculation(light[i], normal, view_direction);
+    }
 
     // 计算阴影
     float shadow = ShadowCalculation(fs_in.FragPosLightSpace);       
-    vec3 lighting = (ambient_light + (1.0 - shadow) * (diffuse_light + specular_light)) * fs_in.pass_color.xyz;    
-    out_color = vec4(lighting, 1.0);
+    
+    vec3 result = ambient_light + (1.0 - shadow) * lighting;
+    out_color = vec4(result, 1.0) * fs_in.pass_color;
 
     if(enable_skybox_sample){
         vec3 I = normalize(fs_in.pass_pos - camera_pos);
         vec3 R = reflect(I, normalize(normal));
-        out_color = 0.33 * vec4(lighting, 1.0) + 0.66 * vec4(texture(skybox, R).rgb, 1.0);
+        out_color = 0.33 * out_color + 0.66 * vec4(texture(skybox, R).rgb, 1.0);
     }
 
     //debug

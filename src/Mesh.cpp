@@ -325,9 +325,10 @@ Mesh Mesh::create_icosphere_mesh(int regression_depth) {
             vertex = m_center + glm::normalize(vertex - m_center);
         }
         for (auto& vertex : triangle.vertices) {
-            glm::vec3 a = triangle.vertices[0] - triangle.vertices[1];
-            glm::vec3 b = triangle.vertices[0] - triangle.vertices[2];
-            glm::vec3 normal = glm::normalize(glm::cross(a, b));
+            //glm::vec3 a = triangle.vertices[0] - triangle.vertices[1];
+            //glm::vec3 b = triangle.vertices[0] - triangle.vertices[2];
+            //glm::vec3 normal = glm::normalize(glm::cross(a, b));
+            glm::vec3 normal = glm::normalize(vertex - m_center);
 
             Vertex v;
             v.position = vertex;
@@ -377,8 +378,8 @@ Mesh Mesh::create_quad_mesh()
 
         // TODO uv ·¶Î§²»ÒªÐ´ËÀ
         glm::vec2 vec;
-        vec.x = cubeVertices[6 + i] * 20.0f;
-        vec.y = cubeVertices[7 + i] * 20.0f;
+        vec.x = cubeVertices[6 + i] * 5.0f;
+        vec.y = cubeVertices[7 + i] * 5.0f;
         vertex.texture_uv = vec;
 
         vertices.push_back(vertex);

@@ -1,5 +1,5 @@
 #include "Material.hpp"
-#include "Shader.hpp"
+#include "Platform/OpenGL/Shader.hpp"
 #include "Texture.hpp"
 
 void Material::update_shader_binding() const {

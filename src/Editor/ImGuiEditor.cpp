@@ -3,7 +3,7 @@
 #include <glm/glm.hpp>
 #include "../../imgui/imgui.h"
 #include "../GamePlay/ECS/Components.hpp"
-#include "../Logger.hpp"
+#include "../Core/Logger.hpp"
 
 ImGuiEditor::ImGuiEditor()
 {
@@ -14,7 +14,7 @@ ImGuiEditor::ImGuiEditor()
     // TODO: editor依赖system，能操控渲染管线，能操控运动，能编辑transform，能编辑mesh，能编辑material...
 }
 
-void ImGuiEditor::init(ecs::RenderSystem* render_system, ecs::MotionSystem* motion_system)
+void ImGuiEditor::init(std::shared_ptr<ecs::RenderSystem> render_system, std::shared_ptr<ecs::MotionSystem> motion_system)
 {
     ref_render_system = render_system;
     ref_motion_system = motion_system;

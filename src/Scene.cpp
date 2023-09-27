@@ -2,7 +2,7 @@
 #include "MyModel.hpp"
 #include "GamePlay/ECS/Components.hpp"
 #include "Texture.hpp"
-#include "Shader.hpp"
+#include "Platform/OpenGL/Shader.hpp"
 
 //void screen_shot() {
 //    const int channels_num = 3;
@@ -54,19 +54,59 @@ void Scene::init() {
 	skybox_primitive.material = skybox_material;
 	skybox_renderable.setPrimitives({ skybox_primitive });
 
-	auto light_entity = world.create_entity();
-	world.addComponent<ecs::NameComponent>(light_entity).name = "light";
-    world.addComponent<ecs::LightComponent>(light_entity);
-	auto& light_transform = world.addComponent<ecs::TransformComponent>(light_entity);
-    light_transform.translation = { 12.0f, 12.0f, 0.0f };
-    light_transform.scale = glm::vec3(0.5f);
-	auto& light_renderable = world.addComponent<ecs::RenderableComponent>(light_entity);
-	ecs::Primitive light_primitive;
-	light_primitive.mesh = Mesh::create_cube_mesh();
-	Material light_material;
-	light_material.shader = new Shader("resource/shader/light.vs", "resource/shader/light.fs");
-	light_primitive.material = light_material;
-	light_renderable.setPrimitives({ light_primitive });
+	//auto light_entity = world.create_entity();
+	//world.addComponent<ecs::NameComponent>(light_entity).name = "light";
+ //   world.addComponent<ecs::LightComponent>(light_entity);
+	//auto& light_transform = world.addComponent<ecs::TransformComponent>(light_entity);
+ //   light_transform.translation = { 12.0f, 12.0f, 0.0f };
+ //   light_transform.scale = glm::vec3(0.5f);
+	//auto& light_renderable = world.addComponent<ecs::RenderableComponent>(light_entity);
+	//ecs::Primitive light_primitive;
+	//light_primitive.mesh = Mesh::create_cube_mesh();
+	//Material light_material;
+	//light_material.color = {255.f / 255.0f, 255.f / 255.0f, 175.f / 255.0f, 175.f / 255.0f };
+	//light_material.shader = new Shader("resource/shader/light.vs", "resource/shader/light.fs");
+	//light_primitive.material = light_material;
+	//light_renderable.setPrimitives({ light_primitive });
+
+	//auto directional_light_entity = world.create_entity();
+	//world.addComponent<ecs::NameComponent>(directional_light_entity).name = "directional_light";
+	//world.addComponent<ecs::LightComponent>(directional_light_entity);
+	//auto& directional_light_transform = world.addComponent<ecs::TransformComponent>(directional_light_entity);
+	//directional_light_transform.translation = { 0.0f, 15.0f, 0.0f };
+	//directional_light_transform.scale = glm::vec3(0.5f);
+	//auto& directional_light_renderable = world.addComponent<ecs::RenderableComponent>(directional_light_entity);
+	//ecs::Primitive directional_light_primitive;
+	//directional_light_primitive.mesh = Mesh::create_cube_mesh();
+	//Material directional_light_material;
+	//directional_light_material.shader = new Shader("resource/shader/light.vs", "resource/shader/light.fs");
+	//directional_light_primitive.material = directional_light_material;
+	//directional_light_renderable.setPrimitives({ directional_light_primitive });
+
+	static const int LIGHT_COUNT = 50;
+	static Shader* light_shader = new Shader("resource/shader/light.vs", "resource/shader/light.fs");
+	for (int i = 0; i < LIGHT_COUNT; i++) {
+		auto light_entity = world.create_entity();
+		world.addComponent<ecs::NameComponent>(light_entity).name = std::string("light") + std::to_string(i);
+		world.addComponent<ecs::LightComponent>(light_entity);
+		auto& light_transform = world.addComponent<ecs::TransformComponent>(light_entity);
+		srand(i * i * i * i + 5363 * i * i * i - 251 * i * i + 6455);
+		double r = (rand() / double(RAND_MAX) - 0.5) * 2;
+		srand(- i * i * i + 73425 * i * i - 97825 * i + 12532);
+		double r2 = rand() / double(RAND_MAX);
+		srand(i * i * i * i * i + 2351425 * i * i * i - 1522532);
+		double r3 = (rand() / double(RAND_MAX) - 0.5) * 2;
+		light_transform.translation = { 12.0f * r, 12.0f * r2, 10.0f * r3 };
+		light_transform.scale = glm::vec3(0.5f);
+		auto& light_renderable = world.addComponent<ecs::RenderableComponent>(light_entity);
+		ecs::Primitive light_primitive;
+		light_primitive.mesh = Mesh::create_cube_mesh();
+		Material light_material;
+		light_material.color = { 255.f * r / 255.0f, 255.f * r2 / 255.0f, 255.f * r3 / 255.0f, 175.f / 255.0f };
+		light_material.shader = light_shader;
+		light_primitive.material = light_material;
+		light_renderable.setPrimitives({ light_primitive });
+	}
 
 	auto cube_entity = world.create_entity();
 	world.addComponent<ecs::NameComponent>(cube_entity).name = "cube";
@@ -90,7 +130,7 @@ void Scene::init() {
     sphere_transform.translation = { 1.0f, 2.0f, 2.0f };
 	auto& sphere_renderable = world.addComponent<ecs::RenderableComponent>(sphere_entity);
 	ecs::Primitive sphere_primitive;
-	sphere_primitive.mesh = Mesh::create_icosphere_mesh(8);
+	sphere_primitive.mesh = Mesh::create_icosphere_mesh(5);
 	Material sphere_material;
 	sphere_material.shader = new Shader("resource/shader/model.vs", "resource/shader/model.fs", "resource/shader/model.gs");
 	sphere_material.set_diffuse_map("resource/images/default_white_map.png");
@@ -102,7 +142,7 @@ void Scene::init() {
     auto ground_entity = world.create_entity();
     world.addComponent<ecs::NameComponent>(ground_entity).name = "ground";
     auto& ground_transform = world.addComponent<ecs::TransformComponent>(ground_entity);
-	ground_transform.scale = glm::vec3(200.0f);
+	ground_transform.scale = glm::vec3(40.0f);
 	auto& ground_renderable = world.addComponent<ecs::RenderableComponent>(ground_entity);
 	ecs::Primitive ground_primitive;
 	ground_primitive.mesh = Mesh::create_quad_mesh();

@@ -1,6 +1,5 @@
 #include "RenderSystem.hpp"
 #include "Components.hpp"
-#include "../../Renderer.hpp"
 
 namespace ecs {
 

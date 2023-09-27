@@ -1,7 +1,5 @@
 #include "Renderer.hpp"
-#include "GamePlay/ECS/Components.hpp"
-#include "GamePlay/ECS/System.hpp"
-#include "Platform/OpenGL/rhi_opengl.hpp"
+#include "rhi_opengl.hpp"
 
 void Renderer::drawIndex(const Shader& shader, unsigned int vao_id, size_t indices_count)
 {

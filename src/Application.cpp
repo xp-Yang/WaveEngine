@@ -4,6 +4,8 @@
 #include "../imgui/imgui_impl_glfw.h"
 #include "../imgui/imgui_impl_opengl3.h"
 #include "GamePlay/ECS/Components.hpp"
+#include "GamePlay/ECS/RenderSystem.hpp"
+#include "GamePlay/ECS/MotionSystem.hpp"
 #include <windows.h>
 #include <iostream>
 
@@ -22,10 +24,10 @@ void Application::run() {
 		m_view.mouse_and_key_callback();
 
 		// motion System
-		m_motion_system.onUpdate();
+		m_motion_system->onUpdate();
 
 		// render System
-		m_render_system.onUpdate();
+		m_render_system->onUpdate();
 		// render imgui
 		m_editor.render();
 
@@ -51,8 +53,10 @@ void Application::init()
 
 	m_scene.init();
 	m_view.set_scene(&m_scene);
-	m_render_system.initPipeline();
-	m_editor.init(&m_render_system, &m_motion_system);
+	m_render_system = std::make_shared<ecs::RenderSystem>();
+	m_render_system->initPipeline();
+	m_motion_system = std::make_shared<ecs::MotionSystem>();
+	m_editor.init(m_render_system, m_motion_system);
 }
 
 void Application::shutdown()

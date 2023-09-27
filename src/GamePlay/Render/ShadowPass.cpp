@@ -1,6 +1,6 @@
 #include "ShadowPass.hpp"
 #include "../ECS/Components.hpp"
-#include "../../Renderer.hpp"
+#include "../../Platform/OpenGL/Renderer.hpp"
 #include "../../Platform/OpenGL/rhi_opengl.hpp"
 
 void ShadowPass::init()
@@ -57,6 +57,8 @@ void ShadowPass::draw() {
     depth_shader->setMatrix("vp", 1, light_ref_matrix);
 
     for (auto entity : world.entityView<ecs::RenderableComponent, ecs::TransformComponent>()) {
+		if (world.hasComponent<ecs::SkyboxComponent>(entity) || world.hasComponent<ecs::LightComponent>(entity))
+			continue;
         auto& renderable = *world.getComponent<ecs::RenderableComponent>(entity);
         auto& model_matrix = *world.getComponent<ecs::TransformComponent>(entity);
 

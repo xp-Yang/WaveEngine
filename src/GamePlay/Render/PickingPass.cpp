@@ -1,6 +1,6 @@
 #include "PickingPass.hpp"
 #include "../ECS/Components.hpp"
-#include "../../Renderer.hpp"
+#include "../../Platform/OpenGL/Renderer.hpp"
 #include "../../Platform/OpenGL/rhi_opengl.hpp"
 #include "../../../imgui/imgui.h"
 

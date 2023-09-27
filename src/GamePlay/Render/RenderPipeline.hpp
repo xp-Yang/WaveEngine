@@ -3,7 +3,12 @@
 
 #include <memory>
 
+enum class PIPELINE_TYPE{
+    FORWARD,
+    DEFERRED,
+};
 struct RenderParams {
+    PIPELINE_TYPE pipeline_type = PIPELINE_TYPE::FORWARD;
     int     msaa_sample_count = 1;
     bool    shadow = true;
     int     shadow_map_sample_count = 1;
@@ -21,6 +26,7 @@ public:
     void render(); // deferred_render()s/forward_render();
 private:
     std::shared_ptr<RenderPass> m_shadow_pass;
+    std::shared_ptr<RenderPass> m_gbuffer_pass;
     std::shared_ptr<RenderPass> m_main_camera_pass;
     std::shared_ptr<RenderPass> m_picking_pass;
     std::shared_ptr<RenderPass> m_post_processing_pass;

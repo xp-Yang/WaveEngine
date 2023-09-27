@@ -6,8 +6,6 @@
 // done: main.cpp全局变量优化 答: 已将所有Object渲染对象交由Scene管理
 // done: loop 中的逻辑分离 答: 分离了imgui的渲染
 // done: 材质应该包含shader
-// 颜色缓冲和深度缓冲使用同一个framebuffer，第3步渲染时阴影没了，为什么？ 
-// 注意开启像素化后能看见位置不对的阴影
 // done: model.gs 的 explode 效果跟着fov缩放变 答：原因：learnOpengl的gs算法在裁剪空间计算法向量，而投影变换是非正交变换。
 // done: 着色器的坐标空间理解和统一
 // done: 键盘和鼠标callback事件用imgui处理
@@ -20,12 +18,12 @@
 // done: picking
 // done: 实现ECS架构，Component数据驱动开发，main.cpp所有全局变量封装，所有逻辑分离
 // done: 阴影贴图(done)、帧缓冲(done)、法线贴图、tbn矩阵、天空盒(done)、反射(done)等知识学习
+// done: 抗锯齿
 // 10. 解决相机运动死锁问题(direction = (0,-1,0)时)
 // 21. depth_shader可以移出，直接用同一个shader传不同view矩阵即可
 // 11. 光源物理模型
 // 12. tbn矩阵计算
 // 13. 理解peter panning 效应
-// 13. 抗锯齿
 // 13. 帧缓冲的附件?
 // 14. 看一下模型加载那篇文章，贴图文件是相对路径保存的或绝对路径保存的，Assimp的简单原理。
 // 16. 粒子系统

@@ -4,8 +4,6 @@
 #include "View.hpp"
 #include "Scene.hpp"
 #include "Editor/ImGuiEditor.hpp"
-#include "GamePlay/ECS/RenderSystem.hpp"
-#include "GamePlay/ECS/MotionSystem.hpp"
 
 class GLFWwindow;
 class Application {
@@ -28,8 +26,8 @@ private:
 	Scene m_scene;
 	View m_view;
 	ImGuiEditor m_editor;
-	ecs::RenderSystem m_render_system;
-	ecs::MotionSystem m_motion_system;
+	std::shared_ptr<ecs::RenderSystem> m_render_system;
+	std::shared_ptr<ecs::MotionSystem> m_motion_system;
 };
 
 #endif

@@ -3,10 +3,6 @@
 
 #include <vector>
 
-struct FrameBuffer {
-	std::vector<int> attachments;
-};
-
 class RenderPass {
 public:
 	virtual void init() = 0;

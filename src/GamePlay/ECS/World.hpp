@@ -6,8 +6,8 @@
 
 namespace ecs{
 
-const int MAX_ENTITIES = 32;
-const int MAX_COMPONENTS = 32;
+const int MAX_ENTITIES = 256;
+const int MAX_COMPONENTS = 128;
 typedef std::bitset<MAX_COMPONENTS> ComponentMask;
 
 // TODO 实现Entity UUID
@@ -64,7 +64,13 @@ public:
     }
 
     // 所有entity都从这里创建
-    ecs::Entity create_entity();
+    ecs::Entity create_entity()
+    {
+        static int entt_id = 0;
+        ecs::Entity entt(entt_id++);
+        m_entities.push_back({ entt, ComponentMask() });
+        return m_entities.back().entity;
+    }
 
     void detroy_entity(const ecs::Entity& entity);
 
