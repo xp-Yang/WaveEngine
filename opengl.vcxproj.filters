@@ -38,12 +38,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\Renderer.cpp">
-      <Filter>engine\src</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Shader.cpp">
-      <Filter>engine\src</Filter>
-    </ClCompile>
     <ClCompile Include="imgui\imgui.cpp">
       <Filter>engine\imgui</Filter>
     </ClCompile>
@@ -68,19 +62,7 @@
     <ClCompile Include="src\main.cpp">
       <Filter>engine\src</Filter>
     </ClCompile>
-    <ClCompile Include="src\Material.cpp">
-      <Filter>engine\src</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Mesh.cpp">
-      <Filter>engine\src</Filter>
-    </ClCompile>
-    <ClCompile Include="src\MyModel.cpp">
-      <Filter>engine\src</Filter>
-    </ClCompile>
     <ClCompile Include="src\Scene.cpp">
-      <Filter>engine\src</Filter>
-    </ClCompile>
-    <ClCompile Include="src\test.cpp">
       <Filter>engine\src</Filter>
     </ClCompile>
     <ClCompile Include="src\View.cpp">
@@ -92,13 +74,7 @@
     <ClCompile Include="src\glad.c">
       <Filter>engine\src</Filter>
     </ClCompile>
-    <ClCompile Include="src\Logger.cpp">
-      <Filter>engine\src</Filter>
-    </ClCompile>
     <ClCompile Include="src\stb_image.cpp">
-      <Filter>engine\src</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Texture.cpp">
       <Filter>engine\src</Filter>
     </ClCompile>
     <ClCompile Include="src\Editor\ImGuiEditor.cpp">
@@ -158,22 +134,44 @@
     <ClCompile Include="src\GamePlay\ECS\World.cpp">
       <Filter>engine\src\GamePlay\ECS</Filter>
     </ClCompile>
+    <ClCompile Include="resource\shader\deferred.vs" />
+    <ClCompile Include="src\GamePlay\Render\GBufferPass.cpp">
+      <Filter>engine</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Core\Logger.cpp">
+      <Filter>engine</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ResourceManager\Material.cpp">
+      <Filter>engine</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ResourceManager\Mesh.cpp">
+      <Filter>engine</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ResourceManager\MyModel.cpp">
+      <Filter>engine</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Platform\OpenGL\FrameBuffer.cpp">
+      <Filter>engine</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Platform\OpenGL\Renderer.cpp">
+      <Filter>engine</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Platform\OpenGL\Shader.cpp">
+      <Filter>engine</Filter>
+    </ClCompile>
+    <ClCompile Include="src\test\test.cpp">
+      <Filter>engine</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ResourceManager\Texture.cpp">
+      <Filter>engine</Filter>
+    </ClCompile>
+    <ClCompile Include="src\GamePlay\Render\LightingPass.cpp">
+      <Filter>engine</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\Renderer.hpp">
-      <Filter>engine\src</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Shader.hpp">
-      <Filter>engine\src</Filter>
-    </ClInclude>
     <ClInclude Include="resource\shader\light.vs">
       <Filter>shaders</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Mesh.hpp">
-      <Filter>engine\src</Filter>
-    </ClInclude>
-    <ClInclude Include="src\MyModel.hpp">
-      <Filter>engine\src</Filter>
     </ClInclude>
     <ClInclude Include="src\Scene.hpp">
       <Filter>engine\src</Filter>
@@ -181,16 +179,7 @@
     <ClInclude Include="src\View.hpp">
       <Filter>engine\src</Filter>
     </ClInclude>
-    <ClInclude Include="src\Material.hpp">
-      <Filter>engine\src</Filter>
-    </ClInclude>
     <ClInclude Include="src\Application.hpp">
-      <Filter>engine\src</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Logger.hpp">
-      <Filter>engine\src</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Texture.hpp">
       <Filter>engine\src</Filter>
     </ClInclude>
     <ClInclude Include="imgui\imconfig.h">
@@ -277,6 +266,17 @@
     <ClInclude Include="src\GamePlay\ECS\World.hpp">
       <Filter>engine\src\GamePlay\ECS</Filter>
     </ClInclude>
+    <ClInclude Include="src\GamePlay\Render\GBufferPass.hpp" />
+    <ClInclude Include="src\Core\Logger.hpp" />
+    <ClInclude Include="src\ResourceManager\Material.hpp" />
+    <ClInclude Include="src\ResourceManager\Mesh.hpp" />
+    <ClInclude Include="src\ResourceManager\MyModel.hpp" />
+    <ClInclude Include="src\Platform\OpenGL\FrameBuffer.hpp" />
+    <ClInclude Include="src\Platform\OpenGL\Renderer.hpp" />
+    <ClInclude Include="src\Platform\OpenGL\Shader.hpp" />
+    <ClInclude Include="src\Platform\rhi.hpp" />
+    <ClInclude Include="src\ResourceManager\Texture.hpp" />
+    <ClInclude Include="src\GamePlay\Render\LightingPass.hpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="resource\shader\light.fs">
@@ -327,5 +327,12 @@
     <None Include="resource\shader\skybox.vs">
       <Filter>shaders</Filter>
     </None>
+    <None Include="resource\shader\deferred.fs" />
+    <None Include="resource\shader\wireframe.fs" />
+    <None Include="resource\shader\wireframe.gs" />
+    <None Include="resource\shader\gBufferPass.fs" />
+    <None Include="resource\shader\gBufferPass.vs" />
+    <None Include="resource\shader\lightingPass.fs" />
+    <None Include="resource\shader\lightingPass.vs" />
   </ItemGroup>
 </Project>

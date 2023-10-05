@@ -31,6 +31,19 @@ void ImGuiEditor::render()
 void ImGuiEditor::render_global_editor() {
     ImGui::Begin("Global Controller", nullptr, ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse);
 
+    static unsigned int pipeline_type_option = (int)m_render_params.pipeline_type;
+    if (ImGui::BeginCombo("Render Pipeline Type", pipeline_type_option == 0 ? "Forward" : "Deferred")) {
+        for (int i = 0; i < 2; i++) {
+            bool selected = pipeline_type_option == i;
+            std::string label = i == 0 ? "Forward" : "Deferred";
+            if (ImGui::Selectable(label.c_str(), selected)) {
+                pipeline_type_option = i;
+                m_render_params.pipeline_type = (PIPELINE_TYPE)pipeline_type_option;
+            }
+        }
+        ImGui::EndCombo();
+    }
+    
     static unsigned int curr_item = 1;
     if (ImGui::BeginCombo("MSAA", (std::to_string((int)std::pow(4, curr_item)) + "x").c_str())) {
         for (int i = 0; i < 3; i++) {

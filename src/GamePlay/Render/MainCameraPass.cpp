@@ -2,17 +2,18 @@
 #include "../ECS/Components.hpp"
 #include "../../Platform/OpenGL/Renderer.hpp"
 #include "../../Platform/OpenGL/rhi_opengl.hpp"
+#include <iostream>
 
 void MainCameraPass::init()
 {
     m_framebuffer = new FrameBuffer(WINDOW_WIDTH, WINDOW_HEIGHT, 4);
-    m_framebuffer->create({ AttachmentType::RGB, AttachmentType::DEPTH24STENCIL8 });
+    m_framebuffer->create({ AttachmentType::RGBA, AttachmentType::DEPTH24STENCIL8 });
 }
 
 void MainCameraPass::prepare(FrameBuffer* framebuffer)
 {
     if (framebuffer)
-        m_shadow_map = framebuffer->getFirstAttachmentOf(AttachmentType::Depth).getMap();
+        m_shadow_map = framebuffer->getFirstAttachmentOf(AttachmentType::DEPTH).getMap();
     else
         m_shadow_map = 0;
 }
@@ -32,14 +33,6 @@ void MainCameraPass::configSamples(int samples)
     m_framebuffer->setSamples(samples);
 }
 
-//void MainCameraPass::config(int msaa_sample_count, bool reflection, bool normal_debug, bool wireframe)
-//{
-//    m_msaa_sample_count = msaa_sample_count;
-//    m_reflection = reflection;
-//    m_normal_debug = normal_debug;
-//    m_wireframe = wireframe;
-//}
-
 void MainCameraPass::draw()
 {
     glViewport(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
@@ -48,7 +41,7 @@ void MainCameraPass::draw()
 
     //glEnable(GL_BLEND);
     //glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
+    glEnable(GL_DEPTH_TEST);
     auto& world = ecs::World::get();
 
     glm::mat4 camera_view = glm::mat4(1.0f);
@@ -68,6 +61,7 @@ void MainCameraPass::draw()
         skybox_texture_id = world.getComponent<ecs::SkyboxComponent>(entity)->texture;
     }
 
+    int primitives_count = 0;
     for (auto entity : world.entityView<ecs::RenderableComponent, ecs::TransformComponent>()) {
         auto& renderable = *world.getComponent<ecs::RenderableComponent>(entity);
         auto& model_matrix = *world.getComponent<ecs::TransformComponent>(entity);
@@ -82,7 +76,6 @@ void MainCameraPass::draw()
             Shader* shader = material.shader;
             material.update_shader_binding();
             shader->start_using();
-            auto model_mat = model_matrix.transform();
             if (world.hasComponent<ecs::SkyboxComponent>(entity)) {
                 glDepthMask(GL_FALSE);
                 shader->setMatrix("view", 1, skybox_view);
@@ -93,21 +86,33 @@ void MainCameraPass::draw()
             }
 
             // TODO 能不能想个好方法管理这些shader属性
-            shader->setMatrix("model", 1, model_mat);
+            shader->setMatrix("model", 1, model_matrix.transform());
             shader->setMatrix("projection", 1, camera_projection);
-            shader->setFloat3("camera_pos", camera_pos);
+            shader->setFloat3("view_pos", camera_pos);
+            
+            if (world.hasComponent<ecs::LightComponent>(entity)) {
+                Renderer::drawIndex(*shader, mesh.get_VAO(), mesh.get_indices_count());
+                shader->stop_using();
+                continue;
+            }
+
+            primitives_count++;
+
+            //这里的循环造成了卡顿，需要deferred rendering解决
+            // ：尽量少设置shader; 尽量少在渲染循环中做计算
             glm::mat4 light_ref_matrix;
             int k = 0;
             for (auto entity : world.entityView<ecs::LightComponent>()) {
                 auto& transform = *world.getComponent<ecs::TransformComponent>(entity);
                 glm::vec3 light_pos = transform.transform()[3];
                 glm::vec4 light_color = world.getComponent<ecs::RenderableComponent>(entity)->primitives[0].material.color;
-                light_ref_matrix = world.getComponent<ecs::LightComponent>(entity)->lightReferenceMatrix();
-                std::string light_id = std::string("light[") + std::to_string(k) + "]";
+                light_ref_matrix = world.getComponent<ecs::LightComponent>(entity)->getLightProjMatrix();
+                std::string light_id = std::string("lights[") + std::to_string(k) + "]";
                 shader->setFloat4(light_id + ".color", light_color);
                 shader->setFloat3(light_id + ".position", light_pos);
                 k++;
             }
+
             shader->setCubeTexture("skybox", 6, skybox_texture_id);
             shader->setBool("enable_skybox_sample", m_reflection);
             shader->setFloat("explosionRatio", explosion_ratio);
@@ -115,17 +120,22 @@ void MainCameraPass::draw()
                 shader->setMatrix("lightSpaceMatrix", 1, light_ref_matrix);
                 shader->setTexture("shadow_map", 7, m_shadow_map);
             }
+            else {
+                // set default map
+                //shader->setTexture("shadow_map", 7, 0);
+            }
             Renderer::drawIndex(*shader, mesh.get_VAO(), mesh.get_indices_count());
             shader->stop_using();
         }
     }
-
-    // don't render border, because StencilMask causes problems
+    //std::cout << "primitives count:" << primitives_count << std::endl;
+    
+    // render border,
+    // TODO 1.模型坐标原点不是几何中心 2.深度测试和模板测试问题，挡住了wireframe和normal的显示
     //auto it = world.entityView<ecs::PickedComponent>();
     //if (it.begin() != it.end())
     //{
-    //    // render border
-    //    glEnable(GL_STENCIL_TEST);// 为了渲染border
+    //    glEnable(GL_STENCIL_TEST);
     //    glStencilMask(0xFF);
 
     //    auto& world = ecs::World::get();

@@ -9,11 +9,11 @@
 #include <windows.h>
 #include <iostream>
 
-#define PERFORMANCE_TEST
+#define PERFORMANCE_TEST 0
 
 void Application::run() {
 	while (!glfwWindowShouldClose(m_window)) {
-#ifdef PERFORMANCE_TEST
+#if PERFORMANCE_TEST
 		LARGE_INTEGER t1, t2, tc;
 		QueryPerformanceFrequency(&tc);
 		QueryPerformanceCounter(&t1);
@@ -32,7 +32,7 @@ void Application::run() {
 		m_editor.render();
 
 		end_frame();
-#ifdef PERFORMANCE_TEST
+#if PERFORMANCE_TEST
 		QueryPerformanceCounter(&t2);
 		auto time = (double)(t2.QuadPart - t1.QuadPart) / (double)tc.QuadPart;
 		std::cout << "gameloop time: " << time << std::endl;

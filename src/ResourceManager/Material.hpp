@@ -20,7 +20,7 @@ struct Material {
         std::string specular_map_path = "";
         std::string normal_map_path = "";
         std::string height_map_path = "";
-    float shininess{ 1.0f };
+    float shininess{ 16.0f };
 
     Shader* shader{ nullptr };
 

@@ -24,6 +24,9 @@ public:
 
 private:
 	unsigned int m_id;
+	std::string m_vertexCode;
+	std::string m_fragmentCode;
+	std::string m_geometryCode;
 };
 
 #endif

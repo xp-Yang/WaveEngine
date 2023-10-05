@@ -8,9 +8,9 @@ enum class PIPELINE_TYPE{
     DEFERRED,
 };
 struct RenderParams {
-    PIPELINE_TYPE pipeline_type = PIPELINE_TYPE::FORWARD;
+    PIPELINE_TYPE pipeline_type = PIPELINE_TYPE::DEFERRED;
     int     msaa_sample_count = 4;
-    bool    shadow = true;
+    bool    shadow = false;
     int     shadow_map_sample_count = 4;
     // for MainCameraPass
     bool    reflection = false;
@@ -28,6 +28,7 @@ public:
 private:
     std::shared_ptr<RenderPass> m_shadow_pass;
     std::shared_ptr<RenderPass> m_gbuffer_pass;
+    std::shared_ptr<RenderPass> m_lighting_pass;
     std::shared_ptr<RenderPass> m_main_camera_pass;
     std::shared_ptr<RenderPass> m_picking_pass;
     std::shared_ptr<RenderPass> m_post_processing_pass;

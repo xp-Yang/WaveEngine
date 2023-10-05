@@ -8,7 +8,7 @@ public:
     void init() override;
     void prepare(FrameBuffer* framebuffer) override;
     void configShader(bool reflection, bool normal_debug, bool wireframe);
-    void configSamples(int samples) override;
+    void configSamples(int samples);
     void draw() override;
     FrameBuffer* getFrameBuffer() override;
 

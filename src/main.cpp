@@ -1,6 +1,6 @@
 #include "Application.hpp"
 
-// TODO:
+// TODO list:
 // done: nanosuit 放在cube前加载就有问题: 答: body是nanosuit的最后一个材质，可能被cube覆盖了？已经无法复现。
 // done: yoko 和 nanosuit 同时加载就有问题: 答: yoko模型没有镜面贴图，使用了nanosuit的镜面贴图导致的，加上default_map解决了
 // done: main.cpp全局变量优化 答: 已将所有Object渲染对象交由Scene管理
@@ -19,12 +19,11 @@
 // done: 实现ECS架构，Component数据驱动开发，main.cpp所有全局变量封装，所有逻辑分离
 // done: 阴影贴图(done)、帧缓冲(done)、法线贴图、tbn矩阵、天空盒(done)、反射(done)等知识学习
 // done: 抗锯齿
+// done: 帧缓冲的附件理解
 // 10. 解决相机运动死锁问题(direction = (0,-1,0)时)
-// 21. depth_shader可以移出，直接用同一个shader传不同view矩阵即可
 // 11. 光源物理模型
 // 12. tbn矩阵计算
 // 13. 理解peter panning 效应
-// 13. 帧缓冲的附件?
 // 14. 看一下模型加载那篇文章，贴图文件是相对路径保存的或绝对路径保存的，Assimp的简单原理。
 // 16. 粒子系统
 // 18. low-poly
@@ -42,6 +41,7 @@
 // 27. RenderSystem, 思考一下它的ECS架构
 // 28. 实现gizmo
 // 28. 线程分离
+// 28. deferred rendering性能分析
 int main()
 {
     auto app = Application::GetApp();

@@ -5,7 +5,7 @@
 #include "Scene.hpp"
 #include "Editor/ImGuiEditor.hpp"
 
-class GLFWwindow;
+struct GLFWwindow;
 class Application {
 public:
 	static Application& GetApp() {

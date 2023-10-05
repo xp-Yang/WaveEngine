@@ -6,7 +6,7 @@
 
 namespace ecs{
 
-const int MAX_ENTITIES = 256;
+const int MAX_ENTITIES = 512;
 const int MAX_COMPONENTS = 128;
 typedef std::bitset<MAX_COMPONENTS> ComponentMask;
 

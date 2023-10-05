@@ -83,7 +83,7 @@ void Scene::init() {
 	//directional_light_primitive.material = directional_light_material;
 	//directional_light_renderable.setPrimitives({ directional_light_primitive });
 
-	static const int LIGHT_COUNT = 20;
+	static const int LIGHT_COUNT = 12;
 	static Shader* light_shader = new Shader("resource/shader/light.vs", "resource/shader/light.fs");
 	for (int i = 0; i < LIGHT_COUNT; i++) {
 		auto light_entity = world.create_entity();
@@ -97,12 +97,14 @@ void Scene::init() {
 		srand(i * i * i * i * i + 2351425 * i * i * i - 1522532);
 		double r3 = (rand() / double(RAND_MAX) - 0.5) * 2;
 		light_transform.translation = { 12.0f * r, 12.0f * r2, 10.0f * r3 };
-		light_transform.scale = glm::vec3(0.5f);
+		light_transform.scale = glm::vec3(0.2f);
 		auto& light_renderable = world.addComponent<ecs::RenderableComponent>(light_entity);
 		ecs::Primitive light_primitive;
-		light_primitive.mesh = Mesh::create_cube_mesh();
+		//light_primitive.mesh = Mesh::create_cube_mesh();
+		light_primitive.mesh = Mesh::create_icosphere_mesh(5);
 		Material light_material;
-		light_material.color = { 255.f * r / 255.0f, 255.f * r2 / 255.0f, 255.f * r3 / 255.0f, 175.f / 255.0f };
+		light_material.color = { 255.f * std::abs(r) / 255.0f, 255.f * std::abs(r2) / 255.0f, 255.f * std::abs(r3) / 255.0f, 175.f / 255.0f };
+		light_material.color /= LIGHT_COUNT / 3;
 		light_material.shader = light_shader;
 		light_primitive.material = light_material;
 		light_renderable.setPrimitives({ light_primitive });
@@ -118,7 +120,7 @@ void Scene::init() {
 	Material cube_material;
 	cube_material.color = glm::vec4(1.0f, 1.0f, 1.0f, 0.1f);
     cube_material.shader = new Shader("resource/shader/model.vs", "resource/shader/model.fs", "resource/shader/model.gs");
-	cube_material.set_diffuse_map("resource/images/default_white_map.png");
+	cube_material.set_diffuse_map("resource/images/pure_white_map.png");
 	cube_material.set_specular_map("resource/images/cube_specular.png");
 	cube_primitive.material = cube_material;
 	cube_renderable.setPrimitives({ cube_primitive });
@@ -133,8 +135,8 @@ void Scene::init() {
 	sphere_primitive.mesh = Mesh::create_icosphere_mesh(5);
 	Material sphere_material;
 	sphere_material.shader = new Shader("resource/shader/model.vs", "resource/shader/model.fs", "resource/shader/model.gs");
-	sphere_material.set_diffuse_map("resource/images/default_white_map.png");
-	sphere_material.set_specular_map("resource/images/default_white_map.png");
+	sphere_material.set_diffuse_map("resource/images/pure_white_map.png");
+	sphere_material.set_specular_map("resource/images/pure_white_map.png");
 	sphere_primitive.material = sphere_material;
 	sphere_renderable.setPrimitives({ sphere_primitive });
 	world.addComponent<ecs::ExplosionComponent>(sphere_entity);

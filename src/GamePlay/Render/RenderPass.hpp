@@ -8,11 +8,17 @@
 class RenderPass {
 public:
 	virtual void init() = 0;
-	virtual void config() {} // TODO
-	virtual void configSamples(int samples) = 0;
 	virtual void prepare(FrameBuffer* framebuffer) = 0;
 	virtual void draw() = 0;
 	virtual FrameBuffer* getFrameBuffer() = 0;
+};
+
+class ScreenQuad {
+public:
+    unsigned int create();
+    unsigned int getVAO();
+private:
+    unsigned int m_vao = 0;
 };
 
 #endif // !RenderPass_hpp

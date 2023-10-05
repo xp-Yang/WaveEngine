@@ -50,6 +50,7 @@ struct CameraComponent {
 	glm::vec3 pos = { 0.0f, 15.0f, 15.0f };
 	glm::vec3 direction = glm::vec3(0.0f) - pos;
 	glm::mat4 view = glm::lookAt(pos, pos+ direction, up);
+	//glm::mat4 projection = glm::ortho(-15.0f * WINDOW_WIDTH / WINDOW_HEIGHT, 15.0f * WINDOW_WIDTH / WINDOW_HEIGHT, -15.0f, 15.0f, 0.1f, 100.0f);
 	glm::mat4 projection = glm::perspective(glm::radians(45.0f), WINDOW_WIDTH / WINDOW_HEIGHT, 0.1f, 100.0f);
 	float zoom = 1.0f;
 
@@ -119,6 +120,10 @@ struct LightComponent {
 		glm::mat4 light_view = glm::lookAt(light_pos, glm::vec3(0.0f, 0.0f, 0.0f), ecs::CameraComponent::up);
 		glm::mat4 ret = light_projection * light_view;
 		return ret;
+	}
+	glm::mat4 getLightProjMatrix() {
+		glm::mat4 result = lightReferenceMatrix();
+		return result;
 	}
 };
 

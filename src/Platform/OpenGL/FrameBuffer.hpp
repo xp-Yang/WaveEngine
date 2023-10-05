@@ -3,11 +3,12 @@
 
 #include <vector>
 
-enum class AttachmentType {
-	RGB,
+enum class AttachmentType {// TODO 所有纹理格式
+	RGB16F,
+	RGBA,
 	DEPTH24STENCIL8,
-	Depth,
-	Stencil,
+	DEPTH,
+	STENCIL,
 };
 
 class Attachment {
@@ -18,7 +19,7 @@ public:
 
 private:
 	unsigned int m_map = 0;
-	AttachmentType m_type = AttachmentType::RGB;
+	AttachmentType m_type = AttachmentType::RGBA;
 };
 
 // TODO multi-sample
@@ -26,6 +27,7 @@ class FrameBuffer {
 public:
 	FrameBuffer(int width, int height, int samples = 1);
 	void create(const std::vector<AttachmentType>& attachments_type);
+	void createDefault();
 	unsigned int getFBO() const;
 	int getWidth() const;
 	int getHeight() const;
@@ -35,7 +37,7 @@ public:
 	void setSamples(int samples);
 	bool isMultiSampled() const;
 	void blitColorMapTo(FrameBuffer* dest);
-	void blitShadowMapTo(FrameBuffer* dest);
+	void blitDepthMapTo(FrameBuffer* dest);
 	void bind();
 	void unBind();
 	void clear();

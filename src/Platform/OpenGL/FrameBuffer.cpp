@@ -14,15 +14,21 @@ void FrameBuffer::create(const std::vector<AttachmentType>& attachments_type)
 {
     glGenFramebuffers(1, &m_fbo);
     glBindFramebuffer(GL_FRAMEBUFFER, m_fbo);
+    int color_attachment_index = -1;
     for (int i = 0; i < attachments_type.size(); i++) {
-        int color_attachment_index = -1;
-        if (attachments_type[i] == AttachmentType::RGB) {
+        if (attachments_type[i] == AttachmentType::RGBA || attachments_type[i] == AttachmentType::RGB16F) {
             color_attachment_index++;
         }
         Attachment attachment;
         attachment.create(attachments_type[i], color_attachment_index, m_samples, m_width, m_height);
         m_attachments.push_back(attachment);
     }
+}
+
+void FrameBuffer::createDefault()
+{
+    m_fbo = 0;
+    glBindFramebuffer(GL_FRAMEBUFFER, m_fbo);
 }
 
 unsigned int FrameBuffer::getFBO() const
@@ -65,15 +71,15 @@ void FrameBuffer::setSamples(int samples)
 
     m_samples = samples;
     for (auto& attachment : m_attachments) {
-        if (attachment.getType() == AttachmentType::RGB) {
+        if (attachment.getType() == AttachmentType::RGBA) {
             glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, attachment.getMap());
-            glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, m_samples, GL_RGB, m_width, m_height, GL_TRUE);
+            glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, m_samples, GL_RGBA, m_width, m_height, GL_TRUE);
         }
         if (attachment.getType() == AttachmentType::DEPTH24STENCIL8) {
             glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, attachment.getMap());
             glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, m_samples, GL_DEPTH24_STENCIL8, m_width, m_height, GL_TRUE);
         }
-        if (attachment.getType() == AttachmentType::Depth) {
+        if (attachment.getType() == AttachmentType::DEPTH) {
             glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, attachment.getMap());
             glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, m_samples, GL_DEPTH_COMPONENT, m_width, m_height, GL_TRUE);
         }
@@ -92,12 +98,11 @@ void FrameBuffer::blitColorMapTo(FrameBuffer* dest)
     glBlitFramebuffer(0, 0, m_width, m_height, 0, 0, dest->getWidth(), dest->getHeight(), GL_COLOR_BUFFER_BIT, GL_NEAREST);
 }
 
-void FrameBuffer::blitShadowMapTo(FrameBuffer* dest)
+void FrameBuffer::blitDepthMapTo(FrameBuffer* dest)
 {
     glBindFramebuffer(GL_READ_FRAMEBUFFER, getFBO());
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, dest->getFBO());
     glBlitFramebuffer(0, 0, m_width, m_height, 0, 0, dest->getWidth(), dest->getHeight(), GL_DEPTH_BUFFER_BIT, GL_NEAREST);
-
 }
 
 void FrameBuffer::bind()
@@ -121,11 +126,20 @@ void Attachment::create(AttachmentType type, int color_attachment_index, int sam
     m_type = type;
     switch (m_type)
     {
-    case AttachmentType::RGB: {
+    case AttachmentType::RGB16F: {
+        glGenTextures(1, &m_map);
+        glBindTexture(GL_TEXTURE_2D, m_map);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, width, height, 0, GL_RGB, GL_FLOAT, NULL);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + color_attachment_index, GL_TEXTURE_2D, m_map, 0);
+        break;
+    }
+    case AttachmentType::RGBA: {
         if (samples > 1) {
             glGenTextures(1, &m_map);
             glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, m_map);
-            glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, samples, GL_RGB, width, height, GL_TRUE);
+            glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, samples, GL_RGBA, width, height, GL_TRUE);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
             glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + color_attachment_index, GL_TEXTURE_2D_MULTISAMPLE, m_map, 0);
@@ -133,7 +147,8 @@ void Attachment::create(AttachmentType type, int color_attachment_index, int sam
         else {
             glGenTextures(1, &m_map);
             glBindTexture(GL_TEXTURE_2D, m_map);
-            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_FLOAT, NULL);
+            //使用GL_FLOAT和GL_UNSIGNED_BYTE区别
             //glTexImage2D 是旧接口，可以使用glTexStorage2D(GL_TEXTURE_2D, 1, format, width, height);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -165,7 +180,7 @@ void Attachment::create(AttachmentType type, int color_attachment_index, int sam
         }
         break;
     }
-    case AttachmentType::Depth: {
+    case AttachmentType::DEPTH: {
         if (samples > 1) {
             glGenTextures(1, &m_map);
             glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, m_map);

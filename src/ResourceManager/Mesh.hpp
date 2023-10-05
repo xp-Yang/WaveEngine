@@ -28,9 +28,9 @@ public:
 	size_t get_vertices_count() const { return m_vertices.size(); }
 
 protected:
-	unsigned int m_VAO;
-	unsigned int m_VBO;
-	unsigned int m_IBO;
+	unsigned int m_VAO = 0;
+	unsigned int m_VBO = 0;
+	unsigned int m_IBO = 0;
 
 	std::vector<Vertex> m_vertices;
 	std::vector<unsigned int> m_indices;

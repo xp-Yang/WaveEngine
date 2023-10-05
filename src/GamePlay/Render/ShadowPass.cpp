@@ -6,10 +6,10 @@
 void ShadowPass::init()
 {
 	m_framebuffer = new FrameBuffer(WINDOW_WIDTH, WINDOW_HEIGHT, 4);
-	m_framebuffer->create({ AttachmentType::Depth });
+	m_framebuffer->create({ AttachmentType::DEPTH });
 
     m_framebuffer_undersampled = new FrameBuffer(WINDOW_WIDTH, WINDOW_HEIGHT, 1);
-    m_framebuffer_undersampled->create({ AttachmentType::Depth });
+    m_framebuffer_undersampled->create({ AttachmentType::DEPTH });
 }
 
 void ShadowPass::prepare(FrameBuffer* framebuffer)
@@ -58,6 +58,6 @@ void ShadowPass::draw() {
 
 FrameBuffer* ShadowPass::getFrameBuffer()
 {
-    m_framebuffer->blitShadowMapTo(m_framebuffer_undersampled);
+    m_framebuffer->blitDepthMapTo(m_framebuffer_undersampled);
 	return m_framebuffer_undersampled;
 }

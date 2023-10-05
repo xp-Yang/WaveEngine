@@ -23,9 +23,9 @@ struct Material {
 };
 
 uniform Material material;
-#define LIGHT_COUNT 20
-uniform Light light[LIGHT_COUNT];
-uniform vec3 camera_pos;
+#define LIGHT_COUNT 256
+uniform Light lights[LIGHT_COUNT];
+uniform vec3 view_pos;
 
 uniform sampler2D shadow_map;
 uniform samplerCube skybox;
@@ -68,24 +68,25 @@ vec3 LightCalculation(Light light, vec3 normal, vec3 view_dir)
 void main()
 {
     vec3 normal = normalize(fs_in.pass_normal);//TODO normal需要变换成世界空间，但要注意不能带平移
-    vec3 view_direction = normalize(camera_pos - fs_in.pass_pos);
+    vec3 view_direction = normalize(view_pos - fs_in.pass_pos);
 
     // 计算光照
     vec3 ambient_light = vec3(0);
     vec3 lighting = vec3(0);
     for(int i = 0; i < LIGHT_COUNT; i++){
-        ambient_light += light[i].color.xyz * material.ambient * vec3(texture(material.diffuse_map, fs_in.pass_uv));
-        lighting += LightCalculation(light[i], normal, view_direction);
+        ambient_light += lights[i].color.xyz * material.ambient * vec3(texture(material.diffuse_map, fs_in.pass_uv));
+        lighting += LightCalculation(lights[i], normal, view_direction);
     }
 
     // 计算阴影
     float shadow = ShadowCalculation(fs_in.FragPosLightSpace);       
     
-    vec3 result = ambient_light + (1.0 - shadow) * lighting;
+    //vec3 result = ambient_light + (1.0 - shadow) * lighting;
+    vec3 result = (1.0 - shadow) * lighting;
     out_color = vec4(result, 1.0) * fs_in.pass_color;
 
     if(enable_skybox_sample){
-        vec3 I = normalize(fs_in.pass_pos - camera_pos);
+        vec3 I = normalize(fs_in.pass_pos - view_pos);
         vec3 R = reflect(I, normalize(normal));
         out_color = 0.33 * out_color + 0.66 * vec4(texture(skybox, R).rgb, 1.0);
     }

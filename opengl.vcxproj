@@ -40,6 +40,7 @@
     <ClCompile Include="src\Editor\ImGuiGizmo.cpp" />
     <ClCompile Include="src\GamePlay\ECS\JobSystem.cpp" />
     <ClCompile Include="src\GamePlay\Render\GBufferPass.cpp" />
+    <ClCompile Include="src\GamePlay\Render\LightingPass.cpp" />
     <ClCompile Include="src\GamePlay\Render\MainCameraPass.cpp" />
     <ClCompile Include="src\GamePlay\Render\PickingPass.cpp" />
     <ClCompile Include="src\GamePlay\Render\ScreenPass.cpp" />
@@ -85,6 +86,7 @@
     <ClInclude Include="src\Editor\ImGuiEditor.hpp" />
     <ClInclude Include="src\Editor\ImGuiGizmo.hpp" />
     <ClInclude Include="src\GamePlay\Render\GBufferPass.hpp" />
+    <ClInclude Include="src\GamePlay\Render\LightingPass.hpp" />
     <ClInclude Include="src\GamePlay\Render\MainCameraPass.hpp" />
     <ClInclude Include="src\GamePlay\Render\PickingPass.hpp" />
     <ClInclude Include="src\GamePlay\Render\ScreenPass.hpp" />
@@ -115,9 +117,11 @@
     <None Include="resource\shader\depth.vs" />
     <None Include="resource\shader\frame.fs" />
     <None Include="resource\shader\frame.vs" />
-    <None Include="resource\shader\gBuffer.fs" />
-    <None Include="resource\shader\gBuffer.vs" />
+    <None Include="resource\shader\gBufferPass.fs" />
+    <None Include="resource\shader\gBufferPass.vs" />
     <None Include="resource\shader\light.fs" />
+    <None Include="resource\shader\lightingPass.fs" />
+    <None Include="resource\shader\lightingPass.vs" />
     <None Include="resource\shader\model.fs" />
     <None Include="resource\shader\model.gs" />
     <None Include="resource\shader\model.vs" />

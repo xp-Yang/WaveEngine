@@ -8,9 +8,6 @@
 Shader::Shader(const char* vertexPath, const char* fragmentPath, const char* geometryPath)
 {
     // 1. 从文件路径中获取顶点/片段着色器
-    std::string vertexCode;
-    std::string fragmentCode;
-    std::string geometryCode;
     std::ifstream vShaderFile;
     std::ifstream fShaderFile;
     std::ifstream gShaderFile;
@@ -36,19 +33,19 @@ Shader::Shader(const char* vertexPath, const char* fragmentPath, const char* geo
         if (geometryPath != nullptr)
             gShaderFile.close();
         // 转换数据流到string
-        vertexCode = vShaderStream.str();
-        fragmentCode = fShaderStream.str();
+        m_vertexCode = vShaderStream.str();
+        m_fragmentCode = fShaderStream.str();
         if (geometryPath != nullptr)
-            geometryCode = gShaderStream.str();
+            m_geometryCode = gShaderStream.str();
     }
     catch (std::ifstream::failure e)
     {
         std::cout << "ERROR::SHADER::FILE_NOT_SUCCESFULLY_READ" << std::endl;
         assert(false);
     }
-    const char* vShaderCode = vertexCode.c_str();
-    const char* fShaderCode = fragmentCode.c_str();
-    const char* gShaderCode = geometryCode.c_str();
+    const char* vShaderCode = m_vertexCode.c_str();
+    const char* fShaderCode = m_fragmentCode.c_str();
+    const char* gShaderCode = m_geometryCode.c_str();
 
     // 2. 编译着色器
     unsigned int vertex, fragment, geometry;

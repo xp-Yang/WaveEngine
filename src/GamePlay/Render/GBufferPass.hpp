@@ -7,15 +7,11 @@ class GBufferPass : public RenderPass {
 public:
     void init() override;
     void prepare(FrameBuffer* framebuffer) override;
-    void configSamples(int samples) override {}
     void draw() override;
     FrameBuffer* getFrameBuffer() override;
 
 private:
-    FrameBuffer* m_frame_buffer{ nullptr };
-    unsigned int m_position_map;
-    unsigned int m_normal_map;
-    unsigned int m_color_spec_map;
+    FrameBuffer* m_framebuffer{ nullptr };
 };
 
 #endif // !GBufferPass_hpp

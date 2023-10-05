@@ -7,13 +7,12 @@ class PickingPass : public RenderPass {
 public:
     void init() override;
     void prepare(FrameBuffer* framebuffer) override;
-    void configSamples(int samples) override {}
     void draw() override;
     FrameBuffer* getFrameBuffer() override;
 
 private:
     FrameBuffer* m_framebuffer{ nullptr };
-    unsigned int m_fbo;
+    unsigned int m_fbo = 0;
 };
 
 #endif
