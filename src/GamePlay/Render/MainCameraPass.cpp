@@ -99,7 +99,6 @@ void MainCameraPass::draw()
             primitives_count++;
 
             //这里的循环造成了卡顿，需要deferred rendering解决
-            // ：尽量少设置shader; 尽量少在渲染循环中做计算
             glm::mat4 light_ref_matrix;
             int k = 0;
             for (auto entity : world.entityView<ecs::LightComponent>()) {

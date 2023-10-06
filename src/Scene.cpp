@@ -83,7 +83,7 @@ void Scene::init() {
 	//directional_light_primitive.material = directional_light_material;
 	//directional_light_renderable.setPrimitives({ directional_light_primitive });
 
-	static const int LIGHT_COUNT = 12;
+	static const int LIGHT_COUNT = 128;
 	static Shader* light_shader = new Shader("resource/shader/light.vs", "resource/shader/light.fs");
 	for (int i = 0; i < LIGHT_COUNT; i++) {
 		auto light_entity = world.create_entity();

@@ -50,6 +50,16 @@ void LightingPass::draw()
 		lighting_shader->setFloat4(light_id + ".color", light_color);
 		lighting_shader->setFloat3(light_id + ".position", light_pos);
 		k++;
+
+		// 模拟正向渲染的嵌套for循环，性能明显下降
+		//for (int i = 0; i < 45 /*primitives count*/; i++) {
+		//	std::string light_id = std::string("lights[") + std::to_string(i) + "]";
+		//}
+		// 正向vs延迟渲染：
+		// drawcall调用：  renderable.primitives.size()次  vs  gbufferPass：renderable.primitives.size()次 + LightingPass 1次，几乎相同
+		// for循环设置shader光源属性：  renderable.primitives.size() * Lights.size()次  vs  Lights.size()次
+		// shader计算：  每次drawcall，每个VAO绘制时，shader对光栅化后的片段并行计算，每个shader内部循环Lights.size()次
+		// vs  LightingPass的一次drawcall中，shader对整个屏幕所有像素并行计算，每个shader内部循环Lights.size()次。
 	}
 	Renderer::drawTriangle(*lighting_shader, m_screen_quad->getVAO(), 6);
 	lighting_shader->stop_using();
