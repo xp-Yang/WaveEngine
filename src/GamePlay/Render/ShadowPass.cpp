@@ -5,11 +5,8 @@
 
 void ShadowPass::init()
 {
-	m_framebuffer = new FrameBuffer(WINDOW_WIDTH, WINDOW_HEIGHT, 4);
+	m_framebuffer = new FrameBuffer(WINDOW_WIDTH, WINDOW_HEIGHT, 1);
 	m_framebuffer->create({ AttachmentType::DEPTH });
-
-    m_framebuffer_undersampled = new FrameBuffer(WINDOW_WIDTH, WINDOW_HEIGHT, 1);
-    m_framebuffer_undersampled->create({ AttachmentType::DEPTH });
 }
 
 void ShadowPass::prepare(FrameBuffer* framebuffer)
@@ -21,10 +18,13 @@ void ShadowPass::configSamples(int samples)
     //config FrameBuffer
     m_framebuffer->bind();
     m_framebuffer->setSamples(samples);
+
+    glBindTexture(GL_TEXTURE_2D, m_framebuffer->getFirstAttachmentOf(AttachmentType::DEPTH).getMap());
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, samples * WINDOW_WIDTH, samples * WINDOW_HEIGHT, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+    glViewport(0, 0, samples * WINDOW_WIDTH, samples * WINDOW_HEIGHT);
 }
 
 void ShadowPass::draw() {
-    glViewport(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
 	m_framebuffer->bind();
     m_framebuffer->clear();
 
@@ -58,6 +58,5 @@ void ShadowPass::draw() {
 
 FrameBuffer* ShadowPass::getFrameBuffer()
 {
-    m_framebuffer->blitDepthMapTo(m_framebuffer_undersampled);
-	return m_framebuffer_undersampled;
+	return m_framebuffer;
 }

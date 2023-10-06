@@ -13,7 +13,6 @@ public:
 
 private:
     FrameBuffer* m_framebuffer{ nullptr };
-    FrameBuffer* m_framebuffer_undersampled{ nullptr };
 };
 
 #endif
