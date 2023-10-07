@@ -1,7 +1,6 @@
 #version 330 core
 
 in GS_OUT{
-    vec4 pass_color;
     vec3 pass_pos;
     vec2 pass_uv;
     vec3 pass_normal;
@@ -84,7 +83,7 @@ void main()
     float shadow = ShadowCalculation(fs_in.FragPosLightSpace);       
     
     vec3 result = ambient_light + (1.0 - shadow) * lighting;
-    gl_FragColor = vec4(result, 1.0) * fs_in.pass_color;
+    gl_FragColor = vec4(result, 1.0);
 
     if(enable_skybox_sample){
         vec3 I = normalize(fs_in.pass_pos - view_pos);
@@ -93,7 +92,7 @@ void main()
     }
 
     //debug
-    //gl_FragColor = vec4(fs_in.pass_color * (ambient_light + diffuse_light + specular_light), 1.0);
+    //gl_FragColor = vec4((ambient_light + diffuse_light + specular_light), 1.0);
     //gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0);
     //gl_FragColor = vec4(fs_in.pass_uv, 0.0, 1.0);
     //gl_FragColor = vec4(vec3(shadow), 1.0);

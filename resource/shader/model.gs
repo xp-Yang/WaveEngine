@@ -4,7 +4,6 @@ layout (triangle_strip, max_vertices = 3) out;
 
 in VS_OUT {
     mat4 vp;
-    vec4 pass_color;
     vec3 pass_pos;
     vec2 pass_uv;
     vec3 pass_normal;
@@ -12,7 +11,6 @@ in VS_OUT {
 } gs_in[];
 
 out GS_OUT{
-    vec4 pass_color;
     vec3 pass_pos;
     vec2 pass_uv;
     vec3 pass_normal;
@@ -42,21 +40,18 @@ void main() {
     //输入和输出的gl_Position为裁剪空间坐标
     gl_Position = gs_in[0].vp * explode(gs_in[0].pass_pos, normal);
     gs_out.pass_uv = gs_in[0].pass_uv;
-    gs_out.pass_color = gs_in[0].pass_color;
     gs_out.pass_normal = gs_in[0].pass_normal;
     gs_out.pass_pos = gs_in[0].pass_pos;
     gs_out.FragPosLightSpace = gs_in[0].FragPosLightSpace;
     EmitVertex();
     gl_Position = gs_in[1].vp * explode(gs_in[1].pass_pos, normal);
     gs_out.pass_uv = gs_in[1].pass_uv;
-    gs_out.pass_color = gs_in[1].pass_color;
     gs_out.pass_normal = gs_in[1].pass_normal;
     gs_out.pass_pos = gs_in[1].pass_pos;
     gs_out.FragPosLightSpace = gs_in[1].FragPosLightSpace;
     EmitVertex();
     gl_Position = gs_in[2].vp * explode(gs_in[2].pass_pos, normal);
     gs_out.pass_uv = gs_in[2].pass_uv;
-    gs_out.pass_color = gs_in[2].pass_color;
     gs_out.pass_normal = gs_in[2].pass_normal;
     gs_out.pass_pos = gs_in[2].pass_pos;
     gs_out.FragPosLightSpace = gs_in[2].FragPosLightSpace;

@@ -144,12 +144,9 @@ void ImGuiEditor::render_entity_editor()
         auto& model_matrix = *world.getComponent<ecs::TransformComponent>(entity);
         std::string obj_name = world.getComponent<ecs::NameComponent>(entity)->name;
 
-
-        glm::vec4 color = renderable.primitives[0].material.color;
         float shininess = renderable.primitives[0].material.shininess;
 
         ImGui::Begin((obj_name + " controller").c_str(), nullptr, ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse);
-        ImGui::ColorEdit3((std::string("color") + "##" + obj_name).c_str(), (float*)&color);
         ImGui::SliderFloat((std::string("shininess") + "##" + obj_name).c_str(), &shininess, 64.0f, 256.0f);
         ImGui::PushItemWidth(85.0f);
         ImGui::SliderFloat((std::string("##x") + "##" + obj_name).c_str(), &model_matrix.translation.x, -10.0f, 10.0f);
@@ -158,12 +155,17 @@ void ImGuiEditor::render_entity_editor()
         ImGui::SameLine();
         ImGui::SliderFloat((std::string("xyz") + "##" + obj_name).c_str(), &model_matrix.translation.z, -10.0f, 10.0f);
         ImGui::PopItemWidth();
+
+        if (world.hasComponent<ecs::LightComponent>(entity)) {
+            glm::vec4& color = world.getComponent<ecs::LightComponent>(entity)->color;
+            ImGui::ColorEdit3((std::string("color") + "##" + obj_name).c_str(), (float*)&color);
+        }
+
         // 编辑对象材质属性
         //ecs::MaterialSystem::onUpdate();
         for (int i = 0; i < renderable.primitives.size(); i++) {
             auto& material = renderable.primitives[i].material;
             //material.materials[i].ambient_strength;
-            material.color = color;
             material.shininess = shininess;
             //curr_entity->material(i).set_diffuse_map();
             //curr_entity->material(i).set_specular_map();

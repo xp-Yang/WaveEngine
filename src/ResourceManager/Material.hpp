@@ -7,7 +7,6 @@
 
 class Shader;
 struct Material {
-    glm::vec4 color{ 1.0f, 1.0f, 1.0f, 1.0f };
     //float diffuse_strength{ 1.0f };
     //float specular_strength{ 1.0f };
     float ambient_strength{ 0.1f };

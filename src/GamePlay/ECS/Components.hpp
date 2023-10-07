@@ -106,6 +106,7 @@ struct SkyboxComponent {
 };
 
 struct LightComponent {
+	glm::vec4 color = {1.0f, 1.0f, 1.0f, 1.0f};
 	glm::mat4 lightReferenceMatrix()
 	{
 		auto& world = ecs::World::get();

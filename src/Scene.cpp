@@ -99,13 +99,14 @@ void Scene::init() {
 		light_transform.translation = { 12.0f * r, 12.0f * r2, 10.0f * r3 };
 		light_transform.scale = glm::vec3(0.2f);
 		auto& light_renderable = world.addComponent<ecs::RenderableComponent>(light_entity);
+		auto& light_properties = world.addComponent<ecs::LightComponent>(light_entity);
 		ecs::Primitive light_primitive;
 		//light_primitive.mesh = Mesh::create_cube_mesh();
 		light_primitive.mesh = Mesh::create_icosphere_mesh(5);
-		Material light_material;
-		light_material.color = { 255.f * std::abs(r) / 255.0f, 255.f * std::abs(r2) / 255.0f, 255.f * std::abs(r3) / 255.0f, 175.f / 255.0f };
+		light_properties.color = { 255.f * std::abs(r) / 255.0f, 255.f * std::abs(r2) / 255.0f, 255.f * std::abs(r3) / 255.0f, 175.f / 255.0f };
 		if (LIGHT_COUNT >= 3)
-			light_material.color /= LIGHT_COUNT / 3;
+			light_properties.color /= LIGHT_COUNT / 3;
+		Material light_material;
 		light_material.shader = light_shader;
 		light_primitive.material = light_material;
 		light_renderable.setPrimitives({ light_primitive });
@@ -119,7 +120,6 @@ void Scene::init() {
 	ecs::Primitive cube_primitive;
 	cube_primitive.mesh = Mesh::create_cube_mesh();
 	Material cube_material;
-	cube_material.color = glm::vec4(1.0f, 1.0f, 1.0f, 0.1f);
     cube_material.shader = new Shader("resource/shader/model.vs", "resource/shader/model.fs", "resource/shader/model.gs");
 	cube_material.set_diffuse_map("resource/images/pure_white_map.png");
 	cube_material.set_specular_map("resource/images/cube_specular.png");

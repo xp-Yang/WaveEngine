@@ -45,7 +45,7 @@ void LightingPass::draw()
 	for (auto entity : world.entityView<ecs::LightComponent>()) {
 		auto& transform = *world.getComponent<ecs::TransformComponent>(entity);
 		glm::vec3 light_pos = transform.transform()[3];
-		glm::vec4 light_color = world.getComponent<ecs::RenderableComponent>(entity)->primitives[0].material.color;
+		glm::vec4 light_color = world.getComponent<ecs::LightComponent>(entity)->color;
 		std::string light_id = std::string("lights[") + std::to_string(k) + "]";
 		lighting_shader->setFloat4(light_id + ".color", light_color);
 		lighting_shader->setFloat3(light_id + ".position", light_pos);
