@@ -104,7 +104,8 @@ void Scene::init() {
 		light_primitive.mesh = Mesh::create_icosphere_mesh(5);
 		Material light_material;
 		light_material.color = { 255.f * std::abs(r) / 255.0f, 255.f * std::abs(r2) / 255.0f, 255.f * std::abs(r3) / 255.0f, 175.f / 255.0f };
-		light_material.color /= LIGHT_COUNT / 3;
+		if (LIGHT_COUNT >= 3)
+			light_material.color /= LIGHT_COUNT / 3;
 		light_material.shader = light_shader;
 		light_primitive.material = light_material;
 		light_renderable.setPrimitives({ light_primitive });

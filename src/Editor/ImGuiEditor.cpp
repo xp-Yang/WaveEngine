@@ -150,7 +150,7 @@ void ImGuiEditor::render_entity_editor()
 
         ImGui::Begin((obj_name + " controller").c_str(), nullptr, ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse);
         ImGui::ColorEdit3((std::string("color") + "##" + obj_name).c_str(), (float*)&color);
-        ImGui::SliderFloat((std::string("shininess") + "##" + obj_name).c_str(), &shininess, 0.1f, 512.0f);
+        ImGui::SliderFloat((std::string("shininess") + "##" + obj_name).c_str(), &shininess, 64.0f, 256.0f);
         ImGui::PushItemWidth(85.0f);
         ImGui::SliderFloat((std::string("##x") + "##" + obj_name).c_str(), &model_matrix.translation.x, -10.0f, 10.0f);
         ImGui::SameLine();

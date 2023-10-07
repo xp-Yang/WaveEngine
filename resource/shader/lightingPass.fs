@@ -18,16 +18,17 @@ const int LIGHT_COUNT = 256;
 uniform Light lights[LIGHT_COUNT];
 uniform vec3 view_pos;
 
-vec3 LightCalculation(Light light, vec3 normal, vec3 view_dir, vec3 position, vec3 diffuse, vec3 specular)
+// blinn-phong
+vec3 LightCalculation(Light light, vec3 n, vec3 v, vec3 l, vec3 diffuse_coef, vec3 specular_coef)
 {
-    vec3 incidence_dir = normalize(light.position - position);
-
-    float diff_coef = max(dot(incidence_dir, normal), 0.0);
-    vec3 diffuse_light = light.color.xyz * diff_coef * diffuse;
+    vec3 diffuse_light = light.color.xyz * max(dot(l, n), 0.0) * diffuse_coef;
     
-    vec3 reflect_dir = reflect(-incidence_dir, normal);
-    float spec_coef = pow(max(dot(view_dir, reflect_dir), 0.001), 16.0);
-    vec3 specular_light = light.color.xyz * spec_coef * specular;
+    vec3 h = normalize(v + l);
+    vec3 specular_light = light.color.xyz * pow(max(dot(n, h), 0.0), 128.0) * specular_coef;
+
+    // phong
+    //vec3 reflect_dir = reflect(-l, n);
+    //vec3 specular_light = light.color.xyz * pow(max(dot(v, reflect_dir), 0.0), 128.0) * specular_coef;
 
     return diffuse_light + specular_light;
 }
@@ -47,7 +48,8 @@ void main()
     vec3 lighting = vec3(0);
     for(int i = 0; i < LIGHT_COUNT; i++){
         //ambient_light += lights[i].color.xyz * material.ambient * Diffuse);
-        lighting += LightCalculation(lights[i], Normal, viewDir, Position, Diffuse, Specular);
+        vec3 lightDir = normalize(lights[i].position - Position);
+        lighting += LightCalculation(lights[i], Normal, viewDir, lightDir, Diffuse, Specular);
     }
     gl_FragColor = vec4(lighting, 1.0);
 }

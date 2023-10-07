@@ -9,9 +9,7 @@
 #include "World.hpp"
 #include "../../ResourceManager/Mesh.hpp"
 #include "../../ResourceManager/Material.hpp"
-
-#define WINDOW_WIDTH 1600.0f
-#define WINDOW_HEIGHT 900.0f
+#include "../../Window.hpp"
 
 namespace ecs {
 

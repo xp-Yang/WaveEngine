@@ -32,11 +32,10 @@ void ScreenPass::draw()
 	Renderer::drawTriangle(*frame_shader, m_screen_quad->getVAO(), 6);
 	glEnable(GL_DEPTH_TEST);
 
-	// debug depth
-	//glClearColor(1.0f, 0.0f, 1.0f, 1.0f);
-	//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+	// debug
+	//glViewport(WINDOW_WIDTH, 0, WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2);
 	//frame_shader->start_using();
-	//frame_shader->setTexture("Texture", 0, 56);
+	//frame_shader->setTexture("Texture", 0, 57);
 	//Renderer::drawTriangle(*frame_shader, m_screen_quad->getVAO(), 6);
 }
 

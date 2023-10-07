@@ -49,16 +49,17 @@ float ShadowCalculation(vec4 fragPosLightSpace)
     return shadow;
 }
 
-vec3 LightCalculation(Light light, vec3 normal, vec3 view_dir)
+// blinn-phong
+vec3 LightCalculation(Light light, vec3 n, vec3 v, vec3 l, vec3 diffuse_coef, vec3 specular_coef)
 {
-    vec3 incidence_dir = normalize(light.position - fs_in.pass_pos);
-
-    float diff_coef = max(dot(incidence_dir, normal), 0.0);
-    vec3 diffuse_light = light.color.xyz * diff_coef * vec3(texture(material.diffuse_map, fs_in.pass_uv));
+    vec3 diffuse_light = light.color.xyz * max(dot(l, n), 0.0) * diffuse_coef;
     
-    vec3 reflect_dir = reflect(-incidence_dir, normal);
-    float spec_coef = pow(max(dot(view_dir, reflect_dir), 0.001), material.shininess);
-    vec3 specular_light = light.color.xyz * spec_coef * vec3(texture(material.specular_map, fs_in.pass_uv));
+    vec3 h = normalize(v + l);
+    vec3 specular_light = light.color.xyz * pow(max(dot(n, h), 0.0), 128.0) * specular_coef;
+
+    // phong
+    //vec3 reflect_dir = reflect(-l, n);
+    //vec3 specular_light = light.color.xyz * pow(max(dot(v, reflect_dir), 0.0), material.shininess) * specular_coef;
 
     return diffuse_light + specular_light;
 }
@@ -67,20 +68,22 @@ void main()
 {
     vec3 normal = normalize(fs_in.pass_normal);//TODO normal需要变换成世界空间，但要注意不能带平移
     vec3 view_direction = normalize(view_pos - fs_in.pass_pos);
+    vec3 diffuse_coef = vec3(texture(material.diffuse_map, fs_in.pass_uv));
+    vec3 specular_coef = vec3(texture(material.specular_map, fs_in.pass_uv));
 
     // 计算光照
     vec3 ambient_light = vec3(0);
     vec3 lighting = vec3(0);
     for(int i = 0; i < LIGHT_COUNT; i++){
-        ambient_light += lights[i].color.xyz * material.ambient * vec3(texture(material.diffuse_map, fs_in.pass_uv));
-        lighting += LightCalculation(lights[i], normal, view_direction);
+        //ambient_light += lights[i].color.xyz * material.ambient * diffuse_coef;
+        vec3 lightDir = normalize(lights[i].position - fs_in.pass_pos);
+        lighting += LightCalculation(lights[i], normal, view_direction, lightDir, diffuse_coef, specular_coef);
     }
 
     // 计算阴影
     float shadow = ShadowCalculation(fs_in.FragPosLightSpace);       
     
-    //vec3 result = ambient_light + (1.0 - shadow) * lighting;
-    vec3 result = (1.0 - shadow) * lighting;
+    vec3 result = ambient_light + (1.0 - shadow) * lighting;
     gl_FragColor = vec4(result, 1.0) * fs_in.pass_color;
 
     if(enable_skybox_sample){

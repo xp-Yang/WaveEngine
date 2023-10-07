@@ -4,8 +4,8 @@
 #include "View.hpp"
 #include "Scene.hpp"
 #include "Editor/ImGuiEditor.hpp"
+#include "Window.hpp"
 
-struct GLFWwindow;
 class Application {
 public:
 	static Application& GetApp() {
@@ -15,14 +15,14 @@ public:
 	void run();
 	void init();
 	void shutdown();
+	std::shared_ptr<Window> getWindow();
 
 private:
 	Application() = default;
-	GLFWwindow* create_window(int size_x, int size_y);
-	void new_frame();
-	void end_frame();
+	void newFrame();
+	void endFrame();
 
-	GLFWwindow* m_window{ nullptr };
+	std::shared_ptr<Window> m_window;
 	Scene m_scene;
 	View m_view;
 	ImGuiEditor m_editor;

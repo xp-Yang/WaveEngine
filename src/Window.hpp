@@ -1,6 +1,9 @@
 #ifndef Window_hpp
 #define Window_hpp
 
+#define WINDOW_WIDTH 1600.0f
+#define WINDOW_HEIGHT 900.0f
+
 struct Viewport {
     int x;
     int y;
