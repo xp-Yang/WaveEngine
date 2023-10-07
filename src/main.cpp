@@ -20,6 +20,8 @@
 // done: 阴影贴图(done)、帧缓冲(done)、法线贴图、tbn矩阵、天空盒(done)、反射(done)等知识学习
 // done: 抗锯齿
 // done: 帧缓冲的附件理解
+// done: 窗口大小可缩放
+// done: deferred rendering 性能分析，见LightingPass.cpp
 // 10. 解决相机运动死锁问题(direction = (0,-1,0)时)
 // 11. 光源物理模型
 // 12. tbn矩阵计算
@@ -31,7 +33,6 @@
 // 19. 天空盒的模型矩阵大小代表着什么
 // 19. 当前反射算法的弱点：距离不对
 // 20. 动态环境贴图，球面时
-// 22. 窗口大小可缩放
 // 23. 批渲染？
 // 24. 学会renderdoc使用
 // 25. 优化cpu和gpu的io调用
@@ -39,9 +40,11 @@
 // 27. main的逻辑放入SandBox中
 // 27. Material 频繁修改, 思考一下它的ECS架构
 // 27. RenderSystem, 思考一下它的ECS架构
-// 28. 实现gizmo
 // 28. 线程分离
-// 28. deferred rendering性能分析
+// 28. 实现gizmo
+// 28. 实现事件机制
+// 28. 实现窗口停靠，实现多viewport
+// 28. 多视口
 int main()
 {
     auto app = Application::GetApp();

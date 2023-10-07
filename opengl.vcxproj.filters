@@ -134,7 +134,6 @@
     <ClCompile Include="src\GamePlay\ECS\World.cpp">
       <Filter>engine\src\GamePlay\ECS</Filter>
     </ClCompile>
-    <ClCompile Include="resource\shader\deferred.vs" />
     <ClCompile Include="src\GamePlay\Render\GBufferPass.cpp">
       <Filter>engine</Filter>
     </ClCompile>
@@ -166,6 +165,9 @@
       <Filter>engine</Filter>
     </ClCompile>
     <ClCompile Include="src\GamePlay\Render\LightingPass.cpp">
+      <Filter>engine</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Window.cpp">
       <Filter>engine</Filter>
     </ClCompile>
   </ItemGroup>
@@ -277,6 +279,7 @@
     <ClInclude Include="src\Platform\rhi.hpp" />
     <ClInclude Include="src\ResourceManager\Texture.hpp" />
     <ClInclude Include="src\GamePlay\Render\LightingPass.hpp" />
+    <ClInclude Include="src\Window.hpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="resource\shader\light.fs">
@@ -327,7 +330,6 @@
     <None Include="resource\shader\skybox.vs">
       <Filter>shaders</Filter>
     </None>
-    <None Include="resource\shader\deferred.fs" />
     <None Include="resource\shader\wireframe.fs" />
     <None Include="resource\shader\wireframe.gs" />
     <None Include="resource\shader\gBufferPass.fs" />

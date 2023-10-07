@@ -26,7 +26,6 @@
     <ClCompile Include="imgui\imgui_impl_opengl3.cpp" />
     <ClCompile Include="imgui\imgui_tables.cpp" />
     <ClCompile Include="imgui\imgui_widgets.cpp" />
-    <ClCompile Include="resource\shader\deferred.vs" />
     <ClCompile Include="src\Application.cpp" />
     <ClCompile Include="src\Core\Math.hpp" />
     <ClCompile Include="src\GamePlay\ECS\AnimationSystem.cpp" />
@@ -63,6 +62,7 @@
     <ClCompile Include="src\ResourceManager\Texture.cpp" />
     <ClCompile Include="src\View.cpp" />
     <ClCompile Include="src\GamePlay\ECS\World.cpp" />
+    <ClCompile Include="src\Window.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="imgui\imconfig.h" />
@@ -108,11 +108,11 @@
     <ClInclude Include="src\ResourceManager\Texture.hpp" />
     <ClInclude Include="src\View.hpp" />
     <ClInclude Include="src\GamePlay\ECS\World.hpp" />
+    <ClInclude Include="src\Window.hpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="resource\shader\border.fs" />
     <None Include="resource\shader\border.vs" />
-    <None Include="resource\shader\deferred.fs" />
     <None Include="resource\shader\depth.fs" />
     <None Include="resource\shader\depth.vs" />
     <None Include="resource\shader\frame.fs" />

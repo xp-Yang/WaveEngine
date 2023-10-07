@@ -18,7 +18,7 @@ public:
 
 private:
 	Application() = default;
-	void create_window(int size_x, int size_y);
+	GLFWwindow* create_window(int size_x, int size_y);
 	void new_frame();
 	void end_frame();
 

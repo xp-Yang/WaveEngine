@@ -31,8 +31,6 @@ uniform sampler2D shadow_map;
 uniform samplerCube skybox;
 uniform bool enable_skybox_sample;
 
-out vec4 out_color;
-
 float ShadowCalculation(vec4 fragPosLightSpace)
 {
     // 1.还在裁剪空间，执行透视除法，变换到NDC空间
@@ -83,20 +81,20 @@ void main()
     
     //vec3 result = ambient_light + (1.0 - shadow) * lighting;
     vec3 result = (1.0 - shadow) * lighting;
-    out_color = vec4(result, 1.0) * fs_in.pass_color;
+    gl_FragColor = vec4(result, 1.0) * fs_in.pass_color;
 
     if(enable_skybox_sample){
         vec3 I = normalize(fs_in.pass_pos - view_pos);
         vec3 R = reflect(I, normalize(normal));
-        out_color = 0.33 * out_color + 0.66 * vec4(texture(skybox, R).rgb, 1.0);
+        gl_FragColor = 0.33 * gl_FragColor + 0.66 * vec4(texture(skybox, R).rgb, 1.0);
     }
 
     //debug
-    //out_color = vec4(fs_in.pass_color * (ambient_light + diffuse_light + specular_light), 1.0);
-    //out_color = vec4(1.0, 0.0, 0.0, 1.0);
-    //out_color = vec4(fs_in.pass_uv, 0.0, 1.0);
-    //out_color = vec4(vec3(shadow), 1.0);
-    //out_color = vec4(normal, 1.0);
-    //out_color = vec4(abs(spec_coef),abs(spec_coef),abs(spec_coef), 1.0f);
-    //out_color = vec4(abs(view_direction), 1.0f);
+    //gl_FragColor = vec4(fs_in.pass_color * (ambient_light + diffuse_light + specular_light), 1.0);
+    //gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0);
+    //gl_FragColor = vec4(fs_in.pass_uv, 0.0, 1.0);
+    //gl_FragColor = vec4(vec3(shadow), 1.0);
+    //gl_FragColor = vec4(normal, 1.0);
+    //gl_FragColor = vec4(abs(spec_coef),abs(spec_coef),abs(spec_coef), 1.0f);
+    //gl_FragColor = vec4(abs(view_direction), 1.0f);
 }

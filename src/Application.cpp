@@ -11,6 +11,10 @@
 
 #define PERFORMANCE_TEST 0
 
+void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
+	glViewport(0, 0, width, height);
+}
+
 void Application::run() {
 	while (!glfwWindowShouldClose(m_window)) {
 #if PERFORMANCE_TEST
@@ -42,8 +46,15 @@ void Application::run() {
 
 void Application::init()
 {
-	create_window((int)WINDOW_WIDTH, (int)WINDOW_HEIGHT);
+	m_window = create_window((int)WINDOW_WIDTH, (int)WINDOW_HEIGHT);
+	glfwSetFramebufferSizeCallback(m_window, framebuffer_size_callback);
 	//glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED); // FPS 模式
+
+	//初始化GLAD，使其可以管理OpenGL函数指针
+	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
+	{
+		assert(false);
+	}
 
 	// setup imgui
 	IMGUI_CHECKVERSION();
@@ -84,30 +95,25 @@ void Application::end_frame()
 	glfwSwapBuffers(m_window);//交换颜色缓冲（它是一个储存着GLFW窗口每一个像素颜色的大缓冲），输出在屏幕上。
 }
 
-void Application::create_window(int size_x, int size_y) {
+GLFWwindow* Application::create_window(int size_x, int size_y) {
 	//glfwInit函数来初始化GLFW，glfwWindowHint函数来配置GLFW
 	glfwInit();
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);//告诉GLFW我们要使用的OpenGL版本是3.3
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);//告诉GLFW我们要使用的OpenGL版本是3.3,这样GLFW会在创建OpenGL上下文时做出适当的调整
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);//明确告诉GLFW我们使用的是核心模式(Core-profile)
-	glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);//并且不允许用户调整窗口的大小
+	//glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);//不允许用户调整窗口的大小
 	//只对默认FBO有效:
 	//glEnable(GL_MULTISAMPLE);
 	//glfwWindowHint(GLFW_SAMPLES, 16);
 
-	m_window = glfwCreateWindow(size_x, size_y, "RenderEngine", nullptr, nullptr);
-	if (m_window == nullptr)
+	auto window = glfwCreateWindow(size_x, size_y, "RenderEngine", nullptr, nullptr);
+	if (window == nullptr)
 	{
 		assert(false);
 		glfwTerminate();
-		return;
+		return nullptr;
 	}
-	glfwMakeContextCurrent(m_window);
+	glfwMakeContextCurrent(window);
 
-	//初始化GLAD，使其可以管理OpenGL函数指针
-	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
-	{
-		assert(false);
-		return;
-	}
+	return window;
 }

@@ -1,5 +1,4 @@
 #version 330 core
-out vec4 FragColor;
 
 in vec2 uv;
 
@@ -50,5 +49,5 @@ void main()
         //ambient_light += lights[i].color.xyz * material.ambient * Diffuse);
         lighting += LightCalculation(lights[i], Normal, viewDir, Position, Diffuse, Specular);
     }
-    FragColor = vec4(lighting, 1.0);
+    gl_FragColor = vec4(lighting, 1.0);
 }

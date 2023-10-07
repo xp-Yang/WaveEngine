@@ -4,9 +4,7 @@ in vec3 pass_uv;
 
 uniform samplerCube skybox;
 
-out vec4 out_color;
-
 void main()
 {    
-    out_color = texture(skybox, pass_uv);
+    gl_FragColor = texture(skybox, pass_uv);
 }
