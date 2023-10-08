@@ -83,7 +83,7 @@ void Scene::init() {
 	//directional_light_primitive.material = directional_light_material;
 	//directional_light_renderable.setPrimitives({ directional_light_primitive });
 
-	static const int LIGHT_COUNT = 128;
+	static const int LIGHT_COUNT = 3;
 	static Shader* light_shader = new Shader("resource/shader/light.vs", "resource/shader/light.fs");
 	for (int i = 0; i < LIGHT_COUNT; i++) {
 		auto light_entity = world.create_entity();
@@ -106,6 +106,8 @@ void Scene::init() {
 		light_properties.color = { 255.f * std::abs(r) / 255.0f, 255.f * std::abs(r2) / 255.0f, 255.f * std::abs(r3) / 255.0f, 175.f / 255.0f };
 		if (LIGHT_COUNT >= 3)
 			light_properties.color /= LIGHT_COUNT / 3;
+		else
+			light_properties.color = { 1.0f, 1.0f, 1.0f, 1.0f };
 		Material light_material;
 		light_material.shader = light_shader;
 		light_primitive.material = light_material;

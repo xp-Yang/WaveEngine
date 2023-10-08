@@ -2,6 +2,7 @@
 #include "Platform/OpenGL/rhi_opengl.hpp"
 #include <GLFW/glfw3.h>
 #include <assert.h>
+#include <utility>
 
 void Window::create(int width, int height)
 {
@@ -21,11 +22,20 @@ void Window::create(int width, int height)
 	}
 	glfwMakeContextCurrent(m_window);
 
-	//glfwSetWindowUserPointer(m_window, &m_Data);
+	m_main_viewport.x = 0;
+	m_main_viewport.y = 0;
+	m_main_viewport.width = width;
+	m_main_viewport.height = height;
+	glfwSetWindowUserPointer(m_window, &m_main_viewport);
 
 	glfwSetFramebufferSizeCallback(m_window, [](GLFWwindow* window, int width, int height) {
-		//glfwGetWindowUserPointer(window);
-		;// glViewport(0, 0, width, height);
+		Viewport& main_viewport = *(Viewport*)glfwGetWindowUserPointer(window);
+		float scale_factor = std::min((float)width / (float)main_viewport.width, (float)height / (float)main_viewport.height);
+		main_viewport.width *= scale_factor;
+		main_viewport.height *= scale_factor;
+		main_viewport.x = 0;
+		main_viewport.y = height - main_viewport.height;
+		glViewport(main_viewport.x, main_viewport.y, main_viewport.width, main_viewport.height);
 		});
 }
 

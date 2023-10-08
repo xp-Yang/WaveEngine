@@ -22,6 +22,7 @@
 // done: 帧缓冲的附件理解
 // done: 窗口大小可缩放
 // done: deferred rendering 性能分析，见LightingPass.cpp
+// done: 批渲染理解
 // 10. 解决相机运动死锁问题(direction = (0,-1,0)时)
 // 11. 光源物理模型
 // 12. tbn矩阵计算
@@ -33,7 +34,6 @@
 // 19. 天空盒的模型矩阵大小代表着什么
 // 19. 当前反射算法的弱点：距离不对
 // 20. 动态环境贴图，球面时
-// 23. 批渲染？
 // 24. 学会renderdoc使用
 // 25. 优化cpu和gpu的io调用
 // 26. Editor 编辑材质后，保存文件
@@ -41,13 +41,14 @@
 // 27. Material 频繁修改, 思考一下它的ECS架构
 // 27. RenderSystem, 思考一下它的ECS架构
 // 28. 线程分离
-// 28. 实现gizmo
 // 28. 实现事件机制
-// 28. 实现窗口停靠，实现多viewport
-// 28. 多视口
+// 28. 集成imgizmo
+// 28. 集成imgui窗口停靠，多viewport
+// 28. 加载、保存文件，序列化和反序列化
+// 28. 优化pickingPass
 int main()
 {
-    auto app = Application::GetApp();
+    auto& app = Application::GetApp();
     app.init();
     app.run();
     app.shutdown();

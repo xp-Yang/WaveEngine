@@ -2,6 +2,7 @@
 #include "../ECS/Components.hpp"
 #include "../../Platform/OpenGL/Renderer.hpp"
 #include "../../Platform/OpenGL/rhi_opengl.hpp"
+#include "../../Application.hpp"
 
 void ScreenPass::init()
 {
@@ -23,7 +24,8 @@ void ScreenPass::draw()
 {
 	m_default_framebuffer->bind();
 	m_default_framebuffer->clear();
-	glViewport(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
+	auto main_viewport = Application::GetApp().getWindow()->getMainViewport();
+	glViewport(main_viewport.x, main_viewport.y, main_viewport.width, main_viewport.height);
 
 	glDisable(GL_DEPTH_TEST);
 	static Shader* frame_shader = new Shader("resource/shader/frame.vs", "resource/shader/frame.fs");
@@ -32,11 +34,12 @@ void ScreenPass::draw()
 	Renderer::drawTriangle(*frame_shader, m_screen_quad->getVAO(), 6);
 	glEnable(GL_DEPTH_TEST);
 
-	// debug
-	//glViewport(WINDOW_WIDTH, 0, WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2);
-	//frame_shader->start_using();
-	//frame_shader->setTexture("Texture", 0, 57);
-	//Renderer::drawTriangle(*frame_shader, m_screen_quad->getVAO(), 6);
+
+	// a child window for debugging
+	glViewport(main_viewport.width - main_viewport.width / 4, main_viewport.y, main_viewport.width / 4, main_viewport.height / 4);
+	frame_shader->start_using();
+	frame_shader->setTexture("Texture", 0, 66);
+	Renderer::drawTriangle(*frame_shader, m_screen_quad->getVAO(), 6);
 }
 
 FrameBuffer* ScreenPass::getFrameBuffer()

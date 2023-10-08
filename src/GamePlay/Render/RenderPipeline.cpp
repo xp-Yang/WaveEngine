@@ -33,11 +33,12 @@ void RenderPipeline::render()
     if (!ImGui::GetIO().WantCaptureMouse) {
         m_picking_pass->draw();
     }
-
+    if (m_render_params.shadow) {
+        static_cast<ShadowPass*>(m_shadow_pass.get())->configSamples(m_render_params.shadow_map_sample_count);
+        m_shadow_pass->draw();
+    }
     if (m_render_params.pipeline_type == PIPELINE_TYPE::FORWARD) {
         if (m_render_params.shadow) {
-            static_cast<ShadowPass*>(m_shadow_pass.get())->configSamples(m_render_params.shadow_map_sample_count);
-            m_shadow_pass->draw();
             m_main_camera_pass->prepare(m_shadow_pass->getFrameBuffer());
         }
         else {
@@ -53,7 +54,12 @@ void RenderPipeline::render()
     else if (m_render_params.pipeline_type == PIPELINE_TYPE::DEFERRED) {
         m_gbuffer_pass->draw();
 
-        m_lighting_pass->prepare(m_gbuffer_pass->getFrameBuffer());
+        if (m_render_params.shadow) {
+            static_cast<LightingPass*>(m_lighting_pass.get())->prepare(m_gbuffer_pass->getFrameBuffer(), m_shadow_pass->getFrameBuffer());
+        }
+        else {
+            m_lighting_pass->prepare(m_gbuffer_pass->getFrameBuffer());
+        }
         m_lighting_pass->draw();
 
         m_screen_pass->prepare(m_lighting_pass->getFrameBuffer());
