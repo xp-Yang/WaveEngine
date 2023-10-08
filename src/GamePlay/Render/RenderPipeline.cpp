@@ -5,7 +5,7 @@
 #include "MainCameraPass.hpp"
 #include "PickingPass.hpp"
 #include "ScreenPass.hpp"
-#include "../../../imgui/imgui.h"
+#include <imgui.h>
 
 void RenderPipeline::init()
 {

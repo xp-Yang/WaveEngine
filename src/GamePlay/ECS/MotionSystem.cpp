@@ -1,7 +1,7 @@
 #include "MotionSystem.hpp"
 #include "Components.hpp"
 #include <GLFW/glfw3.h>
-#include "../../../imgui/imgui.h"
+#include <imgui.h>
 
 namespace ecs {
 

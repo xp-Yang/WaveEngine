@@ -1,7 +1,7 @@
 #include "ImGuiEditor.hpp"
 #include <string>
 #include <glm/glm.hpp>
-#include "../../imgui/imgui.h"
+#include <imgui.h>
 #include "../GamePlay/ECS/Components.hpp"
 #include "../Core/Logger.hpp"
 

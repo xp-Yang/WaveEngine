@@ -2,7 +2,7 @@
 #include "../ECS/Components.hpp"
 #include "../../Platform/OpenGL/Renderer.hpp"
 #include "../../Platform/OpenGL/rhi_opengl.hpp"
-#include "../../../imgui/imgui.h"
+#include <imgui.h>
 
 void PickingPass::init()
 {
@@ -79,7 +79,7 @@ void PickingPass::draw()
         int picked_id = (int)data[0] + (((int)data[1]) << 8) + (((int)data[2]) << 16);
 
         for (auto entity : world.entityView<ecs::RenderableComponent, ecs::TransformComponent>()) {
-            if (entity.getId() == picked_id) {
+            if (entity.getId() * 50000 == picked_id) {
                 world.addComponent<ecs::PickedComponent>(entity);
             }
             else

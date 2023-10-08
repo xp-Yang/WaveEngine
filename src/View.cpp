@@ -1,6 +1,6 @@
 #include "View.hpp"
 #include "Platform/OpenGL/rhi_opengl.hpp"
-#include "../imgui/imgui.h"
+#include <imgui.h>
 #include "GamePlay/ECS/Components.hpp"
 #include "GamePlay/ECS/CameraSystem.hpp"
 #include "Scene.hpp"

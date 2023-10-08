@@ -45,7 +45,7 @@
 // 28. 集成imgizmo
 // 28. 集成imgui窗口停靠，多viewport
 // 28. 加载、保存文件，序列化和反序列化
-// 28. 优化pickingPass
+// 28. 优化pickingPass, readpixel用鼠标事件处理一次
 int main()
 {
     auto& app = Application::GetApp();
