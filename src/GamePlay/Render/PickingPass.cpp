@@ -1,8 +1,7 @@
 #include "PickingPass.hpp"
 #include "../ECS/Components.hpp"
-#include "../../Platform/OpenGL/Renderer.hpp"
-#include "../../Platform/OpenGL/rhi_opengl.hpp"
-#include <imgui.h>
+#include "../../Platform/RHI/rhi.hpp"
+#include <imgui/imgui.h>
 
 void PickingPass::init()
 {

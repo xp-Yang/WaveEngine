@@ -1,8 +1,7 @@
 #ifndef Renderer_hpp
 #define Renderer_hpp
 
-#include "Shader.hpp"
-
+class Shader;
 class Renderer {
 public:
     static void drawIndex(const Shader& shader, unsigned int vao_id, size_t indices_count);

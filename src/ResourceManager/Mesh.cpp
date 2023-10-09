@@ -1,7 +1,7 @@
 #include "Mesh.hpp"
 #include <windows.h>
 #include <iostream>
-#include "../Platform/OpenGL/rhi_opengl.hpp"
+#include "../Platform/RHI/rhi.hpp"
 
 Mesh::Mesh(std::vector<Vertex> vertices)
     : m_vertices(vertices)

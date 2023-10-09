@@ -1,14 +1,9 @@
 #include "View.hpp"
-#include "Platform/OpenGL/rhi_opengl.hpp"
-#include <imgui.h>
+#include "Platform/RHI/rhi.hpp"
+#include <imgui/imgui.h>
 #include "GamePlay/ECS/Components.hpp"
 #include "GamePlay/ECS/CameraSystem.hpp"
 #include "Scene.hpp"
-
-void View::set_view_port(int width, int height)
-{
-    glViewport(0, 0, width, height);
-}
 
 void View::mouse_and_key_callback()
 {
@@ -29,8 +24,6 @@ void View::mouse_and_key_callback()
         last_pos_x = xpos;
         last_pos_y = ypos;
         last_left_mouse_status = io.MouseDown[0];
-        //if(io.MouseDown[0])
-        //    render_for_picking();
     }
     if (io.MouseDown[0]) {
         float delta_x = xpos - last_pos_x;

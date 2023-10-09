@@ -1,5 +1,6 @@
 #include "Renderer.hpp"
-#include "rhi_opengl.hpp"
+#include <glad/glad.h>
+#include "Shader.hpp"
 
 void Renderer::drawIndex(const Shader& shader, unsigned int vao_id, size_t indices_count)
 {

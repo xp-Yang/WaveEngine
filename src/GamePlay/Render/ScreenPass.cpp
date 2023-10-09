@@ -1,7 +1,6 @@
 #include "ScreenPass.hpp"
 #include "../ECS/Components.hpp"
-#include "../../Platform/OpenGL/Renderer.hpp"
-#include "../../Platform/OpenGL/rhi_opengl.hpp"
+#include "../../Platform/RHI/rhi.hpp"
 #include "../../Application.hpp"
 
 void ScreenPass::init()

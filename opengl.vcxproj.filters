@@ -80,9 +80,6 @@
     <ClCompile Include="src\Editor\ImGuiEditor.cpp">
       <Filter>engine\src\Editor</Filter>
     </ClCompile>
-    <ClCompile Include="src\Editor\ImGuiGizmo.cpp">
-      <Filter>engine\src\Editor</Filter>
-    </ClCompile>
     <ClCompile Include="src\Core\Math.hpp">
       <Filter>engine\src\Core</Filter>
     </ClCompile>
@@ -149,13 +146,13 @@
     <ClCompile Include="src\ResourceManager\MyModel.cpp">
       <Filter>engine</Filter>
     </ClCompile>
-    <ClCompile Include="src\Platform\OpenGL\FrameBuffer.cpp">
+    <ClCompile Include="src\Platform\RHI\OpenGL\FrameBuffer.cpp">
       <Filter>engine</Filter>
     </ClCompile>
-    <ClCompile Include="src\Platform\OpenGL\Renderer.cpp">
+    <ClCompile Include="src\Platform\RHI\OpenGL\Renderer.cpp">
       <Filter>engine</Filter>
     </ClCompile>
-    <ClCompile Include="src\Platform\OpenGL\Shader.cpp">
+    <ClCompile Include="src\Platform\RHI\OpenGL\Shader.cpp">
       <Filter>engine</Filter>
     </ClCompile>
     <ClCompile Include="src\test\test.cpp">
@@ -168,6 +165,39 @@
       <Filter>engine</Filter>
     </ClCompile>
     <ClCompile Include="src\Window.cpp">
+      <Filter>engine</Filter>
+    </ClCompile>
+    <ClCompile Include="imgui\ImGuizmo.cpp">
+      <Filter>engine</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Platform\OS\Windows\FileDialog.cpp">
+      <Filter>engine</Filter>
+    </ClCompile>
+    <ClCompile Include="thirdparty\imgui\imgui.cpp">
+      <Filter>engine</Filter>
+    </ClCompile>
+    <ClCompile Include="thirdparty\imgui\imgui_demo.cpp">
+      <Filter>engine</Filter>
+    </ClCompile>
+    <ClCompile Include="thirdparty\imgui\imgui_draw.cpp">
+      <Filter>engine</Filter>
+    </ClCompile>
+    <ClCompile Include="thirdparty\imgui\imgui_impl_glfw.cpp">
+      <Filter>engine</Filter>
+    </ClCompile>
+    <ClCompile Include="thirdparty\imgui\imgui_impl_opengl3.cpp">
+      <Filter>engine</Filter>
+    </ClCompile>
+    <ClCompile Include="thirdparty\imgui\imgui_tables.cpp">
+      <Filter>engine</Filter>
+    </ClCompile>
+    <ClCompile Include="thirdparty\imgui\imgui_widgets.cpp">
+      <Filter>engine</Filter>
+    </ClCompile>
+    <ClCompile Include="thirdparty\imgui\ImGuizmo.cpp">
+      <Filter>engine</Filter>
+    </ClCompile>
+    <ClCompile Include="thirdparty\imgui\main.cpp">
       <Filter>engine</Filter>
     </ClCompile>
   </ItemGroup>
@@ -214,13 +244,10 @@
     <ClInclude Include="src\Editor\ImGuiEditor.hpp">
       <Filter>engine\src\Editor</Filter>
     </ClInclude>
-    <ClInclude Include="src\Editor\ImGuiGizmo.hpp">
-      <Filter>engine\src\Editor</Filter>
-    </ClInclude>
     <ClInclude Include="src\Core\Memory.hpp">
       <Filter>engine\src\Core</Filter>
     </ClInclude>
-    <ClInclude Include="src\Platform\OpenGL\rhi_opengl.hpp">
+    <ClInclude Include="src\Platform\RHI\OpenGL\rhi_opengl.hpp">
       <Filter>engine\src\PlatForm</Filter>
     </ClInclude>
     <ClInclude Include="src\GamePlay\ECS\AnimationSystem.hpp">
@@ -273,13 +300,26 @@
     <ClInclude Include="src\ResourceManager\Material.hpp" />
     <ClInclude Include="src\ResourceManager\Mesh.hpp" />
     <ClInclude Include="src\ResourceManager\MyModel.hpp" />
-    <ClInclude Include="src\Platform\OpenGL\FrameBuffer.hpp" />
-    <ClInclude Include="src\Platform\OpenGL\Renderer.hpp" />
-    <ClInclude Include="src\Platform\OpenGL\Shader.hpp" />
-    <ClInclude Include="src\Platform\rhi.hpp" />
+    <ClInclude Include="src\Platform\RHI\OpenGL\FrameBuffer.hpp" />
+    <ClInclude Include="src\Platform\RHI\OpenGL\Renderer.hpp" />
+    <ClInclude Include="src\Platform\RHI\OpenGL\Shader.hpp" />
+    <ClInclude Include="src\Platform\RHI\rhi.hpp" />
     <ClInclude Include="src\ResourceManager\Texture.hpp" />
     <ClInclude Include="src\GamePlay\Render\LightingPass.hpp" />
     <ClInclude Include="src\Window.hpp" />
+    <ClInclude Include="imgui\ImGuizmo.h" />
+    <ClInclude Include="src\Platform\OS\Windows\FileDialog.hpp" />
+    <ClInclude Include="src\Platform\RHI\Vulkan\rhi_vulkan.hpp" />
+    <ClInclude Include="thirdparty\imgui\imconfig.h" />
+    <ClInclude Include="thirdparty\imgui\imgui.h" />
+    <ClInclude Include="thirdparty\imgui\imgui_impl_glfw.h" />
+    <ClInclude Include="thirdparty\imgui\imgui_impl_opengl3.h" />
+    <ClInclude Include="thirdparty\imgui\imgui_impl_opengl3_loader.h" />
+    <ClInclude Include="thirdparty\imgui\imgui_internal.h" />
+    <ClInclude Include="thirdparty\imgui\ImGuizmo.h" />
+    <ClInclude Include="thirdparty\imgui\imstb_rectpack.h" />
+    <ClInclude Include="thirdparty\imgui\imstb_textedit.h" />
+    <ClInclude Include="thirdparty\imgui\imstb_truetype.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="resource\shader\light.fs">
@@ -336,5 +376,6 @@
     <None Include="resource\shader\gBufferPass.vs" />
     <None Include="resource\shader\lightingPass.fs" />
     <None Include="resource\shader\lightingPass.vs" />
+    <None Include="src\Platform\OS\Linux\linux.placeholder" />
   </ItemGroup>
 </Project>

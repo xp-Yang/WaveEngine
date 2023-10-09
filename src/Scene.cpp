@@ -2,7 +2,7 @@
 #include "GamePlay/ECS/Components.hpp"
 #include "ResourceManager/MyModel.hpp"
 #include "ResourceManager/Texture.hpp"
-#include "Platform/OpenGL/Shader.hpp"
+#include "Platform/RHI/rhi.hpp"
 
 //void screen_shot() {
 //    const int channels_num = 3;

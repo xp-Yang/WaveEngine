@@ -1,9 +1,9 @@
 #include "Shader.hpp"
-#include <string>
+#include <glad/glad.h>
+#include <glm/gtc/type_ptr.hpp>
 #include <fstream>
 #include <sstream>
 #include <iostream>
-#include "rhi_opengl.hpp"
 
 Shader::Shader(const char* vertexPath, const char* fragmentPath, const char* geometryPath)
 {

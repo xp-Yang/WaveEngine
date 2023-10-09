@@ -1,8 +1,8 @@
-#include "Platform/OpenGL/rhi_opengl.hpp"
+#include "Platform/RHI/rhi.hpp"
 #include <GLFW/glfw3.h>
 #include "Application.hpp"
-#include "../imgui/imgui_impl_glfw.h"
-#include "../imgui/imgui_impl_opengl3.h"
+#include <imgui/imgui_impl_glfw.h>
+#include <imgui/imgui_impl_opengl3.h>
 #include "GamePlay/ECS/Components.hpp"
 #include "GamePlay/ECS/RenderSystem.hpp"
 #include "GamePlay/ECS/MotionSystem.hpp"
@@ -12,7 +12,7 @@
 #define PERFORMANCE_TEST 0
 
 void Application::run() {
-	while (!glfwWindowShouldClose(m_window->getNativeWindowHandle())) {
+	while (!m_window->shouldClose()) {
 #if PERFORMANCE_TEST
 		LARGE_INTEGER t1, t2, tc;
 		QueryPerformanceFrequency(&tc);
@@ -71,7 +71,6 @@ void Application::shutdown()
 	ImGui_ImplGlfw_Shutdown();
 	ImGui::DestroyContext();
 	m_window->shutdown();
-	glfwTerminate();
 }
 
 std::shared_ptr<Window> Application::getWindow()
@@ -81,7 +80,7 @@ std::shared_ptr<Window> Application::getWindow()
 
 void Application::newFrame()
 {
-	glfwPollEvents();//检查触发事件（键盘输入、鼠标移动等）
+	m_window->pollEvents();//检查触发事件（键盘输入、鼠标移动等）
 
 	ImGui_ImplOpenGL3_NewFrame();
 	ImGui_ImplGlfw_NewFrame();

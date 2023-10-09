@@ -2,7 +2,7 @@
 #define RenderPass_hpp
 
 #include <vector>
-#include "../../Platform/OpenGL/FrameBuffer.hpp"
+#include "../../Platform/RHI/rhi.hpp"
 
 // ½Ó¿ÚÀà
 class RenderPass {

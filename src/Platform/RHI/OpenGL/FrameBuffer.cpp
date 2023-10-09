@@ -1,5 +1,5 @@
 #include "FrameBuffer.hpp"
-#include "rhi_opengl.hpp"
+#include <glad/glad.h>
 #include <assert.h>
 
 FrameBuffer::FrameBuffer(int width, int height, int samples)

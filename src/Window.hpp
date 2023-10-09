@@ -16,6 +16,8 @@ class Window {
 public:
     void create(int width, int height);
     void shutdown();
+    bool shouldClose() const;
+    void pollEvents() const;
     void setMainViewport(const Viewport& viewport);
     GLFWwindow* getNativeWindowHandle() const;
     int getWidth() const;

@@ -1,5 +1,5 @@
 #include "Window.hpp"
-#include "Platform/OpenGL/rhi_opengl.hpp"
+#include "Platform/RHI/rhi.hpp"
 #include <GLFW/glfw3.h>
 #include <assert.h>
 #include <utility>
@@ -42,6 +42,17 @@ void Window::create(int width, int height)
 void Window::shutdown()
 {
 	glfwDestroyWindow(m_window);
+	glfwTerminate();
+}
+
+bool Window::shouldClose() const
+{
+	return glfwWindowShouldClose(m_window);
+}
+
+void Window::pollEvents() const
+{
+	glfwPollEvents();
 }
 
 void Window::setMainViewport(const Viewport& viewport)

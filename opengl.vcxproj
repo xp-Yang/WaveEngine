@@ -19,16 +19,8 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="imgui\imgui.cpp" />
-    <ClCompile Include="imgui\imgui_demo.cpp" />
-    <ClCompile Include="imgui\imgui_draw.cpp" />
-    <ClCompile Include="imgui\imgui_impl_glfw.cpp" />
-    <ClCompile Include="imgui\imgui_impl_opengl3.cpp" />
-    <ClCompile Include="imgui\imgui_tables.cpp" />
-    <ClCompile Include="imgui\imgui_widgets.cpp" />
     <ClCompile Include="src\Application.cpp" />
     <ClCompile Include="src\Core\Math.hpp" />
-    <ClCompile Include="imgui\ImGuizmo.cpp" />
     <ClCompile Include="src\GamePlay\ECS\AnimationSystem.cpp" />
     <ClCompile Include="src\GamePlay\ECS\CameraSystem.cpp" />
     <ClCompile Include="src\GamePlay\ECS\Components.cpp" />
@@ -45,38 +37,37 @@
     <ClCompile Include="src\GamePlay\Render\ScreenPass.cpp" />
     <ClCompile Include="src\GamePlay\Render\ShadowPass.cpp" />
     <ClCompile Include="src\Core\Logger.cpp" />
-    <ClCompile Include="src\glad.c" />
+    <ClCompile Include="thirdparty\glad.c" />
     <ClCompile Include="src\main.cpp" />
+    <ClCompile Include="src\Platform\OS\Windows\FileDialog.cpp" />
     <ClCompile Include="src\ResourceManager\Material.cpp" />
     <ClCompile Include="src\ResourceManager\Mesh.cpp" />
     <ClCompile Include="src\ResourceManager\MyModel.cpp" />
-    <ClCompile Include="src\Platform\OpenGL\FrameBuffer.cpp" />
-    <ClCompile Include="src\Platform\OpenGL\Renderer.cpp" />
+    <ClCompile Include="src\Platform\RHI\OpenGL\FrameBuffer.cpp" />
+    <ClCompile Include="src\Platform\RHI\OpenGL\Renderer.cpp" />
     <ClCompile Include="src\GamePlay\Render\RenderPass.cpp" />
     <ClCompile Include="src\GamePlay\Render\RenderPipeline.cpp" />
-    <ClCompile Include="src\Platform\OpenGL\Shader.cpp" />
+    <ClCompile Include="src\Platform\RHI\OpenGL\Shader.cpp" />
     <ClCompile Include="src\Scene.cpp" />
-    <ClCompile Include="src\stb_image.cpp" />
+    <ClCompile Include="thirdparty\stb_image.cpp" />
     <ClCompile Include="src\GamePlay\ECS\System.cpp" />
     <ClCompile Include="src\test\test.cpp" />
     <ClCompile Include="src\ResourceManager\Texture.cpp" />
     <ClCompile Include="src\View.cpp" />
     <ClCompile Include="src\GamePlay\ECS\World.cpp" />
     <ClCompile Include="src\Window.cpp" />
+    <ClCompile Include="thirdparty\imgui\imgui.cpp" />
+    <ClCompile Include="thirdparty\imgui\ImGuizmo.cpp" />
+    <ClCompile Include="thirdparty\imgui\imgui_demo.cpp" />
+    <ClCompile Include="thirdparty\imgui\imgui_draw.cpp" />
+    <ClCompile Include="thirdparty\imgui\imgui_impl_glfw.cpp" />
+    <ClCompile Include="thirdparty\imgui\imgui_impl_opengl3.cpp" />
+    <ClCompile Include="thirdparty\imgui\imgui_tables.cpp" />
+    <ClCompile Include="thirdparty\imgui\imgui_widgets.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="imgui\imconfig.h" />
-    <ClInclude Include="imgui\imgui.h" />
-    <ClInclude Include="imgui\imgui_impl_glfw.h" />
-    <ClInclude Include="imgui\imgui_impl_opengl3.h" />
-    <ClInclude Include="imgui\imgui_impl_opengl3_loader.h" />
-    <ClInclude Include="imgui\imgui_internal.h" />
-    <ClInclude Include="imgui\imstb_rectpack.h" />
-    <ClInclude Include="imgui\imstb_textedit.h" />
-    <ClInclude Include="imgui\imstb_truetype.h" />
     <ClInclude Include="src\Application.hpp" />
     <ClInclude Include="src\Core\Memory.hpp" />
-    <ClInclude Include="imgui\ImGuizmo.h" />
     <ClInclude Include="src\GamePlay\ECS\AnimationSystem.hpp" />
     <ClInclude Include="src\GamePlay\ECS\Components.hpp" />
     <ClInclude Include="src\GamePlay\ECS\CameraSystem.hpp" />
@@ -93,22 +84,35 @@
     <ClInclude Include="src\GamePlay\Render\ShadowPass.hpp" />
     <ClInclude Include="src\Core\Logger.hpp" />
     <ClInclude Include="resource\shader\light.vs" />
+    <ClInclude Include="src\Platform\OS\Windows\FileDialog.hpp" />
+    <ClInclude Include="src\Platform\RHI\Vulkan\rhi_vulkan.hpp" />
     <ClInclude Include="src\ResourceManager\Material.hpp" />
     <ClInclude Include="src\ResourceManager\Mesh.hpp" />
     <ClInclude Include="src\ResourceManager\MyModel.hpp" />
-    <ClInclude Include="src\Platform\OpenGL\FrameBuffer.hpp" />
-    <ClInclude Include="src\Platform\OpenGL\rhi_opengl.hpp" />
-    <ClInclude Include="src\Platform\OpenGL\Renderer.hpp" />
+    <ClInclude Include="src\Platform\RHI\OpenGL\FrameBuffer.hpp" />
+    <ClInclude Include="src\Platform\RHI\OpenGL\rhi_opengl.hpp" />
+    <ClInclude Include="src\Platform\RHI\OpenGL\Renderer.hpp" />
     <ClInclude Include="src\GamePlay\Render\RenderPass.hpp" />
     <ClInclude Include="src\GamePlay\Render\RenderPipeline.hpp" />
-    <ClInclude Include="src\Platform\OpenGL\Shader.hpp" />
-    <ClInclude Include="src\Platform\rhi.hpp" />
+    <ClInclude Include="src\Platform\RHI\OpenGL\Shader.hpp" />
+    <ClInclude Include="src\Platform\RHI\rhi.hpp" />
     <ClInclude Include="src\Scene.hpp" />
     <ClInclude Include="src\GamePlay\ECS\System.hpp" />
     <ClInclude Include="src\ResourceManager\Texture.hpp" />
     <ClInclude Include="src\View.hpp" />
     <ClInclude Include="src\GamePlay\ECS\World.hpp" />
     <ClInclude Include="src\Window.hpp" />
+    <ClInclude Include="thirdparty\imgui\imconfig.h" />
+    <ClInclude Include="thirdparty\imgui\imgui.h" />
+    <ClInclude Include="thirdparty\imgui\ImGuizmo.h" />
+    <ClInclude Include="thirdparty\imgui\imgui_impl_glfw.h" />
+    <ClInclude Include="thirdparty\imgui\imgui_impl_opengl3.h" />
+    <ClInclude Include="thirdparty\imgui\imgui_impl_opengl3_loader.h" />
+    <ClInclude Include="thirdparty\imgui\imgui_internal.h" />
+    <ClInclude Include="thirdparty\imgui\imstb_rectpack.h" />
+    <ClInclude Include="thirdparty\imgui\imstb_textedit.h" />
+    <ClInclude Include="thirdparty\imgui\imstb_truetype.h" />
+    <ClInclude Include="thirdparty\stb_image.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="resource\shader\border.fs" />
@@ -133,6 +137,7 @@
     <None Include="resource\shader\skybox.vs" />
     <None Include="resource\shader\wireframe.fs" />
     <None Include="resource\shader\wireframe.gs" />
+    <None Include="src\Platform\OS\Linux\linux.placeholder" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
@@ -187,19 +192,19 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>$(SolutionDir)include;$(SolutionDir)imgui</IncludePath>
+    <IncludePath>$(SolutionDir)thirdparty</IncludePath>
     <LibraryPath>$(SolutionDir)lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <IncludePath>$(SolutionDir)include;$(SolutionDir)imgui</IncludePath>
+    <IncludePath>$(SolutionDir)thirdparty</IncludePath>
     <LibraryPath>$(SolutionDir)lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <IncludePath>$(SolutionDir)include;$(SolutionDir)imgui</IncludePath>
+    <IncludePath>$(SolutionDir)thirdparty</IncludePath>
     <LibraryPath>$(SolutionDir)lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <IncludePath>$(SolutionDir)include;$(SolutionDir)imgui</IncludePath>
+    <IncludePath>$(SolutionDir)thirdparty</IncludePath>
     <LibraryPath>$(SolutionDir)lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -216,7 +221,8 @@
       <EntryPointSymbol>mainCRTStartup</EntryPointSymbol>
     </Link>
     <PostBuildEvent>
-      <Command>$(OutDir)\$(ProjectName).exe</Command>
+      <Command>
+      </Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -237,7 +243,8 @@
       <EntryPointSymbol>mainCRTStartup</EntryPointSymbol>
     </Link>
     <PostBuildEvent>
-      <Command>$(OutDir)\$(ProjectName).exe</Command>
+      <Command>
+      </Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -255,7 +262,8 @@
       <EntryPointSymbol>mainCRTStartup</EntryPointSymbol>
     </Link>
     <PostBuildEvent>
-      <Command>$(OutDir)\$(ProjectName).exe</Command>
+      <Command>
+      </Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -276,7 +284,8 @@
       <EntryPointSymbol>mainCRTStartup</EntryPointSymbol>
     </Link>
     <PostBuildEvent>
-      <Command>$(OutDir)\$(ProjectName).exe</Command>
+      <Command>
+      </Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
