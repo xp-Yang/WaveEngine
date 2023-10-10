@@ -1,8 +1,8 @@
 #ifndef ImGuiEditor_hpp
 #define ImGuiEditor_hpp
 
-#include "../GamePlay/ECS/RenderSystem.hpp"
-#include "../GamePlay/ECS/MotionSystem.hpp"
+#include "GamePlay/ECS/RenderSystem.hpp"
+#include "GamePlay/ECS/MotionSystem.hpp"
 
 class ImGuiEditor {
 public:

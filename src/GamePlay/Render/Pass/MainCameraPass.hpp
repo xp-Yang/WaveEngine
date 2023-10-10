@@ -1,7 +1,7 @@
 #ifndef MainCameraPass_hpp
 #define MainCameraPass_hpp
 
-#include "RenderPass.hpp"
+#include "../RenderPass.hpp"
 
 class MainCameraPass : public RenderPass {
 public:

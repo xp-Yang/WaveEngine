@@ -1,13 +1,12 @@
-#ifndef ShadowPass_hpp 
-#define ShadowPass_hpp
+#ifndef GBufferPass_hpp
+#define GBufferPass_hpp
 
-#include "RenderPass.hpp"
+#include "../RenderPass.hpp"
 
-class ShadowPass : public RenderPass {
+class GBufferPass : public RenderPass {
 public:
     void init() override;
     void prepare(FrameBuffer* framebuffer) override;
-    void configSamples(int samples);
     void draw() override;
     FrameBuffer* getFrameBuffer() override;
 
@@ -15,4 +14,4 @@ private:
     FrameBuffer* m_framebuffer{ nullptr };
 };
 
-#endif
+#endif // !GBufferPass_hpp

@@ -4,31 +4,7 @@
 namespace ecs {
 
 class System {
-
-};
-
-class RenderSystem {
-public:
-
-};
-
-class RenderPickedSystem {
-
-};
-
-class InputSystem {
-
-};
-
-class ChangeTransformSystem{
-
-};
-
-class ChangeMaterialSystem {
-
-};
-
-struct LightSystem {
+	virtual void func() = 0;
 };
 
 }

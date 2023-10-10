@@ -1,5 +1,5 @@
 #include "Material.hpp"
-#include "../Platform/RHI/rhi.hpp"
+#include "Platform/RHI/rhi.hpp"
 #include "Texture.hpp"
 
 void Material::update_shader_binding() const {

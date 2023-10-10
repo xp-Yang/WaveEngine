@@ -1,9 +1,9 @@
-#ifndef ScreenPass_hpp
-#define ScreenPass_hpp
+#ifndef PickingPass_hpp
+#define PickingPass_hpp
 
-#include "RenderPass.hpp"
+#include "../RenderPass.hpp"
 
-class ScreenPass : public RenderPass {
+class PickingPass : public RenderPass {
 public:
     void init() override;
     void prepare(FrameBuffer* framebuffer) override;
@@ -11,9 +11,8 @@ public:
     FrameBuffer* getFrameBuffer() override;
 
 private:
-    FrameBuffer* m_default_framebuffer{ nullptr };
     FrameBuffer* m_framebuffer{ nullptr };
-    ScreenQuad* m_screen_quad;
+    unsigned int m_fbo = 0;
 };
 
 #endif

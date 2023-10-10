@@ -1,7 +1,7 @@
 #ifndef RenderSystem_hpp
 #define RenderSystem_hpp
 
-#include "../Render/RenderPipeline.hpp"
+#include "GamePlay/Render/RenderPipeline.hpp"
 
 namespace ecs {
 

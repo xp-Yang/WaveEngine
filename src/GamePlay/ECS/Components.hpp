@@ -7,9 +7,9 @@
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/quaternion.hpp>
 #include "World.hpp"
-#include "../../ResourceManager/Mesh.hpp"
-#include "../../ResourceManager/Material.hpp"
-#include "../../Window.hpp"
+#include "ResourceManager/Mesh.hpp"
+#include "ResourceManager/Material.hpp"
+#include "Window.hpp"
 
 namespace ecs {
 

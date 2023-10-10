@@ -1,10 +1,10 @@
 #include "RenderPipeline.hpp"
-#include "ShadowPass.hpp"
-#include "GBufferPass.hpp"
-#include "LightingPass.hpp"
-#include "MainCameraPass.hpp"
-#include "PickingPass.hpp"
-#include "ScreenPass.hpp"
+#include "Pass/ShadowPass.hpp"
+#include "Pass/GBufferPass.hpp"
+#include "Pass/LightingPass.hpp"
+#include "Pass/MainCameraPass.hpp"
+#include "Pass/PickingPass.hpp"
+#include "Pass/ScreenPass.hpp"
 #include <imgui/imgui.h>
 
 void RenderPipeline::init()
