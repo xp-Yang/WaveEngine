@@ -1,6 +1,6 @@
 #include "MainCameraPass.hpp"
-#include "../ECS/Components.hpp"
-#include "../../Platform/RHI/rhi.hpp"
+#include "GamePlay/ECS/Components.hpp"
+#include "Platform/RHI/rhi.hpp"
 #include <iostream>
 
 void MainCameraPass::init()

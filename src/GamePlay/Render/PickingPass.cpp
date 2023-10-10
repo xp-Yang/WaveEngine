@@ -1,6 +1,6 @@
 #include "PickingPass.hpp"
-#include "../ECS/Components.hpp"
-#include "../../Platform/RHI/rhi.hpp"
+#include "GamePlay/ECS/Components.hpp"
+#include "Platform/RHI/rhi.hpp"
 #include <imgui/imgui.h>
 
 void PickingPass::init()

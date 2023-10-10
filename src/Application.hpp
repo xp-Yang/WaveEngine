@@ -4,6 +4,7 @@
 #include "View.hpp"
 #include "Scene.hpp"
 #include "Editor/ImGuiEditor.hpp"
+#include "Platform/RHI/rhi.hpp"
 #include "Window.hpp"
 
 class Application {

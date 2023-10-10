@@ -1,6 +1,7 @@
 #ifndef RenderPipeline_hpp
 #define RenderPipeline_hpp
 
+#include "RenderPass.hpp"
 #include <memory>
 
 enum class PIPELINE_TYPE{
@@ -19,7 +20,6 @@ struct RenderParams {
     int     pixelate_level = 1;
 };
 
-class RenderPass;
 class RenderPipeline {
 public:
     void init();

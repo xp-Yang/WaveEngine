@@ -1,5 +1,3 @@
-#include "Platform/RHI/rhi.hpp"
-#include <GLFW/glfw3.h>
 #include "Application.hpp"
 #include <imgui/imgui_impl_glfw.h>
 #include <imgui/imgui_impl_opengl3.h>

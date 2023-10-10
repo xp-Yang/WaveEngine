@@ -1,6 +1,6 @@
 #include "ShadowPass.hpp"
-#include "../ECS/Components.hpp"
-#include "../../Platform/RHI/rhi.hpp"
+#include "GamePlay/ECS/Components.hpp"
+#include "Platform/RHI/rhi.hpp"
 
 void ShadowPass::init()
 {

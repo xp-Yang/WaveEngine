@@ -1,5 +1,4 @@
 #include "RenderPass.hpp"
-#include "../../Platform/RHI/rhi.hpp"
 
 unsigned int ScreenQuad::create()
 {

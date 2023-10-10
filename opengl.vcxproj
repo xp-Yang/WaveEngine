@@ -37,9 +37,10 @@
     <ClCompile Include="src\GamePlay\Render\ScreenPass.cpp" />
     <ClCompile Include="src\GamePlay\Render\ShadowPass.cpp" />
     <ClCompile Include="src\Core\Logger.cpp" />
+    <ClCompile Include="src\Platform\OS\FileDialog.cpp" />
     <ClCompile Include="thirdparty\glad.c" />
     <ClCompile Include="src\main.cpp" />
-    <ClCompile Include="src\Platform\OS\Windows\FileDialog.cpp" />
+    <ClCompile Include="src\Platform\OS\Windows\WindowsFileDialog.cpp" />
     <ClCompile Include="src\ResourceManager\Material.cpp" />
     <ClCompile Include="src\ResourceManager\Mesh.cpp" />
     <ClCompile Include="src\ResourceManager\MyModel.cpp" />
@@ -76,6 +77,7 @@
     <ClInclude Include="src\GamePlay\ECS\PhysicsSystem.hpp" />
     <ClInclude Include="src\GamePlay\ECS\RenderSystem.hpp" />
     <ClInclude Include="src\Editor\ImGuiEditor.hpp" />
+    <ClInclude Include="src\Platform\OS\FileDialog.hpp" />
     <ClInclude Include="src\GamePlay\Render\GBufferPass.hpp" />
     <ClInclude Include="src\GamePlay\Render\LightingPass.hpp" />
     <ClInclude Include="src\GamePlay\Render\MainCameraPass.hpp" />
@@ -84,7 +86,7 @@
     <ClInclude Include="src\GamePlay\Render\ShadowPass.hpp" />
     <ClInclude Include="src\Core\Logger.hpp" />
     <ClInclude Include="resource\shader\light.vs" />
-    <ClInclude Include="src\Platform\OS\Windows\FileDialog.hpp" />
+    <ClInclude Include="src\Platform\OS\Windows\WindowsFileDialog.hpp" />
     <ClInclude Include="src\Platform\RHI\Vulkan\rhi_vulkan.hpp" />
     <ClInclude Include="src\ResourceManager\Material.hpp" />
     <ClInclude Include="src\ResourceManager\Mesh.hpp" />
@@ -192,19 +194,19 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>$(SolutionDir)thirdparty</IncludePath>
+    <IncludePath>$(SolutionDir)thirdparty;$(SolutionDir)src</IncludePath>
     <LibraryPath>$(SolutionDir)lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <IncludePath>$(SolutionDir)thirdparty</IncludePath>
+    <IncludePath>$(SolutionDir)thirdparty;$(SolutionDir)src</IncludePath>
     <LibraryPath>$(SolutionDir)lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <IncludePath>$(SolutionDir)thirdparty</IncludePath>
+    <IncludePath>$(SolutionDir)thirdparty;$(SolutionDir)src</IncludePath>
     <LibraryPath>$(SolutionDir)lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <IncludePath>$(SolutionDir)thirdparty</IncludePath>
+    <IncludePath>$(SolutionDir)thirdparty;$(SolutionDir)src</IncludePath>
     <LibraryPath>$(SolutionDir)lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">

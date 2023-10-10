@@ -1,7 +1,7 @@
 #include "ScreenPass.hpp"
-#include "../ECS/Components.hpp"
-#include "../../Platform/RHI/rhi.hpp"
-#include "../../Application.hpp"
+#include "GamePlay/ECS/Components.hpp"
+#include "Platform/RHI/rhi.hpp"
+#include "Application.hpp"
 
 void ScreenPass::init()
 {
