@@ -8,7 +8,6 @@
 #include <glad/glad.h>
 #include "OpenGL/FrameBuffer.hpp"
 #include "OpenGL/Renderer.hpp"
-#include "OpenGL/Shader.hpp"
 
 class RHI {
 public:

@@ -1,5 +1,5 @@
 #include "Scene.hpp"
-#include "GamePlay/ECS/Components.hpp"
+#include "GamePlay/Framework/ECS/Components.hpp"
 #include "ResourceManager/MyModel.hpp"
 #include "ResourceManager/Texture.hpp"
 #include "Platform/RHI/rhi.hpp"

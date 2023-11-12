@@ -1,8 +1,8 @@
 #ifndef Application_hpp
 #define Application_hpp
 
-#include "View.hpp"
-#include "Scene.hpp"
+#include "GamePlay/Framework/Scene.hpp"
+#include "GamePlay/Input/InputSystem.hpp"
 #include "Editor/ImGuiEditor.hpp"
 #include "Platform/RHI/rhi.hpp"
 #include "Window.hpp"
@@ -16,19 +16,19 @@ public:
 	void run();
 	void init();
 	void shutdown();
-	std::shared_ptr<Window> getWindow();
+	Window* getWindow();
 
 private:
 	Application() = default;
 	void newFrame();
 	void endFrame();
 
-	std::shared_ptr<Window> m_window;
+	std::unique_ptr<Window> m_window;
 	Scene m_scene;
-	View m_view;
 	ImGuiEditor m_editor;
-	std::shared_ptr<ecs::RenderSystem> m_render_system;
-	std::shared_ptr<ecs::MotionSystem> m_motion_system;
+	std::unique_ptr<RenderSystem> m_render_system;
+	std::unique_ptr<MotionSystem> m_motion_system;
+	std::unique_ptr<InputSystem> m_input_system;
 };
 
 #endif

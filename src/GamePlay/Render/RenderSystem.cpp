@@ -1,11 +1,8 @@
 #include "RenderSystem.hpp"
-#include "Components.hpp"
-
-namespace ecs {
 
 void RenderSystem::initPipeline()
 {
-    m_render_pipeline = new RenderPipeline();
+    m_render_pipeline = std::make_unique<RenderPipeline>();
     m_render_pipeline->init();
 }
 
@@ -17,6 +14,4 @@ void RenderSystem::setRenderParams(const RenderParams& params)
 void RenderSystem::onUpdate()
 {
     m_render_pipeline->render();
-}
-
 }

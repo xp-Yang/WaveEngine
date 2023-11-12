@@ -46,6 +46,7 @@
 // 28. 集成imgui窗口停靠，多viewport
 // 28. 加载、保存文件，序列化和反序列化
 // 28. 优化pickingPass, readpixel用鼠标事件处理一次
+// 28. 实现scenegraph场景管理，理清楚bbs的objectlist
 int main()
 {
     auto& app = Application::GetApp();

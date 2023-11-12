@@ -1,11 +1,11 @@
 #include "MainCameraPass.hpp"
-#include "GamePlay/ECS/Components.hpp"
+#include "GamePlay/Framework/ECS/Components.hpp"
 #include "Platform/RHI/rhi.hpp"
 #include <iostream>
 
 void MainCameraPass::init()
 {
-    m_framebuffer = new FrameBuffer(WINDOW_WIDTH, WINDOW_HEIGHT, 4);
+    m_framebuffer = std::make_unique<FrameBuffer>(WINDOW_WIDTH, WINDOW_HEIGHT, 4);
     m_framebuffer->create({ AttachmentType::RGBA, AttachmentType::DEPTH24STENCIL8 });
 }
 
@@ -253,5 +253,5 @@ void MainCameraPass::draw()
 
 FrameBuffer* MainCameraPass::getFrameBuffer()
 {
-    return m_framebuffer;
+    return m_framebuffer.get();
 }

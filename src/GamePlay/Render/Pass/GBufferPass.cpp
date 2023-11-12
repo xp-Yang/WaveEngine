@@ -1,10 +1,10 @@
 #include "GBufferPass.hpp"
-#include "GamePlay/ECS/Components.hpp"
+#include "GamePlay/Framework/ECS/Components.hpp"
 #include "Platform/RHI/rhi.hpp"
 
 void GBufferPass::init()
 {
-    m_framebuffer = new FrameBuffer(WINDOW_WIDTH, WINDOW_HEIGHT);
+    m_framebuffer = std::make_unique<FrameBuffer>(WINDOW_WIDTH, WINDOW_HEIGHT);
     m_framebuffer->create({ AttachmentType::RGB16F, AttachmentType::RGB16F, AttachmentType::RGB16F, AttachmentType::RGB16F, AttachmentType::DEPTH });
     GLuint attachments[4] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2, GL_COLOR_ATTACHMENT3 };
     glDrawBuffers(4, attachments);
@@ -59,5 +59,5 @@ void GBufferPass::draw()
 
 FrameBuffer* GBufferPass::getFrameBuffer()
 {
-    return m_framebuffer;
+    return m_framebuffer.get();
 }

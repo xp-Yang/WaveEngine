@@ -1,22 +1,22 @@
 #include "ScreenPass.hpp"
-#include "GamePlay/ECS/Components.hpp"
+#include "GamePlay/Framework/ECS/Components.hpp"
 #include "Platform/RHI/rhi.hpp"
 #include "Application.hpp"
 
 void ScreenPass::init()
 {
-	m_default_framebuffer = new FrameBuffer(WINDOW_WIDTH, WINDOW_HEIGHT);
+	m_default_framebuffer = std::make_unique<FrameBuffer>(WINDOW_WIDTH, WINDOW_HEIGHT);
 	m_default_framebuffer->createDefault();
 	// ÓÃÀ´downSampleµÄ
-	m_framebuffer = new FrameBuffer(WINDOW_WIDTH, WINDOW_HEIGHT);
+	m_framebuffer = std::make_unique<FrameBuffer>(WINDOW_WIDTH, WINDOW_HEIGHT);
 	m_framebuffer->create({ AttachmentType::RGBA });
-	m_screen_quad = new ScreenQuad();
+	m_screen_quad = std::make_unique<ScreenQuad>();
 	m_screen_quad->create();
 }
 
 void ScreenPass::prepare(FrameBuffer* framebuffer)
 {
-	framebuffer->blitColorMapTo(m_framebuffer);
+	framebuffer->blitColorMapTo(m_framebuffer.get());
 }
 
 void ScreenPass::draw()
@@ -43,5 +43,5 @@ void ScreenPass::draw()
 
 FrameBuffer* ScreenPass::getFrameBuffer()
 {
-	return m_framebuffer;
+	return m_framebuffer.get();
 }

@@ -1,9 +1,7 @@
 #ifndef RenderSystem_hpp
 #define RenderSystem_hpp
 
-#include "GamePlay/Render/RenderPipeline.hpp"
-
-namespace ecs {
+#include "RenderPipeline.hpp"
 
 class RenderSystem {
 public:
@@ -12,9 +10,7 @@ public:
     void onUpdate();
 
 private:
-    RenderPipeline* m_render_pipeline{ nullptr };
+    std::unique_ptr<RenderPipeline> m_render_pipeline;
 };
-
-}
 
 #endif // !RenderSystem_hpp

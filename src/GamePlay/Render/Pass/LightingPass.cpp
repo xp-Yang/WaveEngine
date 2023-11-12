@@ -1,12 +1,12 @@
 #include "LightingPass.hpp"
-#include "GamePlay/ECS/Components.hpp"
+#include "GamePlay/Framework/ECS/Components.hpp"
 #include "Platform/RHI/rhi.hpp"
 
 void LightingPass::init()
 {
-    m_framebuffer = new FrameBuffer(WINDOW_WIDTH, WINDOW_HEIGHT);
+    m_framebuffer = std::make_unique<FrameBuffer>(WINDOW_WIDTH, WINDOW_HEIGHT);
     m_framebuffer->create({ AttachmentType::RGB16F, AttachmentType::DEPTH });
-	m_screen_quad = new ScreenQuad();
+	m_screen_quad = std::make_unique<ScreenQuad>();
 	m_screen_quad->create();
 }
 
@@ -82,7 +82,7 @@ void LightingPass::draw()
 
 	// lights
 	glEnable(GL_DEPTH_TEST);
-	m_gbuffer_framebuffer->blitDepthMapTo(m_framebuffer);
+	m_gbuffer_framebuffer->blitDepthMapTo(m_framebuffer.get());
 	for (auto entity : world.entityView<ecs::LightComponent, ecs::RenderableComponent, ecs::TransformComponent>()) {
 		auto& renderable = *world.getComponent<ecs::RenderableComponent>(entity);
 		auto& model_matrix = *world.getComponent<ecs::TransformComponent>(entity);
@@ -104,5 +104,5 @@ void LightingPass::draw()
 
 FrameBuffer* LightingPass::getFrameBuffer()
 {
-	return m_framebuffer;
+	return m_framebuffer.get();
 }

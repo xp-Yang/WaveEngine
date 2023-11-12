@@ -10,8 +10,12 @@
 class FileDialog
 {
 public:
-    virtual std::string OpenFile(const char* filter) { return ""; };
-    virtual std::string SaveFile(const char* filter) { return ""; };
+    FileDialog() = default;
+    FileDialog(const FileDialog&) = delete;
+    FileDialog& operator=(const FileDialog&) = delete;
+    virtual ~FileDialog() = default;
+    virtual std::string OpenFile(const char* filter) = 0;
+    virtual std::string SaveFile(const char* filter) = 0;
     static FileDialog* create();
 };
 

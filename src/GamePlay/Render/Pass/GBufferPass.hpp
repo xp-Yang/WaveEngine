@@ -9,9 +9,6 @@ public:
     void prepare(FrameBuffer* framebuffer) override;
     void draw() override;
     FrameBuffer* getFrameBuffer() override;
-
-private:
-    FrameBuffer* m_framebuffer{ nullptr };
 };
 
 #endif // !GBufferPass_hpp

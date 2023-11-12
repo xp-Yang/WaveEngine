@@ -19,7 +19,6 @@ public:
     //bool is_shadow_map_enable() const { return m_enable_shadow_map; }
     //void set_shadow_map_id(unsigned int id) { shadow_map_id = id; }
     //unsigned int get_shadow_map_id() const { return shadow_map_id; }
-    void mouse_and_key_callback();
 
 
 private:

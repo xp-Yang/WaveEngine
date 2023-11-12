@@ -3,8 +3,6 @@
 #include <GLFW/glfw3.h>
 #include <imgui/imgui.h>
 
-namespace ecs {
-
 void MotionSystem::onUpdate()
 {
 	auto& world = ecs::World::get();
@@ -17,6 +15,4 @@ void MotionSystem::onUpdate()
 		auto& light_transform = *world.getComponent<ecs::TransformComponent>(entity);
 		light_transform.translation = glm::vec3(rotate * glm::vec4(light_transform.translation, 1.0f));
 	}
-}
-
 }

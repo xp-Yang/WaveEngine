@@ -1,9 +1,8 @@
 #include "Application.hpp"
 #include <imgui/imgui_impl_glfw.h>
 #include <imgui/imgui_impl_opengl3.h>
-#include "GamePlay/ECS/Components.hpp"
-#include "GamePlay/ECS/RenderSystem.hpp"
-#include "GamePlay/ECS/MotionSystem.hpp"
+#include "GamePlay/Framework/ECS/Components.hpp"
+#include "GamePlay/Framework/ECS/MotionSystem.hpp"
 #include <windows.h>
 #include <iostream>
 
@@ -19,7 +18,7 @@ void Application::run() {
 		newFrame(); // automatically handle imgui input
 
 		// input System
-		m_view.mouse_and_key_callback();
+		m_input_system->mouse_and_key_callback();
 
 		// motion System
 		m_motion_system->onUpdate();
@@ -40,8 +39,7 @@ void Application::run() {
 
 void Application::init()
 {
-	m_window = std::make_shared<Window>();
-	m_window->create((int)WINDOW_WIDTH, (int)WINDOW_HEIGHT);
+	m_window = std::make_unique<Window>((int)WINDOW_WIDTH, (int)WINDOW_HEIGHT);
 
 	//初始化GLAD，使其可以管理OpenGL函数指针
 	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
@@ -56,11 +54,11 @@ void Application::init()
 	ImGui_ImplOpenGL3_Init("#version 330");
 
 	m_scene.init();
-	m_view.set_scene(&m_scene);
-	m_render_system = std::make_shared<ecs::RenderSystem>();
+	m_render_system = std::make_unique<RenderSystem>();
 	m_render_system->initPipeline();
-	m_motion_system = std::make_shared<ecs::MotionSystem>();
-	m_editor.init(m_render_system, m_motion_system);
+	m_motion_system = std::make_unique<MotionSystem>();
+	m_input_system = std::make_unique<InputSystem>();
+	m_editor.init(m_render_system.get(), m_motion_system.get());
 }
 
 void Application::shutdown()
@@ -71,15 +69,13 @@ void Application::shutdown()
 	m_window->shutdown();
 }
 
-std::shared_ptr<Window> Application::getWindow()
+Window* Application::getWindow()
 {
-	return m_window;
+	return m_window.get();
 }
 
 void Application::newFrame()
 {
-	m_window->pollEvents();//检查触发事件（键盘输入、鼠标移动等）
-
 	ImGui_ImplOpenGL3_NewFrame();
 	ImGui_ImplGlfw_NewFrame();
 	ImGui::NewFrame();
@@ -89,5 +85,6 @@ void Application::endFrame()
 {
 	ImGui::Render();
 	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-	glfwSwapBuffers(m_window->getNativeWindowHandle());//交换颜色缓冲（它是一个储存着GLFW窗口每一个像素颜色的大缓冲），输出在屏幕上。
+
+	m_window->update();
 }

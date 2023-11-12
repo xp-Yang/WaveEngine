@@ -21,9 +21,11 @@ struct Material {
         std::string height_map_path = "";
     float shininess{ 128.0f };
 
+    // TODO：Shader 设计考量，是共享其他shader资源，还是自己拥有
     Shader* shader{ nullptr };
 
     void update_shader_binding() const;
+    //void set_shader();
     void set_specular_map(std::string map_path);
     void set_diffuse_map(std::string map_path);
 };

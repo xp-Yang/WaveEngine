@@ -9,12 +9,12 @@
 
 void RenderPipeline::init()
 {
-    m_main_camera_pass = std::make_shared<MainCameraPass>();
-    m_shadow_pass = std::make_shared<ShadowPass>();
-    m_gbuffer_pass = std::make_shared<GBufferPass>();
-    m_lighting_pass = std::make_shared<LightingPass>();
-    m_picking_pass = std::make_shared<PickingPass>();
-    m_screen_pass = std::make_shared<ScreenPass>();
+    m_main_camera_pass = std::make_unique<MainCameraPass>();
+    m_shadow_pass = std::make_unique<ShadowPass>();
+    m_gbuffer_pass = std::make_unique<GBufferPass>();
+    m_lighting_pass = std::make_unique<LightingPass>();
+    m_picking_pass = std::make_unique<PickingPass>();
+    m_screen_pass = std::make_unique<ScreenPass>();
     m_shadow_pass->init();
     m_main_camera_pass->init();
     m_gbuffer_pass->init();

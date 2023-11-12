@@ -59,8 +59,8 @@ class World {
 public:
     // 单例
     static World& get() {
-        static World* instance = new World();
-        return *instance;
+        static World instance;
+        return instance;
     }
 
     // 所有entity都从这里创建
@@ -159,7 +159,8 @@ public:
 
 private:
     World() = default;
-    World(const World&) = default;
+    World(const World&) = delete;
+    ~World();
 };
 
 template<typename... ComponentTypes>

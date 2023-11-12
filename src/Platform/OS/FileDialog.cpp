@@ -3,9 +3,9 @@
 
 FileDialog* FileDialog::create()
 {
-    auto file_dialog = new WindowsFileDialog();
+    static WindowsFileDialog file_dialog;
 #ifdef __LINUX__
     auto file_dialog;
 #endif
-    return file_dialog;
+    return &file_dialog;
 }

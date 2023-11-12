@@ -11,7 +11,6 @@ public:
     FrameBuffer* getFrameBuffer() override;
 
 private:
-    FrameBuffer* m_framebuffer{ nullptr };
     unsigned int m_fbo = 0;
 };
 

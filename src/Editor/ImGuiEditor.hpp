@@ -1,13 +1,13 @@
 #ifndef ImGuiEditor_hpp
 #define ImGuiEditor_hpp
 
-#include "GamePlay/ECS/RenderSystem.hpp"
-#include "GamePlay/ECS/MotionSystem.hpp"
+#include "GamePlay/Render/RenderSystem.hpp"
+#include "GamePlay/Framework/ECS/MotionSystem.hpp"
 
 class ImGuiEditor {
 public:
 	ImGuiEditor();
-	void init(std::shared_ptr<ecs::RenderSystem> render_system, std::shared_ptr<ecs::MotionSystem> motion_system);
+	void init(RenderSystem* render_system, MotionSystem* motion_system);
 	void render();
 	void render_global_editor();
 	void render_camera_editor();
@@ -19,8 +19,9 @@ public:
 	int icosphere_accuracy;
 
 private:
-	std::shared_ptr<ecs::RenderSystem> ref_render_system;
-	std::shared_ptr<ecs::MotionSystem> ref_motion_system;
+	// 无所有权的，不 out live 所指向的实际资源
+	RenderSystem* ref_render_system;
+	MotionSystem* ref_motion_system;
 	RenderParams m_render_params;
 };
 

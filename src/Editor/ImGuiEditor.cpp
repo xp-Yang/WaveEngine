@@ -2,8 +2,9 @@
 #include <string>
 #include <glm/glm.hpp>
 #include <imgui/imgui.h>
-#include "GamePlay/ECS/Components.hpp"
+#include "GamePlay/Framework/ECS/Components.hpp"
 #include "Core/Logger.hpp"
+#include "Platform/OS/FileDialog.hpp"
 
 ImGuiEditor::ImGuiEditor()
 {
@@ -14,7 +15,7 @@ ImGuiEditor::ImGuiEditor()
     // TODO: editor依赖system，能操控渲染管线，能操控运动，能编辑transform，能编辑mesh，能编辑material...
 }
 
-void ImGuiEditor::init(std::shared_ptr<ecs::RenderSystem> render_system, std::shared_ptr<ecs::MotionSystem> motion_system)
+void ImGuiEditor::init(RenderSystem* render_system, MotionSystem* motion_system)
 {
     ref_render_system = render_system;
     ref_motion_system = motion_system;
@@ -34,7 +35,10 @@ void ImGuiEditor::render_global_editor() {
         if (ImGui::BeginMenu("File"))
         {
             if (ImGui::MenuItem("New")) {}
-            if (ImGui::MenuItem("Open", "Ctrl+O")) {}
+            if (ImGui::MenuItem("Open", "Ctrl+O")) {
+                FileDialog* file_dlg = FileDialog::create();
+                file_dlg->OpenFile("");
+            }
             if (ImGui::MenuItem("Save", "Ctrl+S")) {}
             if (ImGui::MenuItem("Save As..")) {}
             ImGui::EndMenu();

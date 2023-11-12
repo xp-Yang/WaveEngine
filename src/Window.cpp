@@ -2,7 +2,7 @@
 #include <assert.h>
 #include <utility>
 
-void Window::create(int width, int height)
+Window::Window(int width, int height)
 {
 	glfwInit();//初始化GLFW; glfwWindowHint()配置GLFW
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);//告诉GLFW我们要使用的OpenGL版本是3.3
@@ -48,9 +48,10 @@ bool Window::shouldClose() const
 	return glfwWindowShouldClose(m_window);
 }
 
-void Window::pollEvents() const
+void Window::update() const
 {
-	glfwPollEvents();
+	glfwPollEvents();//检查触发事件（键盘输入、鼠标移动等）
+	glfwSwapBuffers(m_window);//交换颜色缓冲（它是一个储存着GLFW窗口每一个像素颜色的大缓冲），输出在屏幕上。
 }
 
 void Window::setMainViewport(const Viewport& viewport)

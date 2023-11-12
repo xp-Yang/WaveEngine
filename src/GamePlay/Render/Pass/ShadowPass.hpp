@@ -10,9 +10,6 @@ public:
     void configSamples(int samples);
     void draw() override;
     FrameBuffer* getFrameBuffer() override;
-
-private:
-    FrameBuffer* m_framebuffer{ nullptr };
 };
 
 #endif

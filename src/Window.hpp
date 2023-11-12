@@ -17,10 +17,10 @@ struct Viewport {
 // TODO 考虑对非GLFWwindow的扩展
 class Window {
 public:
-    void create(int width, int height);
+    Window(int width, int height);
     void shutdown();
     bool shouldClose() const;
-    void pollEvents() const;
+    void update() const;
     void setMainViewport(const Viewport& viewport);
     GLFWwindow* getNativeWindowHandle() const;
     int getWidth() const;

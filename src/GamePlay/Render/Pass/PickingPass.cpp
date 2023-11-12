@@ -1,11 +1,11 @@
 #include "PickingPass.hpp"
-#include "GamePlay/ECS/Components.hpp"
+#include "GamePlay/Framework/ECS/Components.hpp"
 #include "Platform/RHI/rhi.hpp"
 #include <imgui/imgui.h>
 
 void PickingPass::init()
 {
-    m_framebuffer = new FrameBuffer(WINDOW_WIDTH, WINDOW_HEIGHT);
+    m_framebuffer = std::make_unique<FrameBuffer>(WINDOW_WIDTH, WINDOW_HEIGHT);
     m_framebuffer->create({ AttachmentType::RGBA , AttachmentType::DEPTH});
 }
 
@@ -90,5 +90,5 @@ void PickingPass::draw()
 
 FrameBuffer* PickingPass::getFrameBuffer()
 {
-    return m_framebuffer;
+    return m_framebuffer.get();
 }

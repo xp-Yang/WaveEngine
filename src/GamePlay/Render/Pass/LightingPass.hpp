@@ -14,8 +14,7 @@ public:
 private:
     FrameBuffer* m_gbuffer_framebuffer{ nullptr };
     unsigned int m_shadow_map = 0;
-    FrameBuffer* m_framebuffer{ nullptr };
-    ScreenQuad* m_screen_quad;
+    std::unique_ptr<ScreenQuad> m_screen_quad;
 };
 
 #endif

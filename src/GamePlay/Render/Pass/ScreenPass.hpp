@@ -11,9 +11,8 @@ public:
     FrameBuffer* getFrameBuffer() override;
 
 private:
-    FrameBuffer* m_default_framebuffer{ nullptr };
-    FrameBuffer* m_framebuffer{ nullptr };
-    ScreenQuad* m_screen_quad;
+    std::unique_ptr<FrameBuffer> m_default_framebuffer{ nullptr };
+    std::unique_ptr<ScreenQuad> m_screen_quad;
 };
 
 #endif
