@@ -1,6 +1,6 @@
 #include "RenderSystem.hpp"
 
-void RenderSystem::initPipeline()
+RenderSystem::RenderSystem()
 {
     m_render_pipeline = std::make_unique<RenderPipeline>();
     m_render_pipeline->init();

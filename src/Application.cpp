@@ -1,12 +1,24 @@
 #include "Application.hpp"
-#include <imgui/imgui_impl_glfw.h>
-#include <imgui/imgui_impl_opengl3.h>
-#include "GamePlay/Framework/ECS/Components.hpp"
-#include "GamePlay/Framework/ECS/MotionSystem.hpp"
 #include <windows.h>
 #include <iostream>
+#include <imgui/imgui_impl_glfw.h>
+#include <imgui/imgui_impl_opengl3.h>
+#include "GamePlay/Framework/Scene.hpp"
+#include "Editor/ImGuiEditor.hpp"
+#include "GamePlay/Render/RenderSystem.hpp"
+#include "GamePlay/Framework/ECS/Components.hpp"
+#include "GamePlay/Framework/ECS/MotionSystem.hpp"
+#include "GamePlay/Input/InputSystem.hpp"
 
 #define PERFORMANCE_TEST 0
+
+Application::~Application() = default;
+
+Application& Application::GetApp()
+{
+	static Application app;
+	return app;
+}
 
 void Application::run() {
 	while (!m_window->shouldClose()) {
@@ -26,7 +38,7 @@ void Application::run() {
 		// render System
 		m_render_system->onUpdate();
 		// render imgui
-		m_editor.render();
+		m_editor->render();
 
 		endFrame();
 #if PERFORMANCE_TEST
@@ -43,9 +55,7 @@ void Application::init()
 
 	//初始化GLAD，使其可以管理OpenGL函数指针
 	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
-	{
 		assert(false);
-	}
 
 	// setup imgui
 	IMGUI_CHECKVERSION();
@@ -53,12 +63,12 @@ void Application::init()
 	ImGui_ImplGlfw_InitForOpenGL(m_window->getNativeWindowHandle(), true);
 	ImGui_ImplOpenGL3_Init("#version 330");
 
-	m_scene.init();
+	m_scene = std::make_unique<Scene>();
 	m_render_system = std::make_unique<RenderSystem>();
-	m_render_system->initPipeline();
 	m_motion_system = std::make_unique<MotionSystem>();
 	m_input_system = std::make_unique<InputSystem>();
-	m_editor.init(m_render_system.get(), m_motion_system.get());
+	m_editor = std::make_unique<ImGuiEditor>();
+	m_editor->init(m_render_system.get(), m_motion_system.get());
 }
 
 void Application::shutdown()

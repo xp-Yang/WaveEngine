@@ -27,6 +27,14 @@
 //    //stbi_write_jpg("jpg_test_.jpg", w, h, channels_num, data, w * channels_num);
 //}
 
+Scene::Scene() {
+	init();
+}
+
+Scene::~Scene() {
+
+}
+
 void Scene::init() {    
     // TODO 这些需要被scene管理吗，参考filament
 	auto& world = ecs::World::get();

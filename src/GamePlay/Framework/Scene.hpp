@@ -3,8 +3,8 @@
 
 class Scene {
 public:
-	Scene() = default;
-	~Scene() = default;
+	Scene();
+	~Scene();
 	//Object* object(const std::string& name) {
 	//	auto it = m_objects.find(name);
 	//	if (it == m_objects.end())
@@ -27,6 +27,7 @@ public:
 	//void set_skybox(Skybox* skybox) { m_skybox = skybox; }
 	//const Skybox& get_skybox() const { return *m_skybox; }
 
+protected:
 	void init();
 
 private:

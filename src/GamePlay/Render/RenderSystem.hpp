@@ -5,7 +5,7 @@
 
 class RenderSystem {
 public:
-    void initPipeline();
+    RenderSystem();
     void setRenderParams(const RenderParams& params);
     void onUpdate();
 
