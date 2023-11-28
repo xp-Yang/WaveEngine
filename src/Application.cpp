@@ -37,7 +37,7 @@ void Application::run() {
 
 		// render System
 		m_render_system->onUpdate();
-		// render imgui
+		/*render Editor(imgui)*/
 		m_editor->render();
 
 		endFrame();

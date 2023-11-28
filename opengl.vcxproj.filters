@@ -33,33 +33,15 @@
     <Filter Include="engine\src\GamePlay\Render">
       <UniqueIdentifier>{6cea49c1-efe9-424b-a1ef-aa1b7d0478e3}</UniqueIdentifier>
     </Filter>
-    <Filter Include="thirdparty">
-      <UniqueIdentifier>{d62a1257-d0ca-49eb-b549-6905c6450dfa}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="thirdparty\imgui">
+    <Filter Include="engine\imgui">
       <UniqueIdentifier>{d2d91617-6717-4c4c-a589-7d5264001ffe}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="engine\src\PlatForm\OS">
-      <UniqueIdentifier>{172c2ee6-b12a-433e-80bd-5d6e9f1e4f66}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="engine\src\PlatForm\RHI">
-      <UniqueIdentifier>{f77df061-8856-470f-b786-37656ff12458}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="engine\src\PlatForm\RHI\OpenGL">
-      <UniqueIdentifier>{b0e2ea42-e101-4c65-a1cc-e8f9e3334773}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="engine\src\PlatForm\OS\Windows">
-      <UniqueIdentifier>{d9cf7bc8-0240-4ccc-8ee6-aaccc1063b0b}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="engine\src\PlatForm\OS\Linux">
-      <UniqueIdentifier>{89687c18-9016-48db-a29e-7e3705b80132}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\main.cpp">
       <Filter>engine\src</Filter>
     </ClCompile>
-    <ClCompile Include="src\GamePlay\Framework\Scene.cpp">
+    <ClCompile Include="src\Scene.cpp">
       <Filter>engine\src</Filter>
     </ClCompile>
     <ClCompile Include="src\View.cpp">
@@ -74,66 +56,85 @@
     <ClCompile Include="src\Core\Math.hpp">
       <Filter>engine\src\Core</Filter>
     </ClCompile>
-    <ClCompile Include="src\GamePlay\Framework\ECS\AnimationSystem.cpp">
+    <ClCompile Include="src\GamePlay\ECS\AnimationSystem.cpp">
       <Filter>engine\src\GamePlay\ECS</Filter>
     </ClCompile>
-    <ClCompile Include="src\GamePlay\Framework\ECS\CameraSystem.cpp">
+    <ClCompile Include="src\GamePlay\ECS\CameraSystem.cpp">
       <Filter>engine\src\GamePlay\ECS</Filter>
     </ClCompile>
-    <ClCompile Include="src\GamePlay\Framework\ECS\Components.cpp">
+    <ClCompile Include="src\GamePlay\ECS\Components.cpp">
       <Filter>engine\src\GamePlay\ECS</Filter>
     </ClCompile>
-    <ClCompile Include="src\GamePlay\Framework\ECS\JobSystem.cpp">
+    <ClCompile Include="src\GamePlay\ECS\JobSystem.cpp">
       <Filter>engine\src\GamePlay\ECS</Filter>
     </ClCompile>
-    <ClCompile Include="src\GamePlay\Framework\ECS\MotionSystem.cpp">
+    <ClCompile Include="src\GamePlay\ECS\MotionSystem.cpp">
       <Filter>engine\src\GamePlay\ECS</Filter>
     </ClCompile>
-    <ClCompile Include="src\GamePlay\Framework\ECS\PhysicsSystem.cpp">
+    <ClCompile Include="src\GamePlay\ECS\PhysicsSystem.cpp">
       <Filter>engine\src\GamePlay\ECS</Filter>
     </ClCompile>
-    <ClCompile Include="src\GamePlay\Render\RenderSystem.cpp">
+    <ClCompile Include="src\GamePlay\ECS\RenderSystem.cpp">
       <Filter>engine\src\GamePlay\ECS</Filter>
     </ClCompile>
-    <ClCompile Include="src\GamePlay\Framework\ECS\MaterialSystem.cpp">
+    <ClCompile Include="src\GamePlay\ECS\System.cpp">
       <Filter>engine\src\GamePlay\ECS</Filter>
+    </ClCompile>
+    <ClCompile Include="src\GamePlay\ECS\MaterialSystem.cpp">
+      <Filter>engine\src\GamePlay\ECS</Filter>
+    </ClCompile>
+    <ClCompile Include="src\GamePlay\Render\RenderPass.cpp">
+      <Filter>engine\src\GamePlay\Render</Filter>
     </ClCompile>
     <ClCompile Include="src\GamePlay\Render\RenderPipeline.cpp">
       <Filter>engine\src\GamePlay\Render</Filter>
     </ClCompile>
-    <ClCompile Include="src\GamePlay\Render\Pass\MainCameraPass.cpp">
+    <ClCompile Include="src\GamePlay\Render\ScreenPass.cpp">
       <Filter>engine\src\GamePlay\Render</Filter>
     </ClCompile>
-    <ClCompile Include="src\GamePlay\Render\Pass\ScreenPass.cpp">
+    <ClCompile Include="src\GamePlay\Render\ShadowPass.cpp">
       <Filter>engine\src\GamePlay\Render</Filter>
-    <ClCompile Include="src\GamePlay\Framework\ECS\World.cpp">
+    </ClCompile>
+    <ClCompile Include="src\GamePlay\Render\PickingPass.cpp">
+      <Filter>engine\src\GamePlay\Render</Filter>
+    </ClCompile>
+    <ClCompile Include="src\GamePlay\Render\MainCameraPass.cpp">
+      <Filter>engine\src\GamePlay\Render</Filter>
+    </ClCompile>
+    <ClCompile Include="src\GamePlay\ECS\World.cpp">
       <Filter>engine\src\GamePlay\ECS</Filter>
+    </ClCompile>
+    <ClCompile Include="src\GamePlay\Render\GBufferPass.cpp">
+      <Filter>engine</Filter>
     </ClCompile>
     <ClCompile Include="src\Core\Logger.cpp">
       <Filter>engine</Filter>
     </ClCompile>
-    <ClCompile Include="src\GamePlay\Render\Pass\PickingPass.cpp">
-      <Filter>engine\src\GamePlay\Render</Filter>
+    <ClCompile Include="src\ResourceManager\Material.cpp">
+      <Filter>engine</Filter>
     </ClCompile>
-    <ClCompile Include="src\GamePlay\Render\Pass\ShadowPass.cpp">
-      <Filter>engine\src\GamePlay\Render</Filter>
+    <ClCompile Include="src\ResourceManager\Mesh.cpp">
+      <Filter>engine</Filter>
     </ClCompile>
-    <ClCompile Include="src\GamePlay\Render\Pass\GBufferPass.cpp">
-      <Filter>engine\src\GamePlay\Render</Filter>
+    <ClCompile Include="src\ResourceManager\MyModel.cpp">
+      <Filter>engine</Filter>
     </ClCompile>
-    <ClCompile Include="src\GamePlay\Render\Pass\LightingPass.cpp">
-      <Filter>engine\src\GamePlay\Render</Filter>
+    <ClCompile Include="src\Platform\RHI\OpenGL\FrameBuffer.cpp">
+      <Filter>engine</Filter>
     </ClCompile>
     <ClCompile Include="src\Platform\RHI\OpenGL\Renderer.cpp">
       <Filter>engine</Filter>
     </ClCompile>
-    <ClCompile Include="src\ResourceManager\Shader.cpp">
+    <ClCompile Include="src\Platform\RHI\OpenGL\Shader.cpp">
       <Filter>engine</Filter>
     </ClCompile>
     <ClCompile Include="src\test\test.cpp">
       <Filter>engine</Filter>
     </ClCompile>
     <ClCompile Include="src\ResourceManager\Texture.cpp">
+      <Filter>engine</Filter>
+    </ClCompile>
+    <ClCompile Include="src\GamePlay\Render\LightingPass.cpp">
       <Filter>engine</Filter>
     </ClCompile>
     <ClCompile Include="src\Window.cpp">
@@ -143,90 +144,36 @@
       <Filter>engine</Filter>
     </ClCompile>
     <ClCompile Include="thirdparty\imgui\imgui.cpp">
-      <Filter>thirdparty\imgui</Filter>
+      <Filter>engine</Filter>
     </ClCompile>
     <ClCompile Include="thirdparty\imgui\imgui_demo.cpp">
-      <Filter>thirdparty\imgui</Filter>
+      <Filter>engine</Filter>
     </ClCompile>
     <ClCompile Include="thirdparty\imgui\imgui_draw.cpp">
-      <Filter>thirdparty\imgui</Filter>
+      <Filter>engine</Filter>
     </ClCompile>
     <ClCompile Include="thirdparty\imgui\imgui_impl_glfw.cpp">
-      <Filter>thirdparty\imgui</Filter>
+      <Filter>engine</Filter>
     </ClCompile>
     <ClCompile Include="thirdparty\imgui\imgui_impl_opengl3.cpp">
-      <Filter>thirdparty\imgui</Filter>
+      <Filter>engine</Filter>
     </ClCompile>
     <ClCompile Include="thirdparty\imgui\imgui_tables.cpp">
-      <Filter>thirdparty\imgui</Filter>
+      <Filter>engine</Filter>
     </ClCompile>
     <ClCompile Include="thirdparty\imgui\imgui_widgets.cpp">
-      <Filter>thirdparty\imgui</Filter>
+      <Filter>engine</Filter>
     </ClCompile>
     <ClCompile Include="thirdparty\imgui\ImGuizmo.cpp">
-      <Filter>thirdparty\imgui</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Core\Logger.cpp">
-      <Filter>engine\src\Core</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Platform\OS\FileDialog.cpp">
-      <Filter>engine\src\PlatForm\OS</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Platform\RHI\OpenGL\FrameBuffer.cpp">
-      <Filter>engine\src\PlatForm\RHI\OpenGL</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Platform\RHI\OpenGL\Renderer.cpp">
-      <Filter>engine\src\PlatForm\RHI\OpenGL</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Platform\RHI\OpenGL\Shader.cpp">
-      <Filter>engine\src\PlatForm\RHI\OpenGL</Filter>
-    </ClCompile>
-    <ClCompile Include="src\ResourceManager\Mesh.cpp">
-      <Filter>engine\src\ResourceManager</Filter>
-    </ClCompile>
-    <ClCompile Include="src\ResourceManager\Material.cpp">
-      <Filter>engine\src\ResourceManager</Filter>
-    </ClCompile>
-    <ClCompile Include="src\ResourceManager\MyModel.cpp">
-      <Filter>engine\src\ResourceManager</Filter>
-    </ClCompile>
-    <ClCompile Include="src\ResourceManager\Texture.cpp">
-      <Filter>engine\src\ResourceManager</Filter>
-    </ClCompile>
-    <ClCompile Include="thirdparty\stb_image.cpp">
-      <Filter>thirdparty</Filter>
+      <Filter>engine</Filter>
     </ClCompile>
     <ClCompile Include="thirdparty\glad.c">
-      <Filter>thirdparty</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Window.cpp">
-      <Filter>engine\src</Filter>
-    </ClCompile>
-    <ClCompile Include="src\test\test.cpp">
-      <Filter>engine\src</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Platform\OS\Windows\WindowsFileDialog.cpp">
-      <Filter>engine\src\PlatForm\OS\Windows</Filter>
-    </ClCompile>
-    <ClCompile Include="src\GamePlay\Render\Pass\GBufferPass.cpp">
       <Filter>engine</Filter>
     </ClCompile>
-    <ClCompile Include="src\GamePlay\Render\Pass\LightingPass.cpp">
+    <ClCompile Include="thirdparty\stb_image.cpp">
       <Filter>engine</Filter>
     </ClCompile>
-    <ClCompile Include="src\GamePlay\Render\Pass\MainCameraPass.cpp">
-      <Filter>engine</Filter>
-    </ClCompile>
-    <ClCompile Include="src\GamePlay\Render\Pass\PickingPass.cpp">
-      <Filter>engine</Filter>
-    </ClCompile>
-    <ClCompile Include="src\GamePlay\Render\Pass\ScreenPass.cpp">
-      <Filter>engine</Filter>
-    </ClCompile>
-    <ClCompile Include="src\GamePlay\Render\Pass\ShadowPass.cpp">
-      <Filter>engine</Filter>
-    </ClCompile>
-    <ClCompile Include="src\GamePlay\Input\InputSystem.cpp">
+    <ClCompile Include="src\Platform\OS\FileDialog.cpp">
       <Filter>engine</Filter>
     </ClCompile>
   </ItemGroup>
@@ -234,7 +181,7 @@
     <ClInclude Include="resource\shader\light.vs">
       <Filter>shaders</Filter>
     </ClInclude>
-    <ClInclude Include="src\GamePlay\Framework\Scene.hpp">
+    <ClInclude Include="src\Scene.hpp">
       <Filter>engine\src</Filter>
     </ClInclude>
     <ClInclude Include="src\View.hpp">
@@ -252,25 +199,28 @@
     <ClInclude Include="src\Platform\RHI\OpenGL\rhi_opengl.hpp">
       <Filter>engine\src\PlatForm</Filter>
     </ClInclude>
-    <ClInclude Include="src\GamePlay\Framework\ECS\AnimationSystem.hpp">
+    <ClInclude Include="src\GamePlay\ECS\AnimationSystem.hpp">
       <Filter>engine\src\GamePlay\ECS</Filter>
     </ClInclude>
-    <ClInclude Include="src\GamePlay\Framework\ECS\CameraSystem.hpp">
+    <ClInclude Include="src\GamePlay\ECS\CameraSystem.hpp">
       <Filter>engine\src\GamePlay\ECS</Filter>
     </ClInclude>
-    <ClInclude Include="src\GamePlay\Framework\ECS\Components.hpp">
+    <ClInclude Include="src\GamePlay\ECS\Components.hpp">
       <Filter>engine\src\GamePlay\ECS</Filter>
     </ClInclude>
-    <ClInclude Include="src\GamePlay\Framework\ECS\MotionSystem.hpp">
+    <ClInclude Include="src\GamePlay\ECS\MotionSystem.hpp">
       <Filter>engine\src\GamePlay\ECS</Filter>
     </ClInclude>
-    <ClInclude Include="src\GamePlay\Framework\ECS\PhysicsSystem.hpp">
+    <ClInclude Include="src\GamePlay\ECS\PhysicsSystem.hpp">
       <Filter>engine\src\GamePlay\ECS</Filter>
     </ClInclude>
-    <ClInclude Include="src\GamePlay\Render\RenderSystem.hpp">
+    <ClInclude Include="src\GamePlay\ECS\RenderSystem.hpp">
       <Filter>engine\src\GamePlay\ECS</Filter>
     </ClInclude>
-    <ClInclude Include="src\GamePlay\Framework\ECS\MaterialSystem.hpp">
+    <ClInclude Include="src\GamePlay\ECS\System.hpp">
+      <Filter>engine\src\GamePlay\ECS</Filter>
+    </ClInclude>
+    <ClInclude Include="src\GamePlay\ECS\MaterialSystem.hpp">
       <Filter>engine\src\GamePlay\ECS</Filter>
     </ClInclude>
     <ClInclude Include="src\GamePlay\Render\RenderPass.hpp">
@@ -279,117 +229,32 @@
     <ClInclude Include="src\GamePlay\Render\RenderPipeline.hpp">
       <Filter>engine\src\GamePlay\Render</Filter>
     </ClInclude>
-    <ClInclude Include="src\GamePlay\Render\Pass\GBufferPass.hpp">
+    <ClInclude Include="src\GamePlay\Render\ScreenPass.hpp">
       <Filter>engine\src\GamePlay\Render</Filter>
     </ClInclude>
-    <ClInclude Include="src\GamePlay\Render\Pass\LightingPass.hpp">
+    <ClInclude Include="src\GamePlay\Render\ShadowPass.hpp">
       <Filter>engine\src\GamePlay\Render</Filter>
     </ClInclude>
-    <ClInclude Include="src\GamePlay\Render\Pass\MainCameraPass.hpp">
+    <ClInclude Include="src\GamePlay\Render\PickingPass.hpp">
       <Filter>engine\src\GamePlay\Render</Filter>
     </ClInclude>
-    <ClInclude Include="src\GamePlay\Render\Pass\PickingPass.hpp">
+    <ClInclude Include="src\GamePlay\Render\MainCameraPass.hpp">
       <Filter>engine\src\GamePlay\Render</Filter>
     </ClInclude>
-    <ClInclude Include="src\GamePlay\Render\Pass\ScreenPass.hpp">
-      <Filter>engine\src\GamePlay\Render</Filter>
-    </ClInclude>
-    <ClInclude Include="src\GamePlay\Render\Pass\ShadowPass.hpp">
-      <Filter>engine\src\GamePlay\Render</Filter>
-    </ClInclude>
-    <ClInclude Include="src\GamePlay\ECS\RenderSystem.hpp">
-      <Filter>engine\src\GamePlay\Render</Filter>
-    </ClInclude>
-    <ClInclude Include="thirdparty\imgui\imconfig.h">
-      <Filter>thirdparty\imgui</Filter>
-    </ClInclude>
-    <ClInclude Include="thirdparty\imgui\imgui.h">
-      <Filter>thirdparty\imgui</Filter>
-    </ClInclude>
-    <ClInclude Include="thirdparty\imgui\imgui_impl_glfw.h">
-      <Filter>thirdparty\imgui</Filter>
-    </ClInclude>
-    <ClInclude Include="thirdparty\imgui\imgui_impl_opengl3.h">
-      <Filter>thirdparty\imgui</Filter>
-    </ClInclude>
-    <ClInclude Include="thirdparty\imgui\imgui_impl_opengl3_loader.h">
-      <Filter>thirdparty\imgui</Filter>
-    </ClInclude>
-    <ClInclude Include="thirdparty\imgui\imgui_internal.h">
-      <Filter>thirdparty\imgui</Filter>
-    </ClInclude>
-    <ClInclude Include="thirdparty\imgui\ImGuizmo.h">
-      <Filter>thirdparty\imgui</Filter>
-    </ClInclude>
-    <ClInclude Include="thirdparty\imgui\imstb_rectpack.h">
-      <Filter>thirdparty\imgui</Filter>
-    </ClInclude>
-    <ClInclude Include="thirdparty\imgui\imstb_textedit.h">
-      <Filter>thirdparty\imgui</Filter>
-    </ClInclude>
-    <ClInclude Include="thirdparty\imgui\imstb_truetype.h">
-      <Filter>thirdparty\imgui</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Core\Logger.hpp">
-      <Filter>engine\src\Core</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Platform\OS\FileDialog.hpp">
-      <Filter>engine\src\PlatForm\OS</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Platform\RHI\rhi.hpp">
-      <Filter>engine\src\PlatForm\RHI</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Platform\RHI\Vulkan\rhi_vulkan.hpp">
-      <Filter>engine\src\PlatForm\RHI</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Platform\RHI\OpenGL\FrameBuffer.hpp">
-      <Filter>engine\src\PlatForm\RHI\OpenGL</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Platform\RHI\OpenGL\Shader.hpp">
-      <Filter>engine\src\PlatForm\RHI\OpenGL</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Platform\RHI\OpenGL\Renderer.hpp">
-      <Filter>engine\src\PlatForm\RHI\OpenGL</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Platform\RHI\OpenGL\rhi_opengl.hpp">
-      <Filter>engine\src\PlatForm\RHI\OpenGL</Filter>
-    </ClInclude>
-    <ClInclude Include="src\ResourceManager\Mesh.hpp">
-      <Filter>engine\src\ResourceManager</Filter>
-    </ClInclude>
-    <ClInclude Include="src\ResourceManager\Material.hpp">
-      <Filter>engine\src\ResourceManager</Filter>
-    </ClInclude>
-    <ClInclude Include="src\ResourceManager\MyModel.hpp">
-      <Filter>engine\src\ResourceManager</Filter>
-    </ClInclude>
-    <ClInclude Include="src\ResourceManager\Texture.hpp">
-      <Filter>engine\src\ResourceManager</Filter>
-    </ClInclude>
-    <ClInclude Include="thirdparty\stb_image.h">
-      <Filter>thirdparty</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Window.hpp">
-      <Filter>engine\src</Filter>
-    </ClInclude>
-    <ClInclude Include="src\GamePlay\ECS\JobSystem.hpp">
+    <ClInclude Include="src\GamePlay\ECS\World.hpp">
       <Filter>engine\src\GamePlay\ECS</Filter>
     </ClInclude>
-    <ClInclude Include="src\Platform\OS\Windows\WindowsFileDialog.hpp">
-      <Filter>engine\src\PlatForm\OS\Windows</Filter>
-    </ClInclude>
-    <ClInclude Include="src\GamePlay\Framework\ECS\World.hpp">
-      <Filter>engine\src\GamePlay\ECS</Filter>
-    </ClInclude>
+    <ClInclude Include="src\GamePlay\Render\GBufferPass.hpp" />
     <ClInclude Include="src\Core\Logger.hpp" />
     <ClInclude Include="src\ResourceManager\Material.hpp" />
     <ClInclude Include="src\ResourceManager\Mesh.hpp" />
     <ClInclude Include="src\ResourceManager\MyModel.hpp" />
     <ClInclude Include="src\Platform\RHI\OpenGL\FrameBuffer.hpp" />
     <ClInclude Include="src\Platform\RHI\OpenGL\Renderer.hpp" />
-    <ClInclude Include="src\ResourceManager\Shader.hpp" />
+    <ClInclude Include="src\Platform\RHI\OpenGL\Shader.hpp" />
     <ClInclude Include="src\Platform\RHI\rhi.hpp" />
     <ClInclude Include="src\ResourceManager\Texture.hpp" />
+    <ClInclude Include="src\GamePlay\Render\LightingPass.hpp" />
     <ClInclude Include="src\Window.hpp" />
     <ClInclude Include="src\Platform\OS\Windows\WindowsFileDialog.hpp" />
     <ClInclude Include="src\Platform\RHI\Vulkan\rhi_vulkan.hpp" />
@@ -405,14 +270,6 @@
     <ClInclude Include="thirdparty\imgui\imstb_truetype.h" />
     <ClInclude Include="thirdparty\stb_image.h" />
     <ClInclude Include="src\Platform\OS\FileDialog.hpp" />
-    <ClInclude Include="src\GamePlay\Framework\ECS\JobSystem.hpp" />
-    <ClInclude Include="src\GamePlay\Render\Pass\GBufferPass.hpp" />
-    <ClInclude Include="src\GamePlay\Render\Pass\LightingPass.hpp" />
-    <ClInclude Include="src\GamePlay\Render\Pass\MainCameraPass.hpp" />
-    <ClInclude Include="src\GamePlay\Render\Pass\PickingPass.hpp" />
-    <ClInclude Include="src\GamePlay\Render\Pass\ScreenPass.hpp" />
-    <ClInclude Include="src\GamePlay\Render\Pass\ShadowPass.hpp" />
-    <ClInclude Include="src\GamePlay\Input\InputSystem.hpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="resource\shader\light.fs">
@@ -463,26 +320,12 @@
     <None Include="resource\shader\skybox.vs">
       <Filter>shaders</Filter>
     </None>
-    <None Include="resource\shader\wireframe.fs">
-      <Filter>shaders</Filter>
-    </None>
-    <None Include="resource\shader\wireframe.gs">
-      <Filter>shaders</Filter>
-    </None>
-    <None Include="resource\shader\lightingPass.vs">
-      <Filter>shaders</Filter>
-    </None>
-    <None Include="resource\shader\lightingPass.fs">
-      <Filter>shaders</Filter>
-    </None>
-    <None Include="resource\shader\gBufferPass.fs">
-      <Filter>shaders</Filter>
-    </None>
-    <None Include="resource\shader\gBufferPass.vs">
-      <Filter>shaders</Filter>
-    </None>
-    <None Include="src\Platform\OS\Linux\linux.placeholder">
-      <Filter>engine\src\PlatForm\OS\Linux</Filter>
-    </None>
+    <None Include="resource\shader\wireframe.fs" />
+    <None Include="resource\shader\wireframe.gs" />
+    <None Include="resource\shader\gBufferPass.fs" />
+    <None Include="resource\shader\gBufferPass.vs" />
+    <None Include="resource\shader\lightingPass.fs" />
+    <None Include="resource\shader\lightingPass.vs" />
+    <None Include="src\Platform\OS\Linux\linux.placeholder" />
   </ItemGroup>
 </Project>

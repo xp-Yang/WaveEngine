@@ -43,9 +43,9 @@ struct CameraComponent {
 	static const float CameraMovementSpeed;
 	static const float Sensitivity;
 	static const float ZoomUnit;
-	static glm::vec3 up;
+	static glm::vec3 up; //vec3(0.0f, 0.0f, 1.0f);
 
-	glm::vec3 pos = { 0.0f, 15.0f, 15.0f };
+	glm::vec3 pos = { 0.0f, -15.0f, 15.0f };
 	glm::vec3 direction = glm::vec3(0.0f) - pos;
 	glm::mat4 view = glm::lookAt(pos, pos+ direction, up);
 	//glm::mat4 projection = glm::ortho(-15.0f * WINDOW_WIDTH / WINDOW_HEIGHT, 15.0f * WINDOW_WIDTH / WINDOW_HEIGHT, -15.0f, 15.0f, 0.1f, 100.0f);

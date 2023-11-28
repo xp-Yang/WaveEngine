@@ -355,11 +355,11 @@ Mesh Mesh::create_quad_mesh()
 
     GLfloat cubeVertices[] =
     {
-        // vertex               // normal            // uv
-        -1.0f,  0.0f,  -1.0f,   0.0f, 1.0f, 0.0f,    0.0f, 1.0f,// 0
-        -1.0f,  0.0f,   1.0f,   0.0f, 1.0f, 0.0f,    0.0f, 0.0f,// 1
-         1.0f,  0.0f,   1.0f,   0.0f, 1.0f, 0.0f,    1.0f, 0.0f,// 2
-         1.0f,  0.0f,  -1.0f,   0.0f, 1.0f, 0.0f,    1.0f, 1.0f,// 3
+        // vertex               // normal             // uv
+        -1.0f,  1.0f, 0.0f,     0.0f, 0.0f, 1.0f,     0.0f, 1.0f,// 0
+        -1.0f, -1.0f, 0.0f,     0.0f, 0.0f, 1.0f,     0.0f, 0.0f,// 1
+         1.0f, -1.0f, 0.0f,     0.0f, 0.0f, 1.0f,     1.0f, 0.0f,// 2
+         1.0f,  1.0f, 0.0f,     0.0f, 0.0f, 1.0f,     1.0f, 1.0f,// 3
     };
     for (int i = 0; i < sizeof(cubeVertices) / sizeof(cubeVertices[0]); i += 8) {
         Vertex vertex;

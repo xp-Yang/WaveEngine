@@ -12,6 +12,7 @@ public:
 	void render_global_editor();
 	void render_camera_editor();
 	void render_entity_editor();
+	void EditTransform(float* cameraView, float* cameraProjection, float* matrix, bool editTransformDecomposition);
 	void update_render_params();
 
 	bool stop_rotate;

@@ -2,6 +2,8 @@
 #include <string>
 #include <glm/glm.hpp>
 #include <imgui/imgui.h>
+#include <imgui/imgui_internal.h>
+#include <imgui/ImGuizmo.h>
 #include "GamePlay/Framework/ECS/Components.hpp"
 #include "Core/Logger.hpp"
 #include "Platform/OS/FileDialog.hpp"
@@ -143,6 +145,11 @@ void ImGuiEditor::render_entity_editor()
     // TODO 考虑对材质的编辑放入MaterialSystem
     auto& world = ecs::World::get();
 
+    ecs::CameraComponent* camera = nullptr;
+    for (auto entity : world.entityView<ecs::CameraComponent>()) {
+        camera = world.getComponent<ecs::CameraComponent>(entity);
+    }
+
     for (auto entity : world.entityView<ecs::NameComponent, ecs::PickedComponent, ecs::RenderableComponent, ecs::TransformComponent>()) {
         auto& renderable = *world.getComponent<ecs::RenderableComponent>(entity);
         auto& model_matrix = *world.getComponent<ecs::TransformComponent>(entity);
@@ -189,6 +196,16 @@ void ImGuiEditor::render_entity_editor()
             ImGui::SliderFloat((std::string("explosion ratio") + "##" + obj_name).c_str(), &explosion.explosionRatio, 0.0f, 1.0f);
         }
 
+        {
+            ImGuizmo::SetOrthographic(true);
+            ImGuizmo::BeginFrame();
+            if (camera) {
+                glm::mat4 v = camera->view;
+                glm::mat4 p = camera->projection;
+                EditTransform((float*)(&v), (float*)(&p), (float*)(&model_matrix), true);
+            }
+        }
+
         // log
         {
             ImGui::NewLine();
@@ -208,6 +225,58 @@ void ImGuiEditor::render_entity_editor()
         ImGui::End();
         break; //只选择一个
     }
+}
+
+void ImGuiEditor::EditTransform(float* cameraView, float* cameraProjection, float* matrix, bool editTransformDecomposition)
+{
+    //switch (m_Option)
+    //{
+    //case ToolbarOptions::Default:
+    //    break;
+    //case ToolbarOptions::Translate:
+    //    mCurrentGizmoOperation = ImGuizmo::TRANSLATE;
+    //    break;
+    //case ToolbarOptions::Rotation:
+    //    mCurrentGizmoOperation = ImGuizmo::ROTATE;
+    //    break;
+    //case ToolbarOptions::Scale:
+    //    mCurrentGizmoOperation = ImGuizmo::SCALE;
+    //    break;
+    //default:
+    //    break;
+    //}
+
+    static ImGuizmo::MODE mCurrentGizmoMode(ImGuizmo::LOCAL);
+    static bool useSnap = false;
+    static float snap[3] = { 1.f, 1.f, 1.f };
+    static float bounds[] = { -0.5f, -0.5f, -0.5f, 0.5f, 0.5f, 0.5f };
+    static float boundsSnap[] = { 0.1f, 0.1f, 0.1f };
+    static bool boundSizing = false;
+    static bool boundSizingSnap = false;
+
+    ImGuiIO& io = ImGui::GetIO();
+    float viewManipulateRight = io.DisplaySize.x;
+    float viewManipulateTop = 0;
+
+    ImGui::SetNextWindowSize(ImVec2(800, 400), ImGuiCond_Appearing);
+    ImGui::SetNextWindowPos(ImVec2(400, 20), ImGuiCond_Appearing);
+
+    ImGuizmo::SetDrawlist();
+
+    // ImGuizmo的绘制范围应该与Viewport窗口相同, 绘制(相对于显示器的)地点也应该相同
+    float windowWidth = (float)WINDOW_WIDTH;
+    float windowHeight = (float)WINDOW_HEIGHT;
+    ImGuizmo::SetRect(0, 0, windowWidth, windowHeight);
+
+    //ImGuizmo::DrawGrid(cameraView, cameraProjection, identityMatrix, 100.f);
+    //ImGuizmo::DrawCubes(cameraView, cameraProjection, &objectMatrix[0][0], gizmoCount);
+    ImGuizmo::Manipulate(cameraView, cameraProjection, ImGuizmo::TRANSLATE, mCurrentGizmoMode, matrix, NULL,
+        useSnap ? &snap[0] : NULL, boundSizing ? bounds : NULL, boundSizingSnap ? boundsSnap : NULL);
+
+    //viewManipulateRight = ImGui::GetWindowPos().x + windowWidth;
+    //viewManipulateTop = ImGui::GetWindowPos().y;
+    //float camDistance = 8.f;
+    //ImGuizmo::ViewManipulate(cameraView, camDistance, ImVec2(viewManipulateRight - 128, viewManipulateTop), ImVec2(128, 128), 0x10101010);
 }
 
 void ImGuiEditor::update_render_params()
