@@ -5,7 +5,7 @@
 
 void ScreenPass::init()
 {
-	m_default_framebuffer = std::make_unique<FrameBuffer>(WINDOW_WIDTH, WINDOW_HEIGHT);
+	m_default_framebuffer = std::make_unique<FrameBuffer>(WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2);
 	m_default_framebuffer->createDefault();
 	// ÓÃÀ´downSampleµÄ
 	m_framebuffer = std::make_unique<FrameBuffer>(WINDOW_WIDTH, WINDOW_HEIGHT);
@@ -35,7 +35,7 @@ void ScreenPass::draw()
 
 
 	// a child window for debugging
-	glViewport(main_viewport.width - main_viewport.width / 4, main_viewport.y, main_viewport.width / 4, main_viewport.height / 4);
+	glViewport(main_viewport.x + main_viewport.width - main_viewport.width / 4, main_viewport.y, main_viewport.width / 4, main_viewport.height / 4);
 	frame_shader->start_using();
 	frame_shader->setTexture("Texture", 0, 66);
 	Renderer::drawTriangle(*frame_shader, m_screen_quad->getVAO(), 6);

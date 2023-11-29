@@ -6,6 +6,8 @@
 
 #define WINDOW_WIDTH (1600.0f)
 #define WINDOW_HEIGHT (900.0f)
+#define MAIN_VIEWPORT_WIDTH (800.0f)
+#define MAIN_VIEWPORT_HEIGHT (450.0f)
 
 struct Viewport {
     int x;

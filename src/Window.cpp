@@ -20,10 +20,10 @@ Window::Window(int width, int height)
 	}
 	glfwMakeContextCurrent(m_window);
 
-	m_main_viewport.x = 0;
-	m_main_viewport.y = 0;
-	m_main_viewport.width = width;
-	m_main_viewport.height = height;
+	m_main_viewport.x = WINDOW_WIDTH - MAIN_VIEWPORT_WIDTH;
+	m_main_viewport.y = WINDOW_HEIGHT - MAIN_VIEWPORT_HEIGHT;
+	m_main_viewport.width = MAIN_VIEWPORT_WIDTH;
+	m_main_viewport.height = MAIN_VIEWPORT_HEIGHT;
 	glfwSetWindowUserPointer(m_window, &m_main_viewport);
 
 	glfwSetFramebufferSizeCallback(m_window, [](GLFWwindow* window, int width, int height) {

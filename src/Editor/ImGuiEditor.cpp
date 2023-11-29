@@ -31,6 +31,7 @@ void ImGuiEditor::render()
    renderGlobalController();
    renderCameraController();
    renderPickedEntityController();
+   renderMainViewWindow();
    renderGizmos();
    updateRenderParams();
 }
@@ -54,13 +55,14 @@ void ImGuiEditor::drawGrid()
     }
 }
 
-void ImGuiEditor::renderMainView(ImTextureID texture)
+void ImGuiEditor::renderMainViewWindow()
 {
-    ImVec2 main_view_size = ImVec2(800, 600);
-    ImGui::SetNextWindowSize(main_view_size);
-    ImGui::Begin("MainView");
-
-    ImGui::Image(texture, main_view_size/*, ImVec2{ 0, 1 }, ImVec2{ 1, 0 }*/);
+    static ImGuiWindowFlags window_flags = 0;
+    ImGui::Begin("MainView", nullptr, window_flags | ImGuiWindowFlags_NoBackground);
+    ImGuiWindow* window = ImGui::GetCurrentWindow();
+    window_flags = ImGui::IsWindowHovered() && ImGui::IsMouseHoveringRect(window->InnerRect.Min, window->InnerRect.Max) ? ImGuiWindowFlags_NoMove : 0;
+    Viewport viewport = { ImGui::GetWindowPos().x, WINDOW_HEIGHT - ImGui::GetWindowPos().y - ImGui::GetWindowHeight(), ImGui::GetWindowWidth(), ImGui::GetWindowHeight() };
+    Application::GetApp().getWindow()->setMainViewport(viewport);
     ImGui::End();
 }
 
@@ -321,6 +323,7 @@ void ImGuiEditor::EditTransform(float* cameraView, float* cameraProjection, floa
     ImGuizmo::Manipulate(cameraView, cameraProjection, imguizmo_operation, ImGuizmo::LOCAL, matrix, NULL,
         useSnap ? &snap[0] : NULL, boundSizing ? bounds : NULL, boundSizingSnap ? boundsSnap : NULL);
 
+    // TODO ÒÔ Application::GetApp().getWindow()->getMainViewport()Îª×¼
     //ImGuiIO& io = ImGui::GetIO();
     //float viewManipulateRight = io.DisplaySize.x;
     //float viewManipulateTop = 0;

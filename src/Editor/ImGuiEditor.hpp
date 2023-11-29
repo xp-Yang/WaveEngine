@@ -15,7 +15,7 @@ public:
 	ImGuiEditor();
 	void init(RenderSystem* render_system);
 	void render();
-	void renderMainView(ImTextureID texture);
+	void renderMainViewWindow();
 	void drawGrid();
 
 	bool stop_rotate;
