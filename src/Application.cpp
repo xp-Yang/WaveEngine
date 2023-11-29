@@ -36,8 +36,6 @@ void Application::run() {
 		m_motion_system->onUpdate();
 
 		// render
-		//m_editor->drawGrid(); /*先画地板*/ /*不行，imgui图层就是在上面的*/
-		m_render_system->onUpdate();
 		m_editor->render(); /*render Editor(imgui)*/
 
 		endFrame();

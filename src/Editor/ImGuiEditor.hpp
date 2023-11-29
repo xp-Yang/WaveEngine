@@ -32,7 +32,7 @@ protected:
 
 private:
 	// 无所有权的，不 out live 所指向的实际资源
-	RenderSystem* ref_render_system;
+	RenderSystem* m_ref_render_system;
 	RenderParams m_render_params;
 
 	ToolbarType m_toolbar_type;

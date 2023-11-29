@@ -19,11 +19,14 @@ ImGuiEditor::ImGuiEditor()
 
 void ImGuiEditor::init(RenderSystem* render_system)
 {
-    ref_render_system = render_system;
+    m_ref_render_system = render_system;
 }
 
 void ImGuiEditor::render()
 {
+   // TODO setViewport of renderSystem according to dockspace position
+   m_ref_render_system->onUpdate();
+
    ImGui::DockSpaceOverViewport(ImGui::GetMainViewport(), ImGuiDockNodeFlags_PassthruCentralNode);
    renderGlobalController();
    renderCameraController();
@@ -327,5 +330,5 @@ void ImGuiEditor::EditTransform(float* cameraView, float* cameraProjection, floa
 
 void ImGuiEditor::updateRenderParams()
 {
-    ref_render_system->setRenderParams(m_render_params);
+    m_ref_render_system->setRenderParams(m_render_params);
 }
