@@ -4,8 +4,8 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
-#define WINDOW_WIDTH 1600.0f
-#define WINDOW_HEIGHT 900.0f
+#define WINDOW_WIDTH (1600.0f)
+#define WINDOW_HEIGHT (900.0f)
 
 struct Viewport {
     int x;

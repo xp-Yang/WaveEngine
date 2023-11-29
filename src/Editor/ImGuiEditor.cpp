@@ -17,21 +17,51 @@ ImGuiEditor::ImGuiEditor()
     // TODO: editor依赖system，能操控渲染管线，能操控运动，能编辑transform，能编辑mesh，能编辑material...
 }
 
-void ImGuiEditor::init(RenderSystem* render_system, MotionSystem* motion_system)
+void ImGuiEditor::init(RenderSystem* render_system)
 {
     ref_render_system = render_system;
-    ref_motion_system = motion_system;
 }
 
 void ImGuiEditor::render()
 {
-   render_global_editor();
-   render_camera_editor();
-   render_entity_editor();
-   update_render_params();
+   ImGui::DockSpaceOverViewport(ImGui::GetMainViewport(), ImGuiDockNodeFlags_PassthruCentralNode);
+   renderGlobalController();
+   renderCameraController();
+   renderPickedEntityController();
+   renderGizmos();
+   updateRenderParams();
 }
 
-void ImGuiEditor::render_global_editor() {
+void ImGuiEditor::drawGrid()
+{
+    auto& world = ecs::World::get();
+    ecs::CameraComponent* camera = nullptr;
+    for (auto entity : world.entityView<ecs::CameraComponent>()) {
+        camera = world.getComponent<ecs::CameraComponent>(entity);
+    }
+    static const float identityMatrix[16] =
+    { 1.f, 0.f, 0.f, 0.f,
+        0.f, 1.f, 0.f, 0.f,
+        0.f, 0.f, 1.f, 0.f,
+        0.f, 0.f, 0.f, 1.f };
+    if (camera) {
+        glm::mat4 v = camera->view;
+        glm::mat4 p = camera->projection;
+        ImGuizmo::DrawGrid((float*)(&v), (float*)(&p), identityMatrix, 100.f);
+    }
+}
+
+void ImGuiEditor::renderMainView(ImTextureID texture)
+{
+    ImVec2 main_view_size = ImVec2(800, 600);
+    ImGui::SetNextWindowSize(main_view_size);
+    ImGui::Begin("MainView");
+
+    ImGui::Image(texture, main_view_size/*, ImVec2{ 0, 1 }, ImVec2{ 1, 0 }*/);
+    ImGui::End();
+}
+
+void ImGuiEditor::renderGlobalController() {
     if (ImGui::BeginMainMenuBar())
     {
         if (ImGui::BeginMenu("File"))
@@ -109,7 +139,7 @@ void ImGuiEditor::render_global_editor() {
     ImGui::End();
 }
 
-void ImGuiEditor::render_camera_editor()
+void ImGuiEditor::renderCameraController()
 {
     ImGui::Begin("Camera Controller", nullptr, ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse);
 
@@ -140,7 +170,7 @@ void ImGuiEditor::render_camera_editor()
     ImGui::End();
 }
 
-void ImGuiEditor::render_entity_editor()
+void ImGuiEditor::renderPickedEntityController()
 {
     // TODO 考虑对材质的编辑放入MaterialSystem
     auto& world = ecs::World::get();
@@ -152,19 +182,28 @@ void ImGuiEditor::render_entity_editor()
 
     for (auto entity : world.entityView<ecs::NameComponent, ecs::PickedComponent, ecs::RenderableComponent, ecs::TransformComponent>()) {
         auto& renderable = *world.getComponent<ecs::RenderableComponent>(entity);
-        auto& model_matrix = *world.getComponent<ecs::TransformComponent>(entity);
+        auto& transform_component = *world.getComponent<ecs::TransformComponent>(entity);
         std::string obj_name = world.getComponent<ecs::NameComponent>(entity)->name;
 
         float shininess = renderable.primitives[0].material.shininess;
 
         ImGui::Begin((obj_name + " controller").c_str(), nullptr, ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse);
+        if (ImGui::RadioButton("Translate", m_toolbar_type == ToolbarType::Translate))
+            m_toolbar_type = ToolbarType::Translate;
+        ImGui::SameLine();
+        if (ImGui::RadioButton("Rotate", m_toolbar_type == ToolbarType::Rotate))
+            m_toolbar_type = ToolbarType::Rotate;
+        ImGui::SameLine();
+        if (ImGui::RadioButton("Scale", m_toolbar_type == ToolbarType::Scale))
+            m_toolbar_type = ToolbarType::Scale;
+
         ImGui::SliderFloat((std::string("shininess") + "##" + obj_name).c_str(), &shininess, 64.0f, 256.0f);
         ImGui::PushItemWidth(85.0f);
-        ImGui::SliderFloat((std::string("##x") + "##" + obj_name).c_str(), &model_matrix.translation.x, -10.0f, 10.0f);
+        ImGui::SliderFloat((std::string("##x") + "##" + obj_name).c_str(), &transform_component.translation.x, -10.0f, 10.0f);
         ImGui::SameLine();
-        ImGui::SliderFloat((std::string("##y") + "##" + obj_name).c_str(), &model_matrix.translation.y, -10.0f, 10.0f);
+        ImGui::SliderFloat((std::string("##y") + "##" + obj_name).c_str(), &transform_component.translation.y, -10.0f, 10.0f);
         ImGui::SameLine();
-        ImGui::SliderFloat((std::string("xyz") + "##" + obj_name).c_str(), &model_matrix.translation.z, -10.0f, 10.0f);
+        ImGui::SliderFloat((std::string("xyz") + "##" + obj_name).c_str(), &transform_component.translation.z, -10.0f, 10.0f);
         ImGui::PopItemWidth();
 
         if (world.hasComponent<ecs::LightComponent>(entity)) {
@@ -196,21 +235,11 @@ void ImGuiEditor::render_entity_editor()
             ImGui::SliderFloat((std::string("explosion ratio") + "##" + obj_name).c_str(), &explosion.explosionRatio, 0.0f, 1.0f);
         }
 
-        {
-            ImGuizmo::SetOrthographic(true);
-            ImGuizmo::BeginFrame();
-            if (camera) {
-                glm::mat4 v = camera->view;
-                glm::mat4 p = camera->projection;
-                EditTransform((float*)(&v), (float*)(&p), (float*)(&model_matrix), true);
-            }
-        }
-
         // log
         {
             ImGui::NewLine();
             ImGui::Text("model matrix:");
-            std::string test_light = matrix_log(model_matrix.transform());
+            std::string test_light = matrix_log(transform_component.transform());
             ImGui::Text(test_light.c_str());
         }
 
@@ -227,26 +256,58 @@ void ImGuiEditor::render_entity_editor()
     }
 }
 
-void ImGuiEditor::EditTransform(float* cameraView, float* cameraProjection, float* matrix, bool editTransformDecomposition)
+void ImGuiEditor::renderGizmos()
 {
-    //switch (m_Option)
-    //{
-    //case ToolbarOptions::Default:
-    //    break;
-    //case ToolbarOptions::Translate:
-    //    mCurrentGizmoOperation = ImGuizmo::TRANSLATE;
-    //    break;
-    //case ToolbarOptions::Rotation:
-    //    mCurrentGizmoOperation = ImGuizmo::ROTATE;
-    //    break;
-    //case ToolbarOptions::Scale:
-    //    mCurrentGizmoOperation = ImGuizmo::SCALE;
-    //    break;
-    //default:
-    //    break;
-    //}
+    ImGuizmo::SetOrthographic(true);
+    ImGuizmo::BeginFrame();
+    // ImGuizmo的绘制范围是全屏
+    ImGuizmo::SetRect(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
 
-    static ImGuizmo::MODE mCurrentGizmoMode(ImGuizmo::LOCAL);
+    auto& world = ecs::World::get();
+    ecs::CameraComponent* camera = nullptr;
+    for (auto entity : world.entityView<ecs::CameraComponent>()) {
+        camera = world.getComponent<ecs::CameraComponent>(entity);
+    }
+    glm::mat4 model_matrix = glm::mat4(1.0f);
+    for (auto entity : world.entityView<ecs::NameComponent, ecs::PickedComponent, ecs::RenderableComponent, ecs::TransformComponent>()) {
+        model_matrix = world.getComponent<ecs::TransformComponent>(entity)->transform();
+        break;
+    }
+
+    if (camera) {
+        glm::mat4 v = camera->view;
+        glm::mat4 p = camera->projection;
+        EditTransform((float*)(&v), (float*)(&p), (float*)(&model_matrix));
+        for (auto entity : world.entityView<ecs::NameComponent, ecs::PickedComponent, ecs::RenderableComponent, ecs::TransformComponent>()) {
+            float matrixTranslation[3], matrixRotation[3], matrixScale[3];
+            ImGuizmo::DecomposeMatrixToComponents((float*)&model_matrix, matrixTranslation, matrixRotation, matrixScale);
+            auto& transform_component = *world.getComponent<ecs::TransformComponent>(entity);
+            transform_component.translation = glm::vec3(matrixTranslation[0], matrixTranslation[1], matrixTranslation[2]);
+            transform_component.scale = glm::vec3(matrixScale[0], matrixScale[1], matrixScale[2]);
+            transform_component.rotation = glm::vec3(matrixRotation[0], matrixRotation[1], matrixRotation[2]);
+            break;
+        }
+    }
+}
+
+void ImGuiEditor::EditTransform(float* cameraView, float* cameraProjection, float* matrix)
+{
+    ImGuizmo::OPERATION imguizmo_operation;
+    switch (m_toolbar_type)
+    {
+    case ToolbarType::Translate:
+        imguizmo_operation = ImGuizmo::TRANSLATE;
+        break;
+    case ToolbarType::Rotate:
+        imguizmo_operation = ImGuizmo::ROTATE;
+        break;
+    case ToolbarType::Scale:
+        imguizmo_operation = ImGuizmo::SCALE;
+        break;
+    default:
+        break;
+    }
+
     static bool useSnap = false;
     static float snap[3] = { 1.f, 1.f, 1.f };
     static float bounds[] = { -0.5f, -0.5f, -0.5f, 0.5f, 0.5f, 0.5f };
@@ -254,32 +315,17 @@ void ImGuiEditor::EditTransform(float* cameraView, float* cameraProjection, floa
     static bool boundSizing = false;
     static bool boundSizingSnap = false;
 
-    ImGuiIO& io = ImGui::GetIO();
-    float viewManipulateRight = io.DisplaySize.x;
-    float viewManipulateTop = 0;
-
-    ImGui::SetNextWindowSize(ImVec2(800, 400), ImGuiCond_Appearing);
-    ImGui::SetNextWindowPos(ImVec2(400, 20), ImGuiCond_Appearing);
-
-    ImGuizmo::SetDrawlist();
-
-    // ImGuizmo的绘制范围应该与Viewport窗口相同, 绘制(相对于显示器的)地点也应该相同
-    float windowWidth = (float)WINDOW_WIDTH;
-    float windowHeight = (float)WINDOW_HEIGHT;
-    ImGuizmo::SetRect(0, 0, windowWidth, windowHeight);
-
-    //ImGuizmo::DrawGrid(cameraView, cameraProjection, identityMatrix, 100.f);
-    //ImGuizmo::DrawCubes(cameraView, cameraProjection, &objectMatrix[0][0], gizmoCount);
-    ImGuizmo::Manipulate(cameraView, cameraProjection, ImGuizmo::TRANSLATE, mCurrentGizmoMode, matrix, NULL,
+    ImGuizmo::Manipulate(cameraView, cameraProjection, imguizmo_operation, ImGuizmo::LOCAL, matrix, NULL,
         useSnap ? &snap[0] : NULL, boundSizing ? bounds : NULL, boundSizingSnap ? boundsSnap : NULL);
 
-    //viewManipulateRight = ImGui::GetWindowPos().x + windowWidth;
-    //viewManipulateTop = ImGui::GetWindowPos().y;
+    //ImGuiIO& io = ImGui::GetIO();
+    //float viewManipulateRight = io.DisplaySize.x;
+    //float viewManipulateTop = 0;
     //float camDistance = 8.f;
     //ImGuizmo::ViewManipulate(cameraView, camDistance, ImVec2(viewManipulateRight - 128, viewManipulateTop), ImVec2(128, 128), 0x10101010);
 }
 
-void ImGuiEditor::update_render_params()
+void ImGuiEditor::updateRenderParams()
 {
     ref_render_system->setRenderParams(m_render_params);
 }

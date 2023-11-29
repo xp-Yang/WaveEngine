@@ -18,7 +18,7 @@ struct Light {
     //float Linear;
     //float Quadratic;
 };
-const int LIGHT_COUNT = 256;
+const int LIGHT_COUNT = 3;//256;
 uniform Light lights[LIGHT_COUNT];
 uniform vec3 view_pos;
 

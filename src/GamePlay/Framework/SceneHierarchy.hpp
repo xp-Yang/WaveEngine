@@ -1,10 +1,10 @@
-#ifndef Scene_hpp
-#define Scene_hpp
+#ifndef SceneHierarchy_hpp
+#define SceneHierarchy_hpp
 
-class Scene {
+class SceneHierarchy {
 public:
-	Scene();
-	~Scene();
+	SceneHierarchy();
+	~SceneHierarchy();
 	//Object* object(const std::string& name) {
 	//	auto it = m_objects.find(name);
 	//	if (it == m_objects.end())

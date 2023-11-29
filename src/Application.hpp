@@ -4,7 +4,7 @@
 #include "Window.hpp"
 #include <memory>
 
-class Scene;
+class SceneHierarchy;
 class ImGuiEditor;
 class RenderSystem;
 class MotionSystem;
@@ -26,7 +26,7 @@ private:
 
 	std::unique_ptr<Window> m_window;
 	
-	std::unique_ptr<Scene> m_scene;
+	std::unique_ptr<SceneHierarchy> m_scene;
 
 	std::unique_ptr<ImGuiEditor> m_editor;
 	std::unique_ptr<RenderSystem> m_render_system;

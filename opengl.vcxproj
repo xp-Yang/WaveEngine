@@ -49,7 +49,7 @@
     <ClCompile Include="src\Platform\RHI\OpenGL\Renderer.cpp" />
     <ClCompile Include="src\GamePlay\Render\RenderPipeline.cpp" />
     <ClCompile Include="src\ResourceManager\Shader.cpp" />
-    <ClCompile Include="src\GamePlay\Framework\Scene.cpp" />
+    <ClCompile Include="src\GamePlay\Framework\SceneHierarchy.cpp" />
     <ClCompile Include="thirdparty\stb_image.cpp" />
     <ClCompile Include="src\test\test.cpp" />
     <ClCompile Include="src\ResourceManager\Texture.cpp" />
@@ -99,7 +99,7 @@
     <ClInclude Include="src\GamePlay\Render\RenderPipeline.hpp" />
     <ClInclude Include="src\ResourceManager\Shader.hpp" />
     <ClInclude Include="src\Platform\RHI\rhi.hpp" />
-    <ClInclude Include="src\GamePlay\Framework\Scene.hpp" />
+    <ClInclude Include="src\GamePlay\Framework\SceneHierarchy.hpp" />
     <ClInclude Include="src\ResourceManager\Texture.hpp" />
     <ClInclude Include="src\View.hpp" />
     <ClInclude Include="src\GamePlay\Framework\ECS\World.hpp" />
