@@ -31,7 +31,7 @@ void RenderPipeline::setRenderParams(const RenderParams& params)
 
 void RenderPipeline::render()
 {
-    if ((!ImGui::GetIO().WantCaptureMouse || ImGui::GetIO().WantPassThroughMouse) && !ImGuizmo::IsUsing()) {
+    if (ImGui::GetIO().WantPassThroughMouse) {
         m_picking_pass->draw();
     }
     if (m_render_params.shadow) {

@@ -11,7 +11,7 @@ void InputSystem::mouse_and_key_callback()
 	float xpos, ypos;
 	xpos = (float)io.MousePos.x;
 	ypos = (float)io.MousePos.y;
-	if ((io.WantCaptureMouse && !io.WantPassThroughMouse) || ImGuizmo::IsUsing()) {
+	if (!io.WantPassThroughMouse) {
 		return;
 	}
 	static bool last_left_mouse_status = io.MouseDown[0];

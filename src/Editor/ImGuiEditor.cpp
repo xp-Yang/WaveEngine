@@ -59,8 +59,9 @@ void ImGuiEditor::renderMainViewWindow()
     static ImGuiWindowFlags window_flags = 0;
     ImGui::Begin("MainView", nullptr, window_flags | ImGuiWindowFlags_NoBackground);
     ImGuiWindow* window = ImGui::GetCurrentWindow();
-    window_flags = ImGui::IsWindowHovered() && ImGui::IsMouseHoveringRect(window->InnerRect.Min, window->InnerRect.Max) ? ImGuiWindowFlags_NoMove : 0;
-    ImGui::GetIO().WantPassThroughMouse = window_flags != 0;
+    bool hovered_window = ImGui::IsWindowHovered() && ImGui::IsMouseHoveringRect(window->InnerRect.Min, window->InnerRect.Max);
+    window_flags = hovered_window ? ImGuiWindowFlags_NoMove : 0;
+    ImGui::GetIO().WantPassThroughMouse = hovered_window && !ImGuizmo::IsUsing();
     ImVec2 window_pos = ImGui::GetWindowPos();
     ImVec2 window_size = ImGui::GetWindowSize();
     Viewport viewport = { window_pos.x, window_pos.y, window_size.x, window_size.y, Viewport::Coordinates::ScreenCoordinates };
