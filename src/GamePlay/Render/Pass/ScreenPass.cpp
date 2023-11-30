@@ -34,6 +34,7 @@ void ScreenPass::draw()
 	glEnable(GL_DEPTH_TEST);
 
 
+	// TODO 可以塞多个小窗口进多个imgui窗口里
 	// a child window for debugging
 	//auto main_viewport = Application::GetApp().getWindow()->getMainViewport();
 	auto child_viewport = Viewport(main_viewport.x + main_viewport.width - main_viewport.width / 4, main_viewport.y, main_viewport.width / 4, main_viewport.height / 4, Viewport::Coordinates::GLCoordinates);

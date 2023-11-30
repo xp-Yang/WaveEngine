@@ -21,8 +21,8 @@ public:
 		ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST | OFN_NOCHANGEDIR;
 		
 		// 调用win32 api
-		//if (GetOpenFileNameA(&ofn) == TRUE)
-		//	return ofn.lpstrFile;
+		if (GetOpenFileNameA(&ofn) == TRUE)
+			return ofn.lpstrFile;
 
 		return {};
 	}
@@ -41,8 +41,11 @@ public:
 		ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST | OFN_NOCHANGEDIR;
 		
 		// 调用win32 api
-		//if (GetSaveFileNameA(&ofn) == TRUE)
-		//	return ofn.lpstrFile;
+		// Sets the default extension by extracting it from the filter
+		ofn.lpstrDefExt = strchr(filter, '\0') + 1;
+
+		if (GetSaveFileNameA(&ofn) == TRUE)
+			return ofn.lpstrFile;
 
 		return {};
 	}

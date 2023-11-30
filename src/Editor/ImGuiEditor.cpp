@@ -60,13 +60,14 @@ void ImGuiEditor::renderGlobalController() {
     {
         if (ImGui::BeginMenu("File"))
         {
-            if (ImGui::MenuItem("New")) {}
             if (ImGui::MenuItem("Open", "Ctrl+O")) {
                 FileDialog* file_dlg = FileDialog::create();
                 file_dlg->OpenFile("");
             }
-            if (ImGui::MenuItem("Save", "Ctrl+S")) {}
-            if (ImGui::MenuItem("Save As..")) {}
+            if (ImGui::MenuItem("Save As..", "Ctrl+S")) {
+                FileDialog* file_dlg = FileDialog::create();
+                file_dlg->SaveFile("");
+            }
             ImGui::EndMenu();
         }
         if (ImGui::BeginMenu("Edit"))
