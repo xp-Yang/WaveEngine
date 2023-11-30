@@ -31,27 +31,48 @@ void ImGuiEditor::render()
    renderCameraController();
    renderPickedEntityController();
    renderMainViewWindow();
+   renderDebugViewWindow();
    updateRenderParams();
 }
 
 void ImGuiEditor::renderMainViewWindow()
 {
     static ImGuiWindowFlags window_flags = 0;
-    ImGui::Begin("MainView", nullptr, window_flags | ImGuiWindowFlags_NoBackground);
-    ImGuiWindow* window = ImGui::GetCurrentWindow();
-    bool hovered_window = ImGui::IsWindowHovered() && ImGui::IsMouseHoveringRect(window->InnerRect.Min, window->InnerRect.Max);
-    window_flags = hovered_window ? ImGuiWindowFlags_NoMove : 0;
-    ImGui::GetIO().WantPassThroughMouse = hovered_window && !ImGuizmo::IsUsing();
-    ImVec2 window_pos = ImGui::GetWindowPos();
-    ImVec2 window_size = ImGui::GetWindowSize();
-    Viewport viewport = { window_pos.x, window_pos.y, window_size.x, window_size.y, Viewport::Coordinates::ScreenCoordinates };
-    ImGuizmo::SetOrthographic(true);
-    ImGuizmo::SetDrawlist();
-    // ImGuizmo的绘制范围是main viewport
-    ImGuizmo::SetRect(viewport.x, viewport.y, viewport.width, viewport.height);
-    Application::GetApp().getWindow()->setMainViewport(viewport.transToGLCoordinates());
-    renderGizmos();
+    ImGui::SetNextWindowSize(ImVec2(800, 450), ImGuiCond_Appearing);
+    //ImGui::SetNextWindowPos(ImVec2(400, 20), ImGuiCond_Appearing);
+    if (ImGui::Begin("Main View", nullptr, window_flags | ImGuiWindowFlags_NoBackground)) {
+        ImGuiWindow* window = ImGui::GetCurrentWindow();
+        bool hovered_window = ImGui::IsWindowHovered() && ImGui::IsMouseHoveringRect(window->InnerRect.Min, window->InnerRect.Max);
+        window_flags = hovered_window ? ImGuiWindowFlags_NoMove : 0;
+        ImGui::GetIO().WantPassThroughMouse = hovered_window && !ImGuizmo::IsUsing();
+        ImVec2 window_pos = ImGui::GetWindowPos();
+        ImVec2 window_size = ImGui::GetWindowSize();
+        Viewport viewport = { window_pos.x, window_pos.y, window_size.x, window_size.y, Viewport::Coordinates::ScreenCoordinates };
+        ImGuizmo::SetOrthographic(true);
+        ImGuizmo::SetDrawlist();
+        // ImGuizmo的绘制范围是main viewport
+        ImGuizmo::SetRect(viewport.x, viewport.y, viewport.width, viewport.height);
+        Application::GetApp().getWindow()->setMainViewport(viewport.transToGLCoordinates());
+        renderGizmos();
+    }
+    ImGui::End();
+}
 
+void ImGuiEditor::renderDebugViewWindow()
+{
+    static ImGuiWindowFlags window_flags = 0;
+    ImGui::SetNextWindowSize(ImVec2(400, 225), ImGuiCond_Appearing);
+    if (ImGui::Begin("Debug View", nullptr, window_flags/* | ImGuiWindowFlags_NoBackground*/)) {
+        ImGuiWindow* window = ImGui::GetCurrentWindow();
+        bool hovered_window = ImGui::IsWindowHovered() && ImGui::IsMouseHoveringRect(window->InnerRect.Min, window->InnerRect.Max);
+        window_flags = hovered_window ? ImGuiWindowFlags_NoMove : 0;
+        ImGui::GetIO().WantPassThroughMouse = hovered_window && !ImGuizmo::IsUsing();
+        ImVec2 window_pos = ImGui::GetWindowPos();
+        ImVec2 window_size = ImGui::GetWindowSize();
+        Viewport viewport = { window_pos.x, window_pos.y, window_size.x, window_size.y, Viewport::Coordinates::ScreenCoordinates };
+
+        //Application::GetApp().getWindow()->setMainViewport(viewport.transToGLCoordinates());
+    }
     ImGui::End();
 }
 
