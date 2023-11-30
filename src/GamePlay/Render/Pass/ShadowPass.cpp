@@ -19,7 +19,7 @@ void ShadowPass::configSamples(int samples)
     m_framebuffer->setSamples(samples);
 
     glBindTexture(GL_TEXTURE_2D, m_framebuffer->getFirstAttachmentOf(AttachmentType::DEPTH).getMap());
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, samples * WINDOW_WIDTH, samples * WINDOW_HEIGHT, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, samples * m_framebuffer->getWidth(), samples * m_framebuffer->getHeight(), 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
 }
 
 void ShadowPass::draw() {

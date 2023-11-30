@@ -16,7 +16,6 @@ public:
 	void init(RenderSystem* render_system);
 	void render();
 	void renderMainViewWindow();
-	void drawGrid();
 
 	bool stop_rotate;
 	float global_ambient_strength;

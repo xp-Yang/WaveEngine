@@ -53,6 +53,7 @@ Shader::Shader(const char* vertexPath, const char* fragmentPath, const char* geo
     char infoLog[512];
 
     // 顶点着色器
+    // TODO这个类应该是openglshader封装类，真正的shader类应该只调用rhi
     vertex = glCreateShader(GL_VERTEX_SHADER);
     glShaderSource(vertex, 1, &vShaderCode, NULL);
     glCompileShader(vertex);

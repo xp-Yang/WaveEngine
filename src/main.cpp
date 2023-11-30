@@ -22,7 +22,9 @@
 // done: 帧缓冲的附件理解
 // done: 窗口大小可缩放
 // done: deferred rendering 性能分析，见LightingPass.cpp
-// done: 批渲染理解
+// done: 集成imgizmo
+// done: 集成imgui窗口停靠，多viewport
+// 9. 批渲染理解
 // 10. 解决相机运动死锁问题(direction = (0,-1,0)时)
 // 11. 光源物理模型
 // 12. tbn矩阵计算
@@ -42,8 +44,6 @@
 // 27. RenderSystem, 思考一下它的ECS架构
 // 28. 线程分离
 // 28. 实现事件机制
-// 28. 集成imgizmo
-// 28. 集成imgui窗口停靠，多viewport
 // 28. 加载、保存文件，序列化和反序列化
 // 28. 优化pickingPass, readpixel用鼠标事件处理一次
 // 28. 实现scenegraph场景管理，理清楚bbs的objectlist

@@ -42,6 +42,7 @@ Window::Window(int width, int height)
 		//main_viewport.width *= scale_factor;
 		//main_viewport.height *= scale_factor;
 		//main_viewport.transToGLCoordinates();
+		//TODO 封装进rhi
 		//glViewport(main_viewport.x, main_viewport.y, main_viewport.width, main_viewport.height);
 		});
 }
@@ -66,6 +67,7 @@ void Window::update() const
 void Window::setMainViewport(const Viewport& viewport)
 {
 	m_main_viewport = viewport;
+	// TODO 封装进rhi
 	glViewport(m_main_viewport.x, m_main_viewport.y, m_main_viewport.width, m_main_viewport.height);
 }
 

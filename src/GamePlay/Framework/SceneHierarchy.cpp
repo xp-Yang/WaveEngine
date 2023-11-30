@@ -4,29 +4,6 @@
 #include "ResourceManager/Texture.hpp"
 #include "Platform/RHI/rhi.hpp"
 
-//void screen_shot() {
-//    const int channels_num = 3;
-//    const int w = (int)WINDOW_WIDTH;
-//    const int h = (int)WINDOW_HEIGHT;
-//
-//    unsigned char data[w * h * channels_num];
-//
-//    glReadPixels(0, 0, w, h, GL_BGR, GL_UNSIGNED_BYTE, data);
-//
-//    int index = 0;
-//    for (int j = h - 1; j >= 0; --j)
-//    {
-//        for (int i = 0; i < w; ++i)
-//        {
-//            data[index++] = (unsigned char)(255.0 * i / w);
-//            data[index++] = (unsigned char)(255.0 * j / h);
-//            data[index++] = (unsigned char)(255.0 * 0.2);
-//        }
-//    }
-//
-//    //stbi_write_jpg("jpg_test_.jpg", w, h, channels_num, data, w * channels_num);
-//}
-
 SceneHierarchy::SceneHierarchy() {
 	init();
 }
@@ -152,19 +129,19 @@ void SceneHierarchy::init() {
 	sphere_renderable.setPrimitives({ sphere_primitive });
 	world.addComponent<ecs::ExplosionComponent>(sphere_entity);
 
- //   auto ground_entity = world.create_entity();
- //   world.addComponent<ecs::NameComponent>(ground_entity).name = "ground";
- //   auto& ground_transform = world.addComponent<ecs::TransformComponent>(ground_entity);
-	//ground_transform.scale = glm::vec3(40.0f);
-	//auto& ground_renderable = world.addComponent<ecs::RenderableComponent>(ground_entity);
-	//ecs::Primitive ground_primitive;
-	//ground_primitive.mesh = Mesh::create_quad_mesh();
- //   Material ground_material;
- //   ground_material.shader = new Shader("resource/shader/model.vs", "resource/shader/model.fs", "resource/shader/model.gs");
- //   ground_material.set_diffuse_map("resource/images/grid.png");
- //   ground_material.set_specular_map("resource/images/grid.png");
-	//ground_primitive.material = ground_material;
-	//ground_renderable.setPrimitives({ ground_primitive });
+    auto ground_entity = world.create_entity();
+    world.addComponent<ecs::NameComponent>(ground_entity).name = "ground";
+    auto& ground_transform = world.addComponent<ecs::TransformComponent>(ground_entity);
+	ground_transform.scale = glm::vec3(40.0f);
+	auto& ground_renderable = world.addComponent<ecs::RenderableComponent>(ground_entity);
+	ecs::Primitive ground_primitive;
+	ground_primitive.mesh = Mesh::create_quad_mesh();
+    Material ground_material;
+    ground_material.shader = new Shader("resource/shader/model.vs", "resource/shader/model.fs", "resource/shader/model.gs");
+    ground_material.set_diffuse_map("resource/images/grid.png");
+    ground_material.set_specular_map("resource/images/grid.png");
+	ground_primitive.material = ground_material;
+	ground_renderable.setPrimitives({ ground_primitive });
 
 	Model* nanosuit = new Model("resource/model/nanosuit/nanosuit.obj");
 	auto nanosuit_entity = world.create_entity();

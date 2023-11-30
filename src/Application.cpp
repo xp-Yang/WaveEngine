@@ -37,7 +37,7 @@ void Application::run() {
 		m_motion_system->onUpdate();
 
 		// render
-		m_editor->render(); /*render Editor(imgui)*/
+		m_editor->render();
 
 		endFrame();
 #if PERFORMANCE_TEST
@@ -92,7 +92,6 @@ void Application::newFrame()
 	ImGui_ImplGlfw_NewFrame();
 	ImGui::NewFrame();
 
-	ImGuizmo::SetOrthographic(true);
 	ImGuizmo::BeginFrame();
 }
 
@@ -103,8 +102,7 @@ void Application::endFrame()
 
 	// Update and Render additional Platform Windows
 	// (Platform functions may change the current OpenGL context, so we save/restore it to make it easier to paste this code elsewhere.
-	ImGuiIO& io = ImGui::GetIO();
-	if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
+	if (ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
 	{
 		GLFWwindow* backup_current_context = glfwGetCurrentContext();
 		ImGui::UpdatePlatformWindows();

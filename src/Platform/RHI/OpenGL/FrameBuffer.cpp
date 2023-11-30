@@ -23,6 +23,16 @@ void FrameBuffer::create(const std::vector<AttachmentType>& attachments_type)
         attachment.create(attachments_type[i], color_attachment_index, m_samples, m_width, m_height);
         m_attachments.push_back(attachment);
     }
+
+    int color_attachment_size = color_attachment_index + 1;
+    if (color_attachment_size > 1) { //有2个及以上
+        unsigned int* attachments = new unsigned int(color_attachment_size);
+        for (unsigned int i = 0; i < color_attachment_size; i++) {
+            attachments[i] = GL_COLOR_ATTACHMENT0 + i;
+        }
+        glDrawBuffers(color_attachment_size, attachments);
+        //glDrawBuffers函数并不是一个Draw Call,而是一个状态机参数设置的函数,它的作用是告诉OpenGL,把绘制output put填充到这些Attachment对应的Buffer里,所以这个函数在创建Framebuffer的时候就可以被调用了。
+    }
 }
 
 void FrameBuffer::createDefault()

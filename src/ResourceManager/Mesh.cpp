@@ -23,6 +23,7 @@ void Mesh::build() {
 
 void Mesh::reset()
 {
+    // TODO这个类应该是opengl mesh封装类，真正的mesh类应该只调用rhi
     glDeleteVertexArrays(1, &m_VAO);
     m_vertices.clear();
     m_indices.clear();
@@ -356,10 +357,10 @@ Mesh Mesh::create_quad_mesh()
     GLfloat cubeVertices[] =
     {
         // vertex               // normal             // uv
-        -1.0f,  1.0f, 0.0f,     0.0f, 0.0f, 1.0f,     0.0f, 1.0f,// 0
-        -1.0f, -1.0f, 0.0f,     0.0f, 0.0f, 1.0f,     0.0f, 0.0f,// 1
-         1.0f, -1.0f, 0.0f,     0.0f, 0.0f, 1.0f,     1.0f, 0.0f,// 2
-         1.0f,  1.0f, 0.0f,     0.0f, 0.0f, 1.0f,     1.0f, 1.0f,// 3
+        -1.0f, 0.0f, -1.0f,     0.0f, 1.0f, 0.0f,     0.0f, 1.0f,// 0
+        -1.0f, 0.0f,  1.0f,     0.0f, 1.0f, 0.0f,     0.0f, 0.0f,// 1
+         1.0f, 0.0f,  1.0f,     0.0f, 1.0f, 0.0f,     1.0f, 0.0f,// 2
+         1.0f, 0.0f, -1.0f,     0.0f, 1.0f, 0.0f,     1.0f, 1.0f,// 3
     };
     for (int i = 0; i < sizeof(cubeVertices) / sizeof(cubeVertices[0]); i += 8) {
         Vertex vertex;

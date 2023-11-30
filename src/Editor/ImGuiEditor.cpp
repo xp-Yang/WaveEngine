@@ -24,7 +24,6 @@ void ImGuiEditor::init(RenderSystem* render_system)
 
 void ImGuiEditor::render()
 {
-   // TODO setViewport of renderSystem according to dockspace position
    m_ref_render_system->onUpdate();
 
    ImGui::DockSpaceOverViewport(ImGui::GetMainViewport(), ImGuiDockNodeFlags_PassthruCentralNode);
@@ -33,25 +32,6 @@ void ImGuiEditor::render()
    renderPickedEntityController();
    renderMainViewWindow();
    updateRenderParams();
-}
-
-void ImGuiEditor::drawGrid()
-{
-    auto& world = ecs::World::get();
-    ecs::CameraComponent* camera = nullptr;
-    for (auto entity : world.entityView<ecs::CameraComponent>()) {
-        camera = world.getComponent<ecs::CameraComponent>(entity);
-    }
-    static const float identityMatrix[16] =
-    { 1.f, 0.f, 0.f, 0.f,
-        0.f, 1.f, 0.f, 0.f,
-        0.f, 0.f, 1.f, 0.f,
-        0.f, 0.f, 0.f, 1.f };
-    if (camera) {
-        glm::mat4 v = camera->view;
-        glm::mat4 p = camera->projection;
-        ImGuizmo::DrawGrid((float*)(&v), (float*)(&p), identityMatrix, 100.f);
-    }
 }
 
 void ImGuiEditor::renderMainViewWindow()
@@ -65,6 +45,7 @@ void ImGuiEditor::renderMainViewWindow()
     ImVec2 window_pos = ImGui::GetWindowPos();
     ImVec2 window_size = ImGui::GetWindowSize();
     Viewport viewport = { window_pos.x, window_pos.y, window_size.x, window_size.y, Viewport::Coordinates::ScreenCoordinates };
+    ImGuizmo::SetOrthographic(true);
     ImGuizmo::SetDrawlist();
     // ImGuizmoµÄ»æÖÆ·¶Î§ÊÇmain viewport
     ImGuizmo::SetRect(viewport.x, viewport.y, viewport.width, viewport.height);

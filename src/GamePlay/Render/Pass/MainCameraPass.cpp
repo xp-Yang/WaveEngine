@@ -75,6 +75,7 @@ void MainCameraPass::draw()
             material.update_shader_binding();
             shader->start_using();
             if (world.hasComponent<ecs::SkyboxComponent>(entity)) {
+                // TODO 这些pass的gl调用要封装到rhi里
                 glDepthMask(GL_FALSE);
                 shader->setMatrix("view", 1, skybox_view);
             }
