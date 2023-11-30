@@ -108,6 +108,10 @@ void FrameBuffer::blitDepthMapTo(FrameBuffer* dest)
 void FrameBuffer::bind()
 {
     glBindFramebuffer(GL_FRAMEBUFFER, m_fbo);
+
+    // 默认视口变换填满framebuffer，(未填满的部分是clearColor)
+    // frameBuffer 的大小总是整个窗口大小 (其实小点没啥关系，只是会糊)
+    glViewport(0, 0, m_width, m_height);
 }
 
 void FrameBuffer::unBind()

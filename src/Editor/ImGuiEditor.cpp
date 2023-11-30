@@ -32,7 +32,6 @@ void ImGuiEditor::render()
    renderCameraController();
    renderPickedEntityController();
    renderMainViewWindow();
-   renderGizmos();
    updateRenderParams();
 }
 
@@ -61,8 +60,16 @@ void ImGuiEditor::renderMainViewWindow()
     ImGui::Begin("MainView", nullptr, window_flags | ImGuiWindowFlags_NoBackground);
     ImGuiWindow* window = ImGui::GetCurrentWindow();
     window_flags = ImGui::IsWindowHovered() && ImGui::IsMouseHoveringRect(window->InnerRect.Min, window->InnerRect.Max) ? ImGuiWindowFlags_NoMove : 0;
-    Viewport viewport = { ImGui::GetWindowPos().x, WINDOW_HEIGHT - ImGui::GetWindowPos().y - ImGui::GetWindowHeight(), ImGui::GetWindowWidth(), ImGui::GetWindowHeight() };
-    Application::GetApp().getWindow()->setMainViewport(viewport);
+    ImGui::GetIO().WantPassThroughMouse = window_flags != 0;
+    ImVec2 window_pos = ImGui::GetWindowPos();
+    ImVec2 window_size = ImGui::GetWindowSize();
+    Viewport viewport = { window_pos.x, window_pos.y, window_size.x, window_size.y, Viewport::Coordinates::ScreenCoordinates };
+    ImGuizmo::SetDrawlist();
+    // ImGuizmo的绘制范围是main viewport
+    ImGuizmo::SetRect(viewport.x, viewport.y, viewport.width, viewport.height);
+    Application::GetApp().getWindow()->setMainViewport(viewport.transToGLCoordinates());
+    renderGizmos();
+
     ImGui::End();
 }
 
@@ -263,40 +270,6 @@ void ImGuiEditor::renderPickedEntityController()
 
 void ImGuiEditor::renderGizmos()
 {
-    ImGuizmo::SetOrthographic(true);
-    ImGuizmo::BeginFrame();
-    // ImGuizmo的绘制范围是全屏
-    ImGuizmo::SetRect(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
-
-    auto& world = ecs::World::get();
-    ecs::CameraComponent* camera = nullptr;
-    for (auto entity : world.entityView<ecs::CameraComponent>()) {
-        camera = world.getComponent<ecs::CameraComponent>(entity);
-    }
-    glm::mat4 model_matrix = glm::mat4(1.0f);
-    for (auto entity : world.entityView<ecs::NameComponent, ecs::PickedComponent, ecs::RenderableComponent, ecs::TransformComponent>()) {
-        model_matrix = world.getComponent<ecs::TransformComponent>(entity)->transform();
-        break;
-    }
-
-    if (camera) {
-        glm::mat4 v = camera->view;
-        glm::mat4 p = camera->projection;
-        EditTransform((float*)(&v), (float*)(&p), (float*)(&model_matrix));
-        for (auto entity : world.entityView<ecs::NameComponent, ecs::PickedComponent, ecs::RenderableComponent, ecs::TransformComponent>()) {
-            float matrixTranslation[3], matrixRotation[3], matrixScale[3];
-            ImGuizmo::DecomposeMatrixToComponents((float*)&model_matrix, matrixTranslation, matrixRotation, matrixScale);
-            auto& transform_component = *world.getComponent<ecs::TransformComponent>(entity);
-            transform_component.translation = glm::vec3(matrixTranslation[0], matrixTranslation[1], matrixTranslation[2]);
-            transform_component.scale = glm::vec3(matrixScale[0], matrixScale[1], matrixScale[2]);
-            transform_component.rotation = glm::vec3(matrixRotation[0], matrixRotation[1], matrixRotation[2]);
-            break;
-        }
-    }
-}
-
-void ImGuiEditor::EditTransform(float* cameraView, float* cameraProjection, float* matrix)
-{
     ImGuizmo::OPERATION imguizmo_operation;
     switch (m_toolbar_type)
     {
@@ -313,22 +286,34 @@ void ImGuiEditor::EditTransform(float* cameraView, float* cameraProjection, floa
         break;
     }
 
-    static bool useSnap = false;
-    static float snap[3] = { 1.f, 1.f, 1.f };
-    static float bounds[] = { -0.5f, -0.5f, -0.5f, 0.5f, 0.5f, 0.5f };
-    static float boundsSnap[] = { 0.1f, 0.1f, 0.1f };
-    static bool boundSizing = false;
-    static bool boundSizingSnap = false;
+    auto& world = ecs::World::get();
+    ecs::CameraComponent* camera = nullptr;
+    for (auto entity : world.entityView<ecs::CameraComponent>()) {
+        camera = world.getComponent<ecs::CameraComponent>(entity);
+    }
+    ecs::TransformComponent* transform_component = nullptr;
+    for (auto entity : world.entityView<ecs::NameComponent, ecs::PickedComponent, ecs::RenderableComponent, ecs::TransformComponent>()) {
+        transform_component = world.getComponent<ecs::TransformComponent>(entity);
+        break;
+    }
 
-    ImGuizmo::Manipulate(cameraView, cameraProjection, imguizmo_operation, ImGuizmo::LOCAL, matrix, NULL,
-        useSnap ? &snap[0] : NULL, boundSizing ? bounds : NULL, boundSizingSnap ? boundsSnap : NULL);
+    if (camera && transform_component) {
+        glm::mat4 model_matrix = transform_component->transform();
+        ImGuizmo::Manipulate((float*)(&camera->view), (float*)(&camera->projection), imguizmo_operation, ImGuizmo::LOCAL, (float*)(&model_matrix), NULL, NULL, NULL, NULL);
+        float matrixTranslation[3], matrixRotation[3], matrixScale[3];
+        ImGuizmo::DecomposeMatrixToComponents((float*)&model_matrix, matrixTranslation, matrixRotation, matrixScale);
+        transform_component->translation = glm::vec3(matrixTranslation[0], matrixTranslation[1], matrixTranslation[2]);
+        transform_component->scale = glm::vec3(matrixScale[0], matrixScale[1], matrixScale[2]);
+        transform_component->rotation = glm::vec3(matrixRotation[0], matrixRotation[1], matrixRotation[2]);
+    }
 
-    // TODO 以 Application::GetApp().getWindow()->getMainViewport()为准
-    //ImGuiIO& io = ImGui::GetIO();
-    //float viewManipulateRight = io.DisplaySize.x;
-    //float viewManipulateTop = 0;
-    //float camDistance = 8.f;
-    //ImGuizmo::ViewManipulate(cameraView, camDistance, ImVec2(viewManipulateRight - 128, viewManipulateTop), ImVec2(128, 128), 0x10101010);
+    if (camera) {
+        Viewport viewport = Application::GetApp().getWindow()->getMainViewport();
+        viewport.transToScreenCoordinates();
+        ImVec2 air_window_size = ImVec2(128, 128);
+        float camDistance = 8.f;
+        ImGuizmo::ViewManipulate((float*)(&camera->view), camDistance, ImVec2(viewport.x + viewport.width - air_window_size.x, viewport.y), air_window_size, 0x10101010);
+    }
 }
 
 void ImGuiEditor::updateRenderParams()

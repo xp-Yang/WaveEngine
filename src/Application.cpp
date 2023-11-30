@@ -3,6 +3,7 @@
 #include <iostream>
 #include <imgui/imgui_impl_glfw.h>
 #include <imgui/imgui_impl_opengl3.h>
+#include <imgui/ImGuizmo.h>
 #include "GamePlay/Framework/SceneHierarchy.hpp"
 #include "Editor/ImGuiEditor.hpp"
 #include "GamePlay/Render/RenderSystem.hpp"
@@ -90,6 +91,9 @@ void Application::newFrame()
 	ImGui_ImplOpenGL3_NewFrame();
 	ImGui_ImplGlfw_NewFrame();
 	ImGui::NewFrame();
+
+	ImGuizmo::SetOrthographic(true);
+	ImGuizmo::BeginFrame();
 }
 
 void Application::endFrame()

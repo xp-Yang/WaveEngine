@@ -48,6 +48,7 @@
 // 28. 优化pickingPass, readpixel用鼠标事件处理一次
 // 28. 实现scenegraph场景管理，理清楚bbs的objectlist
 // 28. 调整fov缩放为什么比较合理
+// 28. 去除所有gl裸调用
 int main()
 {
     auto& app = Application::GetApp();

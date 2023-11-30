@@ -2,6 +2,9 @@
 #include <assert.h>
 #include <utility>
 
+float WINDOW_WIDTH(1920.0f);
+float WINDOW_HEIGHT(1080.0f);
+
 Window::Window(int width, int height)
 {
 	glfwInit();//≥ı ºªØGLFW; glfwWindowHint()≈‰÷√GLFW
@@ -20,20 +23,26 @@ Window::Window(int width, int height)
 	}
 	glfwMakeContextCurrent(m_window);
 
-	m_main_viewport.x = WINDOW_WIDTH - MAIN_VIEWPORT_WIDTH;
-	m_main_viewport.y = WINDOW_HEIGHT - MAIN_VIEWPORT_HEIGHT;
-	m_main_viewport.width = MAIN_VIEWPORT_WIDTH;
-	m_main_viewport.height = MAIN_VIEWPORT_HEIGHT;
+	m_main_viewport.x = 0;
+	m_main_viewport.y = 0;
+	m_main_viewport.width = WINDOW_WIDTH;
+	m_main_viewport.height = WINDOW_HEIGHT;
 	glfwSetWindowUserPointer(m_window, &m_main_viewport);
 
 	glfwSetFramebufferSizeCallback(m_window, [](GLFWwindow* window, int width, int height) {
-		Viewport& main_viewport = *(Viewport*)glfwGetWindowUserPointer(window);
-		float scale_factor = std::min((float)width / (float)main_viewport.width, (float)height / (float)main_viewport.height);
-		main_viewport.width *= scale_factor;
-		main_viewport.height *= scale_factor;
-		main_viewport.x = 0;
-		main_viewport.y = height - main_viewport.height;
-		glViewport(main_viewport.x, main_viewport.y, main_viewport.width, main_viewport.height);
+		if (width <= 0 || height <= 0)
+			return;
+
+		float scale_factor = std::min((float)width / WINDOW_WIDTH, (float)height / WINDOW_HEIGHT);
+		WINDOW_WIDTH = width;
+		WINDOW_HEIGHT = height;
+
+		//Viewport& main_viewport = *(Viewport*)glfwGetWindowUserPointer(window);
+		//main_viewport.transToScreenCoordinates();
+		//main_viewport.width *= scale_factor;
+		//main_viewport.height *= scale_factor;
+		//main_viewport.transToGLCoordinates();
+		//glViewport(main_viewport.x, main_viewport.y, main_viewport.width, main_viewport.height);
 		});
 }
 

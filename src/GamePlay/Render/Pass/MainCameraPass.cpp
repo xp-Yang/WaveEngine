@@ -34,7 +34,6 @@ void MainCameraPass::configSamples(int samples)
 
 void MainCameraPass::draw()
 {
-    glViewport(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
     m_framebuffer->bind();
     m_framebuffer->clear();
 

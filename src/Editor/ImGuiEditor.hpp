@@ -28,7 +28,6 @@ protected:
 	void renderPickedEntityController();
 	void renderGizmos();
 	void updateRenderParams();
-	void EditTransform(float* cameraView, float* cameraProjection, float* matrix);
 
 private:
 	// 无所有权的，不 out live 所指向的实际资源

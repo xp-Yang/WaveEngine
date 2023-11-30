@@ -17,7 +17,6 @@ void GBufferPass::prepare(FrameBuffer* framebuffer)
 
 void GBufferPass::draw()
 {
-    glViewport(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
     m_framebuffer->bind();
     m_framebuffer->clear();
 

@@ -1,5 +1,6 @@
 #include "InputSystem.hpp"
 #include <imgui/imgui.h>
+#include <imgui/ImGuizmo.h>
 #include "GamePlay/Framework/ECS/Components.hpp"
 #include "GamePlay/Framework/ECS/CameraSystem.hpp"
 
@@ -10,7 +11,7 @@ void InputSystem::mouse_and_key_callback()
 	float xpos, ypos;
 	xpos = (float)io.MousePos.x;
 	ypos = (float)io.MousePos.y;
-	if (io.WantCaptureMouse) {
+	if ((io.WantCaptureMouse && !io.WantPassThroughMouse) || ImGuizmo::IsUsing()) {
 		return;
 	}
 	static bool last_left_mouse_status = io.MouseDown[0];

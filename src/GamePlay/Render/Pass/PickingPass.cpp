@@ -2,6 +2,7 @@
 #include "GamePlay/Framework/ECS/Components.hpp"
 #include "Platform/RHI/rhi.hpp"
 #include <imgui/imgui.h>
+#include "Application.hpp"
 
 void PickingPass::init()
 {
@@ -16,9 +17,10 @@ void PickingPass::prepare(FrameBuffer* framebuffer)
 void PickingPass::draw()
 {
     // render for picking
-    glViewport(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
     m_framebuffer->bind();
     m_framebuffer->clear();
+    auto main_viewport = Application::GetApp().getWindow()->getMainViewport();
+    Application::GetApp().getWindow()->setMainViewport(main_viewport);
 
     glEnable(GL_DEPTH_TEST);
 

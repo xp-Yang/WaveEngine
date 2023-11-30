@@ -26,7 +26,6 @@ void LightingPass::draw()
 {
 	m_framebuffer->bind();
 	m_framebuffer->clear();
-	glViewport(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
 
 	static Shader* lighting_shader = new Shader("resource/shader/lightingPass.vs", "resource/shader/lightingPass.fs");
 	auto g_position_map = m_gbuffer_framebuffer->getFirstAttachmentOf(AttachmentType::RGB16F).getMap();

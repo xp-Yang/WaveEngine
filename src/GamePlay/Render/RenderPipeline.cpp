@@ -6,6 +6,7 @@
 #include "Pass/PickingPass.hpp"
 #include "Pass/ScreenPass.hpp"
 #include <imgui/imgui.h>
+#include <imgui/ImGuizmo.h>
 
 void RenderPipeline::init()
 {
@@ -30,7 +31,7 @@ void RenderPipeline::setRenderParams(const RenderParams& params)
 
 void RenderPipeline::render()
 {
-    if (!ImGui::GetIO().WantCaptureMouse) {
+    if ((!ImGui::GetIO().WantCaptureMouse || ImGui::GetIO().WantPassThroughMouse) && !ImGuizmo::IsUsing()) {
         m_picking_pass->draw();
     }
     if (m_render_params.shadow) {

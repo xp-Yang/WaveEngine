@@ -4,16 +4,57 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
-#define WINDOW_WIDTH (1600.0f)
-#define WINDOW_HEIGHT (900.0f)
-#define MAIN_VIEWPORT_WIDTH (800.0f)
-#define MAIN_VIEWPORT_HEIGHT (450.0f)
+extern float WINDOW_WIDTH;
+extern float WINDOW_HEIGHT;
 
 struct Viewport {
+    enum Coordinates : unsigned int {
+        GLCoordinates,
+        ScreenCoordinates,
+    };
+    Viewport() = default;
+    Viewport(float _x, float _y, float _width, float _height, Coordinates _coordinates)
+        : x(_x)
+        , y(_y)
+        , width(_width)
+        , height(_height)
+        , coordinates(_coordinates)
+    {}
+    Viewport(int _x, int _y, int _width, int _height, Coordinates _coordinates)
+        : x(_x)
+        , y(_y)
+        , width(_width)
+        , height(_height)
+        , coordinates(_coordinates)
+    {}
+    Viewport(const Viewport& _rhs)
+        : x(_rhs.x)
+        , y(_rhs.y)
+        , width(_rhs.width)
+        , height(_rhs.height)
+        , coordinates(_rhs.coordinates)
+    {}
     int x;
     int y;
     int width;
     int height;
+    Coordinates coordinates;
+
+    Viewport& transToScreenCoordinates() {
+        if (coordinates == ScreenCoordinates)
+            return *this;
+        this->y = WINDOW_HEIGHT - this->height - this->y;
+        coordinates = ScreenCoordinates;
+        return *this;
+    }
+
+    Viewport& transToGLCoordinates() {
+        if (coordinates == GLCoordinates)
+            return *this;
+        this->y = WINDOW_HEIGHT - this->height - this->y;
+        coordinates = GLCoordinates;
+        return *this;
+    }
 };
 
 // TODO 考虑对非GLFWwindow的扩展
