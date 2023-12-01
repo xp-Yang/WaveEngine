@@ -31,6 +31,8 @@ struct TransformComponent {
 			* glm::scale(glm::mat4(1.0f), scale);
 		return result;
 	}
+
+	// TODO Ð´¸ödecomposition ºÍ composition
 };
 
 struct CameraComponent {
