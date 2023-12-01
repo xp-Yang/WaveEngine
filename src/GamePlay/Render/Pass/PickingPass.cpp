@@ -19,7 +19,7 @@ void PickingPass::draw()
     // render for picking
     m_framebuffer->bind();
     m_framebuffer->clear();
-    auto main_viewport = Application::GetApp().getWindow()->getMainViewport();
+    auto main_viewport = Application::GetApp().getWindow()->getMainViewport().value_or(Viewport());
     Application::GetApp().getWindow()->setMainViewport(main_viewport);
 
     glEnable(GL_DEPTH_TEST);

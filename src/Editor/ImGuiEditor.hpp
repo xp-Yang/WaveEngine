@@ -15,8 +15,6 @@ public:
 	ImGuiEditor();
 	void init(RenderSystem* render_system);
 	void render();
-	void renderMainViewWindow();
-	void renderDebugViewWindow();
 
 	bool stop_rotate;
 	float global_ambient_strength;
@@ -26,6 +24,9 @@ protected:
 	void renderGlobalController();
 	void renderCameraController();
 	void renderPickedEntityController();
+	void renderMainViewWindow();
+	void renderPickingViewWindow();
+	void renderShadowViewWindow();
 	void renderGizmos();
 	void updateRenderParams();
 

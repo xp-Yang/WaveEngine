@@ -31,7 +31,8 @@ void ImGuiEditor::render()
    renderCameraController();
    renderPickedEntityController();
    renderMainViewWindow();
-   renderDebugViewWindow();
+   renderPickingViewWindow();
+   renderShadowViewWindow();
    updateRenderParams();
 }
 
@@ -39,15 +40,14 @@ void ImGuiEditor::renderMainViewWindow()
 {
     static ImGuiWindowFlags window_flags = 0;
     ImGui::SetNextWindowSize(ImVec2(800, 450), ImGuiCond_Appearing);
-    //ImGui::SetNextWindowPos(ImVec2(400, 20), ImGuiCond_Appearing);
-    if (ImGui::Begin("Main View", nullptr, window_flags | ImGuiWindowFlags_NoBackground)) {
+    if (ImGui::Begin("MainView", nullptr, window_flags | ImGuiWindowFlags_NoBackground)) {
         ImGuiWindow* window = ImGui::GetCurrentWindow();
         bool hovered_window = ImGui::IsWindowHovered() && ImGui::IsMouseHoveringRect(window->InnerRect.Min, window->InnerRect.Max);
         window_flags = hovered_window ? ImGuiWindowFlags_NoMove : 0;
         ImGui::GetIO().WantPassThroughMouse = hovered_window && !ImGuizmo::IsUsing();
         ImVec2 window_pos = ImGui::GetWindowPos();
         ImVec2 window_size = ImGui::GetWindowSize();
-        Viewport viewport = { window_pos.x, window_pos.y, window_size.x, window_size.y, Viewport::Coordinates::ScreenCoordinates };
+        Viewport viewport = { (int)window_pos.x, (int)window_pos.y, (int)window_size.x, (int)window_size.y, Viewport::Coordinates::ScreenCoordinates };
         ImGuizmo::SetOrthographic(true);
         ImGuizmo::SetDrawlist();
         // ImGuizmoµÄ»æÖÆ·¶Î§ÊÇmain viewport
@@ -58,20 +58,35 @@ void ImGuiEditor::renderMainViewWindow()
     ImGui::End();
 }
 
-void ImGuiEditor::renderDebugViewWindow()
+void ImGuiEditor::renderPickingViewWindow()
 {
     static ImGuiWindowFlags window_flags = 0;
     ImGui::SetNextWindowSize(ImVec2(400, 225), ImGuiCond_Appearing);
-    if (ImGui::Begin("Debug View", nullptr, window_flags/* | ImGuiWindowFlags_NoBackground*/)) {
+    if (ImGui::Begin("PickingView", nullptr, window_flags | ImGuiWindowFlags_NoBackground)) {
         ImGuiWindow* window = ImGui::GetCurrentWindow();
         bool hovered_window = ImGui::IsWindowHovered() && ImGui::IsMouseHoveringRect(window->InnerRect.Min, window->InnerRect.Max);
         window_flags = hovered_window ? ImGuiWindowFlags_NoMove : 0;
-        ImGui::GetIO().WantPassThroughMouse = hovered_window && !ImGuizmo::IsUsing();
+        ImGui::GetIO().WantPassThroughMouse = ImGui::GetIO().WantPassThroughMouse || hovered_window && !ImGuizmo::IsUsing();
         ImVec2 window_pos = ImGui::GetWindowPos();
         ImVec2 window_size = ImGui::GetWindowSize();
-        Viewport viewport = { window_pos.x, window_pos.y, window_size.x, window_size.y, Viewport::Coordinates::ScreenCoordinates };
+        Viewport viewport = { (int)window_pos.x, (int)window_pos.y, (int)window_size.x, (int)window_size.y, Viewport::Coordinates::ScreenCoordinates };
+        Application::GetApp().getWindow()->setViewport("PickingView", viewport.transToGLCoordinates());
+    }
+    ImGui::End();
+}
 
-        //Application::GetApp().getWindow()->setMainViewport(viewport.transToGLCoordinates());
+void ImGuiEditor::renderShadowViewWindow()
+{
+    static ImGuiWindowFlags window_flags = 0;
+    ImGui::SetNextWindowSize(ImVec2(400, 225), ImGuiCond_Appearing);
+    if (ImGui::Begin("ShadowView", nullptr, window_flags | ImGuiWindowFlags_NoBackground)) {
+        ImGuiWindow* window = ImGui::GetCurrentWindow();
+        bool hovered_window = ImGui::IsWindowHovered() && ImGui::IsMouseHoveringRect(window->InnerRect.Min, window->InnerRect.Max);
+        window_flags = hovered_window ? ImGuiWindowFlags_NoMove : 0;
+        ImVec2 window_pos = ImGui::GetWindowPos();
+        ImVec2 window_size = ImGui::GetWindowSize();
+        Viewport viewport = { (int)window_pos.x, (int)window_pos.y, (int)window_size.x, (int)window_size.y, Viewport::Coordinates::ScreenCoordinates };
+        Application::GetApp().getWindow()->setViewport("ShadowView", viewport.transToGLCoordinates());
     }
     ImGui::End();
 }
@@ -312,7 +327,7 @@ void ImGuiEditor::renderGizmos()
     }
 
     if (camera) {
-        Viewport viewport = Application::GetApp().getWindow()->getMainViewport();
+        Viewport viewport = Application::GetApp().getWindow()->getMainViewport().value_or(Viewport());
         viewport.transToScreenCoordinates();
         ImVec2 air_window_size = ImVec2(128, 128);
         float camDistance = 8.f;

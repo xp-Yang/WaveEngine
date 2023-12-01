@@ -1,6 +1,8 @@
 #ifndef Window_hpp
 #define Window_hpp
 
+#include <optional>
+#include <unordered_map>
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
@@ -13,13 +15,6 @@ struct Viewport {
         ScreenCoordinates,
     };
     Viewport() = default;
-    Viewport(float _x, float _y, float _width, float _height, Coordinates _coordinates)
-        : x(_x)
-        , y(_y)
-        , width(_width)
-        , height(_height)
-        , coordinates(_coordinates)
-    {}
     Viewport(int _x, int _y, int _width, int _height, Coordinates _coordinates)
         : x(_x)
         , y(_y)
@@ -65,15 +60,17 @@ public:
     bool shouldClose() const;
     void update() const;
     void setMainViewport(const Viewport& viewport);
+    void setViewport(std::string id, const Viewport& viewport);
+    std::optional<Viewport> getViewport(std::string id) const;
+    std::optional<Viewport> getMainViewport() const;
     GLFWwindow* getNativeWindowHandle() const;
     int getWidth() const;
     int getHeight() const;
-    Viewport getMainViewport() const;
 private:
     GLFWwindow* m_window{ nullptr };
     int m_width;
     int m_height;
-    Viewport m_main_viewport;
+    std::unordered_map<std::string, Viewport> m_viewports; // always has one main viewport
 };
 
 #endif

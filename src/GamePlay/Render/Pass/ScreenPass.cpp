@@ -24,7 +24,7 @@ void ScreenPass::draw()
 	m_default_framebuffer->bind();
 	m_default_framebuffer->clear();
 
-	auto main_viewport = Application::GetApp().getWindow()->getMainViewport();
+	auto main_viewport = Application::GetApp().getWindow()->getMainViewport().value_or(Viewport());
 	Application::GetApp().getWindow()->setMainViewport(main_viewport);
 	glDisable(GL_DEPTH_TEST);
 	static Shader* frame_shader = new Shader("resource/shader/frame.vs", "resource/shader/frame.fs");
@@ -36,13 +36,17 @@ void ScreenPass::draw()
 
 	// TODO 可以塞多个小窗口进多个imgui窗口里
 	// a child window for debugging
-	//auto main_viewport = Application::GetApp().getWindow()->getMainViewport();
-	auto child_viewport = Viewport(main_viewport.x + main_viewport.width - main_viewport.width / 4, main_viewport.y, main_viewport.width / 4, main_viewport.height / 4, Viewport::Coordinates::GLCoordinates);
-	Application::GetApp().getWindow()->setMainViewport(child_viewport);
+	Viewport picking_viewport = Application::GetApp().getWindow()->getViewport("PickingView").value_or(Viewport());
+	Application::GetApp().getWindow()->setViewport("PickingView", picking_viewport);
 	frame_shader->start_using();
 	frame_shader->setTexture("Texture", 0, 66);
 	Renderer::drawTriangle(*frame_shader, m_screen_quad->getVAO(), 6);
-	Application::GetApp().getWindow()->setMainViewport(main_viewport);
+
+	Viewport shadow_viewport = Application::GetApp().getWindow()->getViewport("ShadowView").value_or(Viewport());
+	Application::GetApp().getWindow()->setViewport("ShadowView", shadow_viewport);
+	frame_shader->start_using();
+	frame_shader->setTexture("Texture", 0, 56);
+	Renderer::drawTriangle(*frame_shader, m_screen_quad->getVAO(), 6);
 }
 
 FrameBuffer* ScreenPass::getFrameBuffer()

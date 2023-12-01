@@ -17,7 +17,7 @@ public:
 	virtual void drawTriangles() = 0;
 	// buffer
 	virtual void createFrameBuffer() = 0;
-	// 全局状态
+	// context 全局状态
 	virtual void setViewport() = 0;
 	virtual void enableDepthTest(bool enable) = 0;
 	virtual void enableStencilTest(bool enable) = 0;
