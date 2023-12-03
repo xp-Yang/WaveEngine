@@ -47,11 +47,12 @@ struct CameraComponent {
 	static const float ZoomUnit;
 	static glm::vec3 up; //vec3(0.0f, 1.0f, 0.0f) (y为上) or vec3(0.0f, 0.0f, 1.0f) (z为上)
 
-	glm::vec3 pos = { 0.0f, 15.0f, 15.0f };
-	glm::vec3 direction = glm::vec3(0.0f) - pos;
-	glm::mat4 view = glm::lookAt(pos, pos+ direction, up);
-	//glm::mat4 projection = glm::ortho(-15.0f * WINDOW_WIDTH / WINDOW_HEIGHT, 15.0f * WINDOW_WIDTH / WINDOW_HEIGHT, -15.0f, 15.0f, 0.1f, 100.0f);
-	glm::mat4 projection = glm::perspective(glm::radians(45.0f), WINDOW_WIDTH / WINDOW_HEIGHT, 0.1f, 100.0f);
+	float focal_length = {20.0f};
+	glm::vec3 direction = glm::normalize(glm::vec3(0.0f, -1.0f , -1.0f));
+	glm::vec3 pos = glm::vec3(0.0f) - focal_length * direction;
+	glm::mat4 view = glm::lookAt(pos, pos + direction, up);
+	//glm::mat4 projection = glm::ortho(-15.0f * ASPECT_RATIO, 15.0f * ASPECT_RATIO, -15.0f, 15.0f, 0.1f, 100.0f);
+	glm::mat4 projection = glm::perspective(glm::radians(45.0f), ASPECT_RATIO, 0.1f, 100.0f);
 	float zoom = 1.0f;
 
 	glm::vec3 getRightDirection() const { // camera 的 x 轴

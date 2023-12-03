@@ -49,6 +49,7 @@
 // 28. 实现scenegraph场景管理，理清楚bbs的objectlist
 // 28. 调整fov缩放为什么比较合理
 // 28. 去除所有gl裸调用
+// 28. 软光栅+软光追，opengl光栅+opengl光追，opengl光栅+软光追，
 int main()
 {
     auto& app = Application::GetApp();

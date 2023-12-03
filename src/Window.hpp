@@ -8,6 +8,7 @@
 
 extern float WINDOW_WIDTH;
 extern float WINDOW_HEIGHT;
+extern float ASPECT_RATIO;
 
 struct Viewport {
     enum Coordinates : unsigned int {

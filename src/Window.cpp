@@ -4,6 +4,7 @@
 
 float WINDOW_WIDTH(1920.0f);
 float WINDOW_HEIGHT(1080.0f);
+float ASPECT_RATIO(16.0f / 9.0f);
 
 Window::Window(int width, int height)
 {

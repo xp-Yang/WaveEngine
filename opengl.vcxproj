@@ -28,6 +28,8 @@
     <ClCompile Include="src\GamePlay\Framework\ECS\MotionSystem.cpp" />
     <ClCompile Include="src\GamePlay\Framework\ECS\PhysicsSystem.cpp" />
     <ClCompile Include="src\GamePlay\Input\InputSystem.cpp" />
+    <ClCompile Include="src\GamePlay\RayTracing\Hittable.cpp" />
+    <ClCompile Include="src\GamePlay\RayTracing\RayCast.cpp" />
     <ClCompile Include="src\GamePlay\Render\RenderSystem.cpp" />
     <ClCompile Include="src\Editor\ImGuiEditor.cpp" />
     <ClCompile Include="src\GamePlay\Framework\ECS\JobSystem.cpp" />
@@ -67,7 +69,10 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Application.hpp" />
+    <ClInclude Include="src\Core\Color.hpp" />
     <ClInclude Include="src\Core\Memory.hpp" />
+    <ClInclude Include="src\Core\Point.hpp" />
+    <ClInclude Include="src\Core\Vector.hpp" />
     <ClInclude Include="src\GamePlay\Framework\ECS\AnimationSystem.hpp" />
     <ClInclude Include="src\GamePlay\Framework\ECS\Components.hpp" />
     <ClInclude Include="src\GamePlay\Framework\ECS\CameraSystem.hpp" />
@@ -76,6 +81,10 @@
     <ClInclude Include="src\GamePlay\Framework\ECS\MotionSystem.hpp" />
     <ClInclude Include="src\GamePlay\Framework\ECS\PhysicsSystem.hpp" />
     <ClInclude Include="src\GamePlay\Input\InputSystem.hpp" />
+    <ClInclude Include="src\GamePlay\RayTracing\Eye.hpp" />
+    <ClInclude Include="src\GamePlay\RayTracing\Hittable.hpp" />
+    <ClInclude Include="src\GamePlay\RayTracing\Material.hpp" />
+    <ClInclude Include="src\GamePlay\RayTracing\RayCast.hpp" />
     <ClInclude Include="src\GamePlay\Render\RenderSystem.hpp" />
     <ClInclude Include="src\Editor\ImGuiEditor.hpp" />
     <ClInclude Include="src\Platform\OS\FileDialog.hpp" />

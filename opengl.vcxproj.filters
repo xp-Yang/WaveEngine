@@ -173,6 +173,12 @@
     <ClCompile Include="src\GamePlay\Framework\ECS\World.cpp">
       <Filter>engine</Filter>
     </ClCompile>
+    <ClCompile Include="src\GamePlay\RayTracing\RayCast.cpp">
+      <Filter>engine</Filter>
+    </ClCompile>
+    <ClCompile Include="src\GamePlay\RayTracing\Hittable.cpp">
+      <Filter>engine</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="resource\shader\light.vs">
@@ -240,6 +246,13 @@
     <ClInclude Include="src\ResourceManager\Shader.hpp" />
     <ClInclude Include="src\GamePlay\Framework\SceneHierarchy.hpp" />
     <ClInclude Include="src\GamePlay\Framework\ECS\World.hpp" />
+    <ClInclude Include="src\GamePlay\RayTracing\RayCast.hpp" />
+    <ClInclude Include="src\GamePlay\RayTracing\Hittable.hpp" />
+    <ClInclude Include="src\Core\Color.hpp" />
+    <ClInclude Include="src\Core\Point.hpp" />
+    <ClInclude Include="src\Core\Vector.hpp" />
+    <ClInclude Include="src\GamePlay\RayTracing\Eye.hpp" />
+    <ClInclude Include="src\GamePlay\RayTracing\Material.hpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="resource\shader\light.fs">
