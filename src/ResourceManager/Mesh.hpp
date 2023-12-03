@@ -1,6 +1,6 @@
 #ifndef Mesh_hpp
 #define Mesh_hpp
-#include <glm/glm.hpp>
+#include <Core/Vector.hpp>
 #include <vector>
 #include <string>
 
@@ -41,7 +41,8 @@ protected:
 public:
 	static Mesh create_cube_mesh();
 	static Mesh create_icosphere_mesh(int regression_depth);
-	static Mesh create_quad_mesh();
+	static Mesh create_quad_mesh(const Point3& origin, const Vec3& positive_dir_u, const Vec3& positive_dir_v);
+	static Mesh create_screen_mesh();
 };
 
 

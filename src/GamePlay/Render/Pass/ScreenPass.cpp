@@ -10,8 +10,7 @@ void ScreenPass::init()
 	// ÓÃÀ´downSampleµÄ
 	m_framebuffer = std::make_unique<FrameBuffer>(WINDOW_WIDTH, WINDOW_HEIGHT);
 	m_framebuffer->create({ AttachmentType::RGBA });
-	m_screen_quad = std::make_unique<ScreenQuad>();
-	m_screen_quad->create();
+	m_screen_quad = Mesh::create_screen_mesh();
 }
 
 void ScreenPass::prepare(FrameBuffer* framebuffer)
@@ -30,7 +29,7 @@ void ScreenPass::draw()
 	static Shader* frame_shader = new Shader("resource/shader/frame.vs", "resource/shader/frame.fs");
 	frame_shader->start_using();
 	frame_shader->setTexture("Texture", 0, m_framebuffer->getFirstAttachmentOf(AttachmentType::RGBA).getMap());
-	Renderer::drawTriangle(*frame_shader, m_screen_quad->getVAO(), 6);
+	Renderer::drawIndex(*frame_shader, m_screen_quad.get_VAO(), m_screen_quad.get_indices_count());
 	glEnable(GL_DEPTH_TEST);
 
 
@@ -40,13 +39,13 @@ void ScreenPass::draw()
 	Application::GetApp().getWindow()->setViewport("PickingView", picking_viewport);
 	frame_shader->start_using();
 	frame_shader->setTexture("Texture", 0, 66);
-	Renderer::drawTriangle(*frame_shader, m_screen_quad->getVAO(), 6);
+	Renderer::drawIndex(*frame_shader, m_screen_quad.get_VAO(), m_screen_quad.get_indices_count());
 
 	Viewport shadow_viewport = Application::GetApp().getWindow()->getViewport("ShadowView").value_or(Viewport());
 	Application::GetApp().getWindow()->setViewport("ShadowView", shadow_viewport);
 	frame_shader->start_using();
 	frame_shader->setTexture("Texture", 0, 56);
-	Renderer::drawTriangle(*frame_shader, m_screen_quad->getVAO(), 6);
+	Renderer::drawIndex(*frame_shader, m_screen_quad.get_VAO(), m_screen_quad.get_indices_count());
 }
 
 FrameBuffer* ScreenPass::getFrameBuffer()

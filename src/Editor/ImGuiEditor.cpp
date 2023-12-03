@@ -39,7 +39,7 @@ void ImGuiEditor::render()
 void ImGuiEditor::renderMainViewWindow()
 {
     static ImGuiWindowFlags window_flags = 0;
-    ImGui::SetNextWindowSize(ImVec2(800, 450), ImGuiCond_Appearing);
+    ImGui::SetNextWindowSize(ImVec2(1280, 720), ImGuiCond_Appearing);
     if (ImGui::Begin("MainView", nullptr, window_flags | ImGuiWindowFlags_NoBackground)) {
         ImGuiWindow* window = ImGui::GetCurrentWindow();
         bool hovered_window = ImGui::IsWindowHovered() && ImGui::IsMouseHoveringRect(window->InnerRect.Min, window->InnerRect.Max);

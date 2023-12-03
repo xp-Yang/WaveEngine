@@ -4,7 +4,6 @@
 class SceneHierarchy {
 public:
 	SceneHierarchy();
-	~SceneHierarchy();
 	//Object* object(const std::string& name) {
 	//	auto it = m_objects.find(name);
 	//	if (it == m_objects.end())

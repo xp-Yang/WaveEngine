@@ -69,9 +69,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Application.hpp" />
-    <ClInclude Include="src\Core\Color.hpp" />
     <ClInclude Include="src\Core\Memory.hpp" />
-    <ClInclude Include="src\Core\Point.hpp" />
     <ClInclude Include="src\Core\Vector.hpp" />
     <ClInclude Include="src\GamePlay\Framework\ECS\AnimationSystem.hpp" />
     <ClInclude Include="src\GamePlay\Framework\ECS\Components.hpp" />

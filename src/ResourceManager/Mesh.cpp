@@ -349,44 +349,31 @@ Mesh Mesh::create_icosphere_mesh(int regression_depth) {
     return Mesh(all_vertices, indices);
 }
 
-Mesh Mesh::create_quad_mesh()
+Mesh Mesh::create_quad_mesh(const Point3& origin, const Vec3& positive_dir_u, const Vec3& positive_dir_v)
 {
     std::vector<Vertex> vertices;
     std::vector<unsigned int> indices;
 
-    GLfloat cubeVertices[] =
-    {
-        // vertex               // normal             // uv
-        -1.0f, 0.0f, -1.0f,     0.0f, 1.0f, 0.0f,     0.0f, 1.0f,// 0
-        -1.0f, 0.0f,  1.0f,     0.0f, 1.0f, 0.0f,     0.0f, 0.0f,// 1
-         1.0f, 0.0f,  1.0f,     0.0f, 1.0f, 0.0f,     1.0f, 0.0f,// 2
-         1.0f, 0.0f, -1.0f,     0.0f, 1.0f, 0.0f,     1.0f, 1.0f,// 3
-    };
-    for (int i = 0; i < sizeof(cubeVertices) / sizeof(cubeVertices[0]); i += 8) {
+    Vec3 normal = glm::normalize(glm::cross(positive_dir_u, positive_dir_v));
+    Point3 origin_p = origin;
+    Point3 right_p = origin_p + positive_dir_u;
+    Point3 upper_right_p = origin_p + positive_dir_u + positive_dir_v;
+    Point3 upper_p = origin_p + positive_dir_v;
+    Point3 points[4] = { origin_p, right_p, upper_right_p, upper_p };
+
+    for (int i = 0; i < 4; i++) {
         Vertex vertex;
 
-        glm::vec3 position;
-        position.x = cubeVertices[0 + i];
-        position.y = cubeVertices[1 + i];
-        position.z = cubeVertices[2 + i];
-        vertex.position = position;
-
-        glm::vec3 normal;
-        normal.x = cubeVertices[3 + i];
-        normal.y = cubeVertices[4 + i];
-        normal.z = cubeVertices[5 + i];
+        vertex.position = points[i];
         vertex.normal = normal;
-
-        // TODO uv ·¶Î§²»ÒªÐ´ËÀ
-        glm::vec2 vec;
-        vec.x = cubeVertices[6 + i] * 5.0f;
-        vec.y = cubeVertices[7 + i] * 5.0f;
-        vertex.texture_uv = vec;
+        float u = (i == 0 || i == 3) ? 0.0f : 1.0f;
+        float v = (i == 0 || i == 1) ? 0.0f : 1.0f;
+        vertex.texture_uv = { u, v };
 
         vertices.push_back(vertex);
     }
 
-    GLuint cubeIndices[] =
+    unsigned int cubeIndices[] =
     {
         0, 1, 2,
         0, 2, 3,
@@ -396,4 +383,9 @@ Mesh Mesh::create_quad_mesh()
     }
 
     return Mesh(vertices, indices);
+}
+
+Mesh Mesh::create_screen_mesh()
+{
+    return create_quad_mesh(Point3(-1.0f, -1.0f, 0.0f), Vec3(2.0f, 0.0f, 0.0f), Vec3(0.0f, 2.0f, 0.0f));
 }

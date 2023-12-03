@@ -8,10 +8,6 @@ SceneHierarchy::SceneHierarchy() {
 	init();
 }
 
-SceneHierarchy::~SceneHierarchy() {
-
-}
-
 void SceneHierarchy::init() {    
     // TODO 这些需要被SceneHierarchy管理吗，参考filament
 	auto& world = ecs::World::get();
@@ -135,7 +131,7 @@ void SceneHierarchy::init() {
 	ground_transform.scale = glm::vec3(40.0f);
 	auto& ground_renderable = world.addComponent<ecs::RenderableComponent>(ground_entity);
 	ecs::Primitive ground_primitive;
-	ground_primitive.mesh = Mesh::create_quad_mesh();
+	ground_primitive.mesh = Mesh::create_quad_mesh(Point3(-0.5f, 0.0f, 0.5f), Vec3(1.0f, 0.0f, 0.0f), Vec3(0.0f, 0.0f, -1.0f));
     Material ground_material;
     ground_material.shader = new Shader("resource/shader/model.vs", "resource/shader/model.fs", "resource/shader/model.gs");
     ground_material.set_diffuse_map("resource/images/grid.png");

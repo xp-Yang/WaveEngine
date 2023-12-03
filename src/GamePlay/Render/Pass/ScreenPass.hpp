@@ -12,7 +12,7 @@ public:
 
 private:
     std::unique_ptr<FrameBuffer> m_default_framebuffer{ nullptr };
-    std::unique_ptr<ScreenQuad> m_screen_quad;
+    Mesh m_screen_quad;
 };
 
 #endif

@@ -6,8 +6,7 @@ void LightingPass::init()
 {
     m_framebuffer = std::make_unique<FrameBuffer>(WINDOW_WIDTH, WINDOW_HEIGHT);
     m_framebuffer->create({ AttachmentType::RGB16F, AttachmentType::DEPTH });
-	m_screen_quad = std::make_unique<ScreenQuad>();
-	m_screen_quad->create();
+	m_screen_quad = Mesh::create_screen_mesh();
 }
 
 void LightingPass::prepare(FrameBuffer* framebuffer)
@@ -76,7 +75,7 @@ void LightingPass::draw()
 		// set default map
 		//shader->setTexture("shadow_map", 4, 0);
 	}
-	Renderer::drawTriangle(*lighting_shader, m_screen_quad->getVAO(), 6);
+	Renderer::drawIndex(*lighting_shader, m_screen_quad.get_VAO(), m_screen_quad.get_indices_count());
 	lighting_shader->stop_using();
 
 	// lights
