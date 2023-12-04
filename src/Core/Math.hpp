@@ -38,6 +38,32 @@ namespace MathUtils {
         else
             return -unit;
     }
+    Vec3 randomLambertianDistribution(const Vec3& normal) {
+        // 1. 构造切平面
+        Vec3 up = Vec3(0, 1, 0);
+        Vec3 local_u;
+        if (normal == up)
+            local_u = Vec3(1, 0, 0);
+        local_u = glm::cross(normal, up);
+        Vec3 local_v = glm::cross(normal, local_u);
+        
+        // 2. 在切平面均匀取点
+        Point3 random_plane_point;
+        random_plane_point = randomUnit() * local_u + randomUnit() * local_v;
+
+        // 3. 将点映射回球面
+        return getPointOnUnitSphere(random_plane_point, normal);
+    }
+    Point3 getPointOnUnitSphere(const Point3& plane_point, const Vec3& normal) {
+        float r_square = glm::dot(plane_point, plane_point);
+        if (r_square > 1)
+            return{};
+
+        float h = 1 - r_square;
+
+        return plane_point + h * normal;
+    }
+
     double clamp(double x, double min, double max) {
         if (x < min) return min;
         if (x > max) return max;
