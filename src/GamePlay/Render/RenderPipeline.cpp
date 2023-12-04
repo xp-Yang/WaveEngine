@@ -5,6 +5,7 @@
 #include "Pass/MainCameraPass.hpp"
 #include "Pass/PickingPass.hpp"
 #include "Pass/ScreenPass.hpp"
+#include "Pass/RayTracingPass.hpp"
 #include <imgui/imgui.h>
 #include <imgui/ImGuizmo.h>
 
@@ -22,6 +23,9 @@ void RenderPipeline::init()
     m_lighting_pass->init();
     m_picking_pass->init();
     m_screen_pass->init();
+
+    m_ray_tracing_pass = std::make_unique<RayTracingPass>();
+    m_ray_tracing_pass->init();
 }
 
 void RenderPipeline::setRenderParams(const RenderParams& params)
@@ -31,6 +35,8 @@ void RenderPipeline::setRenderParams(const RenderParams& params)
 
 void RenderPipeline::render()
 {
+    m_ray_tracing_pass->draw();
+
     if (ImGui::GetIO().WantPassThroughMouse) {
         m_picking_pass->draw();
     }

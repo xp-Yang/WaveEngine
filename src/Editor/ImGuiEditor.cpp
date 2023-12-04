@@ -95,11 +95,12 @@ void ImGuiEditor::renderShadowViewWindow()
 void ImGuiEditor::renderRayTracingViewWindow()
 {
     static ImGuiWindowFlags window_flags = 0;
-    ImGui::SetNextWindowSize(ImVec2(400, 225), ImGuiCond_Appearing);
+    ImGui::SetNextWindowSize(ImVec2(800, 450), ImGuiCond_Appearing);
     if (ImGui::Begin("RayTracingView", nullptr, window_flags | ImGuiWindowFlags_NoBackground)) {
         ImGuiWindow* window = ImGui::GetCurrentWindow();
         bool hovered_window = ImGui::IsWindowHovered() && ImGui::IsMouseHoveringRect(window->InnerRect.Min, window->InnerRect.Max);
         window_flags = hovered_window ? ImGuiWindowFlags_NoMove : 0;
+        ImGui::GetIO().WantPassThroughMouse = ImGui::GetIO().WantPassThroughMouse || hovered_window && !ImGuizmo::IsUsing();
         ImVec2 window_pos = ImGui::GetWindowPos();
         ImVec2 window_size = ImGui::GetWindowSize();
         Viewport viewport = { (int)window_pos.x, (int)window_pos.y, (int)window_size.x, (int)window_size.y, Viewport::Coordinates::ScreenCoordinates };

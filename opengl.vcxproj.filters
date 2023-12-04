@@ -179,6 +179,9 @@
     <ClCompile Include="src\GamePlay\RayTracing\Hittable.cpp">
       <Filter>engine</Filter>
     </ClCompile>
+    <ClCompile Include="src\GamePlay\Render\Pass\RayTracingPass.cpp">
+      <Filter>engine</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="resource\shader\light.vs">
@@ -251,6 +254,7 @@
     <ClInclude Include="src\Core\Vector.hpp" />
     <ClInclude Include="src\GamePlay\RayTracing\Eye.hpp" />
     <ClInclude Include="src\GamePlay\RayTracing\Material.hpp" />
+    <ClInclude Include="src\GamePlay\Render\Pass\RayTracingPass.hpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="resource\shader\light.fs">
@@ -308,5 +312,7 @@
     <None Include="resource\shader\lightingPass.fs" />
     <None Include="resource\shader\lightingPass.vs" />
     <None Include="src\Platform\OS\Linux\linux.placeholder" />
+    <None Include="resource\shader\RayTracing.fs" />
+    <None Include="resource\shader\RayTracing.vs" />
   </ItemGroup>
 </Project>

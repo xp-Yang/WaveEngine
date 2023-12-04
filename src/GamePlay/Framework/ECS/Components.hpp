@@ -57,24 +57,24 @@ struct CameraComponent {
 
 	glm::vec3 getRightDirection() const { // camera µÄ x Öá
 		glm::vec3 cameraRight = glm::normalize(glm::cross(direction, up));
-		for (int i = 0; i < 3; i++) {
-			if (abs(cameraRight[i] - 1) < 0.001f) {
-				cameraRight[i] = 1.0f;
-				break;
-			}
-		}
+		//for (int i = 0; i < 3; i++) {
+		//	if (abs(cameraRight[i] - 1) < 0.001f) {
+		//		cameraRight[i] = 1.0f;
+		//		break;
+		//	}
+		//}
 		return cameraRight;
 	}
 
 	glm::vec3 getUpDirection() const { // camera µÄ y Öá
 		glm::vec3 cameraRight = getRightDirection();
 		glm::vec3 cameraUp = glm::cross(cameraRight, direction);
-		for (int i = 0; i < 3; i++) {
-			if (abs(cameraUp[i] - 1) < 0.001f) {
-				cameraUp[i] = 1.0f;
-				break;
-			}
-		}
+		//for (int i = 0; i < 3; i++) {
+		//	if (abs(cameraUp[i] - 1) < 0.001f) {
+		//		cameraUp[i] = 1.0f;
+		//		break;
+		//	}
+		//}
 		return cameraUp;
 	}
 };

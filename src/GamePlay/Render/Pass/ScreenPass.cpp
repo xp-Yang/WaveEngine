@@ -46,6 +46,12 @@ void ScreenPass::draw()
 	frame_shader->start_using();
 	frame_shader->setTexture("Texture", 0, 56);
 	Renderer::drawIndex(*frame_shader, m_screen_quad.get_VAO(), m_screen_quad.get_indices_count());
+
+	Viewport rt_viewport = Application::GetApp().getWindow()->getViewport("RayTracingView").value_or(Viewport());
+	Application::GetApp().getWindow()->setViewport("RayTracingView", rt_viewport);
+	frame_shader->start_using();
+	frame_shader->setTexture("Texture", 0, 40);
+	Renderer::drawIndex(*frame_shader, m_screen_quad.get_VAO(), m_screen_quad.get_indices_count());
 }
 
 FrameBuffer* ScreenPass::getFrameBuffer()

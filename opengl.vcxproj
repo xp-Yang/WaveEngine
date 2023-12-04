@@ -30,6 +30,7 @@
     <ClCompile Include="src\GamePlay\Input\InputSystem.cpp" />
     <ClCompile Include="src\GamePlay\RayTracing\Hittable.cpp" />
     <ClCompile Include="src\GamePlay\RayTracing\RayCast.cpp" />
+    <ClCompile Include="src\GamePlay\Render\Pass\RayTracingPass.cpp" />
     <ClCompile Include="src\GamePlay\Render\RenderSystem.cpp" />
     <ClCompile Include="src\Editor\ImGuiEditor.cpp" />
     <ClCompile Include="src\GamePlay\Framework\ECS\JobSystem.cpp" />
@@ -83,6 +84,7 @@
     <ClInclude Include="src\GamePlay\RayTracing\Hittable.hpp" />
     <ClInclude Include="src\GamePlay\RayTracing\Material.hpp" />
     <ClInclude Include="src\GamePlay\RayTracing\RayCast.hpp" />
+    <ClInclude Include="src\GamePlay\Render\Pass\RayTracingPass.hpp" />
     <ClInclude Include="src\GamePlay\Render\RenderSystem.hpp" />
     <ClInclude Include="src\Editor\ImGuiEditor.hpp" />
     <ClInclude Include="src\Platform\OS\FileDialog.hpp" />
@@ -142,6 +144,8 @@
     <None Include="resource\shader\normal.gs" />
     <None Include="resource\shader\picking.fs" />
     <None Include="resource\shader\picking.vs" />
+    <None Include="resource\shader\RayTracing.fs" />
+    <None Include="resource\shader\RayTracing.vs" />
     <None Include="resource\shader\skybox.fs" />
     <None Include="resource\shader\skybox.vs" />
     <None Include="resource\shader\wireframe.fs" />
