@@ -155,27 +155,47 @@ void SceneHierarchy::init() {
 		primitive.material.shader = nanosuit_shader;
 		nanosuit_primitives.push_back(primitive);
 	}
-	nanosuit_renderable.setPrimitives({ nanosuit_primitives });
+	nanosuit_renderable.setPrimitives(nanosuit_primitives);
 	world.addComponent<ecs::ExplosionComponent>(nanosuit_entity);
 
-	Model* yoko = new Model("resource/model/yoko/008.obj");
-	auto yoko_entity = world.create_entity();
-	world.addComponent<ecs::NameComponent>(yoko_entity).name = "yoko";
-	auto& yoko_transform = world.addComponent<ecs::TransformComponent>(yoko_entity);
-	yoko_transform.translation = { -5.0f, 0.0f, 0.0f };
-	yoko_transform.scale = glm::vec3(0.25f);
-	auto& yoko_renderable = world.addComponent<ecs::RenderableComponent>(yoko_entity);
-	std::vector<ecs::Primitive> yoko_primitives;
-	Shader* yoko_shader = new Shader("resource/shader/model.vs", "resource/shader/model.fs", "resource/shader/model.gs");
-	for (int i = 0; i < yoko->get_datas().size(); i++) {
+	//Model* yoko = new Model("resource/model/yoko/008.obj");
+	//auto yoko_entity = world.create_entity();
+	//world.addComponent<ecs::NameComponent>(yoko_entity).name = "yoko";
+	//auto& yoko_transform = world.addComponent<ecs::TransformComponent>(yoko_entity);
+	//yoko_transform.translation = { -5.0f, 0.0f, 0.0f };
+	//yoko_transform.scale = glm::vec3(0.25f);
+	//auto& yoko_renderable = world.addComponent<ecs::RenderableComponent>(yoko_entity);
+	//std::vector<ecs::Primitive> yoko_primitives;
+	//Shader* yoko_shader = new Shader("resource/shader/model.vs", "resource/shader/model.fs", "resource/shader/model.gs");
+	//for (int i = 0; i < yoko->get_datas().size(); i++) {
+	//	ecs::Primitive primitive;
+	//	primitive.mesh = yoko->get_datas().at(i).mesh;
+	//	primitive.material = yoko->get_datas().at(i).material;
+	//	primitive.material.shader = yoko_shader;
+	//	yoko_primitives.push_back(primitive);
+	//}
+	//yoko_renderable.setPrimitives(yoko_primitives);
+	//world.addComponent<ecs::ExplosionComponent>(yoko_entity);
+
+	Model* bunny = new Model("resource/model/bunny.obj");
+	auto bunny_entity = world.create_entity();
+	world.addComponent<ecs::NameComponent>(bunny_entity).name = "bunny";
+	auto& bunny_transform = world.addComponent<ecs::TransformComponent>(bunny_entity);
+	bunny_transform.translation = { -5.0f, 0.0f, 0.0f };
+	bunny_transform.scale = glm::vec3(25.0f);
+	auto& bunny_renderable = world.addComponent<ecs::RenderableComponent>(bunny_entity);
+	std::vector<ecs::Primitive> bunny_primitives;
+	Shader* bunny_shader = new Shader("resource/shader/model.vs", "resource/shader/model.fs", "resource/shader/model.gs");
+	for (int i = 0; i < bunny->get_datas().size(); i++) {
 		ecs::Primitive primitive;
-		primitive.mesh = yoko->get_datas().at(i).mesh;
-		primitive.material = yoko->get_datas().at(i).material;
-		primitive.material.shader = yoko_shader;
-		yoko_primitives.push_back(primitive);
+		primitive.mesh = bunny->get_datas().at(i).mesh;
+		primitive.material = bunny->get_datas().at(i).material;
+		primitive.material.shader = bunny_shader;
+		primitive.material = sphere_material;
+		bunny_primitives.push_back(primitive);
 	}
-	yoko_renderable.setPrimitives({ yoko_primitives });
-	world.addComponent<ecs::ExplosionComponent>(yoko_entity);
+	bunny_renderable.setPrimitives(bunny_primitives);
+	world.addComponent<ecs::ExplosionComponent>(bunny_entity);
 
 	auto camera = world.create_entity();
 	world.addComponent<ecs::NameComponent>(camera).name = "camera";

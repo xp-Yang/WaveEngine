@@ -27,6 +27,7 @@ protected:
 	void renderMainViewWindow();
 	void renderPickingViewWindow();
 	void renderShadowViewWindow();
+	void renderRayTracingViewWindow();
 	void renderGizmos();
 	void updateRenderParams();
 
