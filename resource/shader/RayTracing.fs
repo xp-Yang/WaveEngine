@@ -213,4 +213,18 @@ void main() {
         color += shading(ray, sphereList) / 20;
     }
     FragColor = vec4(color, 1.0f);
+
+    //debug
+
+    ////vec2 random = randomInUnitCircleByPolar();
+    //
+    //vec3 test = normalize(vec3(0, 1, 0) + randomUnitVec());
+    //vec2 random = vec2(test.x, test.z);
+    //
+    //random = (1 + random) / 2.0;
+    //
+    //if(abs(uv.x - random.x) < 0.05 && abs(uv.y - random.y) < 0.05){
+    //  FragColor = vec4(1.0f);
+    //}else
+    //  FragColor = vec4(0.0f);
 }
