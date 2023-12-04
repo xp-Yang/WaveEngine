@@ -21,15 +21,18 @@ namespace MathUtils {
         // Returns a random real in [min,max).
         return min + (max - min) * randomUnit();
     }
-    // generate a vector on a unit sphere
-    inline Vec3 randomUnitVec() {
+    // generate a vector in a unit sphere
+    inline Vec3 randomInUnitSphere() {
         while (true) {
-            Vec3 unit_cube(randomUnit(), randomUnit(), randomUnit());
+            Vec3 unit_cube(random(-1, 1), random(-1, 1), random(-1, 1));
             if (glm::dot(unit_cube, unit_cube) < 1.0f) { //为了均匀分布，否则归一化后沿立方体对角线的抽样比较多
-                return glm::normalize(unit_cube);
+                return unit_cube;
             }
         }
-        return Vec3(1.0f, 0, 0);
+    }
+    // generate a vector on a unit sphere
+    inline Vec3 randomUnitVec() {
+        return glm::normalize(randomInUnitSphere());
     }
     inline Vec3 randomOnHemisphere(const Vec3& normal) {
         Vec3 unit = randomUnitVec();
@@ -43,9 +46,16 @@ namespace MathUtils {
         if (r_square > 1)
             return{};
 
-        float h = 1 - r_square;
+        float h = std::sqrt(1 - r_square);
 
         return plane_point + h * normal;
+    }
+
+    // 单位圆内的点按极轴均匀分布(非均匀分布)
+    inline glm::vec2 randomInUnitCircleByPolar() {
+        float r = randomUnit();
+        float theta = random(0, 2 * PI);
+        return glm::vec2(r * cos(theta), r * sin(theta));
     }
     inline Vec3 randomLambertianDistribution(const Vec3& normal) {
         // 1. 构造切平面
@@ -56,9 +66,9 @@ namespace MathUtils {
         local_u = glm::cross(normal, up);
         Vec3 local_v = glm::cross(normal, local_u);
 
-        // 2. 在切平面均匀取点
+        // 2. 在切平面的单位圆内均匀取点
         Point3 random_plane_point;
-        random_plane_point = randomUnit() * local_u + randomUnit() * local_v;
+        random_plane_point = randomInUnitCircleByPolar().x * local_u + randomInUnitCircleByPolar().y * local_v;
 
         // 3. 将点映射回球面
         return getPointOnUnitSphere(random_plane_point, normal);
