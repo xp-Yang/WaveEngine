@@ -63,12 +63,14 @@ namespace MathUtils {
         Vec3 local_u;
         if (normal == up)
             local_u = Vec3(1, 0, 0);
-        local_u = glm::cross(normal, up);
+        else
+            local_u = glm::cross(normal, up);
         Vec3 local_v = glm::cross(normal, local_u);
 
         // 2. 在切平面的单位圆内均匀取点
         Point3 random_plane_point;
-        random_plane_point = randomInUnitCircleByPolar().x * local_u + randomInUnitCircleByPolar().y * local_v;
+        glm::vec2 coef = randomInUnitCircleByPolar();
+        random_plane_point = coef.x * local_u + coef.y * local_v;
 
         // 3. 将点映射回球面
         return getPointOnUnitSphere(random_plane_point, normal);

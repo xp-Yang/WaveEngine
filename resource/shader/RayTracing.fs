@@ -57,9 +57,7 @@ vec3 randomUnitVec() {
 
     vec3 getPointOnUnitSphere(vec3 plane_point, vec3 normal) {
         float r_square = dot(plane_point, plane_point);
-
         float h = sqrt(1 - r_square);
-
         return plane_point + h * normal;
     }
     // 单位圆内的点按极轴均匀分布(非均匀分布)
@@ -74,12 +72,14 @@ vec3 randomUnitVec() {
         vec3 local_u;
         if (normal == up)
             local_u = vec3(1, 0, 0);
-        local_u = cross(normal, up);
+        else
+            local_u = cross(normal, up);
         vec3 local_v = cross(normal, local_u);
 
         // 2. 在切平面的单位圆内均匀取点
         vec3 random_plane_point;
-        random_plane_point = randomInUnitCircleByPolar().x * local_u + randomInUnitCircleByPolar().y * local_v;
+        vec2 coef = randomInUnitCircleByPolar();
+        random_plane_point = coef.x * local_u + coef.y * local_v;
 
         // 3. 将点映射回球面
         return getPointOnUnitSphere(random_plane_point, normal);
@@ -162,6 +162,7 @@ vec3 shading(Ray ray, Sphere[3] sphereList) {
             vec3 incident_dir = ray.direction;
 			ray.origin = hitRes.point;
             if(!hitRes.is_metal)
+			    //ray.direction = normalize(hitRes.normal + randomUnitVec());
 			    ray.direction = normalize(randomLambertianDistribution(hitRes.normal));
             else
 			    ray.direction = normalize(hitRes.normal + reflect(incident_dir, hitRes.normal) + hitRes.fuzzy * randomUnitVec());
@@ -196,7 +197,7 @@ void main() {
     sphere1.origin = vec3(5.0, 5.0, -1.0);
     sphere1.radius = 5.0f;
     sphere1.albedo = vec3(0.5f, 0.5f, 0.9f);
-    sphere1.fuzzy = 0.8f;
+    sphere1.fuzzy = 0.4f;
     sphere1.is_metal = true;
     sphereList[1] = sphere1;
         Sphere sphere2;
