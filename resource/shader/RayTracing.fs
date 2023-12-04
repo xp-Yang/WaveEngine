@@ -85,6 +85,14 @@ vec3 randomUnitVec() {
         return getPointOnUnitSphere(random_plane_point, normal);
     }
 
+    vec3 randomOnHemisphere(vec3 normal) {
+        vec3 unit = randomUnitVec();
+        if (dot(unit, normal) > 0.0)
+            return unit;
+        else
+            return -unit;
+    }
+
 float valid_range;
 float hitSphere(Ray ray, Sphere sphere){
     // solve the intersection equation
@@ -163,7 +171,8 @@ vec3 shading(Ray ray, Sphere[3] sphereList) {
 			ray.origin = hitRes.point;
             if(!hitRes.is_metal)
 			    //ray.direction = normalize(hitRes.normal + randomUnitVec());
-			    ray.direction = normalize(randomLambertianDistribution(hitRes.normal));
+			    ray.direction = normalize(randomOnHemisphere(hitRes.normal));
+			    //ray.direction = normalize(randomLambertianDistribution(hitRes.normal));
             else
 			    ray.direction = normalize(hitRes.normal + reflect(incident_dir, hitRes.normal) + hitRes.fuzzy * randomUnitVec());
 			color *= hitRes.albedo;
@@ -191,14 +200,14 @@ void main() {
     sphere0.radius = 4.0f;
     sphere0.albedo = vec3(0.8f, 0.8f, 0.1f);
     sphere0.fuzzy = 0.2f;
-    sphere0.is_metal = true;
+    sphere0.is_metal = false;
     sphereList[0] = sphere0;
         Sphere sphere1;
     sphere1.origin = vec3(5.0, 5.0, -1.0);
     sphere1.radius = 5.0f;
     sphere1.albedo = vec3(0.5f, 0.5f, 0.9f);
     sphere1.fuzzy = 0.4f;
-    sphere1.is_metal = true;
+    sphere1.is_metal = false;
     sphereList[1] = sphere1;
         Sphere sphere2;
     sphere2.origin = vec3(0.0, -1000.0, -1.0);
