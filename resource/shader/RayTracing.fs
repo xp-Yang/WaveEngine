@@ -47,20 +47,43 @@ float rand() {
 }
 vec3 randomUnitVec() {
     while (true) {
-        vec3 unit_cube = vec3(rand(), rand(), rand());
+        vec3 unit_cube = 2.0 * vec3(rand(), rand(), rand()) - vec3(1, 1, 1);
         if (dot(unit_cube, unit_cube) < 1.0f) { //为了均匀分布，否则归一化后沿立方体对角线的抽样比较多
             return normalize(unit_cube);
         }
     }
     return vec3(1.0f, 0, 0);
 }
-vec3 random_in_unit_sphere() {
-	vec3 p;
-	do {
-		p = 2.0 * vec3(rand(), rand() ,rand()) - vec3(1, 1, 1);
-	} while (dot(p, p) >= 1.0);
-	return p;
-}
+
+    vec3 getPointOnUnitSphere(vec3 plane_point, vec3 normal) {
+        float r_square = dot(plane_point, plane_point);
+
+        float h = sqrt(1 - r_square);
+
+        return plane_point + h * normal;
+    }
+    // 单位圆内的点按极轴均匀分布(非均匀分布)
+    vec2 randomInUnitCircleByPolar() {
+        float r = rand();
+        float theta = 2 * 3.14159 * rand();
+        return vec2(r * cos(theta), r * sin(theta));
+    }
+    vec3 randomLambertianDistribution(vec3 normal) {
+        // 1. 构造切平面
+        vec3 up = vec3(0, 1, 0);
+        vec3 local_u;
+        if (normal == up)
+            local_u = vec3(1, 0, 0);
+        local_u = cross(normal, up);
+        vec3 local_v = cross(normal, local_u);
+
+        // 2. 在切平面的单位圆内均匀取点
+        vec3 random_plane_point;
+        random_plane_point = randomInUnitCircleByPolar().x * local_u + randomInUnitCircleByPolar().y * local_v;
+
+        // 3. 将点映射回球面
+        return getPointOnUnitSphere(random_plane_point, normal);
+    }
 
 float valid_range;
 float hitSphere(Ray ray, Sphere sphere){
@@ -115,7 +138,7 @@ HitResult hitOnce(Ray ray, Sphere[3] sphereList){
         }
     }
     if(result.hit){
-        vec3 intersectionPoint = ray.origin + root * ray.direction;
+        vec3 intersectionPoint = ray.origin + valid_range * ray.direction;
         vec3 N = normalize(intersectionPoint - sphereList[closest_id].origin);
 
         result.point = intersectionPoint;
@@ -139,9 +162,9 @@ vec3 shading(Ray ray, Sphere[3] sphereList) {
             vec3 incident_dir = ray.direction;
 			ray.origin = hitRes.point;
             if(!hitRes.is_metal)
-			    ray.direction = normalize(hitRes.normal + random_in_unit_sphere());
+			    ray.direction = normalize(randomLambertianDistribution(hitRes.normal));
             else
-			    ray.direction = normalize(hitRes.normal + reflect(incident_dir, hitRes.normal) + hitRes.fuzzy * random_in_unit_sphere());
+			    ray.direction = normalize(hitRes.normal + reflect(incident_dir, hitRes.normal) + hitRes.fuzzy * randomUnitVec());
 			color *= hitRes.albedo;
 			hitAnything = true;
 		}
@@ -163,8 +186,8 @@ void main() {
     //2. 构造sphere
     Sphere[3] sphereList;
         Sphere sphere0;
-    sphere0.origin = vec3(-5.0, 5.0, -1.0);
-    sphere0.radius = 4.9f;
+    sphere0.origin = vec3(-5.0, 4.0, -1.0);
+    sphere0.radius = 4.0f;
     sphere0.albedo = vec3(0.8f, 0.8f, 0.1f);
     sphere0.fuzzy = 0.2f;
     sphere0.is_metal = true;
@@ -185,8 +208,8 @@ void main() {
     sphereList[2] = sphere2;
     //3. shading color by hit, Monte Carlo it
     vec3 color = vec3(0.0f, 0.0f, 0.0f);
-    for(int i = 0; i < 1; i++){
-        color += shading(ray, sphereList) / 1;
+    for(int i = 0; i < 20; i++){
+        color += shading(ray, sphereList) / 20;
     }
     FragColor = vec4(color, 1.0f);
 }

@@ -41,6 +41,7 @@ namespace MathUtils {
         else
             return -unit;
     }
+
     inline Point3 getPointOnUnitSphere(const Point3& plane_point, const Vec3& normal) {
         float r_square = glm::dot(plane_point, plane_point);
         if (r_square > 1)
@@ -50,7 +51,6 @@ namespace MathUtils {
 
         return plane_point + h * normal;
     }
-
     // 单位圆内的点按极轴均匀分布(非均匀分布)
     inline glm::vec2 randomInUnitCircleByPolar() {
         float r = randomUnit();
