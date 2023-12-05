@@ -52,8 +52,10 @@ struct CameraComponent {
 	glm::vec3 pos = glm::vec3(0.0f) - focal_length * direction;
 	glm::mat4 view = glm::lookAt(pos, pos + direction, up);
 	//glm::mat4 projection = glm::ortho(-15.0f * ASPECT_RATIO, 15.0f * ASPECT_RATIO, -15.0f, 15.0f, 0.1f, 100.0f);
-	glm::mat4 projection = glm::perspective(glm::radians(45.0f), ASPECT_RATIO, 0.1f, 100.0f);
+	glm::mat4 projection = glm::perspective(fov, ASPECT_RATIO, 0.1f, 100.0f);
+	float originFov = glm::radians(45.0f);
 	float zoom = 1.0f;
+	float fov = glm::radians(45.0f); // fov = originFov / zoom
 
 	glm::vec3 getRightDirection() const { // camera µÄ x Öá
 		glm::vec3 cameraRight = glm::normalize(glm::cross(direction, up));

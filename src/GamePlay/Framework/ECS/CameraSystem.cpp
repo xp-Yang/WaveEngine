@@ -55,6 +55,7 @@ void CameraSystem::onKeyUpdate(int key, float frame_time)
 
 void CameraSystem::onMouseUpdate(double delta_x, double delta_y, int mouse_button)
 {
+    // Viewing Style 转方向，并且相机位置也转动，聚焦于(0, 0, 0)点
 	auto& world = ecs::World::get();
     for (auto entity : world.entityView<ecs::CameraComponent>()) {
         ecs::CameraComponent& camera = *world.getComponent<ecs::CameraComponent>(entity);
@@ -84,7 +85,7 @@ void CameraSystem::onMouseUpdate(double delta_x, double delta_y, int mouse_butto
         }
     }
 
-	// FPS style
+	// FPS style 自己不动，只转方向
     //if (mouse_button == 0) {
     //    // get pitch
     //    m_direction.pitch += delta_y * Sensitivity;
@@ -116,13 +117,12 @@ void CameraSystem::onMouseWheelUpdate(double yoffset)
         if (camera.zoom < 0.1f)
             camera.zoom = 0.1f;
 
-        float fov = 45.0f;
-        fov /= camera.zoom;
-        if (fov <= 1.0f)
-            fov = 1.0f;
-        if (fov >= 135.0f)
-            fov = 135.0f;
-        camera.projection = glm::perspective(glm::radians(fov), WINDOW_WIDTH / WINDOW_HEIGHT, 0.1f, 100.0f);
+        camera.fov = camera.originFov / camera.zoom;
+        if (camera.fov <= glm::radians(1.0f))
+            camera.fov = glm::radians(1.0f);
+        if (camera.fov >= glm::radians(135.0f))
+            camera.fov = glm::radians(135.0f);
+        camera.projection = glm::perspective(camera.fov, WINDOW_WIDTH / WINDOW_HEIGHT, 0.1f, 100.0f);
     }
 }
 

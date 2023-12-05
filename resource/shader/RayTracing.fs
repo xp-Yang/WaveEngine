@@ -5,12 +5,12 @@ in vec2 uv;
 
 struct Camera {
     vec3 pos;
+    float distance; // 到此处假定的平面的距离
+    float fov;
+    float aspect_ratio;
     vec3 front;
     vec3 right;
     vec3 up;
-    float halfH;
-    float halfW;
-    vec3 leftbottom;
 };
 uniform struct Camera camera;
 
@@ -169,12 +169,14 @@ vec3 shading(Ray ray, Sphere[3] sphereList) {
 		if (hitRes.hit) {
             vec3 incident_dir = ray.direction;
 			ray.origin = hitRes.point;
-            if(!hitRes.is_metal)
-			    //ray.direction = normalize(hitRes.normal + randomUnitVec());
-			    ray.direction = normalize(randomOnHemisphere(hitRes.normal));
+            if(!hitRes.is_metal){
+			    ray.direction = normalize(hitRes.normal + randomUnitVec());
+			    //ray.direction = normalize(randomOnHemisphere(hitRes.normal));
 			    //ray.direction = normalize(randomLambertianDistribution(hitRes.normal));
-            else
+            }
+            else{
 			    ray.direction = normalize(hitRes.normal + reflect(incident_dir, hitRes.normal) + hitRes.fuzzy * randomUnitVec());
+            }
 			color *= hitRes.albedo;
 			hitAnything = true;
 		}
@@ -188,11 +190,15 @@ vec3 shading(Ray ray, Sphere[3] sphereList) {
 
 void main() {
     //初始化随机种子
-    wseed = uint(randOrigin * float(6.95857) * (uv.x * uv.y));
+    wseed = uint(randOrigin * (uv.x * uv.y));
     //1. 构造ray
 	Ray ray;
 	ray.origin = camera.pos;
-	ray.direction = normalize(camera.leftbottom + (uv.x * 2.0 * camera.halfW) * camera.right + (uv.y * 2.0 * camera.halfH) * camera.up);
+
+    float width = tan(camera.fov / 2) * camera.distance * 2.0;
+    float height = width / camera.aspect_ratio;
+    vec3 leftbottom = camera.pos + camera.distance * camera.front - width / 2.0 * camera.right - height / 2.0 * camera.up;
+	ray.direction = normalize(leftbottom + (uv.x * width) * camera.right + (uv.y * height) * camera.up - camera.pos);
     //2. 构造sphere
     Sphere[3] sphereList;
         Sphere sphere0;
@@ -218,8 +224,9 @@ void main() {
     sphereList[2] = sphere2;
     //3. shading color by hit, Monte Carlo it
     vec3 color = vec3(0.0f, 0.0f, 0.0f);
-    for(int i = 0; i < 20; i++){
-        color += shading(ray, sphereList) / 20;
+    int frames_samples = 1;
+    for(int i = 0; i < frames_samples; i++){
+        color += shading(ray, sphereList) / frames_samples;
     }
     FragColor = vec4(color, 1.0f);
 
