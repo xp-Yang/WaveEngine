@@ -2,6 +2,7 @@
 #include "GamePlay/Framework/ECS/Components.hpp"
 #include "Platform/RHI/rhi.hpp"
 #include "Core/Math.hpp"
+#include "Application.hpp"
 
 void RayTracingPass::init()
 {
@@ -26,13 +27,15 @@ void RayTracingPass::draw()
 		camera = world.getComponent<ecs::CameraComponent>(entity);
 	}
 
+	Viewport rt_viewport = Application::GetApp().getWindow()->getViewport("RayTracingView").value_or(Viewport());
+
 	{
 		rt_shader->start_using();
 		// camera
 		rt_shader->setFloat3("camera.pos", camera->pos);
-		rt_shader->setFloat("camera.distance", camera->focal_length);
+		rt_shader->setFloat("camera.distance", 1.0f/*camera->focal_length*/);
 		rt_shader->setFloat("camera.fov", camera->fov);
-		rt_shader->setFloat("camera.aspect_ratio", 16.0f / 9.0f);
+		rt_shader->setFloat("camera.aspect_ratio", 16.0f / 9.0f); //TODO 需要一种方法viewport大小只调整纹理显示范围，不会拉伸纹理也不影响fov和宽高比
 
 		rt_shader->setFloat3("camera.front", camera->direction);
 		rt_shader->setFloat3("camera.right", camera->getRightDirection());

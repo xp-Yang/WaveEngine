@@ -5,7 +5,7 @@ in vec2 uv;
 
 struct Camera {
     vec3 pos;
-    float distance; // 到此处假定的平面的距离
+    float distance; // 到此处假定的平面的距离，实际上是任意值都可以。射线方向由fov和aspect_ratio决定
     float fov;
     float aspect_ratio;
     vec3 front;
