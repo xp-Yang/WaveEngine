@@ -106,7 +106,7 @@ void CameraSystem::onMouseUpdate(double delta_x, double delta_y, int mouse_butto
             camera.direction.x = cos(glm::radians(camera.fps_params.pitch)) * sin(glm::radians(camera.fps_params.yaw));
             camera.direction.y = sin(glm::radians(camera.fps_params.pitch));
             camera.direction.z = -cos(glm::radians(camera.fps_params.pitch)) * cos(glm::radians(camera.fps_params.yaw));
-            camera.direction = glm::normalize(camera.direction);
+            camera.camera_up = glm::normalize(ecs::CameraComponent::up - glm::dot(ecs::CameraComponent::up, camera.direction) * camera.direction);
 
             camera.view = glm::lookAt(camera.pos, camera.pos + camera.direction, camera.camera_up);
         }
