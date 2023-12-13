@@ -97,6 +97,7 @@ void CameraSystem::onMouseUpdate(double delta_x, double delta_y, int mouse_butto
             camera.fps_params.yaw += delta_x * ecs::CameraComponent::Sensitivity;
 
             // make sure that when pitch is out of bounds, screen doesn't get flipped
+            // 使用欧拉角导致的问题：在极点发生死锁，yaw和roll重合，失去了一个自由度
             if (camera.fps_params.pitch > 89.0f)
                 camera.fps_params.pitch = 89.0f;
             if (camera.fps_params.pitch < -89.0f)
@@ -106,7 +107,10 @@ void CameraSystem::onMouseUpdate(double delta_x, double delta_y, int mouse_butto
             camera.direction.x = cos(glm::radians(camera.fps_params.pitch)) * sin(glm::radians(camera.fps_params.yaw));
             camera.direction.y = sin(glm::radians(camera.fps_params.pitch));
             camera.direction.z = -cos(glm::radians(camera.fps_params.pitch)) * cos(glm::radians(camera.fps_params.yaw));
-            camera.camera_up = glm::normalize(ecs::CameraComponent::up - glm::dot(ecs::CameraComponent::up, camera.direction) * camera.direction);
+            
+            camera.camera_up.x = sin(glm::radians(camera.fps_params.pitch)) * sin(glm::radians(camera.fps_params.yaw));
+            camera.camera_up.y = cos(glm::radians(camera.fps_params.pitch));
+            camera.camera_up.z = -sin(glm::radians(camera.fps_params.pitch)) * cos(glm::radians(camera.fps_params.yaw));
 
             camera.view = glm::lookAt(camera.pos, camera.pos + camera.direction, camera.camera_up);
         }

@@ -51,7 +51,7 @@ float ShadowCalculation(vec4 fragPosLightSpace)
 // blinn-phong
 vec3 LightCalculation(Light light, vec3 n, vec3 v, vec3 l, vec3 diffuse_coef, vec3 specular_coef)
 {
-    vec3 diffuse_light = light.color.xyz * max(dot(l, n), 0.0) * diffuse_coef; // 不是lambertian反射
+    vec3 diffuse_light = light.color.xyz * max(dot(l, n), 0.0) * diffuse_coef;
     
     vec3 h = normalize(v + l);
     vec3 specular_light = light.color.xyz * pow(max(dot(n, h), 0.0), 128.0) * specular_coef; // 光线入射能量不对

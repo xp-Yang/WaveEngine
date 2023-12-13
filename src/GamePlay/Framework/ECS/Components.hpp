@@ -72,7 +72,7 @@ struct CameraComponent {
 
 	glm::vec3 getRightDirection() const { // camera 的 x 轴
 		return glm::cross(direction, camera_up);
-		glm::vec3 cameraRight = glm::normalize(glm::cross(direction, up)); // 欧拉角的一大问题：经过北极点后，right和up的朝向突变翻转
+		glm::vec3 cameraRight = glm::normalize(glm::cross(direction, up));
 		return cameraRight;
 	}
 
