@@ -57,55 +57,91 @@ void CameraSystem::onMouseUpdate(double delta_x, double delta_y, int mouse_butto
 {
     // Viewing Style 转方向，并且相机位置也转动，聚焦于(0, 0, 0)点
 	auto& world = ecs::World::get();
+    ecs::CameraComponent* p_camera = nullptr;
     for (auto entity : world.entityView<ecs::CameraComponent>()) {
-        ecs::CameraComponent& camera = *world.getComponent<ecs::CameraComponent>(entity);
+        p_camera = world.getComponent<ecs::CameraComponent>(entity);
+    }
+    if (!p_camera)
+        return;
+
+    ecs::CameraComponent& camera = *p_camera;
+    if (camera.mode == ecs::CameraComponent::Mode::Orbit) {
         if (mouse_button == 0) {
-            // TODO 1.绕屏幕中心旋转 2.解决rotate_x direction = (0,-1,0)朝向时的跳变
-            auto rotate_z = glm::rotate(glm::mat4(1.0f), -(float)(0.3f * delta_x * ecs::CameraComponent::Sensitivity), ecs::CameraComponent::up);
-            //auto translate_test = glm::translate(glm::mat4(1.0f), {10.0f, 0.0f, 0.0f});
-            //static auto pos = camera.pos;
-            //camera.pos = translate_test * rotate_z * glm::vec4(pos, 1.0f);
-            camera.pos = rotate_z * glm::vec4(camera.pos, 1.0f);
-            camera.direction = rotate_z * glm::vec4(camera.direction, 1.0f);
+            auto rotate_Y = glm::rotate(glm::mat4(1.0f), -(float)(0.3f * delta_x * ecs::CameraComponent::Sensitivity), ecs::CameraComponent::up);
+            camera.pos = rotate_Y * glm::vec4(camera.pos, 1.0f);
+            camera.direction = rotate_Y * glm::vec4(camera.direction, 1.0f);
             camera.direction = glm::normalize(camera.direction);
 
             auto camera_right = camera.getRightDirection();
             auto rotate_x = glm::rotate(glm::mat4(1.0f), (float)(0.3f * delta_y * ecs::CameraComponent::Sensitivity), camera_right);
             camera.pos = rotate_x * glm::vec4(camera.pos, 1.0f);
             camera.direction = rotate_x * glm::vec4(camera.direction, 1.0f);
-            camera.direction = glm::normalize(camera.direction);
+            camera.camera_up = glm::vec3(rotate_x * glm::vec4(camera.camera_up, 1.0f));
 
-            camera.view = glm::lookAt(camera.pos, camera.pos + camera.direction, ecs::CameraComponent::up);
+            camera.view = glm::lookAt(camera.pos, camera.pos + camera.direction, camera.camera_up);
         }
         else if (mouse_button == 1) {
             camera.pos += -(float)(delta_x * ecs::CameraComponent::Sensitivity) * camera.getRightDirection();
             camera.pos += -(float)(delta_y * ecs::CameraComponent::Sensitivity) * camera.getUpDirection();
 
-            camera.view = glm::lookAt(camera.pos, camera.pos + camera.direction, ecs::CameraComponent::up);
+            camera.view = glm::lookAt(camera.pos, camera.pos + camera.direction, camera.camera_up);
         }
     }
 
-	// FPS style 自己不动，只转方向
-    //if (mouse_button == 0) {
-    //    // get pitch
-    //    m_direction.pitch += delta_y * Sensitivity;
-    //    // get yaw
-    //    m_direction.yaw += delta_x * Sensitivity;
+    if (camera.mode == ecs::CameraComponent::Mode::FPS) {
+        // FPS style 自己不动，只转方向
+        if (mouse_button == 0) {
+            // get pitch
+            camera.fps_params.pitch += delta_y * ecs::CameraComponent::Sensitivity;
+            // get yaw
+            camera.fps_params.yaw += delta_x * ecs::CameraComponent::Sensitivity;
 
-    //    // make sure that when pitch is out of bounds, screen doesn't get flipped
-    //    if (m_direction.pitch > 89.0f)
-    //        m_direction.pitch = 89.0f;
-    //    if (m_direction.pitch < -89.0f)
-    //        m_direction.pitch = -89.0f;
+            // make sure that when pitch is out of bounds, screen doesn't get flipped
+            if (camera.fps_params.pitch > 89.0f)
+                camera.fps_params.pitch = 89.0f;
+            if (camera.fps_params.pitch < -89.0f)
+                camera.fps_params.pitch = -89.0f;
 
-    //    // update direction
-    //    m_direction.x = cos(glm::radians(m_direction.pitch)) * sin(glm::radians(m_direction.yaw));
-    //    m_direction.y = sin(glm::radians(m_direction.pitch));
-    //    m_direction.z = -cos(glm::radians(m_direction.pitch)) * cos(glm::radians(m_direction.yaw));
-    //    m_direction = glm::normalize(m_direction);
+            // update direction
+            camera.direction.x = cos(glm::radians(camera.fps_params.pitch)) * sin(glm::radians(camera.fps_params.yaw));
+            camera.direction.y = sin(glm::radians(camera.fps_params.pitch));
+            camera.direction.z = -cos(glm::radians(camera.fps_params.pitch)) * cos(glm::radians(camera.fps_params.yaw));
+            camera.direction = glm::normalize(camera.direction);
 
-    //    m_view_matrix = glm::lookAt(m_pos, m_pos + m_direction, up);
-    //}
+            camera.view = glm::lookAt(camera.pos, camera.pos + camera.direction, camera.camera_up);
+        }
+    }
+}
+
+void CameraSystem::orbitRotate(Vec3 start, Vec3 end)
+{
+    auto& world = ecs::World::get();
+    ecs::CameraComponent* p_camera = nullptr;
+    for (auto entity : world.entityView<ecs::CameraComponent>()) {
+        p_camera = world.getComponent<ecs::CameraComponent>(entity);
+    }
+    if (!p_camera)
+        return;
+    ecs::CameraComponent& camera = *p_camera;
+
+    // 计算旋转角度角度
+    float angle = acos(fmin(1.0f, glm::dot(start, end)));
+    // 计算旋转轴
+    glm::vec3 rotate_axis = glm::normalize(glm::cross(start, end));
+    //glm::vec3 world_rotate_axis = glm::inverse(glm::mat3(camera.view)) * rotate_axis;
+    
+    // 用四元数表示旋转
+    //glm::quat rotateMat = glm::quat(cos(angle / 2),
+    //    world_rotate_axis.x * sin(angle / 2),
+    //    world_rotate_axis.y * sin(angle / 2),
+    //    world_rotate_axis.z * sin(angle / 2));
+    
+    glm::mat4 rotate_mat = glm::rotate(glm::mat4(1.0f), angle, rotate_axis);
+
+    camera.pos = rotate_mat * glm::vec4(camera.pos, 1.0f);
+    camera.direction = rotate_mat * glm::vec4(camera.direction, 1.0f);
+    camera.camera_up = glm::vec3(rotate_mat * glm::vec4(camera.camera_up, 1.0f));
+    camera.view = glm::lookAt(camera.pos, camera.pos + camera.direction, camera.camera_up);
 }
 
 void CameraSystem::onMouseWheelUpdate(double yoffset)

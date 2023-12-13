@@ -24,8 +24,8 @@
 // done: deferred rendering 性能分析，见LightingPass.cpp
 // done: 集成imgizmo
 // done: 集成imgui窗口停靠，多viewport
+// done: 解决相机运动至极点屏幕反转问题 答：原因是lookat()函数计算view矩阵时，用direction×up计算右矢，使得经过极点时右矢翻转。解决方法：维护相机自身的camera_up，并在计算view矩阵时，传给lookat()函数 camera_up参数而不是全局up参数即可。
 // 9. 批渲染理解
-// 10. 解决相机运动死锁问题(direction = (0,-1,0)时)
 // 11. 光源物理模型
 // 12. tbn矩阵计算
 // 13. 理解peter panning 效应

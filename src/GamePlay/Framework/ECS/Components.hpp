@@ -36,47 +36,50 @@ struct TransformComponent {
 };
 
 struct CameraComponent {
-	//FPS style
-	//struct Direction {
-	//	float pitch = 0.0f; // 方向向量与世界坐标系 x-z 平面的夹角
-	//	float yaw = 0.0f; // 方向向量在世界坐标系 x-z 平面的投影矢量相对世界坐标系 -z 轴的夹角
-	//	float roll = 0.0f;
-	//};
+	enum Mode {
+		Orbit,
+		FPS,
+	} mode{ Orbit };
+
+	enum Projection {
+		Perspective,
+		Ortho,
+	} projection_mode{ Perspective };
+
+	// FPS style
+	// 欧拉角表示：
+	struct FPSParams {
+		float pitch = 0.0f; // 方向向量与世界坐标系 x-z 平面的夹角
+		float yaw = 0.0f; // 方向向量在世界坐标系 x-z 平面的投影矢量相对世界坐标系 -z 轴的夹角
+		float roll = 0.0f;
+	} fps_params;
+
 	static const float CameraMovementSpeed;
 	static const float Sensitivity;
 	static const float ZoomUnit;
 	static glm::vec3 up; //vec3(0.0f, 1.0f, 0.0f) (y为上) or vec3(0.0f, 0.0f, 1.0f) (z为上)
 
+	float originFov = glm::radians(45.0f); //水平fov
+	float zoom = 1.0f;
+	float fov = originFov / zoom;
 	float focal_length = {20.0f};
 	glm::vec3 direction = glm::normalize(glm::vec3(0.0f, -1.0f , -1.0f));
 	glm::vec3 pos = glm::vec3(0.0f) - focal_length * direction;
+	Vec3 camera_up = glm::normalize(up - glm::dot(up, direction) * direction);
 	glm::mat4 view = glm::lookAt(pos, pos + direction, up);
-	//glm::mat4 projection = glm::ortho(-15.0f * ASPECT_RATIO, 15.0f * ASPECT_RATIO, -15.0f, 15.0f, 0.1f, 100.0f);
-	glm::mat4 projection = glm::perspective(fov, ASPECT_RATIO, 0.1f, 100.0f);
-	float originFov = glm::radians(45.0f);
-	float zoom = 1.0f;
-	float fov = glm::radians(45.0f); // fov = originFov / zoom
+	glm::mat4 projection = projection_mode == Perspective ? glm::perspective(fov, ASPECT_RATIO, 0.1f, 100.0f)
+		: glm::ortho(-15.0f * ASPECT_RATIO, 15.0f * ASPECT_RATIO, -15.0f, 15.0f, 0.1f, 100.0f);
 
 	glm::vec3 getRightDirection() const { // camera 的 x 轴
-		glm::vec3 cameraRight = glm::normalize(glm::cross(direction, up));
-		//for (int i = 0; i < 3; i++) {
-		//	if (abs(cameraRight[i] - 1) < 0.001f) {
-		//		cameraRight[i] = 1.0f;
-		//		break;
-		//	}
-		//}
+		return glm::cross(direction, camera_up);
+		glm::vec3 cameraRight = glm::normalize(glm::cross(direction, up)); // 欧拉角的一大问题：经过北极点后，right和up的朝向突变翻转
 		return cameraRight;
 	}
 
 	glm::vec3 getUpDirection() const { // camera 的 y 轴
+		return camera_up;
 		glm::vec3 cameraRight = getRightDirection();
 		glm::vec3 cameraUp = glm::cross(cameraRight, direction);
-		//for (int i = 0; i < 3; i++) {
-		//	if (abs(cameraUp[i] - 1) < 0.001f) {
-		//		cameraUp[i] = 1.0f;
-		//		break;
-		//	}
-		//}
 		return cameraUp;
 	}
 };
