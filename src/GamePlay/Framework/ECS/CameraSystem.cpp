@@ -68,15 +68,15 @@ void CameraSystem::onMouseUpdate(double delta_x, double delta_y, int mouse_butto
     if (camera.mode == ecs::CameraComponent::Mode::Orbit) {
         if (mouse_button == 0) {
             auto rotate_Y = glm::rotate(glm::mat4(1.0f), -(float)(0.3f * delta_x * ecs::CameraComponent::Sensitivity), ecs::CameraComponent::up);
-            camera.pos = rotate_Y * glm::vec4(camera.pos, 1.0f);
-            camera.direction = rotate_Y * glm::vec4(camera.direction, 1.0f);
+            camera.pos = rotate_Y * Vec4(camera.pos, 1.0f);
+            camera.direction = rotate_Y * Vec4(camera.direction, 1.0f);
             camera.direction = glm::normalize(camera.direction);
 
             auto camera_right = camera.getRightDirection();
             auto rotate_x = glm::rotate(glm::mat4(1.0f), (float)(0.3f * delta_y * ecs::CameraComponent::Sensitivity), camera_right);
-            camera.pos = rotate_x * glm::vec4(camera.pos, 1.0f);
-            camera.direction = rotate_x * glm::vec4(camera.direction, 1.0f);
-            camera.camera_up = glm::vec3(rotate_x * glm::vec4(camera.camera_up, 1.0f));
+            camera.pos = rotate_x * Vec4(camera.pos, 1.0f);
+            camera.direction = rotate_x * Vec4(camera.direction, 1.0f);
+            camera.camera_up = Vec3(rotate_x * Vec4(camera.camera_up, 1.0f));
 
             camera.view = glm::lookAt(camera.pos, camera.pos + camera.direction, camera.camera_up);
         }
@@ -131,8 +131,8 @@ void CameraSystem::orbitRotate(Vec3 start, Vec3 end)
     // 计算旋转角度角度
     float angle = acos(fmin(1.0f, glm::dot(start, end)));
     // 计算旋转轴
-    glm::vec3 rotate_axis = glm::normalize(glm::cross(start, end));
-    //glm::vec3 world_rotate_axis = glm::inverse(glm::mat3(camera.view)) * rotate_axis;
+    Vec3 rotate_axis = glm::normalize(glm::cross(start, end));
+    //Vec3 world_rotate_axis = glm::inverse(glm::mat3(camera.view)) * rotate_axis;
     
     // 用四元数表示旋转
     //glm::quat rotateMat = glm::quat(cos(angle / 2),
@@ -142,9 +142,9 @@ void CameraSystem::orbitRotate(Vec3 start, Vec3 end)
     
     glm::mat4 rotate_mat = glm::rotate(glm::mat4(1.0f), angle, rotate_axis);
 
-    camera.pos = rotate_mat * glm::vec4(camera.pos, 1.0f);
-    camera.direction = rotate_mat * glm::vec4(camera.direction, 1.0f);
-    camera.camera_up = glm::vec3(rotate_mat * glm::vec4(camera.camera_up, 1.0f));
+    camera.pos = rotate_mat * Vec4(camera.pos, 1.0f);
+    camera.direction = rotate_mat * Vec4(camera.direction, 1.0f);
+    camera.camera_up = Vec3(rotate_mat * Vec4(camera.camera_up, 1.0f));
     camera.view = glm::lookAt(camera.pos, camera.pos + camera.direction, camera.camera_up);
 }
 

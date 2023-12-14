@@ -52,10 +52,10 @@ namespace MathUtils {
         return plane_point + h * normal;
     }
     // 单位圆内的点按极轴均匀分布(非均匀分布)
-    inline glm::vec2 randomInUnitCircleByPolar() {
+    inline Vec2 randomInUnitCircleByPolar() {
         float r = randomUnit();
         float theta = random(0, 2 * PI);
-        return glm::vec2(r * cos(theta), r * sin(theta));
+        return Vec2(r * cos(theta), r * sin(theta));
     }
     inline Vec3 randomLambertianDistribution(const Vec3& normal) {
         // 1. 构造切平面
@@ -69,7 +69,7 @@ namespace MathUtils {
 
         // 2. 在切平面的单位圆内均匀取点
         Point3 random_plane_point;
-        glm::vec2 coef = randomInUnitCircleByPolar();
+        Vec2 coef = randomInUnitCircleByPolar();
         random_plane_point = coef.x * local_u + coef.y * local_v;
 
         // 3. 将点映射回球面

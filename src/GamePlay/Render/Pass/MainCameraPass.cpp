@@ -44,7 +44,7 @@ void MainCameraPass::draw()
 
     glm::mat4 camera_view = glm::mat4(1.0f);
     glm::mat4 camera_projection;
-    glm::vec3 camera_pos;
+    Vec3 camera_pos;
     for (auto entity : world.entityView<ecs::CameraComponent>()) {
         ecs::CameraComponent& camera = *world.getComponent<ecs::CameraComponent>(entity);
         camera_view = camera.view;
@@ -102,8 +102,8 @@ void MainCameraPass::draw()
             int k = 0;
             for (auto entity : world.entityView<ecs::LightComponent>()) {
                 auto& transform = *world.getComponent<ecs::TransformComponent>(entity);
-                glm::vec3 light_pos = transform.transform()[3];
-                glm::vec4 light_color = world.getComponent<ecs::LightComponent>(entity)->color;
+                Vec3 light_pos = transform.transform()[3];
+                Vec4 light_color = world.getComponent<ecs::LightComponent>(entity)->color;
                 light_ref_matrix = world.getComponent<ecs::LightComponent>(entity)->getLightProjMatrix();
                 std::string light_id = std::string("lights[") + std::to_string(k) + "]";
                 shader->setFloat4(light_id + ".color", light_color);
@@ -181,7 +181,7 @@ void MainCameraPass::draw()
     //        glStencilMask(0x00);
 
     //        border_shader->start_using();
-    //        auto scale = glm::scale(glm::mat4(1.0f), glm::vec3(1.05f));
+    //        auto scale = glm::scale(glm::mat4(1.0f), Vec3(1.05f));
     //        border_shader->setMatrix("model", 1, model_matrix.transform() * scale * glm::mat4(1.0f));
     //        border_shader->setMatrix("view", 1, camera_view);
     //        border_shader->setMatrix("projection", 1, camera_projection);

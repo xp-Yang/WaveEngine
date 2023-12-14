@@ -50,7 +50,7 @@ void PickingPass::draw()
             int r = (id & 0x000000FF) >> 0;
             int g = (id & 0x0000FF00) >> 8;
             int b = (id & 0x00FF0000) >> 16;
-            glm::vec4 color(r / 255.0f, g / 255.0f, b / 255.0f, 1.0f);
+            Color4 color(r / 255.0f, g / 255.0f, b / 255.0f, 1.0f);
             picking_shader->setFloat4("picking_color", color);
 
             Renderer::drawIndex(*picking_shader, mesh.get_VAO(), mesh.get_indices_count());

@@ -40,7 +40,7 @@ void SceneHierarchy::init() {
  //   world.addComponent<ecs::LightComponent>(light_entity);
 	//auto& light_transform = world.addComponent<ecs::TransformComponent>(light_entity);
  //   light_transform.translation = { 12.0f, 12.0f, 0.0f };
- //   light_transform.scale = glm::vec3(0.5f);
+ //   light_transform.scale = Vec3(0.5f);
 	//auto& light_renderable = world.addComponent<ecs::RenderableComponent>(light_entity);
 	//ecs::Primitive light_primitive;
 	//light_primitive.mesh = Mesh::create_cube_mesh();
@@ -55,7 +55,7 @@ void SceneHierarchy::init() {
 	//world.addComponent<ecs::LightComponent>(directional_light_entity);
 	//auto& directional_light_transform = world.addComponent<ecs::TransformComponent>(directional_light_entity);
 	//directional_light_transform.translation = { 0.0f, 15.0f, 0.0f };
-	//directional_light_transform.scale = glm::vec3(0.5f);
+	//directional_light_transform.scale = Vec3(0.5f);
 	//auto& directional_light_renderable = world.addComponent<ecs::RenderableComponent>(directional_light_entity);
 	//ecs::Primitive directional_light_primitive;
 	//directional_light_primitive.mesh = Mesh::create_cube_mesh();
@@ -78,7 +78,7 @@ void SceneHierarchy::init() {
 		srand(i * i * i * i * i + 2351425 * i * i * i - 1522532);
 		double r3 = (rand() / double(RAND_MAX) - 0.5) * 2;
 		light_transform.translation = { 12.0f * r, 10.0f * r2, 12.0f * r3 };
-		light_transform.scale = glm::vec3(0.2f);
+		light_transform.scale = Vec3(0.2f);
 		auto& light_renderable = world.addComponent<ecs::RenderableComponent>(light_entity);
 		auto& light_properties = world.addComponent<ecs::LightComponent>(light_entity);
 		ecs::Primitive light_primitive;
@@ -128,7 +128,7 @@ void SceneHierarchy::init() {
     auto ground_entity = world.create_entity();
     world.addComponent<ecs::NameComponent>(ground_entity).name = "ground";
     auto& ground_transform = world.addComponent<ecs::TransformComponent>(ground_entity);
-	ground_transform.scale = glm::vec3(40.0f);
+	ground_transform.scale = Vec3(40.0f);
 	auto& ground_renderable = world.addComponent<ecs::RenderableComponent>(ground_entity);
 	ecs::Primitive ground_primitive;
 	ground_primitive.mesh = Mesh::create_quad_mesh(Point3(-0.5f, 0.0f, 0.5f), Vec3(1.0f, 0.0f, 0.0f), Vec3(0.0f, 0.0f, -1.0f));
@@ -144,7 +144,7 @@ void SceneHierarchy::init() {
 	world.addComponent<ecs::NameComponent>(nanosuit_entity).name = "nanosuit";
 	auto& nanosuit_transform = world.addComponent<ecs::TransformComponent>(nanosuit_entity);
 	nanosuit_transform.translation = { 5.0f, 0.0f, 0.0f };
-	nanosuit_transform.scale = glm::vec3(0.4f);
+	nanosuit_transform.scale = Vec3(0.4f);
 	auto& nanosuit_renderable = world.addComponent<ecs::RenderableComponent>(nanosuit_entity);
 	std::vector<ecs::Primitive> nanosuit_primitives;
 	Shader* nanosuit_shader = new Shader("resource/shader/model.vs", "resource/shader/model.fs", "resource/shader/model.gs");
@@ -163,7 +163,7 @@ void SceneHierarchy::init() {
 	//world.addComponent<ecs::NameComponent>(yoko_entity).name = "yoko";
 	//auto& yoko_transform = world.addComponent<ecs::TransformComponent>(yoko_entity);
 	//yoko_transform.translation = { -5.0f, 0.0f, 0.0f };
-	//yoko_transform.scale = glm::vec3(0.25f);
+	//yoko_transform.scale = Vec3(0.25f);
 	//auto& yoko_renderable = world.addComponent<ecs::RenderableComponent>(yoko_entity);
 	//std::vector<ecs::Primitive> yoko_primitives;
 	//Shader* yoko_shader = new Shader("resource/shader/model.vs", "resource/shader/model.fs", "resource/shader/model.gs");
@@ -182,7 +182,7 @@ void SceneHierarchy::init() {
 	world.addComponent<ecs::NameComponent>(bunny_entity).name = "bunny";
 	auto& bunny_transform = world.addComponent<ecs::TransformComponent>(bunny_entity);
 	bunny_transform.translation = { -5.0f, 0.0f, 0.0f };
-	bunny_transform.scale = glm::vec3(25.0f);
+	bunny_transform.scale = Vec3(25.0f);
 	auto& bunny_renderable = world.addComponent<ecs::RenderableComponent>(bunny_entity);
 	std::vector<ecs::Primitive> bunny_primitives;
 	Shader* bunny_shader = new Shader("resource/shader/model.vs", "resource/shader/model.fs", "resource/shader/model.gs");

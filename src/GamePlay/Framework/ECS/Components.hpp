@@ -3,9 +3,7 @@
 
 #include <string>
 #include <vector>
-#include <glm/glm.hpp>
-#define GLM_ENABLE_EXPERIMENTAL
-#include <glm/gtx/quaternion.hpp>
+#include "Core/Vector.hpp"
 #include "World.hpp"
 #include "ResourceManager/Mesh.hpp"
 #include "ResourceManager/Material.hpp"
@@ -18,9 +16,9 @@ struct NameComponent {
 };
 
 struct TransformComponent {
-	glm::vec3 translation = { 0.0f, 0.0f, 0.0f };
-	glm::vec3 rotation = { 0.0f, 0.0f, 0.0f }; //角度制
-	glm::vec3 scale = { 1.0f, 1.0f, 1.0f };
+	Vec3 translation = { 0.0f, 0.0f, 0.0f };
+	Vec3 rotation = { 0.0f, 0.0f, 0.0f }; //角度制
+	Vec3 scale = { 1.0f, 1.0f, 1.0f };
 
 	glm::mat4 transform() const
 	{
@@ -57,29 +55,29 @@ struct CameraComponent {
 	static const float CameraMovementSpeed;
 	static const float Sensitivity;
 	static const float ZoomUnit;
-	static glm::vec3 up; //vec3(0.0f, 1.0f, 0.0f) (y为上) or vec3(0.0f, 0.0f, 1.0f) (z为上)
+	static Vec3 up; //vec3(0.0f, 1.0f, 0.0f) (y为上) or vec3(0.0f, 0.0f, 1.0f) (z为上)
 
 	float originFov = glm::radians(45.0f); //水平fov
 	float zoom = 1.0f;
 	float fov = originFov / zoom;
 	float focal_length = {20.0f};
-	glm::vec3 direction = glm::normalize(glm::vec3(0.0f, -1.0f , -1.0f));
-	glm::vec3 pos = glm::vec3(0.0f) - focal_length * direction;
+	Vec3 direction = glm::normalize(Vec3(0.0f, -1.0f , -1.0f));
+	Vec3 pos = Vec3(0.0f) - focal_length * direction;
 	Vec3 camera_up = glm::normalize(up - glm::dot(up, direction) * direction);
 	glm::mat4 view = glm::lookAt(pos, pos + direction, up);
 	glm::mat4 projection = projection_mode == Perspective ? glm::perspective(fov, ASPECT_RATIO, 0.1f, 100.0f)
 		: glm::ortho(-15.0f * ASPECT_RATIO, 15.0f * ASPECT_RATIO, -15.0f, 15.0f, 0.1f, 100.0f);
 
-	glm::vec3 getRightDirection() const { // camera 的 x 轴
+	Vec3 getRightDirection() const { // camera 的 x 轴
 		return glm::cross(direction, camera_up);
-		glm::vec3 cameraRight = glm::normalize(glm::cross(direction, up));
+		Vec3 cameraRight = glm::normalize(glm::cross(direction, up));
 		return cameraRight;
 	}
 
-	glm::vec3 getUpDirection() const { // camera 的 y 轴
+	Vec3 getUpDirection() const { // camera 的 y 轴
 		return camera_up;
-		glm::vec3 cameraRight = getRightDirection();
-		glm::vec3 cameraUp = glm::cross(cameraRight, direction);
+		Vec3 cameraRight = getRightDirection();
+		Vec3 cameraUp = glm::cross(cameraRight, direction);
 		return cameraUp;
 	}
 };
@@ -114,17 +112,17 @@ struct SkyboxComponent {
 };
 
 struct LightComponent {
-	glm::vec4 color = {1.0f, 1.0f, 1.0f, 1.0f};
+	Color4 color = {1.0f, 1.0f, 1.0f, 1.0f};
 	glm::mat4 lightReferenceMatrix()
 	{
 		auto& world = ecs::World::get();
 		glm::mat4 light_projection = glm::ortho(-15.0f * WINDOW_WIDTH / WINDOW_HEIGHT, 15.0f * WINDOW_WIDTH / WINDOW_HEIGHT, -15.0f, 15.0f, 0.1f, 100.0f);
 		//lightProjection = glm::perspective(glm::radians(45.0f), /*1.0f*/WINDOW_WIDTH / WINDOW_HEIGHT, 0.1f, 100.0f);
-		glm::vec3 light_pos = glm::vec3(0.0f);
+		Vec3 light_pos = Vec3(0.0f);
 		for (auto entity : world.entityView<ecs::LightComponent>()) {
 			light_pos = world.getComponent<ecs::TransformComponent>(entity)->translation;
 		}
-		glm::mat4 light_view = glm::lookAt(light_pos, glm::vec3(0.0f, 0.0f, 0.0f), ecs::CameraComponent::up);
+		glm::mat4 light_view = glm::lookAt(light_pos, Vec3(0.0f, 0.0f, 0.0f), ecs::CameraComponent::up);
 		glm::mat4 ret = light_projection * light_view;
 		return ret;
 	}

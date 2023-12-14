@@ -5,13 +5,13 @@
 #include <string>
 
 struct Vertex {
-	glm::vec3 position;
-	glm::vec3 normal;
-	glm::vec2 texture_uv;
+	Vec3 position;
+	Vec3 normal;
+	Vec2 texture_uv;
 };
 
 struct Triangle {
-	glm::vec3 vertices[3];
+	Vec3 vertices[3];
 };
 
 class Mesh {

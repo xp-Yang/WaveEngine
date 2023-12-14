@@ -256,7 +256,7 @@ void ImGuiEditor::renderPickedEntityController()
         ImGui::PopItemWidth();
 
         if (world.hasComponent<ecs::LightComponent>(entity)) {
-            glm::vec4& color = world.getComponent<ecs::LightComponent>(entity)->color;
+            Vec4& color = world.getComponent<ecs::LightComponent>(entity)->color;
             ImGui::ColorEdit3((std::string("color") + "##" + obj_name).c_str(), (float*)&color);
         }
 
@@ -339,9 +339,9 @@ void ImGuiEditor::renderGizmos()
         ImGuizmo::Manipulate((float*)(&camera->view), (float*)(&camera->projection), imguizmo_operation, ImGuizmo::LOCAL, (float*)(&model_matrix), NULL, NULL, NULL, NULL);
         float matrixTranslation[3], matrixRotation[3], matrixScale[3];
         ImGuizmo::DecomposeMatrixToComponents((float*)&model_matrix, matrixTranslation, matrixRotation, matrixScale);
-        transform_component->translation = glm::vec3(matrixTranslation[0], matrixTranslation[1], matrixTranslation[2]);
-        transform_component->scale = glm::vec3(matrixScale[0], matrixScale[1], matrixScale[2]);
-        transform_component->rotation = glm::vec3(matrixRotation[0], matrixRotation[1], matrixRotation[2]);
+        transform_component->translation = Vec3(matrixTranslation[0], matrixTranslation[1], matrixTranslation[2]);
+        transform_component->scale = Vec3(matrixScale[0], matrixScale[1], matrixScale[2]);
+        transform_component->rotation = Vec3(matrixRotation[0], matrixRotation[1], matrixRotation[2]);
     }
 
     if (camera) {

@@ -35,7 +35,7 @@ void LightingPass::draw()
 	lighting_shader->setTexture("gSpecular", 3, g_position_map + 3);
 
 	auto& world = ecs::World::get();
-	glm::vec3 camera_pos;
+	Vec3 camera_pos;
 	glm::mat4 camera_view = glm::mat4(1.0f);
 	glm::mat4 camera_projection;
 	for (auto entity : world.entityView<ecs::CameraComponent>()) {
@@ -50,8 +50,8 @@ void LightingPass::draw()
 	for (auto entity : world.entityView<ecs::LightComponent>()) {
 		light_ref_matrix = world.getComponent<ecs::LightComponent>(entity)->getLightProjMatrix();
 		auto& transform = *world.getComponent<ecs::TransformComponent>(entity);
-		glm::vec3 light_pos = transform.transform()[3];
-		glm::vec4 light_color = world.getComponent<ecs::LightComponent>(entity)->color;
+		Vec3 light_pos = transform.transform()[3];
+		Vec4 light_color = world.getComponent<ecs::LightComponent>(entity)->color;
 		std::string light_id = std::string("lights[") + std::to_string(k) + "]";
 		lighting_shader->setFloat4(light_id + ".color", light_color);
 		lighting_shader->setFloat3(light_id + ".position", light_pos);

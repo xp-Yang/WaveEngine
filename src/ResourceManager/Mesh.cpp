@@ -107,19 +107,19 @@ Mesh Mesh::create_cube_mesh() {
     for (int i = 0; i < sizeof(cubeVertices) / sizeof(cubeVertices[0]); i += 8) {
         Vertex vertex;
 
-        glm::vec3 position;
+        Vec3 position;
         position.x = cubeVertices[0 + i];
         position.y = cubeVertices[1 + i];
         position.z = cubeVertices[2 + i];
         vertex.position = position;
 
-        glm::vec3 normal;
+        Vec3 normal;
         normal.x = cubeVertices[3 + i];
         normal.y = cubeVertices[4 + i];
         normal.z = cubeVertices[5 + i];
         vertex.normal = normal;
 
-        glm::vec2 vec;
+        Vec2 vec;
         vec.x = cubeVertices[6 + i];
         vec.y = cubeVertices[7 + i];
         vertex.texture_uv = vec;
@@ -218,14 +218,14 @@ Mesh Mesh::create_cube_mesh() {
     //};
 }
 
-static void create_tetrahedron(std::vector<Triangle>& triangles, glm::vec3& center) {
+static void create_tetrahedron(std::vector<Triangle>& triangles, Vec3& center) {
     float side_length = 1.0f;
-    glm::vec3 a = glm::vec3(0, 0, 0);
-    glm::vec3 b = glm::vec3(side_length, 0, 0);
-    glm::vec3 c = glm::vec3(side_length / 2.0f, 0, -side_length * sqrt(3.0f) / 2.0f);
-    glm::vec3 d = glm::vec3(side_length / 2.0f, side_length * sqrt(6.0f) / 3.0f, -side_length * sqrt(3.0f) / 2.0f / 3.0f);
+    Vec3 a = Vec3(0, 0, 0);
+    Vec3 b = Vec3(side_length, 0, 0);
+    Vec3 c = Vec3(side_length / 2.0f, 0, -side_length * sqrt(3.0f) / 2.0f);
+    Vec3 d = Vec3(side_length / 2.0f, side_length * sqrt(6.0f) / 3.0f, -side_length * sqrt(3.0f) / 2.0f / 3.0f);
 
-    center = glm::vec3(side_length / 2.0f, side_length * sqrt(6.0f) / 3.0f * (1.0f / 4.0f), -side_length * sqrt(3.0f) / 2.0f / 3.0f);
+    center = Vec3(side_length / 2.0f, side_length * sqrt(6.0f) / 3.0f * (1.0f / 4.0f), -side_length * sqrt(3.0f) / 2.0f / 3.0f);
 
     a -= center;
     b -= center;
@@ -242,9 +242,9 @@ static void create_tetrahedron(std::vector<Triangle>& triangles, glm::vec3& cent
 }
 
 static std::vector<Triangle> subdivide(Triangle triangle) {
-    glm::vec3 new_vertex0 = (triangle.vertices[0] + triangle.vertices[1]) / 2.0f;
-    glm::vec3 new_vertex1 = (triangle.vertices[1] + triangle.vertices[2]) / 2.0f;
-    glm::vec3 new_vertex2 = (triangle.vertices[2] + triangle.vertices[0]) / 2.0f;
+    Vec3 new_vertex0 = (triangle.vertices[0] + triangle.vertices[1]) / 2.0f;
+    Vec3 new_vertex1 = (triangle.vertices[1] + triangle.vertices[2]) / 2.0f;
+    Vec3 new_vertex2 = (triangle.vertices[2] + triangle.vertices[0]) / 2.0f;
 
     Triangle new_triangle0 = { triangle.vertices[0], new_vertex0, new_vertex2 };
     Triangle new_triangle1 = { new_vertex0, triangle.vertices[1], new_vertex1 };
@@ -264,9 +264,9 @@ static std::vector<Triangle> recursive_subdivide(const Triangle& triangle, int r
         return { triangle };
     }
 
-    glm::vec3 new_vertex0 = (triangle.vertices[0] + triangle.vertices[1]) / 2.0f;
-    glm::vec3 new_vertex1 = (triangle.vertices[1] + triangle.vertices[2]) / 2.0f;
-    glm::vec3 new_vertex2 = (triangle.vertices[2] + triangle.vertices[0]) / 2.0f;
+    Vec3 new_vertex0 = (triangle.vertices[0] + triangle.vertices[1]) / 2.0f;
+    Vec3 new_vertex1 = (triangle.vertices[1] + triangle.vertices[2]) / 2.0f;
+    Vec3 new_vertex2 = (triangle.vertices[2] + triangle.vertices[0]) / 2.0f;
 
     Triangle new_triangle0 = { triangle.vertices[0], new_vertex0, new_vertex2 };
     Triangle new_triangle1 = { new_vertex0, triangle.vertices[1], new_vertex1 };
@@ -289,7 +289,7 @@ static std::vector<Triangle> recursive_subdivide(const Triangle& triangle, int r
 
 Mesh Mesh::create_icosphere_mesh(int regression_depth) {
     std::vector<Triangle> m_triangles;
-    glm::vec3 m_center;
+    Vec3 m_center;
 
     // 0. 创建正四面体
     create_tetrahedron(m_triangles, m_center);
@@ -326,10 +326,10 @@ Mesh Mesh::create_icosphere_mesh(int regression_depth) {
             vertex = m_center + glm::normalize(vertex - m_center);
         }
         for (auto& vertex : triangle.vertices) {
-            //glm::vec3 a = triangle.vertices[0] - triangle.vertices[1];
-            //glm::vec3 b = triangle.vertices[0] - triangle.vertices[2];
-            //glm::vec3 normal = glm::normalize(glm::cross(a, b));
-            glm::vec3 normal = glm::normalize(vertex - m_center);
+            //Vec3 a = triangle.vertices[0] - triangle.vertices[1];
+            //Vec3 b = triangle.vertices[0] - triangle.vertices[2];
+            //Vec3 normal = glm::normalize(glm::cross(a, b));
+            Vec3 normal = glm::normalize(vertex - m_center);
 
             Vertex v;
             v.position = vertex;

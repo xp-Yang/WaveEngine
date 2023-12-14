@@ -48,14 +48,14 @@ SubModelData Model::load_mesh(aiMesh* mesh, const aiScene* scene)
     {
         Vertex vertex;
         // 处理顶点位置、法线和纹理坐标
-        glm::vec3 position;
+        Vec3 position;
         position.x = mesh->mVertices[i].x;
         position.y = mesh->mVertices[i].y;
         position.z = mesh->mVertices[i].z;
         vertex.position = position;
 
         if (mesh->HasNormals()) {
-            glm::vec3 normal;
+            Vec3 normal;
             normal.x = mesh->mNormals[i].x;
             normal.y = mesh->mNormals[i].y;
             normal.z = mesh->mNormals[i].z;
@@ -64,13 +64,13 @@ SubModelData Model::load_mesh(aiMesh* mesh, const aiScene* scene)
 
         if (mesh->mTextureCoords[0]) // 网格是否有纹理坐标？
         {
-            glm::vec2 vec;
+            Vec2 vec;
             vec.x = mesh->mTextureCoords[0][i].x;
             vec.y = mesh->mTextureCoords[0][i].y;
             vertex.texture_uv = vec;
         }
         else
-            vertex.texture_uv = glm::vec2(0.0f, 0.0f);
+            vertex.texture_uv = Vec2(0.0f, 0.0f);
 
         vertices.push_back(vertex);
     }

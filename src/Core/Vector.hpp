@@ -1,8 +1,11 @@
 #ifndef Vector_hpp
 #define Vector_hpp
 
-#include "glm/glm.hpp"
+#include <glm/glm.hpp>
+#define GLM_ENABLE_EXPERIMENTAL
+#include <glm/gtx/quaternion.hpp>
 
+using Vec2 = glm::vec2;
 using Vec3 = glm::vec3;
 using Vec4 = glm::vec4;
 
