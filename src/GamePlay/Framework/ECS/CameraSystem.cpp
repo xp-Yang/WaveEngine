@@ -71,6 +71,7 @@ void CameraSystem::onMouseUpdate(double delta_x, double delta_y, int mouse_butto
             camera.pos = rotate_Y * Vec4(camera.pos, 1.0f);
             camera.direction = rotate_Y * Vec4(camera.direction, 1.0f);
             camera.direction = glm::normalize(camera.direction);
+            camera.camera_up = Vec3(rotate_Y * Vec4(camera.camera_up, 1.0f));
 
             auto camera_right = camera.getRightDirection();
             auto rotate_x = glm::rotate(glm::mat4(1.0f), (float)(0.3f * delta_y * ecs::CameraComponent::Sensitivity), camera_right);
