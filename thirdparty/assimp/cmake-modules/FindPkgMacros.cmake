@@ -54,18 +54,15 @@ macro(clear_if_changed TESTVAR)
       set(${var} "NOTFOUND" CACHE STRING "x" FORCE)
     endforeach(var)
   endif ()
-  set(${TESTVAR}_INT_CHECK "${${TESTVAR}}" CACHE INTERNAL "x" FORCE)
+  set(${TESTVAR}_INT_CHECK ${${TESTVAR}} CACHE INTERNAL "x" FORCE)
 endmacro(clear_if_changed)
 
 # Try to get some hints from pkg-config, if available
 macro(use_pkgconfig PREFIX PKGNAME)
-  # Android does not support PKG_CONFIG so we disable it
-  IF ( NOT ANDROID )
-    find_package(PkgConfig)
-    if (PKG_CONFIG_FOUND)
-      pkg_check_modules(${PREFIX} ${PKGNAME})
-    endif ()
-  ENDIF ( NOT ANDROID )
+  find_package(PkgConfig)
+  if (PKG_CONFIG_FOUND)
+    pkg_check_modules(${PREFIX} ${PKGNAME})
+  endif ()
 endmacro (use_pkgconfig)
 
 # Couple a set of release AND debug libraries (or frameworks)

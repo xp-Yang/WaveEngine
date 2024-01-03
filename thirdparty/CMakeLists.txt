@@ -1,5 +1,4 @@
-#TODO thirdparty如何处理
-# thirdparty有各种形式：直接包含头文件和源文件；编译成静态库使用；编译成动态库使用
+# thirdparty的依赖有各种形式：直接包含源代码使用；编译成静态库使用；编译成动态库使用
 
 # glad imgui stb glm 包含源代码即用
 file(GLOB_RECURSE GLAD_HEAD_FILES "glad/*.h")

@@ -5,7 +5,7 @@
 # Open Asset Import Library (ASSIMP)
 # ---------------------------------------------------------------------------
 #
-# Copyright (c) 2006-2020, ASSIMP Development Team
+# Copyright (c) 2006-2016, ASSIMP Development Team
 #
 # All rights reserved.
 #
@@ -63,7 +63,7 @@ def log( sev, msg ):
         logEntry = logEntry + "[WARN]: "
     elif sev == 2:
         logEntry = logEntry + "[ERR] : "
-    logEntry = logEntry + str( msg )
+    logEntry = logEntry + msg
     print( logEntry )
 
 # -------------------------------------------------------------------------------

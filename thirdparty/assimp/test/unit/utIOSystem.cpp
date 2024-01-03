@@ -3,9 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2022, assimp team
-
-
+Copyright (c) 2006-2016, assimp team
 
 All rights reserved.
 
@@ -41,39 +39,56 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------
 */
 #include "UnitTestPCH.h"
-#include "TestIOSystem.h"
 
 #include <assimp/IOSystem.hpp>
 
 using namespace std;
 using namespace Assimp;
 
-class IOSystemTest : public ::testing::Test {
+static const string Sep = "/";
+class TestIOSystem : public IOSystem {
 public:
-    virtual void SetUp() {
-        pImp = new TestIOSystem();
+    TestIOSystem() : IOSystem() {}
+    virtual ~TestIOSystem() {}
+    virtual bool Exists( const char* ) const {
+        return true;
+    }
+    virtual char getOsSeparator() const {
+        return Sep[ 0 ];
     }
 
-    virtual void TearDown() {
-        delete pImp;
+    virtual IOStream* Open(const char* pFile, const char* pMode = "rb") {
+        return NULL;
     }
+
+    virtual void Close( IOStream* pFile) {
+        // empty
+    }
+};
+
+class IOSystemTest : public ::testing::Test {
+public:
+    virtual void SetUp() { pImp = new TestIOSystem(); }
+    virtual void TearDown() { delete pImp; }
 
 protected:
     TestIOSystem* pImp;
 };
 
+/*
+virtual bool PushDirectory( const std::string &path );
+virtual const std::string &CurrentDirectory() const;
+virtual bool PopDirectory();
+*/
+
 TEST_F( IOSystemTest, accessDirectoryStackTest ) {
     EXPECT_FALSE( pImp->PopDirectory() );
-    EXPECT_EQ( 0U, pImp->StackSize() );
+    EXPECT_EQ( 0, pImp->StackSize() );
     EXPECT_FALSE( pImp->PushDirectory( "" ) );
     std::string path = "test/";
     EXPECT_TRUE( pImp->PushDirectory( path ) );
-    EXPECT_EQ( 1U, pImp->StackSize() );
+    EXPECT_EQ( 1, pImp->StackSize() );
     EXPECT_EQ( path, pImp->CurrentDirectory() );
     EXPECT_TRUE( pImp->PopDirectory() );
-    EXPECT_EQ( 0U, pImp->StackSize() );
-}
-
-TEST_F( IOSystemTest, delFileTest ) {
-    EXPECT_FALSE( pImp->DeleteFile( "none" ) );
+    EXPECT_EQ( 0, pImp->StackSize() );
 }

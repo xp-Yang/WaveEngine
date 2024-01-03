@@ -24,13 +24,12 @@ This sample is based on several sources, including:
  - ASSIMP's C++ SimpleOpenGL viewer
 """
 
-import sys
+import os, sys
 from OpenGL.GLUT import *
 from OpenGL.GLU import *
 from OpenGL.GL import *
 
-import logging
-logger = logging.getLogger("pyassimp_opengl")
+import logging;logger = logging.getLogger("pyassimp_opengl")
 logging.basicConfig(level=logging.INFO)
 
 import math
@@ -99,7 +98,7 @@ class GLRenderer():
         logger.info("Loading model:" + path + "...")
 
         if postprocess:
-            self.scene = pyassimp.load(path, processing=postprocess)
+            self.scene = pyassimp.load(path, postprocess)
         else:
             self.scene = pyassimp.load(path)
         logger.info("Done.")

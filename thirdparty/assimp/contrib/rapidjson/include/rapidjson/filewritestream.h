@@ -1,6 +1,6 @@
 // Tencent is pleased to support the open source community by making RapidJSON available.
 // 
-// Copyright (C) 2015 THL A29 Limited, a Tencent company, and Milo Yip.
+// Copyright (C) 2015 THL A29 Limited, a Tencent company, and Milo Yip. All rights reserved.
 //
 // Licensed under the MIT License (the "License"); you may not use this file except
 // in compliance with the License. You may obtain a copy of the License at
@@ -15,17 +15,12 @@
 #ifndef RAPIDJSON_FILEWRITESTREAM_H_
 #define RAPIDJSON_FILEWRITESTREAM_H_
 
-#include "stream.h"
+#include "rapidjson.h"
 #include <cstdio>
-
-#ifdef __clang__
-RAPIDJSON_DIAG_PUSH
-RAPIDJSON_DIAG_OFF(unreachable-code)
-#endif
 
 RAPIDJSON_NAMESPACE_BEGIN
 
-//! Wrapper of C file stream for output using fwrite().
+//! Wrapper of C file stream for input using fread().
 /*!
     \note implements Stream concept
 */
@@ -62,7 +57,7 @@ public:
 
     void Flush() {
         if (current_ != buffer_) {
-            size_t result = std::fwrite(buffer_, 1, static_cast<size_t>(current_ - buffer_), fp_);
+            size_t result = fwrite(buffer_, 1, static_cast<size_t>(current_ - buffer_), fp_);
             if (result < static_cast<size_t>(current_ - buffer_)) {
                 // failure deliberately ignored at this time
                 // added to avoid warn_unused_result build errors
@@ -96,9 +91,5 @@ inline void PutN(FileWriteStream& stream, char c, size_t n) {
 }
 
 RAPIDJSON_NAMESPACE_END
-
-#ifdef __clang__
-RAPIDJSON_DIAG_POP
-#endif
 
 #endif // RAPIDJSON_FILESTREAM_H_

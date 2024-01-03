@@ -1,6 +1,7 @@
 #ifndef Window_hpp
 #define Window_hpp
 
+#include <string>
 #include <optional>
 #include <unordered_map>
 #include <glad/glad.h>
