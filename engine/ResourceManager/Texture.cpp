@@ -1,6 +1,6 @@
 #include "Texture.hpp"
 #include "Platform/RHI/rhi.hpp"
-#include "stb_image.h"
+#include "stb/stb_image.h"
 #include <assert.h>
 
 unsigned int Texture::generate_texture_from_file(const std::string& full_path, bool gamma) {

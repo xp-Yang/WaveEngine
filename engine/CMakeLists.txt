@@ -1,21 +1,13 @@
 set(WAVE_LIB_NAME WaveRuntime)
 
+#TODO 减少重复代码编写
 #include(${THIRD_PARTY_DIR}/CMakeLists.txt)
 
-file(GLOB_RECURSE GLAD_HEAD_FILES "../thirdparty/glad/*.h")
-file(GLOB_RECURSE GLAD_SRC_FILES "../thirdparty/glad/*.c")
+file(GLOB_RECURSE GLAD_SRC_FILES "${THIRD_PARTY_DIR}/glad/*.c")
 
-file(GLOB_RECURSE IMGUI_HEAD_FILES "../thirdparty/imgui/*.h" "../thirdparty/imgui/*.hpp")
-file(GLOB_RECURSE IMGUI_SRC_FILES "../thirdparty/imgui/*.c" "../thirdparty/imgui/*.cpp")
+file(GLOB_RECURSE IMGUI_SRC_FILES "${THIRD_PARTY_DIR}/imgui/*.c" "${THIRD_PARTY_DIR}/imgui/*.cpp")
 
-file(GLOB_RECURSE STB_HEAD_FILES "../thirdparty/stb/*.h" "../thirdparty/stb/*.hpp")
-file(GLOB_RECURSE STB_SRC_FILES "../thirdparty/stb/*.c" "../thirdparty/stb/*.cpp")
-
-file(GLOB_RECURSE GLFW_HEAD_FILES "../thirdparty/glfw/*.h" "../thirdparty/glfw/*.hpp")
-
-file(GLOB_RECURSE ASSIMP_HEAD_FILES "../thirdparty/assimp/*.h" "../thirdparty/assimp/*.hpp")
-
-file(GLOB_RECURSE GLM_HEAD_FILES "../thirdparty/glm/*.h" "../thirdparty/glm/*.hpp" "../thirdparty/glm/*.inl")
+file(GLOB_RECURSE STB_SRC_FILES "${THIRD_PARTY_DIR}/stb/*.c" "${THIRD_PARTY_DIR}/stb/*.cpp")
 
 set(THIRD_PARTY_SRC_FILES
 ${GLAD_SRC_FILES}
@@ -28,6 +20,7 @@ add_library(${WAVE_LIB_NAME} ${SRC_FILES} ${THIRD_PARTY_SRC_FILES})
 
 target_include_directories(${WAVE_LIB_NAME} PUBLIC ${THIRD_PARTY_DIR} ${GLFW_INCLUDE_DIR} ${GLAD_INCLUDE_DIR} ${STB_INCLUDE_DIR} ${ASSIMP_INCLUDE_DIR} ${ENGINE_DIR})
 
+# TODO target_link_directories
 link_directories(${THIRD_LIB_DIR})
 # TODO
-target_link_libraries(${WAVE_LIB_NAME} ${THIRD_LIB_DIR}/glfw3.lib ${THIRD_LIB_DIR}/assimp-vc143-mt.lib)
+target_link_libraries(${WAVE_LIB_NAME} ${THIRD_LIB_DIR}/glfw3.lib ${THIRD_LIB_DIR}/assimp-vc140-mt.lib)

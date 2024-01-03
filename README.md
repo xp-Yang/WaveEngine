@@ -10,6 +10,6 @@ cmake ..
 
 # Dependencies
 
-include source code directly by source code of glad, imgui, stb 
+For glad, imgui, stb, glm, include the source code directly
 
-generate and build libs by source code of glfw
+For glfw, assimp, generate and build libs/dlls from source code
