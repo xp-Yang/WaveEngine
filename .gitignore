@@ -17,6 +17,7 @@
 mono_crash.*
 
 # Build results
+build/
 [Dd]ebug/
 [Dd]ebugPublic/
 [Rr]elease/
@@ -113,6 +114,9 @@ ipch/
 *.VC.VC.opendb
 
 # Visual Studio profiler
+*.vcxproj
+*.vcxproj.filters
+*.vcxproj.user
 *.psess
 *.vsp
 *.vspx
