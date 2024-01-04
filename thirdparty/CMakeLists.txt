@@ -26,5 +26,15 @@ CACHE INTERNAL ""
 )
 
 # glfw assimp 需要编译静态库使用
-#add_subdirectory(glfw)
-#add_subdirectory(assimp)
+if(NOT TARGET glfw)
+	option(GLFW_BUILD_EXAMPLES "" OFF)
+	option(GLFW_BUILD_TESTS "" OFF)
+	option(GLFW_BUILD_DOCS "" OFF)
+	option(GLFW_INSTALL "" OFF)
+	add_subdirectory(glfw)
+endif()
+
+if(NOT TARGET assimp)
+	option(BUILD_SHARED_LIBS "" OFF)
+	add_subdirectory(assimp)
+endif()

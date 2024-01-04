@@ -20,7 +20,6 @@ add_library(${WAVE_LIB_NAME} ${SRC_FILES} ${THIRD_PARTY_SRC_FILES})
 
 target_include_directories(${WAVE_LIB_NAME} PUBLIC ${THIRD_PARTY_DIR} ${GLFW_INCLUDE_DIR} ${GLAD_INCLUDE_DIR} ${STB_INCLUDE_DIR} ${ASSIMP_INCLUDE_DIR} ${ENGINE_DIR})
 
-# TODO target_link_directories
-link_directories(${THIRD_LIB_DIR})
 # TODO
-target_link_libraries(${WAVE_LIB_NAME} ${THIRD_LIB_DIR}/glfw3.lib ${THIRD_LIB_DIR}/assimp-vc140-mt.lib)
+target_link_libraries(${WAVE_LIB_NAME} PUBLIC glfw)
+target_link_libraries(${WAVE_LIB_NAME} PUBLIC assimp)

@@ -12,8 +12,7 @@ set(ASSIMP_INCLUDE_DIR ${PROJECT_SOURCE_DIR}/thirdparty/assimp/include)
 set(RESOURCE_DIR ${PROJECT_SOURCE_DIR}/resource)
 set(ENGINE_DIR ${PROJECT_SOURCE_DIR}/engine)
 set(TEST_DIR ${PROJECT_SOURCE_DIR}/test)
-#TODO 自己编出assimp的lib和dll，glfw的lib，然后自己拷贝到exec目录
-set(THIRD_LIB_DIR ${PROJECT_SOURCE_DIR}/lib)
+
 #TODO 自定义输出binary的路径
 #set_target_properties(MyTarget PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
