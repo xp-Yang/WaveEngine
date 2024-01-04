@@ -113,6 +113,11 @@ Shader::Shader(const char* vertexPath, const char* fragmentPath, const char* geo
         glDeleteShader(geometry);
 }
 
+Shader::Shader(const std::string vertexPath, const std::string fragmentPath, const std::string geometryPath)
+    : Shader(vertexPath.c_str(), fragmentPath.c_str(), geometryPath.empty() ? nullptr : geometryPath.c_str())
+{
+}
+
 void Shader::start_using() const {
     glUseProgram(m_id);
 }

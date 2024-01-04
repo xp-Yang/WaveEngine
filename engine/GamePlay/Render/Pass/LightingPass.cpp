@@ -26,7 +26,8 @@ void LightingPass::draw()
 	m_framebuffer->bind();
 	m_framebuffer->clear();
 
-	static Shader* lighting_shader = new Shader("resource/shader/lightingPass.vs", "resource/shader/lightingPass.fs");
+	std::string resource_dir = RESOURCE_DIR;
+	static Shader* lighting_shader = new Shader(resource_dir + "/shader/lightingPass.vs", resource_dir + "/shader/lightingPass.fs");
 	auto g_position_map = m_gbuffer_framebuffer->getFirstAttachmentOf(AttachmentType::RGB16F).getMap();
 	lighting_shader->start_using();
 	lighting_shader->setTexture("gPosition", 0, g_position_map);

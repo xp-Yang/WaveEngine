@@ -10,7 +10,8 @@ void Material::update_shader_binding() const {
         shader->setFloat("material.ambient", ambient_strength);
         shader->setFloat("material.shininess", shininess);
 
-        static unsigned int default_map = Texture::generate_texture_from_file("resource/images/default_map.png", false);
+        std::string resource_dir = RESOURCE_DIR;
+        static unsigned int default_map = Texture::generate_texture_from_file(resource_dir + "/images/default_map.png", false);
 
         shader->setTexture("material.diffuse_map", 0, diffuse_map != 0 ? diffuse_map : default_map);
         shader->setTexture("material.specular_map", 1, specular_map != 0 ? specular_map : default_map);

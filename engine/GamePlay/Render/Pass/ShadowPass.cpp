@@ -29,7 +29,8 @@ void ShadowPass::draw() {
     glEnable(GL_DEPTH_TEST);
     auto& world = ecs::World::get();
 
-    static Shader* depth_shader = new Shader("resource/shader/depth.vs", "resource/shader/depth.fs");
+    std::string resource_dir = RESOURCE_DIR;
+    static Shader* depth_shader = new Shader(resource_dir + "/shader/depth.vs", resource_dir + "/shader/depth.fs");
 
     glm::mat4 light_ref_matrix;
     for (auto entity : world.entityView<ecs::LightComponent>()) {

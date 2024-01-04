@@ -8,7 +8,9 @@ SceneHierarchy::SceneHierarchy() {
 	init();
 }
 
-void SceneHierarchy::init() {    
+void SceneHierarchy::init() {
+	std::string resource_dir = RESOURCE_DIR;
+
     // TODO 这些需要被SceneHierarchy管理吗，参考filament
 	auto& world = ecs::World::get();
 
@@ -20,18 +22,18 @@ void SceneHierarchy::init() {
 	skybox_primitive.mesh = Mesh::create_cube_mesh();
 	std::vector<std::string> faces
 	{
-		"resource/images/skybox/right.jpg",
-		"resource/images/skybox/left.jpg",
-		"resource/images/skybox/top.jpg",
-		"resource/images/skybox/bottom.jpg",
-		"resource/images/skybox/front.jpg",
-		"resource/images/skybox/back.jpg"
+		resource_dir + "/images/skybox/right.jpg",
+		resource_dir + "/images/skybox/left.jpg",
+		resource_dir + "/images/skybox/top.jpg",
+		resource_dir + "/images/skybox/bottom.jpg",
+		resource_dir + "/images/skybox/front.jpg",
+		resource_dir + "/images/skybox/back.jpg"
 	};
 	// TODO 是否可以放到material中
 	// TODO component size crash
 	world.addComponent<ecs::SkyboxComponent>(skybox_entity).texture = Texture::generate_cube_map(faces);
 	Material skybox_material;
-	skybox_material.shader = new Shader("resource/shader/skybox.vs", "resource/shader/skybox.fs");
+	skybox_material.shader = new Shader(resource_dir + "/shader/skybox.vs", resource_dir + "/shader/skybox.fs");
 	skybox_primitive.material = skybox_material;
 	skybox_renderable.setPrimitives({ skybox_primitive });
 
@@ -46,7 +48,7 @@ void SceneHierarchy::init() {
 	//light_primitive.mesh = Mesh::create_cube_mesh();
 	//Material light_material;
 	//light_material.color = {255.f / 255.0f, 255.f / 255.0f, 175.f / 255.0f, 175.f / 255.0f };
-	//light_material.shader = new Shader("resource/shader/light.vs", "resource/shader/light.fs");
+	//light_material.shader = new Shader(resource_dir + "/shader/light.vs", resource_dir + "/shader/light.fs");
 	//light_primitive.material = light_material;
 	//light_renderable.setPrimitives({ light_primitive });
 
@@ -60,12 +62,12 @@ void SceneHierarchy::init() {
 	//ecs::Primitive directional_light_primitive;
 	//directional_light_primitive.mesh = Mesh::create_cube_mesh();
 	//Material directional_light_material;
-	//directional_light_material.shader = new Shader("resource/shader/light.vs", "resource/shader/light.fs");
+	//directional_light_material.shader = new Shader(resource_dir + "/shader/light.vs", resource_dir + "/shader/light.fs");
 	//directional_light_primitive.material = directional_light_material;
 	//directional_light_renderable.setPrimitives({ directional_light_primitive });
 
 	static const int LIGHT_COUNT = 3;
-	static Shader* light_shader = new Shader("resource/shader/light.vs", "resource/shader/light.fs");
+	static Shader* light_shader = new Shader(resource_dir + "/shader/light.vs", resource_dir + "/shader/light.fs");
 	for (int i = 0; i < LIGHT_COUNT; i++) {
 		auto light_entity = world.create_entity();
 		world.addComponent<ecs::NameComponent>(light_entity).name = std::string("light") + std::to_string(i);
@@ -103,9 +105,9 @@ void SceneHierarchy::init() {
 	ecs::Primitive cube_primitive;
 	cube_primitive.mesh = Mesh::create_cube_mesh();
 	Material cube_material;
-    cube_material.shader = new Shader("resource/shader/model.vs", "resource/shader/model.fs", "resource/shader/model.gs");
-	cube_material.set_diffuse_map("resource/images/pure_white_map.png");
-	cube_material.set_specular_map("resource/images/cube_specular.png");
+    cube_material.shader = new Shader(resource_dir + "/shader/model.vs", resource_dir + "/shader/model.fs", resource_dir + "/shader/model.gs");
+	cube_material.set_diffuse_map(resource_dir + "/images/pure_white_map.png");
+	cube_material.set_specular_map(resource_dir + "/images/cube_specular.png");
 	cube_primitive.material = cube_material;
 	cube_renderable.setPrimitives({ cube_primitive });
     world.addComponent<ecs::ExplosionComponent>(cube_entity);
@@ -118,9 +120,9 @@ void SceneHierarchy::init() {
 	ecs::Primitive sphere_primitive;
 	sphere_primitive.mesh = Mesh::create_icosphere_mesh(5);
 	Material sphere_material;
-	sphere_material.shader = new Shader("resource/shader/model.vs", "resource/shader/model.fs", "resource/shader/model.gs");
-	sphere_material.set_diffuse_map("resource/images/pure_white_map.png");
-	sphere_material.set_specular_map("resource/images/pure_white_map.png");
+	sphere_material.shader = new Shader(resource_dir + "/shader/model.vs", resource_dir + "/shader/model.fs", resource_dir + "/shader/model.gs");
+	sphere_material.set_diffuse_map(resource_dir + "/images/pure_white_map.png");
+	sphere_material.set_specular_map(resource_dir + "/images/pure_white_map.png");
 	sphere_primitive.material = sphere_material;
 	sphere_renderable.setPrimitives({ sphere_primitive });
 	world.addComponent<ecs::ExplosionComponent>(sphere_entity);
@@ -133,13 +135,13 @@ void SceneHierarchy::init() {
 	ecs::Primitive ground_primitive;
 	ground_primitive.mesh = Mesh::create_quad_mesh(Point3(-0.5f, 0.0f, 0.5f), Vec3(1.0f, 0.0f, 0.0f), Vec3(0.0f, 0.0f, -1.0f));
     Material ground_material;
-    ground_material.shader = new Shader("resource/shader/model.vs", "resource/shader/model.fs", "resource/shader/model.gs");
-    ground_material.set_diffuse_map("resource/images/grid.png");
-    ground_material.set_specular_map("resource/images/grid.png");
+    ground_material.shader = new Shader(resource_dir + "/shader/model.vs", resource_dir + "/shader/model.fs", resource_dir + "/shader/model.gs");
+    ground_material.set_diffuse_map(resource_dir + "/images/grid.png");
+    ground_material.set_specular_map(resource_dir + "/images/grid.png");
 	ground_primitive.material = ground_material;
 	ground_renderable.setPrimitives({ ground_primitive });
 
-	Model* nanosuit = new Model("resource/model/nanosuit/nanosuit.obj");
+	Model* nanosuit = new Model(resource_dir + "/model/nanosuit/nanosuit.obj");
 	auto nanosuit_entity = world.create_entity();
 	world.addComponent<ecs::NameComponent>(nanosuit_entity).name = "nanosuit";
 	auto& nanosuit_transform = world.addComponent<ecs::TransformComponent>(nanosuit_entity);
@@ -147,7 +149,7 @@ void SceneHierarchy::init() {
 	nanosuit_transform.scale = Vec3(0.4f);
 	auto& nanosuit_renderable = world.addComponent<ecs::RenderableComponent>(nanosuit_entity);
 	std::vector<ecs::Primitive> nanosuit_primitives;
-	Shader* nanosuit_shader = new Shader("resource/shader/model.vs", "resource/shader/model.fs", "resource/shader/model.gs");
+	Shader* nanosuit_shader = new Shader(resource_dir + "/shader/model.vs", resource_dir + "/shader/model.fs", resource_dir + "/shader/model.gs");
 	for (int i = 0; i < nanosuit->get_datas().size(); i++) {
 		ecs::Primitive primitive;
 		primitive.mesh = nanosuit->get_datas().at(i).mesh;
@@ -158,7 +160,7 @@ void SceneHierarchy::init() {
 	nanosuit_renderable.setPrimitives(nanosuit_primitives);
 	world.addComponent<ecs::ExplosionComponent>(nanosuit_entity);
 
-	//Model* yoko = new Model("resource/model/yoko/008.obj");
+	//Model* yoko = new Model(resource_dir + "/model/yoko/008.obj");
 	//auto yoko_entity = world.create_entity();
 	//world.addComponent<ecs::NameComponent>(yoko_entity).name = "yoko";
 	//auto& yoko_transform = world.addComponent<ecs::TransformComponent>(yoko_entity);
@@ -166,7 +168,7 @@ void SceneHierarchy::init() {
 	//yoko_transform.scale = Vec3(0.25f);
 	//auto& yoko_renderable = world.addComponent<ecs::RenderableComponent>(yoko_entity);
 	//std::vector<ecs::Primitive> yoko_primitives;
-	//Shader* yoko_shader = new Shader("resource/shader/model.vs", "resource/shader/model.fs", "resource/shader/model.gs");
+	//Shader* yoko_shader = new Shader(resource_dir + "/shader/model.vs", resource_dir + "/shader/model.fs", resource_dir + "/shader/model.gs");
 	//for (int i = 0; i < yoko->get_datas().size(); i++) {
 	//	ecs::Primitive primitive;
 	//	primitive.mesh = yoko->get_datas().at(i).mesh;
@@ -177,7 +179,7 @@ void SceneHierarchy::init() {
 	//yoko_renderable.setPrimitives(yoko_primitives);
 	//world.addComponent<ecs::ExplosionComponent>(yoko_entity);
 
-	Model* bunny = new Model("resource/model/bunny.obj");
+	Model* bunny = new Model(resource_dir + "/model/bunny.obj");
 	auto bunny_entity = world.create_entity();
 	world.addComponent<ecs::NameComponent>(bunny_entity).name = "bunny";
 	auto& bunny_transform = world.addComponent<ecs::TransformComponent>(bunny_entity);
@@ -185,7 +187,7 @@ void SceneHierarchy::init() {
 	bunny_transform.scale = Vec3(25.0f);
 	auto& bunny_renderable = world.addComponent<ecs::RenderableComponent>(bunny_entity);
 	std::vector<ecs::Primitive> bunny_primitives;
-	Shader* bunny_shader = new Shader("resource/shader/model.vs", "resource/shader/model.fs", "resource/shader/model.gs");
+	Shader* bunny_shader = new Shader(resource_dir + "/shader/model.vs", resource_dir + "/shader/model.fs", resource_dir + "/shader/model.gs");
 	for (int i = 0; i < bunny->get_datas().size(); i++) {
 		ecs::Primitive primitive;
 		primitive.mesh = bunny->get_datas().at(i).mesh;

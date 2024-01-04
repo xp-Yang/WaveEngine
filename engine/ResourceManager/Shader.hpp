@@ -5,7 +5,8 @@
 
 class Shader{
 public:
-	Shader(const char* vertexPath, const char* fragmentPath, const char* geometryPath = nullptr);
+	Shader(const char* vertexPath, const char* fragmentPath, const char* geometryPath);
+	Shader(const std::string vertexPath, const std::string fragmentPath, const std::string geometryPath = "");
 
 	void start_using() const;
 	void stop_using() const;

@@ -24,7 +24,8 @@ void PickingPass::draw()
 
     glEnable(GL_DEPTH_TEST);
 
-    static Shader* picking_shader = new Shader("resource/shader/picking.vs", "resource/shader/picking.fs");
+    std::string resource_dir = RESOURCE_DIR;
+    static Shader* picking_shader = new Shader(resource_dir + "/shader/picking.vs", resource_dir + "/shader/picking.fs");
     picking_shader->start_using();
 
     auto& world = ecs::World::get();

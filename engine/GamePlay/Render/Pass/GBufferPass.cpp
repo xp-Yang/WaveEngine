@@ -19,7 +19,8 @@ void GBufferPass::draw()
 
     glEnable(GL_DEPTH_TEST);
 
-    static Shader* g_shader = new Shader("resource/shader/gBufferPass.vs", "resource/shader/gBufferPass.fs");
+    std::string resource_dir = RESOURCE_DIR;
+    static Shader* g_shader = new Shader(resource_dir + "/shader/gBufferPass.vs", resource_dir + "/shader/gBufferPass.fs");
 
     auto& world = ecs::World::get();
 
