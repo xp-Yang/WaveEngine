@@ -1,3 +1,5 @@
+set(third_party_folder "ThirdParty")
+
 # thirdparty的依赖有各种形式：直接包含源代码使用；编译成静态库使用；编译成动态库使用
 
 # glad imgui stb glm 包含源代码即用
@@ -32,6 +34,8 @@ if(NOT TARGET glfw)
 	option(GLFW_BUILD_DOCS "" OFF)
 	option(GLFW_INSTALL "" OFF)
 	add_subdirectory(glfw)
+	set_target_properties(glfw PROPERTIES FOLDER ${third_party_folder}/glfw)
+	set_target_properties(update_mappings PROPERTIES FOLDER ${third_party_folder}/glfw)
 endif()
 
 if(NOT TARGET assimp)
@@ -45,4 +49,8 @@ if(NOT TARGET assimp)
 	option(ASSIMP_BUILD_ALL_EXPORTERS_BY_DEFAULT "" OFF)
 	option(ASSIMP_BUILD_ALL_IMPORTERS_BY_DEFAULT "" OFF)
 	add_subdirectory(assimp)
+	set_target_properties(assimp PROPERTIES FOLDER ${third_party_folder}/assimp)
+	set_target_properties(uninstall PROPERTIES FOLDER ${third_party_folder}/assimp)
+	set_target_properties(UpdateAssimpLibsDebugSymbolsAndDLLs PROPERTIES FOLDER ${third_party_folder}/assimp)
+	set_target_properties(zlibstatic PROPERTIES FOLDER ${third_party_folder}/assimp)
 endif()

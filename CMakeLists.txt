@@ -6,19 +6,18 @@ project(WaveEngine VERSION 0.9.0)
 #set(CMAKE_CXX_STANDARD 17)
 #set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-set(THIRD_PARTY_DIR ${PROJECT_SOURCE_DIR}/thirdparty)
-set(GLFW_INCLUDE_DIR ${PROJECT_SOURCE_DIR}/thirdparty/glfw/include)
-set(GLAD_INCLUDE_DIR ${PROJECT_SOURCE_DIR}/thirdparty/glad/include)
-set(ASSIMP_INCLUDE_DIR ${PROJECT_SOURCE_DIR}/thirdparty/assimp/include)
-set(RESOURCE_DIR ${PROJECT_SOURCE_DIR}/resource)
-set(ENGINE_DIR ${PROJECT_SOURCE_DIR}/engine)
+set(ENGINE_DIR ${PROJECT_SOURCE_DIR}/WaveEngine)
+set(ENGINE_SRC_DIR ${ENGINE_DIR}/src)
+set(THIRD_PARTY_DIR ${ENGINE_DIR}/thirdparty)
+set(RESOURCE_DIR ${ENGINE_DIR}/resource)
 set(TEST_DIR ${PROJECT_SOURCE_DIR}/test)
+
+set(GLFW_INCLUDE_DIR ${THIRD_PARTY_DIR}/glfw/include)
+set(GLAD_INCLUDE_DIR ${THIRD_PARTY_DIR}/glad/include)
+set(ASSIMP_INCLUDE_DIR ${THIRD_PARTY_DIR}/assimp/include)
 
 #通过宏定义告诉程序resource目录
 add_definitions(-DRESOURCE_DIR="${RESOURCE_DIR}")
-
-#TODO 自定义输出binary的路径
-#set_target_properties(MyTarget PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
 # ---- Include guards ----
 if(PROJECT_SOURCE_DIR STREQUAL PROJECT_BINARY_DIR)
@@ -28,8 +27,8 @@ if(PROJECT_SOURCE_DIR STREQUAL PROJECT_BINARY_DIR)
   )
 endif()
 
-#TODO dll和resource需要手动拷贝怎么处理
-
-add_subdirectory(thirdparty)
-add_subdirectory(engine)
+add_subdirectory(WaveEngine)
 add_subdirectory(test)
+
+#TODO 自定义输出binary的路径
+#set_target_properties(MyTarget PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)

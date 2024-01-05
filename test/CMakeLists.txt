@@ -1,12 +1,17 @@
 set(TEST_EXEC_NAME Test)
 
-file(GLOB_RECURSE HEAD_FILES "*.hpp")
-file(GLOB_RECURSE SRC_FILES "*.cpp")
+file(GLOB_RECURSE HEAD_FILES "*.hpp" "*.h")
+file(GLOB_RECURSE SRC_FILES "*.cpp" "*.c")
 
+source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}" FILES ${SRC_FILES} ${HEAD_FILES})
+#增加HEAD_FILES以便ide可以显示这些头文件
 add_executable(${TEST_EXEC_NAME} ${HEAD_FILES} ${SRC_FILES})
 
+#设为vs默认启动项目
+set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT ${TEST_EXEC_NAME})
+
 # TODO 只应该include WaveRuntime库提供的头文件以便调用WaveRuntime库
-target_include_directories(${TEST_EXEC_NAME} PUBLIC ${THIRD_PARTY_DIR} ${GLFW_INCLUDE_DIR} ${GLAD_INCLUDE_DIR} ${STB_INCLUDE_DIR} ${ASSIMP_INCLUDE_DIR} ${ENGINE_DIR})
+#target_include_directories(${TEST_EXEC_NAME} PUBLIC )
 
 target_link_libraries(${TEST_EXEC_NAME} WaveRuntime)
 
