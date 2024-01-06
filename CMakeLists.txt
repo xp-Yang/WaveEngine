@@ -12,12 +12,10 @@ set(THIRD_PARTY_DIR ${ENGINE_DIR}/thirdparty)
 set(RESOURCE_DIR ${ENGINE_DIR}/resource)
 set(TEST_DIR ${PROJECT_SOURCE_DIR}/test)
 
+set(IMGUI_INCLUDE_DIR ${THIRD_PARTY_DIR})
 set(GLFW_INCLUDE_DIR ${THIRD_PARTY_DIR}/glfw/include)
 set(GLAD_INCLUDE_DIR ${THIRD_PARTY_DIR}/glad/include)
 set(ASSIMP_INCLUDE_DIR ${THIRD_PARTY_DIR}/assimp/include)
-
-#通过宏定义告诉程序resource目录
-add_definitions(-DRESOURCE_DIR="${RESOURCE_DIR}")
 
 # ---- Include guards ----
 if(PROJECT_SOURCE_DIR STREQUAL PROJECT_BINARY_DIR)
@@ -29,6 +27,9 @@ endif()
 
 add_subdirectory(WaveEngine)
 add_subdirectory(test)
+
+#通过宏定义告诉程序resource目录
+target_compile_definitions(WaveRuntime PUBLIC RESOURCE_DIR="${RESOURCE_DIR}")
 
 #TODO 自定义输出binary的路径
 #set_target_properties(MyTarget PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)

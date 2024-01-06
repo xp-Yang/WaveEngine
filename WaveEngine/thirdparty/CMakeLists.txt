@@ -1,33 +1,35 @@
 set(third_party_folder "ThirdParty")
 
-# thirdparty的依赖有各种形式：直接包含源代码使用；编译成静态库使用；编译成动态库使用
+#glad
+file(GLOB_RECURSE GLAD_HEAD_FILES "${THIRD_PARTY_DIR}/glad/*.h" "${THIRD_PARTY_DIR}/glad/*.hpp")
+file(GLOB_RECURSE GLAD_SRC_FILES "${THIRD_PARTY_DIR}/glad/*.c" "${THIRD_PARTY_DIR}/glad/*.cpp")
+add_library(glad ${GLAD_HEAD_FILES} ${GLAD_SRC_FILES})
+set_target_properties(glad PROPERTIES FOLDER ${third_party_folder}/glad)
+target_include_directories(glad PRIVATE ${GLAD_INCLUDE_DIR})
+	
+#imgui
+file(GLOB_RECURSE IMGUI_HEAD_FILES "${THIRD_PARTY_DIR}/imgui/*.h" "${THIRD_PARTY_DIR}/imgui/*.hpp")
+file(GLOB_RECURSE IMGUI_SRC_FILES "${THIRD_PARTY_DIR}/imgui/*.c" "${THIRD_PARTY_DIR}/imgui/*.cpp")
+add_library(imgui ${IMGUI_HEAD_FILES} ${IMGUI_SRC_FILES})
+set_target_properties(imgui PROPERTIES FOLDER ${third_party_folder}/imgui)
+target_include_directories(imgui PRIVATE ${THIRD_PARTY_DIR}/imgui)
+target_include_directories(imgui PRIVATE ${GLFW_INCLUDE_DIR})
 
-# glad imgui stb glm 包含源代码即用
-#file(GLOB_RECURSE GLAD_HEAD_FILES "glad/*.h" "glad/*.hpp")
-file(GLOB_RECURSE GLAD_SRC_FILES "glad/*.c" "glad/*.cpp")
+#stb
+file(GLOB_RECURSE STB_HEAD_FILES "${THIRD_PARTY_DIR}/stb/*.h" "${THIRD_PARTY_DIR}/stb/*.hpp")
+file(GLOB_RECURSE STB_SRC_FILES "${THIRD_PARTY_DIR}/stb/*.c" "${THIRD_PARTY_DIR}/stb/*.cpp")
+add_library(stb ${STB_HEAD_FILES} ${STB_SRC_FILES})
+set_target_properties(stb PROPERTIES FOLDER ${third_party_folder}/stb)
+target_include_directories(stb PRIVATE ${THIRD_PARTY_DIR}/stb)
 
-#file(GLOB_RECURSE IMGUI_HEAD_FILES "imgui/*.h" "imgui/*.hpp")
-file(GLOB_RECURSE IMGUI_SRC_FILES "imgui/*.c" "imgui/*.cpp")
+#glm
+if(NOT TARGET glm)
+	option(BUILD_STATIC_LIBS "" ON)
+	add_subdirectory(glm)
+	set_target_properties(glm_static PROPERTIES FOLDER ${third_party_folder}/glm)
+endif()
 
-#file(GLOB_RECURSE STB_HEAD_FILES "stb/*.h" "stb/*.hpp")
-file(GLOB_RECURSE STB_SRC_FILES "stb/*.c" "stb/*.cpp")
-
-# glm is header-only
-#file(GLOB_RECURSE GLM_HEAD_FILES "glm/*.h" "glm/*.hpp" "glm/*.inl")
-#file(GLOB_RECURSE GLM_SRC_FILES "glm/*.c" "glm/*.cpp")
-
-#file(GLOB_RECURSE GLFW_HEAD_FILES "glfw/*.h" "glfw/*.hpp")
-
-#file(GLOB_RECURSE ASSIMP_HEAD_FILES "assimp/*.h" "assimp/*.hpp")
-
-set(THIRD_PARTY_SRC_FILES
-${GLAD_SRC_FILES}
-${IMGUI_SRC_FILES}
-${STB_SRC_FILES}
-CACHE INTERNAL ""
-)
-
-# glfw assimp 需要编译静态库使用
+#glfw
 if(NOT TARGET glfw)
 	option(GLFW_BUILD_EXAMPLES "" OFF)
 	option(GLFW_BUILD_TESTS "" OFF)
@@ -38,6 +40,7 @@ if(NOT TARGET glfw)
 	set_target_properties(update_mappings PROPERTIES FOLDER ${third_party_folder}/glfw)
 endif()
 
+#assimp
 if(NOT TARGET assimp)
 	option(BUILD_SHARED_LIBS "" OFF)
 	option(ASSIMP_BUILD_SAMPLES "" OFF)
