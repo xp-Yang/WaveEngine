@@ -7,7 +7,7 @@
 #include "World.hpp"
 #include "ResourceManager/Mesh.hpp"
 #include "ResourceManager/Material.hpp"
-#include "Window.hpp"
+#include "Window_impl.hpp"
 
 namespace ecs {
 

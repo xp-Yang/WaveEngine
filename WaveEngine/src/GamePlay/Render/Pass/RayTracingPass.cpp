@@ -2,7 +2,7 @@
 #include "GamePlay/Framework/ECS/Components.hpp"
 #include "Platform/RHI/rhi.hpp"
 #include "Core/Math.hpp"
-#include "Application.hpp"
+#include "Application_impl.hpp"
 
 void RayTracingPass::init()
 {

@@ -36,7 +36,7 @@ private:
 	RenderSystem* m_ref_render_system;
 	RenderParams m_render_params;
 
-	ToolbarType m_toolbar_type;
+	ToolbarType m_toolbar_type{ ToolbarType::Translate };
 };
 
 #endif

@@ -10,9 +10,6 @@ add_executable(${TEST_EXEC_NAME} ${HEAD_FILES} ${SRC_FILES})
 #设为vs默认启动项目
 set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT ${TEST_EXEC_NAME})
 
-# TODO 只应该include WaveRuntime库提供的头文件以便调用WaveRuntime库
-#target_include_directories(${TEST_EXEC_NAME} PUBLIC )
-
 target_link_libraries(${TEST_EXEC_NAME} WaveRuntime)
 
 target_compile_features(${TEST_EXEC_NAME} PRIVATE cxx_std_17)

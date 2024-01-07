@@ -1,7 +1,7 @@
 #ifndef FileDialog_hpp
 #define FileDialog_hpp
 
-#include "Application.hpp"
+#include "Application_impl.hpp"
 #include <string>
 // TODO 依赖GLFW的部分改为
 #define GLFW_EXPOSE_NATIVE_WIN32
