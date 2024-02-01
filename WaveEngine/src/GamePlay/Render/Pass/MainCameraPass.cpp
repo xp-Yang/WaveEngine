@@ -195,7 +195,8 @@ void MainCameraPass::draw()
 
     if (m_normal_debug)
     {
-        static Shader* normal_shader = new Shader("resource/shader/model.vs", "resource/shader/normal.fs", "resource/shader/normal.gs");
+        std::string resource_dir = RESOURCE_DIR;
+        static Shader* normal_shader = new Shader(resource_dir + "/shader/model.vs", resource_dir + "/shader/normal.fs", resource_dir + "/shader/normal.gs");
 
         auto& world = ecs::World::get();
         glm::mat4 camera_view;
@@ -223,7 +224,8 @@ void MainCameraPass::draw()
     }
 
     if (m_wireframe) {
-        static Shader* wireframe_shader = new Shader("resource/shader/model.vs", "resource/shader/wireframe.fs", "resource/shader/wireframe.gs");
+        std::string resource_dir = RESOURCE_DIR;
+        static Shader* wireframe_shader = new Shader(resource_dir + "/shader/model.vs", resource_dir + "/shader/wireframe.fs", resource_dir + "/shader/wireframe.gs");
 
         auto& world = ecs::World::get();
         glm::mat4 camera_view;
