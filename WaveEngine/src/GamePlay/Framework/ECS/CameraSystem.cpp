@@ -173,6 +173,9 @@ void CameraSystem::onMouseWheelUpdate(double yoffset, double mouse_x, double mou
     auto& world = ecs::World::get();
     for (auto entity : world.entityView<ecs::CameraComponent>()) {
         ecs::CameraComponent& camera = *world.getComponent<ecs::CameraComponent>(entity);
+        if (camera.zoom_mode == ecs::CameraComponent::ZoomMode::ZoomToCenter) {
+            onMouseWheelUpdate(yoffset);
+        }
         if (camera.zoom_mode == ecs::CameraComponent::ZoomMode::ZoomToMouse) {
             auto main_viewport = Application::GetApp().getWindow()->getMainViewport().value_or(Viewport());
             main_viewport.transToScreenCoordinates();
