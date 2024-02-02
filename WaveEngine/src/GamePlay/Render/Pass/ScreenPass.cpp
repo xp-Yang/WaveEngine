@@ -35,27 +35,42 @@ void ScreenPass::draw()
 
 
 	// TODO 可以塞多个小窗口进多个imgui窗口里
-	// a child window for debugging
-	Viewport picking_viewport = Application::GetApp().getWindow()->getViewport("PickingView").value_or(Viewport());
-	Application::GetApp().getWindow()->setViewport("PickingView", picking_viewport);
+	// child window for debugging
+	Viewport picking_viewport = Application::GetApp().getWindow()->getViewport(ViewportType::Pick).value_or(Viewport());
+	Application::GetApp().getWindow()->setViewport(ViewportType::Pick, picking_viewport);
 	frame_shader->start_using();
-	frame_shader->setTexture("Texture", 0, 66);
+	frame_shader->setTexture("Texture", 0, m_pick_view_ref->getFirstAttachmentOf(AttachmentType::RGBA).getMap());
 	Renderer::drawIndex(*frame_shader, m_screen_quad.get_VAO(), m_screen_quad.get_indices_count());
 
-	Viewport shadow_viewport = Application::GetApp().getWindow()->getViewport("ShadowView").value_or(Viewport());
-	Application::GetApp().getWindow()->setViewport("ShadowView", shadow_viewport);
+	Viewport shadow_viewport = Application::GetApp().getWindow()->getViewport(ViewportType::Shadow).value_or(Viewport());
+	Application::GetApp().getWindow()->setViewport(ViewportType::Shadow, shadow_viewport);
 	frame_shader->start_using();
-	frame_shader->setTexture("Texture", 0, 56);
+	frame_shader->setTexture("Texture", 0, m_shadow_view_ref->getFirstAttachmentOf(AttachmentType::DEPTH).getMap());
 	Renderer::drawIndex(*frame_shader, m_screen_quad.get_VAO(), m_screen_quad.get_indices_count());
 
-	Viewport rt_viewport = Application::GetApp().getWindow()->getViewport("RayTracingView").value_or(Viewport());
-	Application::GetApp().getWindow()->setViewport("RayTracingView", rt_viewport);
+	Viewport rt_viewport = Application::GetApp().getWindow()->getViewport(ViewportType::RayTracing).value_or(Viewport());
+	Application::GetApp().getWindow()->setViewport(ViewportType::RayTracing, rt_viewport);
 	frame_shader->start_using();
-	frame_shader->setTexture("Texture", 0, 40);
+	frame_shader->setTexture("Texture", 0, m_rt_view_ref->getFirstAttachmentOf(AttachmentType::RGB16F).getMap());
 	Renderer::drawIndex(*frame_shader, m_screen_quad.get_VAO(), m_screen_quad.get_indices_count());
 }
 
 FrameBuffer* ScreenPass::getFrameBuffer()
 {
 	return m_framebuffer.get();
+}
+
+void ScreenPass::setPickView(FrameBuffer* frame_buffer)
+{
+	m_pick_view_ref = frame_buffer;
+}
+
+void ScreenPass::setShadowView(FrameBuffer* frame_buffer)
+{
+	m_shadow_view_ref = frame_buffer;
+}
+
+void ScreenPass::setRayTracingView(FrameBuffer* frame_buffer)
+{
+	m_rt_view_ref = frame_buffer;
 }

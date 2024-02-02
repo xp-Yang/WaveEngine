@@ -52,6 +52,18 @@ struct Viewport {
         coordinates = GLCoordinates;
         return *this;
     }
+
+    float AspectRatio() {
+        return (float)width / (float)height;
+    }
+};
+
+enum ViewportType {
+    Main,
+    Pick,
+    Shadow,
+    RayTracing,
+    Debug,
 };
 
 // TODO 考虑对非GLFWwindow的扩展
@@ -62,8 +74,8 @@ public:
     bool shouldClose() const;
     void update() const;
     void setMainViewport(const Viewport& viewport);
-    void setViewport(std::string id, const Viewport& viewport);
-    std::optional<Viewport> getViewport(std::string id) const;
+    void setViewport(ViewportType id, const Viewport& viewport);
+    std::optional<Viewport> getViewport(ViewportType id) const;
     std::optional<Viewport> getMainViewport() const;
     GLFWwindow* getNativeWindowHandle() const;
     int getWidth() const;
@@ -72,7 +84,7 @@ private:
     GLFWwindow* m_window{ nullptr };
     int m_width;
     int m_height;
-    std::unordered_map<std::string, Viewport> m_viewports; // always has one main viewport
+    std::unordered_map<ViewportType, Viewport> m_viewports; // always has one main viewport
 };
 
 #endif

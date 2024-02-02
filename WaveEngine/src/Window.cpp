@@ -24,8 +24,8 @@ Window::Window(int width, int height)
 	}
 	glfwMakeContextCurrent(m_window);
 
-	m_viewports["MainView"] = Viewport(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT, Viewport::Coordinates::GLCoordinates);
-	glfwSetWindowUserPointer(m_window, &m_viewports["MainView"]);
+	m_viewports[ViewportType::Main] = Viewport(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT, Viewport::Coordinates::GLCoordinates);
+	glfwSetWindowUserPointer(m_window, &m_viewports[ViewportType::Main]);
 
 	glfwSetFramebufferSizeCallback(m_window, [](GLFWwindow* window, int width, int height) {
 		if (width <= 0 || height <= 0)
@@ -64,19 +64,19 @@ void Window::update() const
 
 void Window::setMainViewport(const Viewport& viewport)
 {
-	m_viewports["MainView"] = viewport;
+	m_viewports[ViewportType::Main] = viewport;
 	// TODO 封装进rhi
-	glViewport(m_viewports["MainView"].x, m_viewports["MainView"].y, m_viewports["MainView"].width, m_viewports["MainView"].height);
+	glViewport(m_viewports[ViewportType::Main].x, m_viewports[ViewportType::Main].y, m_viewports[ViewportType::Main].width, m_viewports[ViewportType::Main].height);
 }
 
-void Window::setViewport(std::string id, const Viewport& viewport)
+void Window::setViewport(ViewportType id, const Viewport& viewport)
 {
 	m_viewports[id] = viewport;
 	// TODO 封装进rhi
 	glViewport(m_viewports[id].x, m_viewports[id].y, m_viewports[id].width, m_viewports[id].height);
 }
 
-std::optional<Viewport> Window::getViewport(std::string id) const
+std::optional<Viewport> Window::getViewport(ViewportType id) const
 {
 	if (m_viewports.find(id) != m_viewports.end())
 		return m_viewports.at(id);
@@ -101,8 +101,8 @@ int Window::getHeight() const
 
 std::optional<Viewport> Window::getMainViewport() const
 {
-	if (m_viewports.find("MainView") != m_viewports.end())
-		return m_viewports.at("MainView");
+	if (m_viewports.find(ViewportType::Main) != m_viewports.end())
+		return m_viewports.at(ViewportType::Main);
 	else
 		return {};
 }

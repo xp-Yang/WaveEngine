@@ -44,6 +44,11 @@ struct CameraComponent {
 		Ortho,
 	} projection_mode{ Perspective };
 
+	enum ZoomMode {
+		ZoomToCenter,
+		ZoomToMouse,
+	} zoom_mode{ ZoomToMouse };
+
 	// FPS style
 	// 欧拉角表示：
 	struct FPSParams {
@@ -55,30 +60,26 @@ struct CameraComponent {
 	static const float CameraMovementSpeed;
 	static const float Sensitivity;
 	static const float ZoomUnit;
-	static Vec3 up; //vec3(0.0f, 1.0f, 0.0f) (y为上) or vec3(0.0f, 0.0f, 1.0f) (z为上)
+	static Vec3 global_up; //vec3(0.0f, 1.0f, 0.0f) (y为上) or vec3(0.0f, 0.0f, 1.0f) (z为上)
 
 	float originFov = glm::radians(45.0f); //水平fov
 	float zoom = 1.0f;
 	float fov = originFov / zoom;
-	float focal_length = {20.0f};
 	Vec3 direction = glm::normalize(Vec3(0.0f, -1.0f , -1.0f));
-	Vec3 pos = Vec3(0.0f) - focal_length * direction;
-	Vec3 camera_up = glm::normalize(up - glm::dot(up, direction) * direction);
-	glm::mat4 view = glm::lookAt(pos, pos + direction, up);
+	Vec3 pos = Vec3(0.0f) - 20.0f * direction;
+	Vec3 camera_up = glm::normalize(global_up - glm::dot(global_up, direction) * direction);
+	glm::mat4 view = glm::lookAt(pos, pos + direction, global_up);
 	glm::mat4 projection = projection_mode == Perspective ? glm::perspective(fov, ASPECT_RATIO, 0.1f, 100.0f)
 		: glm::ortho(-15.0f * ASPECT_RATIO, 15.0f * ASPECT_RATIO, -15.0f, 15.0f, 0.1f, 100.0f);
 
 	Vec3 getRightDirection() const { // camera 的 x 轴
 		return glm::cross(direction, camera_up);
-		Vec3 cameraRight = glm::normalize(glm::cross(direction, up));
+		Vec3 cameraRight = glm::normalize(glm::cross(direction, global_up));
 		return cameraRight;
 	}
 
 	Vec3 getUpDirection() const { // camera 的 y 轴
 		return camera_up;
-		Vec3 cameraRight = getRightDirection();
-		Vec3 cameraUp = glm::cross(cameraRight, direction);
-		return cameraUp;
 	}
 };
 
@@ -122,7 +123,7 @@ struct LightComponent {
 		for (auto entity : world.entityView<ecs::LightComponent>()) {
 			light_pos = world.getComponent<ecs::TransformComponent>(entity)->translation;
 		}
-		glm::mat4 light_view = glm::lookAt(light_pos, Vec3(0.0f, 0.0f, 0.0f), ecs::CameraComponent::up);
+		glm::mat4 light_view = glm::lookAt(light_pos, Vec3(0.0f, 0.0f, 0.0f), ecs::CameraComponent::global_up);
 		glm::mat4 ret = light_projection * light_view;
 		return ret;
 	}

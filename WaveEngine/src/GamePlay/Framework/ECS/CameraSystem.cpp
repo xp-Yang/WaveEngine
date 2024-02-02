@@ -2,6 +2,7 @@
 #include "World.hpp"
 #include "Components.hpp"
 #include <GLFW/glfw3.h>
+#include <Application_impl.hpp>
 
 namespace ecs {
 
@@ -67,7 +68,7 @@ void CameraSystem::onMouseUpdate(double delta_x, double delta_y, int mouse_butto
     ecs::CameraComponent& camera = *p_camera;
     if (camera.mode == ecs::CameraComponent::Mode::Orbit) {
         if (mouse_button == 0) {
-            auto rotate_Y = glm::rotate(glm::mat4(1.0f), -(float)(0.3f * delta_x * ecs::CameraComponent::Sensitivity), ecs::CameraComponent::up);
+            auto rotate_Y = glm::rotate(glm::mat4(1.0f), -(float)(0.3f * delta_x * ecs::CameraComponent::Sensitivity), ecs::CameraComponent::global_up);
             camera.pos = rotate_Y * Vec4(camera.pos, 1.0f);
             camera.direction = rotate_Y * Vec4(camera.direction, 1.0f);
             camera.direction = glm::normalize(camera.direction);
@@ -164,6 +165,63 @@ void CameraSystem::onMouseWheelUpdate(double yoffset)
         if (camera.fov >= glm::radians(135.0f))
             camera.fov = glm::radians(135.0f);
         camera.projection = glm::perspective(camera.fov, WINDOW_WIDTH / WINDOW_HEIGHT, 0.1f, 100.0f);
+    }
+}
+
+void CameraSystem::onMouseWheelUpdate(double yoffset, double mouse_x, double mouse_y)
+{
+    auto& world = ecs::World::get();
+    for (auto entity : world.entityView<ecs::CameraComponent>()) {
+        ecs::CameraComponent& camera = *world.getComponent<ecs::CameraComponent>(entity);
+        if (camera.zoom_mode == ecs::CameraComponent::ZoomMode::ZoomToMouse) {
+            auto main_viewport = Application::GetApp().getWindow()->getMainViewport().value_or(Viewport());
+            main_viewport.transToScreenCoordinates();
+            mouse_x -= main_viewport.x;
+            mouse_y -= main_viewport.y;
+            Vec3 mouse_3d_pos = rayCastPlaneZero(mouse_x, mouse_y);
+            float viewport_width = (float)main_viewport.width;
+            float viewport_height = (float)main_viewport.height;
+            Vec3 center_3d_pos = rayCastPlaneZero(viewport_width / 2.0f, viewport_height / 2.0f);
+            Vec3 displacement = mouse_3d_pos - center_3d_pos;
+            // 1. first translate to mouse_3d_pos
+            camera.pos += displacement;
+            float old_zoom = camera.zoom;
+            camera.view = glm::lookAt(camera.pos, camera.pos + camera.direction, camera.camera_up);
+            onMouseWheelUpdate(yoffset);
+
+            // 2. second translate back to original pos
+            camera.pos -= displacement / (camera.zoom / old_zoom);
+            camera.view = glm::lookAt(camera.pos, camera.pos + camera.direction, camera.camera_up);
+        }
+    }
+}
+
+Vec3 CameraSystem::rayCastPlaneZero(double mouse_x, double mouse_y)
+{
+    auto& world = ecs::World::get();
+    for (auto entity : world.entityView<ecs::CameraComponent>()) {
+        ecs::CameraComponent& camera = *world.getComponent<ecs::CameraComponent>(entity);
+        
+        // 1.  get ray direction from mouse position
+        Vec3 cam_right = camera.getRightDirection();
+        auto main_viewport = Application::GetApp().getWindow()->getMainViewport().value_or(Viewport());
+        float viewport_width = (float)main_viewport.width;
+        float viewport_height = (float)main_viewport.height;
+        // normalized the x, y coordinate and take the viewport center as origin
+        float u = 2.0f * mouse_x / viewport_width - 1.0f;
+        float v = 2.0f * mouse_y / viewport_height - 1.0f;
+        v = 1.0f - v;
+
+        float tangent = glm::tan(camera.fov / 2.0f);
+        Vec3 ray_direction = camera.direction + cam_right * tangent * u + camera.camera_up * tangent * v / (main_viewport.AspectRatio());
+        ray_direction = glm::normalize(ray_direction);
+        // 2.  solve the intersection equation of the ray and the plane: 
+        // plane_normal. dot(m_position + t * ray_direction - p0) = 0 
+        static Vec4 zero_plane = Vec4(0, 1, 0, 0);
+        Vec3 plane_normal = Vec3(zero_plane[0], zero_plane[1], zero_plane[2]);
+        Vec3 p0 = plane_normal * zero_plane[3];
+        float t = (glm::dot(plane_normal, p0) - glm::dot(plane_normal, camera.pos) / glm::dot(plane_normal, ray_direction));
+        return Vec3(camera.pos + t * ray_direction);
     }
 }
 

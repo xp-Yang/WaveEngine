@@ -28,7 +28,7 @@ void RayTracingPass::draw()
 		camera = world.getComponent<ecs::CameraComponent>(entity);
 	}
 
-	Viewport rt_viewport = Application::GetApp().getWindow()->getViewport("RayTracingView").value_or(Viewport());
+	Viewport rt_viewport = Application::GetApp().getWindow()->getViewport(ViewportType::RayTracing).value_or(Viewport());
 
 	{
 		rt_shader->start_using();

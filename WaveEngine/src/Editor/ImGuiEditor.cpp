@@ -71,7 +71,7 @@ void ImGuiEditor::renderPickingViewWindow()
         ImVec2 window_pos = ImGui::GetWindowPos();
         ImVec2 window_size = ImGui::GetWindowSize();
         Viewport viewport = { (int)window_pos.x, (int)window_pos.y, (int)window_size.x, (int)window_size.y, Viewport::Coordinates::ScreenCoordinates };
-        Application::GetApp().getWindow()->setViewport("PickingView", viewport.transToGLCoordinates());
+        Application::GetApp().getWindow()->setViewport(ViewportType::Pick, viewport.transToGLCoordinates());
     }
     ImGui::End();
 }
@@ -87,7 +87,7 @@ void ImGuiEditor::renderShadowViewWindow()
         ImVec2 window_pos = ImGui::GetWindowPos();
         ImVec2 window_size = ImGui::GetWindowSize();
         Viewport viewport = { (int)window_pos.x, (int)window_pos.y, (int)window_size.x, (int)window_size.y, Viewport::Coordinates::ScreenCoordinates };
-        Application::GetApp().getWindow()->setViewport("ShadowView", viewport.transToGLCoordinates());
+        Application::GetApp().getWindow()->setViewport(ViewportType::Shadow, viewport.transToGLCoordinates());
     }
     ImGui::End();
 }
@@ -104,7 +104,7 @@ void ImGuiEditor::renderRayTracingViewWindow()
         ImVec2 window_pos = ImGui::GetWindowPos();
         ImVec2 window_size = ImGui::GetWindowSize();
         Viewport viewport = { (int)window_pos.x, (int)window_pos.y, (int)window_size.x, (int)window_size.y, Viewport::Coordinates::ScreenCoordinates };
-        Application::GetApp().getWindow()->setViewport("RayTracingView", viewport.transToGLCoordinates());
+        Application::GetApp().getWindow()->setViewport(ViewportType::RayTracing, viewport.transToGLCoordinates());
     }
     ImGui::End();
 }

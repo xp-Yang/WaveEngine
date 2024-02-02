@@ -25,6 +25,7 @@ public:
     void init();
     void setRenderParams(const RenderParams& params);
     void render(); // deferred_render()s/forward_render();
+
 private:
     std::unique_ptr<RenderPass> m_shadow_pass;
     std::unique_ptr<RenderPass> m_gbuffer_pass;

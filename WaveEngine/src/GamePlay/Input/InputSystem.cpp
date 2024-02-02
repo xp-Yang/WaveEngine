@@ -45,7 +45,7 @@ void InputSystem::mouse_and_key_callback()
 		ecs::CameraSystem::onMouseUpdate(delta_x, delta_y, 1);
 	}
 
-	ecs::CameraSystem::onMouseWheelUpdate(io.MouseWheel);
+	ecs::CameraSystem::onMouseWheelUpdate(io.MouseWheel, xpos, ypos);
 
 	float avrg_frame_time = 1.0f / io.Framerate;
 	if (io.KeyShift)

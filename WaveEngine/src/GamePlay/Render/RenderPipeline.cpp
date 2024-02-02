@@ -26,6 +26,10 @@ void RenderPipeline::init()
 
     m_ray_tracing_pass = std::make_unique<RayTracingPass>();
     m_ray_tracing_pass->init();
+
+    static_cast<ScreenPass*>(m_screen_pass.get())->setPickView(m_picking_pass->getFrameBuffer());
+    static_cast<ScreenPass*>(m_screen_pass.get())->setShadowView(m_shadow_pass->getFrameBuffer());
+    static_cast<ScreenPass*>(m_screen_pass.get())->setRayTracingView(m_ray_tracing_pass->getFrameBuffer());
 }
 
 void RenderPipeline::setRenderParams(const RenderParams& params)

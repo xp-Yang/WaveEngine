@@ -10,6 +10,8 @@ struct CameraSystem{
 	static void onMouseUpdate(double delta_x, double delta_y, int mouse_button);
 	static void orbitRotate(Vec3 start, Vec3 end);
 	static void onMouseWheelUpdate(double yoffset);
+	static void onMouseWheelUpdate(double yoffset, double mouse_x, double mouse_y);
+	static Vec3 rayCastPlaneZero(double mouse_x, double mouse_y);
 };
 
 }
