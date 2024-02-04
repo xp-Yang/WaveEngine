@@ -164,7 +164,7 @@ void ImGuiEditor::renderGlobalController() {
         }
         ImGui::EndCombo();
     }
-    static unsigned int shadow_curr_item = 1;
+    static unsigned int shadow_curr_item = 0;
     if (ImGui::BeginCombo("Shadow Map Resolution", (std::to_string((int)std::pow(4, shadow_curr_item)) + "x").c_str())) {
         for (int i = 0; i < 3; i++) {
             bool selected = shadow_curr_item == i;

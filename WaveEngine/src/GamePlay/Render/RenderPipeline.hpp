@@ -12,7 +12,7 @@ struct RenderParams {
     PIPELINE_TYPE pipeline_type = PIPELINE_TYPE::DEFERRED;
     int     msaa_sample_count = 4;
     bool    shadow = true;
-    int     shadow_map_sample_count = 4;
+    int     shadow_map_sample_count = 1;
     // for MainCameraPass
     bool    reflection = false;
     bool    normal_debug = false;

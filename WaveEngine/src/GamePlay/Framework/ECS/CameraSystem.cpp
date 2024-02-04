@@ -189,12 +189,24 @@ void CameraSystem::onMouseWheelUpdate(double yoffset, double mouse_x, double mou
             // 1. first translate to mouse_3d_pos
             camera.pos += displacement;
             float old_zoom = camera.zoom;
-            camera.view = glm::lookAt(camera.pos, camera.pos + camera.direction, camera.camera_up);
-            onMouseWheelUpdate(yoffset);
 
-            // 2. second translate back to original pos
+            // 2. set zoom
+            camera.zoom += ecs::CameraComponent::ZoomUnit * (float)yoffset;
+            if (camera.zoom < 0.1f)
+                camera.zoom = 0.1f;
+
+            camera.fov = camera.originFov / camera.zoom;
+            if (camera.fov <= glm::radians(1.0f))
+                camera.fov = glm::radians(1.0f);
+            if (camera.fov >= glm::radians(135.0f))
+                camera.fov = glm::radians(135.0f);
+
+            // 3. second translate back to original pos
             camera.pos -= displacement / (camera.zoom / old_zoom);
+
+            // 4. set view matrix, projection matrix
             camera.view = glm::lookAt(camera.pos, camera.pos + camera.direction, camera.camera_up);
+            camera.projection = glm::perspective(camera.fov, WINDOW_WIDTH / WINDOW_HEIGHT, 0.1f, 100.0f);
         }
     }
 }
@@ -220,8 +232,8 @@ Vec3 CameraSystem::rayCastPlaneZero(double mouse_x, double mouse_y)
         ray_direction = glm::normalize(ray_direction);
         // 2.  solve the intersection equation of the ray and the plane: 
         // plane_normal. dot(m_position + t * ray_direction - p0) = 0 
-        static Vec4 zero_plane = Vec4(0, 1, 0, 0);
-        Vec3 plane_normal = Vec3(zero_plane[0], zero_plane[1], zero_plane[2]);
+        Vec3 plane_normal = Vec3(0, 1, 0);
+        Vec4 zero_plane = Vec4(plane_normal.x, plane_normal.y, plane_normal.z, 0);
         Vec3 p0 = plane_normal * zero_plane[3];
         float t = (glm::dot(plane_normal, p0) - glm::dot(plane_normal, camera.pos) / glm::dot(plane_normal, ray_direction));
         return Vec3(camera.pos + t * ray_direction);
