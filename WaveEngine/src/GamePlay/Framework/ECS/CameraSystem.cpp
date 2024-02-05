@@ -4,6 +4,9 @@
 #include <GLFW/glfw3.h>
 #include <Application_impl.hpp>
 
+#include <imgui/imgui.h>
+#include <Core/Logger.hpp>
+
 namespace ecs {
 
 void CameraSystem::onKeyUpdate(int key, float frame_time)
@@ -182,10 +185,25 @@ void CameraSystem::onMouseWheelUpdate(double yoffset, double mouse_x, double mou
             mouse_x -= main_viewport.x;
             mouse_y -= main_viewport.y;
             Vec3 mouse_3d_pos = rayCastPlaneZero(mouse_x, mouse_y);
+
+            ImGui::Begin("Mouse Ray", nullptr, ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse);
+            ImGui::NewLine();
+            ImGui::Text("mouse 2d position:");
+            std::string test_moue_2d_pos = vec3_log(Vec3(mouse_x, mouse_y, 0));
+            ImGui::Text(test_moue_2d_pos.c_str());
+            ImGui::NewLine();
+            ImGui::Text("mouse 3d position:");
+            std::string test_moue_3d_pos = vec3_log(mouse_3d_pos);
+            ImGui::Text(test_moue_3d_pos.c_str());
+            ImGui::End();
+
             float viewport_width = (float)main_viewport.width;
             float viewport_height = (float)main_viewport.height;
             Vec3 center_3d_pos = rayCastPlaneZero(viewport_width / 2.0f, viewport_height / 2.0f);
             Vec3 displacement = mouse_3d_pos - center_3d_pos;
+
+            if (yoffset == 0.0)
+                return;
             // 1. first translate to mouse_3d_pos
             camera.pos += displacement;
             float old_zoom = camera.zoom;
@@ -202,7 +220,7 @@ void CameraSystem::onMouseWheelUpdate(double yoffset, double mouse_x, double mou
                 camera.fov = glm::radians(135.0f);
 
             // 3. second translate back to original pos
-            camera.pos -= displacement / (camera.zoom / old_zoom);
+            //camera.pos -= displacement * (old_zoom / camera.zoom);
 
             // 4. set view matrix, projection matrix
             camera.view = glm::lookAt(camera.pos, camera.pos + camera.direction, camera.camera_up);
@@ -225,14 +243,15 @@ Vec3 CameraSystem::rayCastPlaneZero(double mouse_x, double mouse_y)
         // normalized the x, y coordinate and take the viewport center as origin
         float u = 2.0f * mouse_x / viewport_width - 1.0f;
         float v = 2.0f * mouse_y / viewport_height - 1.0f;
-        v = 1.0f - v;
+        v = -v;
 
         float tangent = glm::tan(camera.fov / 2.0f);
-        Vec3 ray_direction = camera.direction + cam_right * tangent * u + camera.camera_up * tangent * v / (main_viewport.AspectRatio());
+        Vec3 ray_direction = camera.direction + cam_right * tangent * u * (main_viewport.AspectRatio()) + camera.camera_up * tangent * v;
         ray_direction = glm::normalize(ray_direction);
         // 2.  solve the intersection equation of the ray and the plane: 
         // plane_normal. dot(m_position + t * ray_direction - p0) = 0 
-        Vec3 plane_normal = Vec3(0, 1, 0);
+        //`Vec3 plane_normal = Vec3(0, 1, 0);
+        Vec3 plane_normal = -camera.direction;
         Vec4 zero_plane = Vec4(plane_normal.x, plane_normal.y, plane_normal.z, 0);
         Vec3 p0 = plane_normal * zero_plane[3];
         float t = (glm::dot(plane_normal, p0) - glm::dot(plane_normal, camera.pos) / glm::dot(plane_normal, ray_direction));

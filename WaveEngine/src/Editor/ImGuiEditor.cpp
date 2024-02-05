@@ -40,7 +40,7 @@ void ImGuiEditor::render()
 void ImGuiEditor::renderMainViewWindow()
 {
     static ImGuiWindowFlags window_flags = 0;
-    ImGui::SetNextWindowSize(ImVec2(1280, 720), ImGuiCond_Appearing);
+    ImGui::SetNextWindowSize(ImVec2(1280, 720 + 20), ImGuiCond_Appearing);
     if (ImGui::Begin("MainView", nullptr, window_flags | ImGuiWindowFlags_NoBackground)) {
         ImGuiWindow* window = ImGui::GetCurrentWindow();
         bool hovered_window = ImGui::IsWindowHovered() && ImGui::IsMouseHoveringRect(window->InnerRect.Min, window->InnerRect.Max);
@@ -48,7 +48,7 @@ void ImGuiEditor::renderMainViewWindow()
         ImGui::GetIO().WantPassThroughMouse = hovered_window && !ImGuizmo::IsUsing();
         ImVec2 window_pos = ImGui::GetWindowPos();
         ImVec2 window_size = ImGui::GetWindowSize();
-        Viewport viewport = { (int)window_pos.x, (int)window_pos.y, (int)window_size.x, (int)window_size.y, Viewport::Coordinates::ScreenCoordinates };
+        Viewport viewport = { (int)window_pos.x, (int)window_pos.y + 20, (int)window_size.x, (int)window_size.y - 20, Viewport::Coordinates::ScreenCoordinates };
         ImGuizmo::SetOrthographic(true);
         ImGuizmo::SetDrawlist();
         // ImGuizmoµÄ»æÖÆ·¶Î§ÊÇmain viewport
