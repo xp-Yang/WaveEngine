@@ -45,12 +45,10 @@ void MainCameraPass::draw()
     glm::mat4 camera_view = glm::mat4(1.0f);
     glm::mat4 camera_projection;
     Vec3 camera_pos;
-    for (auto entity : world.entityView<ecs::CameraComponent>()) {
-        ecs::CameraComponent& camera = *world.getComponent<ecs::CameraComponent>(entity);
-        camera_view = camera.view;
-        camera_projection = camera.projection;
-        camera_pos = camera.pos;
-    }
+    ecs::CameraComponent& camera = *world.getMainCameraComponent();
+    camera_view = camera.view;
+    camera_projection = camera.projection;
+    camera_pos = camera.pos;
 
     unsigned int skybox_texture_id = -1;
     auto skybox_view = camera_view;
@@ -140,11 +138,9 @@ void MainCameraPass::draw()
 
     //    glm::mat4 camera_view = glm::mat4(1.0f);
     //    glm::mat4 camera_projection;
-    //    for (auto entity : world.entityView<ecs::CameraComponent>()) {
-    //        ecs::CameraComponent& camera = *world.getComponent<ecs::CameraComponent>(entity);
+    //        ecs::CameraComponent& camera = *world.getMainCameraComponent();
     //        camera_view = camera.view;
     //        camera_projection = camera.projection;
-    //    }
 
     //    for (auto entity : world.entityView<ecs::PickedComponent, ecs::RenderableComponent, ecs::TransformComponent>()) {
     //        auto& renderable = *world.getComponent<ecs::RenderableComponent>(entity);
@@ -201,11 +197,9 @@ void MainCameraPass::draw()
         auto& world = ecs::World::get();
         glm::mat4 camera_view;
         glm::mat4 camera_projection;
-        for (auto entity : world.entityView<ecs::CameraComponent>()) {
-            ecs::CameraComponent& camera = *world.getComponent<ecs::CameraComponent>(entity);
-            camera_view = camera.view;
-            camera_projection = camera.projection;
-        }
+        ecs::CameraComponent& camera = *world.getMainCameraComponent();
+        camera_view = camera.view;
+        camera_projection = camera.projection;
 
         normal_shader->start_using();
         normal_shader->setMatrix("view", 1, camera_view);
@@ -230,11 +224,9 @@ void MainCameraPass::draw()
         auto& world = ecs::World::get();
         glm::mat4 camera_view;
         glm::mat4 camera_projection;
-        for (auto entity : world.entityView<ecs::CameraComponent>()) {
-            ecs::CameraComponent& camera = *world.getComponent<ecs::CameraComponent>(entity);
-            camera_view = camera.view;
-            camera_projection = camera.projection;
-        }
+        ecs::CameraComponent& camera = *world.getMainCameraComponent();
+        camera_view = camera.view;
+        camera_projection = camera.projection;
 
         wireframe_shader->start_using();
         wireframe_shader->setMatrix("view", 1, camera_view);

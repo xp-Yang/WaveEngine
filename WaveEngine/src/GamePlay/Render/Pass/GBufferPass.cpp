@@ -26,11 +26,9 @@ void GBufferPass::draw()
 
     glm::mat4 camera_view = glm::mat4(1.0f);
     glm::mat4 camera_projection;
-    for (auto entity : world.entityView<ecs::CameraComponent>()) {
-        ecs::CameraComponent& camera = *world.getComponent<ecs::CameraComponent>(entity);
-        camera_view = camera.view;
-        camera_projection = camera.projection;
-    }
+    ecs::CameraComponent& camera = *world.getMainCameraComponent();
+    camera_view = camera.view;
+    camera_projection = camera.projection;
 
     for (auto entity : world.entityView<ecs::RenderableComponent, ecs::TransformComponent>()) {
         if (world.hasComponent<ecs::LightComponent>(entity))

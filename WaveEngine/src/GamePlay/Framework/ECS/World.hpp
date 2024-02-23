@@ -7,20 +7,27 @@
 namespace ecs{
 
 const int MAX_ENTITIES = 512;
-const int MAX_COMPONENTS = 128;
+const int MAX_COMPONENTS = 32;
 typedef std::bitset<MAX_COMPONENTS> ComponentMask;
 
 // TODO 实现Entity UUID
+// 每个Entity保存一份bitset，大小是MAX_COMPONENTS。标记了该Entity有没有某种类型的Component数据
+// World保存Entitys数组
 class Entity {
 public:
     Entity() = delete;
     Entity(int id) { m_id = id; }
     int getId() const { return m_id; }
+    ComponentMask& getMask() { return m_mask; }
+    const ComponentMask& getMask() const { return m_mask; }
 
 private:
     int m_id;
+    ComponentMask m_mask;
 };
 
+// 每个Pool保存相同类型的Component数组，数组大小是MAX_ENTITIES个。
+// World保存Pools数组
 class ComponentPool
 {
 public:
@@ -46,14 +53,16 @@ public:
 };
 
 // TODO 更改实现，有bug：get的不一定是已创建
+// 为每个Pool分配id。由于每个Pool保存的都是同一类型的Component，这里用了hack: template<class T> 和 static 变量，使得只有不同的Pool才会初始化一次id
 extern int g_componentCounter;
 template <class T>
-int getComponentId()
+int getComponentPoolId()
 {
-    static int componentId = g_componentCounter++;
-    return componentId;
+    static int componentPoolId = g_componentCounter++;
+    return componentPoolId;
 }
 
+class CameraComponent;
 template<typename... ComponentTypes> class EnttView;
 class World {
 public:
@@ -67,9 +76,8 @@ public:
     ecs::Entity create_entity()
     {
         static int entt_id = 0;
-        ecs::Entity entt(entt_id++);
-        m_entities.push_back({ entt, ComponentMask() });
-        return m_entities.back().entity;
+        m_entities.emplace_back(entt_id++);
+        return m_entities.back();
     }
 
     void detroy_entity(const ecs::Entity& entity);
@@ -77,9 +85,9 @@ public:
     template<typename T>
     bool hasComponent(ecs::Entity entity)
     {
-        int id = entity.getId();
-        int component_id = getComponentId<T>();
-        if (!m_entities[id].mask.test(component_id))
+        int entt_id = entity.getId();
+        int pool_id = getComponentPoolId<T>();
+        if (!m_entities[entt_id].getMask().test(pool_id))
             return false;
         return true;
     }
@@ -87,30 +95,30 @@ public:
     template<typename T>
     T* getComponent(ecs::Entity entity) 
     {
-        int id = entity.getId();
+        int entt_id = entity.getId();
 
-        int component_id = getComponentId<T>();
-        if (!m_entities[id].mask.test(component_id))
+        int pool_id = getComponentPoolId<T>();
+        if (!m_entities[entt_id].getMask().test(pool_id))
             return nullptr;
 
-        T* component = static_cast<T*>(m_component_pools[component_id]->get(id));
+        T* component = static_cast<T*>(m_component_pools[pool_id]->get(entt_id));
         return component;
     }
 
     template<typename T>
     T& addComponent(ecs::Entity entity) 
     {
-        int id = entity.getId();
+        int entt_id = entity.getId();
 
-        int component_id = getComponentId<T>();
-        m_entities[id].mask.set(component_id);
+        int pool_id = getComponentPoolId<T>();
+        m_entities[entt_id].getMask().set(pool_id);
 
-        if (component_id >= m_component_pools.size()) {
+        if (pool_id >= m_component_pools.size()) {
             m_component_pools.push_back(new ComponentPool(sizeof(T)));
         }
 
         // Looks up the component in the pool, and initializes it with placement new
-        T* component = new (m_component_pools[component_id]->get(id)) T();
+        T* component = new (m_component_pools[pool_id]->get(entt_id)) T();
         return *component;
     }
 
@@ -119,11 +127,11 @@ public:
     {
         int id = entity.getId();
 
-        int component_id = getComponentId<T>();
-        m_entities[id].mask.reset(component_id);
+        int pool_id = getComponentPoolId<T>();
+        m_entities[id].getMask().reset(pool_id);
 
         // 池中都没这个component
-        if (component_id >= m_component_pools.size()) {
+        if (pool_id >= m_component_pools.size()) {
             return;
         }
         else {
@@ -138,24 +146,15 @@ public:
         return EnttView<ComponentTypes ...>();
     }
 
-private:
-    struct EntityDesc
-    {
-        Entity entity;
-        ComponentMask mask;
-    };
+    CameraComponent* getMainCameraComponent();
 
-    std::vector<EntityDesc> m_entities;
-    std::vector<ComponentPool*> m_component_pools;
-
-public:
-    const std::vector<EntityDesc>& getAllEntities() {
+    const std::vector<Entity>& getAllEntities() const {
         return m_entities;
     }
 
-    const std::vector<ComponentPool*>& getAllComponentPools() {
-        return m_component_pools;
-    }
+private:
+    std::vector<Entity> m_entities;
+    std::vector<ComponentPool*> m_component_pools;
 
 private:
     World() = default;
@@ -167,32 +166,32 @@ template<typename... ComponentTypes>
 class EnttView {
 public:
     EnttView()
+        : world(&World::get())
     {
-        world = &World::get();
         if (sizeof...(ComponentTypes) == 0)
-            all = true;
+            view_all = true;
         else
         {
             // Unpack the template parameters into an initializer list
-            int componentIds[] = { 0, getComponentId<ComponentTypes>() ... };
+            int poolIds[] = { 0, getComponentPoolId<ComponentTypes>() ... };
             for (int i = 1; i < (sizeof...(ComponentTypes) + 1); i++)
-                m_mask.set(componentIds[i]);
+                view_mask.set(poolIds[i]);
         }
     }
 
     class Iter {
     public:
-        Iter(World* _world, int entity_id, ComponentMask mask, bool all)
-            : world(_world), entity_id(entity_id), mask(mask), all(all) {}
+        Iter(const EnttView* entt_view, int entity_idx)
+            : entt_view_ref(entt_view), entity_idx(entity_idx) {}
 
         Entity operator*() {
-            return world->getAllEntities()[entity_id].entity;
+            return entt_view_ref->world->getAllEntities()[entity_idx];
         }
 
         Iter& operator++() {
-            entity_id++;
-            for (; entity_id < world->getAllEntities().size(); entity_id++) {
-                if (mask == (world->getAllEntities()[entity_id].mask & mask))
+            entity_idx++;
+            for (; entity_idx < entt_view_ref->world->getAllEntities().size(); entity_idx++) {
+                if (entt_view_ref->view_mask == (entt_view_ref->world->getAllEntities()[entity_idx].getMask() & entt_view_ref->view_mask))
                     break;
             }
             return *this;
@@ -200,43 +199,50 @@ public:
 
         Iter operator++(int) {
             Iter tmp = *this;
-            ++* this;
+            ++ *this;
             return tmp;
         }
 
         bool operator==(const Iter& another) const {
-            return entity_id == another.entity_id;
+            return entity_idx == another.entity_idx;
         }
 
         bool operator!=(const Iter& another) const {
-            return entity_id != another.entity_id;
+            return entity_idx != another.entity_idx;
         }
 
-        int entity_id;
-        ecs::World* world;
-        ComponentMask mask;
-        bool all{ false };
+        int entity_idx;
+        const EnttView* entt_view_ref{ nullptr };
     };
 
     const Iter begin() const
     {
         int i = 0;
-        for (i = 0; i < world->getAllEntities().size(); i++) {
-            if ((world->getAllEntities()[i].mask & m_mask) == m_mask)
+        const auto& all_entities = world->getAllEntities();
+        for (i = 0; i < all_entities.size(); i++) {
+            if ((all_entities[i].getMask() & view_mask) == view_mask)
                 break;
         }
-        return Iter(world, i, m_mask, all);
+        // 如果没找到
+        if (i == all_entities.size()) {
+            return end();
+        }
+        return Iter(this, i);
     }
 
     const Iter end() const
     {
         // 配合operator++()
-        return Iter(world, (int)world->getAllEntities().size(), m_mask, all);
+        return Iter(this, (int)world->getAllEntities().size());
     }
 
-    ecs::World* world{ nullptr };
-    ComponentMask m_mask;
-    bool all{ false };
+private:
+    World* world{ nullptr };
+    // 模板参数要查看的Component类型
+    ComponentMask view_mask;
+    bool view_all{ false };
+
+    friend class Iter;
 };
 
 }

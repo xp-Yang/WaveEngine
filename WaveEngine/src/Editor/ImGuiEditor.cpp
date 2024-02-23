@@ -193,29 +193,26 @@ void ImGuiEditor::renderCameraController()
     ImGui::Begin("Camera Controller", nullptr, ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse);
 
     auto& world = ecs::World::get();
+    auto& camera = *world.getMainCameraComponent();
+    ImGui::NewLine();
+    ImGui::Text("view matrix:");
+    std::string test_view = matrix_log(camera.view);
+    ImGui::Text(test_view.c_str());
 
-    for (auto entity : world.entityView<ecs::CameraComponent>()) {
-        auto& camera = *world.getComponent<ecs::CameraComponent>(entity);
-        ImGui::NewLine();
-        ImGui::Text("view matrix:");
-        std::string test_view = matrix_log(camera.view);
-        ImGui::Text(test_view.c_str());
+    ImGui::NewLine();
+    ImGui::Text("inverse view matrix:");
+    std::string inverse_view = matrix_log(glm::inverse(camera.view));
+    ImGui::Text(inverse_view.c_str());
 
-        ImGui::NewLine();
-        ImGui::Text("inverse view matrix:");
-        std::string inverse_view = matrix_log(glm::inverse(camera.view));
-        ImGui::Text(inverse_view.c_str());
+    ImGui::NewLine();
+    ImGui::Text("camera position:");
+    std::string test_camera_pos = vec3_log(camera.pos);
+    ImGui::Text(test_camera_pos.c_str());
 
-        ImGui::NewLine();
-        ImGui::Text("camera position:");
-        std::string test_camera_pos = vec3_log(camera.pos);
-        ImGui::Text(test_camera_pos.c_str());
-
-        ImGui::NewLine();
-        ImGui::Text("camera direction:");
-        std::string test_camera_dir = vec3_log(camera.direction);
-        ImGui::Text(test_camera_dir.c_str());
-    }
+    ImGui::NewLine();
+    ImGui::Text("camera direction:");
+    std::string test_camera_dir = vec3_log(camera.direction);
+    ImGui::Text(test_camera_dir.c_str());
     ImGui::End();
 }
 
@@ -223,11 +220,6 @@ void ImGuiEditor::renderPickedEntityController()
 {
     // TODO 考虑对材质的编辑放入MaterialSystem
     auto& world = ecs::World::get();
-
-    ecs::CameraComponent* camera = nullptr;
-    for (auto entity : world.entityView<ecs::CameraComponent>()) {
-        camera = world.getComponent<ecs::CameraComponent>(entity);
-    }
 
     for (auto entity : world.entityView<ecs::NameComponent, ecs::PickedComponent, ecs::RenderableComponent, ecs::TransformComponent>()) {
         auto& renderable = *world.getComponent<ecs::RenderableComponent>(entity);
@@ -324,10 +316,7 @@ void ImGuiEditor::renderGizmos()
     }
 
     auto& world = ecs::World::get();
-    ecs::CameraComponent* camera = nullptr;
-    for (auto entity : world.entityView<ecs::CameraComponent>()) {
-        camera = world.getComponent<ecs::CameraComponent>(entity);
-    }
+    ecs::CameraComponent* camera = world.getMainCameraComponent();
     ecs::TransformComponent* transform_component = nullptr;
     for (auto entity : world.entityView<ecs::NameComponent, ecs::PickedComponent, ecs::RenderableComponent, ecs::TransformComponent>()) {
         transform_component = world.getComponent<ecs::TransformComponent>(entity);

@@ -23,10 +23,7 @@ void RayTracingPass::draw()
 	std::string resource_dir = RESOURCE_DIR;
 	static Shader* rt_shader = new Shader(resource_dir + "/shader/RayTracing.vs", resource_dir + "/shader/RayTracing.fs");
 	auto& world = ecs::World::get();
-	ecs::CameraComponent* camera = nullptr;
-	for (auto entity : world.entityView<ecs::CameraComponent>()) {
-		camera = world.getComponent<ecs::CameraComponent>(entity);
-	}
+	ecs::CameraComponent* camera = world.getMainCameraComponent();
 
 	Viewport rt_viewport = Application::GetApp().getWindow()->getViewport(ViewportType::RayTracing).value_or(Viewport());
 

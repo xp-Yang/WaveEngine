@@ -11,6 +11,7 @@
 
 namespace ecs {
 
+
 struct NameComponent {
     std::string name;
 };
@@ -31,6 +32,7 @@ struct TransformComponent {
 	}
 
 	// TODO Ð´¸ödecomposition ºÍ composition
+	void decomposition() {}
 };
 
 struct CameraComponent {
@@ -82,6 +84,10 @@ struct CameraComponent {
 		return camera_up;
 	}
 };
+inline const float CameraComponent::CameraMovementSpeed = 20.0f;
+inline const float CameraComponent::Sensitivity = 0.01f;
+inline const float CameraComponent::ZoomUnit = 0.1f;
+inline Vec3 CameraComponent::global_up = Vec3(0.0f, 1.0f, 0.0f);
 
 enum class PrimitiveType {
 	POINTS         = 0,

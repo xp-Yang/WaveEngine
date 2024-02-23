@@ -39,12 +39,10 @@ void LightingPass::draw()
 	Vec3 camera_pos;
 	glm::mat4 camera_view = glm::mat4(1.0f);
 	glm::mat4 camera_projection;
-	for (auto entity : world.entityView<ecs::CameraComponent>()) {
-		ecs::CameraComponent& camera = *world.getComponent<ecs::CameraComponent>(entity);
-		camera_pos = camera.pos;
-		camera_view = camera.view;
-		camera_projection = camera.projection;
-	}
+	ecs::CameraComponent& camera = *world.getMainCameraComponent();
+	camera_pos = camera.pos;
+	camera_view = camera.view;
+	camera_projection = camera.projection;
 	lighting_shader->setFloat3("view_pos", camera_pos);
 	glm::mat4 light_ref_matrix;
 	int k = 0;
