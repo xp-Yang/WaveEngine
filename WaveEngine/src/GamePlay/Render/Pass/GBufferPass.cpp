@@ -24,8 +24,8 @@ void GBufferPass::draw()
 
     auto& world = ecs::World::get();
 
-    glm::mat4 camera_view = glm::mat4(1.0f);
-    glm::mat4 camera_projection;
+    Mat4 camera_view = Mat4(1.0f);
+    Mat4 camera_projection;
     ecs::CameraComponent& camera = *world.getMainCameraComponent();
     camera_view = camera.view;
     camera_projection = camera.projection;

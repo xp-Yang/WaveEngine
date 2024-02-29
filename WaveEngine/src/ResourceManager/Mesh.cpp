@@ -323,13 +323,13 @@ Mesh Mesh::create_icosphere_mesh(int regression_depth) {
     std::vector<Vertex> all_vertices;
     for (auto& triangle : m_triangles) {
         for (auto& vertex : triangle.vertices) {
-            vertex = m_center + glm::normalize(vertex - m_center);
+            vertex = m_center + normalize(vertex - m_center);
         }
         for (auto& vertex : triangle.vertices) {
             //Vec3 a = triangle.vertices[0] - triangle.vertices[1];
             //Vec3 b = triangle.vertices[0] - triangle.vertices[2];
-            //Vec3 normal = glm::normalize(glm::cross(a, b));
-            Vec3 normal = glm::normalize(vertex - m_center);
+            //Vec3 normal = normalize(cross(a, b));
+            Vec3 normal = normalize(vertex - m_center);
 
             Vertex v;
             v.position = vertex;
@@ -354,7 +354,7 @@ Mesh Mesh::create_quad_mesh(const Point3& origin, const Vec3& positive_dir_u, co
     std::vector<Vertex> vertices;
     std::vector<unsigned int> indices;
 
-    Vec3 normal = glm::normalize(glm::cross(positive_dir_u, positive_dir_v));
+    Vec3 normal = normalize(cross(positive_dir_u, positive_dir_v));
     Point3 origin_p = origin;
     Point3 right_p = origin_p + positive_dir_u;
     Point3 upper_right_p = origin_p + positive_dir_u + positive_dir_v;

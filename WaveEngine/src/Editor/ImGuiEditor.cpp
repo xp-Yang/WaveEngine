@@ -1,6 +1,5 @@
 #include "ImGuiEditor.hpp"
 #include <string>
-#include <glm/glm.hpp>
 #include <imgui/imgui.h>
 #include <imgui/imgui_internal.h>
 #include <imgui/ImGuizmo.h>
@@ -324,7 +323,7 @@ void ImGuiEditor::renderGizmos()
     }
 
     if (camera && transform_component) {
-        glm::mat4 model_matrix = transform_component->transform();
+        Mat4 model_matrix = transform_component->transform();
         ImGuizmo::Manipulate((float*)(&camera->view), (float*)(&camera->projection), imguizmo_operation, ImGuizmo::LOCAL, (float*)(&model_matrix), NULL, NULL, NULL, NULL);
         float matrixTranslation[3], matrixRotation[3], matrixScale[3];
         ImGuizmo::DecomposeMatrixToComponents((float*)&model_matrix, matrixTranslation, matrixRotation, matrixScale);

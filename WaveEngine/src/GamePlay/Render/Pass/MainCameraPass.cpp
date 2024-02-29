@@ -42,8 +42,8 @@ void MainCameraPass::draw()
     glEnable(GL_DEPTH_TEST);
     auto& world = ecs::World::get();
 
-    glm::mat4 camera_view = glm::mat4(1.0f);
-    glm::mat4 camera_projection;
+    Mat4 camera_view = Mat4(1.0f);
+    Mat4 camera_projection;
     Vec3 camera_pos;
     ecs::CameraComponent& camera = *world.getMainCameraComponent();
     camera_view = camera.view;
@@ -53,7 +53,7 @@ void MainCameraPass::draw()
     unsigned int skybox_texture_id = -1;
     auto skybox_view = camera_view;
     for (auto entity : world.entityView<ecs::SkyboxComponent>()) {
-        skybox_view = glm::mat4(glm::mat3(skybox_view));
+        skybox_view = Mat4(Mat3(skybox_view));
         skybox_texture_id = world.getComponent<ecs::SkyboxComponent>(entity)->texture;
     }
 
@@ -96,7 +96,7 @@ void MainCameraPass::draw()
             primitives_count++;
 
             //这里的循环造成了卡顿，需要deferred rendering解决
-            glm::mat4 light_ref_matrix;
+            Mat4 light_ref_matrix;
             int k = 0;
             for (auto entity : world.entityView<ecs::LightComponent>()) {
                 auto& transform = *world.getComponent<ecs::TransformComponent>(entity);
@@ -136,8 +136,8 @@ void MainCameraPass::draw()
 
     //    auto& world = ecs::World::get();
 
-    //    glm::mat4 camera_view = glm::mat4(1.0f);
-    //    glm::mat4 camera_projection;
+    //    Mat4 camera_view = Mat4(1.0f);
+    //    Mat4 camera_projection;
     //        ecs::CameraComponent& camera = *world.getMainCameraComponent();
     //        camera_view = camera.view;
     //        camera_projection = camera.projection;
@@ -177,8 +177,8 @@ void MainCameraPass::draw()
     //        glStencilMask(0x00);
 
     //        border_shader->start_using();
-    //        auto scale = glm::scale(glm::mat4(1.0f), Vec3(1.05f));
-    //        border_shader->setMatrix("model", 1, model_matrix.transform() * scale * glm::mat4(1.0f));
+    //        auto scale = glm::scale(Mat4(1.0f), Vec3(1.05f));
+    //        border_shader->setMatrix("model", 1, model_matrix.transform() * scale * Mat4(1.0f));
     //        border_shader->setMatrix("view", 1, camera_view);
     //        border_shader->setMatrix("projection", 1, camera_projection);
     //        for (int i = 0; i < renderable.primitives.size(); i++) {
@@ -195,8 +195,8 @@ void MainCameraPass::draw()
         static Shader* normal_shader = new Shader(resource_dir + "/shader/model.vs", resource_dir + "/shader/normal.fs", resource_dir + "/shader/normal.gs");
 
         auto& world = ecs::World::get();
-        glm::mat4 camera_view;
-        glm::mat4 camera_projection;
+        Mat4 camera_view;
+        Mat4 camera_projection;
         ecs::CameraComponent& camera = *world.getMainCameraComponent();
         camera_view = camera.view;
         camera_projection = camera.projection;
@@ -222,8 +222,8 @@ void MainCameraPass::draw()
         static Shader* wireframe_shader = new Shader(resource_dir + "/shader/model.vs", resource_dir + "/shader/wireframe.fs", resource_dir + "/shader/wireframe.gs");
 
         auto& world = ecs::World::get();
-        glm::mat4 camera_view;
-        glm::mat4 camera_projection;
+        Mat4 camera_view;
+        Mat4 camera_projection;
         ecs::CameraComponent& camera = *world.getMainCameraComponent();
         camera_view = camera.view;
         camera_projection = camera.projection;

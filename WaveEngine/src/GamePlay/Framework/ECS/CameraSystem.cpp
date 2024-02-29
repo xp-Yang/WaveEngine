@@ -64,14 +64,14 @@ void CameraSystem::onMouseUpdate(double delta_x, double delta_y, int mouse_butto
     ecs::CameraComponent& camera = *p_camera;
     if (camera.mode == ecs::CameraComponent::Mode::Orbit) {
         if (mouse_button == 0) {
-            auto rotate_Y = glm::rotate(glm::mat4(1.0f), -(float)(0.3f * delta_x * ecs::CameraComponent::Sensitivity), ecs::CameraComponent::global_up);
+            auto rotate_Y = glm::rotate(Mat4(1.0f), -(float)(0.3f * delta_x * ecs::CameraComponent::Sensitivity), ecs::CameraComponent::global_up);
             camera.pos = rotate_Y * Vec4(camera.pos, 1.0f);
             camera.direction = rotate_Y * Vec4(camera.direction, 1.0f);
-            camera.direction = glm::normalize(camera.direction);
+            camera.direction = normalize(camera.direction);
             camera.camera_up = Vec3(rotate_Y * Vec4(camera.camera_up, 1.0f));
 
             auto camera_right = camera.getRightDirection();
-            auto rotate_x = glm::rotate(glm::mat4(1.0f), (float)(0.3f * delta_y * ecs::CameraComponent::Sensitivity), camera_right);
+            auto rotate_x = glm::rotate(Mat4(1.0f), (float)(0.3f * delta_y * ecs::CameraComponent::Sensitivity), camera_right);
             camera.pos = rotate_x * Vec4(camera.pos, 1.0f);
             camera.direction = rotate_x * Vec4(camera.direction, 1.0f);
             camera.camera_up = Vec3(rotate_x * Vec4(camera.camera_up, 1.0f));
@@ -102,13 +102,13 @@ void CameraSystem::onMouseUpdate(double delta_x, double delta_y, int mouse_butto
                 camera.fps_params.pitch = -89.0f;
 
             // update direction
-            camera.direction.x = cos(glm::radians(camera.fps_params.pitch)) * sin(glm::radians(camera.fps_params.yaw));
-            camera.direction.y = sin(glm::radians(camera.fps_params.pitch));
-            camera.direction.z = -cos(glm::radians(camera.fps_params.pitch)) * cos(glm::radians(camera.fps_params.yaw));
+            camera.direction.x = cos(deg2rad(camera.fps_params.pitch)) * sin(deg2rad(camera.fps_params.yaw));
+            camera.direction.y = sin(deg2rad(camera.fps_params.pitch));
+            camera.direction.z = -cos(deg2rad(camera.fps_params.pitch)) * cos(deg2rad(camera.fps_params.yaw));
             
-            camera.camera_up.x = sin(glm::radians(camera.fps_params.pitch)) * sin(glm::radians(camera.fps_params.yaw));
-            camera.camera_up.y = cos(glm::radians(camera.fps_params.pitch));
-            camera.camera_up.z = -sin(glm::radians(camera.fps_params.pitch)) * cos(glm::radians(camera.fps_params.yaw));
+            camera.camera_up.x = sin(deg2rad(camera.fps_params.pitch)) * sin(deg2rad(camera.fps_params.yaw));
+            camera.camera_up.y = cos(deg2rad(camera.fps_params.pitch));
+            camera.camera_up.z = -sin(deg2rad(camera.fps_params.pitch)) * cos(deg2rad(camera.fps_params.yaw));
 
             camera.view = glm::lookAt(camera.pos, camera.pos + camera.direction, camera.camera_up);
         }
@@ -124,10 +124,10 @@ void CameraSystem::orbitRotate(Vec3 start, Vec3 end)
     ecs::CameraComponent& camera = *p_camera;
 
     // 计算旋转角度角度
-    float angle = acos(fmin(1.0f, glm::dot(start, end)));
+    float angle = acos(fmin(1.0f, dot(start, end)));
     // 计算旋转轴
-    Vec3 rotate_axis = glm::normalize(glm::cross(start, end));
-    //Vec3 world_rotate_axis = glm::inverse(glm::mat3(camera.view)) * rotate_axis;
+    Vec3 rotate_axis = normalize(cross(start, end));
+    //Vec3 world_rotate_axis = glm::inverse(Mat3(camera.view)) * rotate_axis;
     
     // 用四元数表示旋转
     //glm::quat rotateMat = glm::quat(cos(angle / 2),
@@ -135,7 +135,7 @@ void CameraSystem::orbitRotate(Vec3 start, Vec3 end)
     //    world_rotate_axis.y * sin(angle / 2),
     //    world_rotate_axis.z * sin(angle / 2));
     
-    glm::mat4 rotate_mat = glm::rotate(glm::mat4(1.0f), angle, rotate_axis);
+    Mat4 rotate_mat = glm::rotate(Mat4(1.0f), angle, rotate_axis);
 
     camera.pos = rotate_mat * Vec4(camera.pos, 1.0f);
     camera.direction = rotate_mat * Vec4(camera.direction, 1.0f);
@@ -152,10 +152,10 @@ void CameraSystem::onMouseWheelUpdate(double yoffset)
         camera.zoom = 0.1f;
 
     camera.fov = camera.originFov / camera.zoom;
-    if (camera.fov <= glm::radians(1.0f))
-        camera.fov = glm::radians(1.0f);
-    if (camera.fov >= glm::radians(135.0f))
-        camera.fov = glm::radians(135.0f);
+    if (camera.fov <= deg2rad(1.0f))
+        camera.fov = deg2rad(1.0f);
+    if (camera.fov >= deg2rad(135.0f))
+        camera.fov = deg2rad(135.0f);
     camera.projection = glm::perspective(camera.fov, WINDOW_WIDTH / WINDOW_HEIGHT, 0.1f, 100.0f);
 }
 
@@ -201,10 +201,10 @@ void CameraSystem::onMouseWheelUpdate(double yoffset, double mouse_x, double mou
             camera.zoom = 0.1f;
 
         camera.fov = camera.originFov / camera.zoom;
-        if (camera.fov <= glm::radians(1.0f))
-            camera.fov = glm::radians(1.0f);
-        if (camera.fov >= glm::radians(135.0f))
-            camera.fov = glm::radians(135.0f);
+        if (camera.fov <= deg2rad(1.0f))
+            camera.fov = deg2rad(1.0f);
+        if (camera.fov >= deg2rad(135.0f))
+            camera.fov = deg2rad(135.0f);
 
         // 3. second translate back to original pos
         //camera.pos -= displacement * (old_zoom / camera.zoom);
@@ -232,14 +232,14 @@ Vec3 CameraSystem::rayCastPlaneZero(double mouse_x, double mouse_y)
 
     float tangent = glm::tan(camera.fov / 2.0f);
     Vec3 ray_direction = camera.direction + cam_right * tangent * u * (main_viewport.AspectRatio()) + camera.camera_up * tangent * v;
-    ray_direction = glm::normalize(ray_direction);
+    ray_direction = normalize(ray_direction);
     // 2.  solve the intersection equation of the ray and the plane: 
     // plane_normal. dot(m_position + t * ray_direction - p0) = 0 
     //`Vec3 plane_normal = Vec3(0, 1, 0);
     Vec3 plane_normal = -camera.direction;
     Vec4 zero_plane = Vec4(plane_normal.x, plane_normal.y, plane_normal.z, 0);
     Vec3 p0 = plane_normal * zero_plane[3];
-    float t = (glm::dot(plane_normal, p0) - glm::dot(plane_normal, camera.pos) / glm::dot(plane_normal, ray_direction));
+    float t = (dot(plane_normal, p0) - dot(plane_normal, camera.pos) / dot(plane_normal, ray_direction));
     return Vec3(camera.pos + t * ray_direction);
 }
 

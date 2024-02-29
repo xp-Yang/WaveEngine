@@ -1,6 +1,7 @@
 #ifndef Shader_hpp
 #define Shader_hpp
 #include "Core/Vector.hpp"
+#include "Core/Matrix.hpp"
 #include <string>
 
 class Shader{
@@ -18,7 +19,7 @@ public:
 	void setFloat4(const std::string& name, float value1, float value2, float value3, float value4) const;
 	void setFloat4(const std::string& name, const Vec4& value) const;
 	void setFloat3(const std::string& name, const Vec3& value) const;
-	void setMatrix(const std::string& name, int count, const glm::mat4& mat_value) const;
+	void setMatrix(const std::string& name, int count, const Mat4& mat_value) const;
 	void setTexture(const std::string& name, int texture_unit, unsigned int texture_id) const;
 	void setCubeTexture(const std::string& name, int texture_unit, unsigned int texture_id) const;
 

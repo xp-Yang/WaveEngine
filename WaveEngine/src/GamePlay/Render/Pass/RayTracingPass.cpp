@@ -46,7 +46,7 @@ void RayTracingPass::draw()
 		//Vec3 leftbottom = camera->pos + camera->focal_length * camera->direction - width / 2.0f * camera->getRightDirection() - height / 2.0f * camera->getUpDirection();
 
 		// random
-		rt_shader->setFloat("randOrigin", 674764.0f * (MathUtils::randomUnit() + 1.0f));
+		rt_shader->setFloat("randOrigin", 674764.0f * (Core::randomUnit() + 1.0f));
 		// render to m_framebuffer
 		Renderer::drawIndex(*rt_shader, m_screen_quad.get_VAO(), m_screen_quad.get_indices_count());
 	}

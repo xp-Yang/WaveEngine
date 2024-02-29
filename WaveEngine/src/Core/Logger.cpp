@@ -1,6 +1,6 @@
 #include "Logger.hpp"
 
-std::string matrix_log(const glm::mat4 mat)
+std::string matrix_log(const Mat4 mat)
 {
     std::string result;
     char buf[1024];
@@ -21,7 +21,7 @@ std::string matrix_log(const glm::mat4 mat)
     return result;
 }
 
-std::string vec3_log(const glm::vec3 vec) {
+std::string vec3_log(const Vec3 vec) {
     std::string result;
     char buf[1024];
     sprintf_s(buf, "%.3f %.3f %.3f \n", vec.x, vec.y, vec.z);

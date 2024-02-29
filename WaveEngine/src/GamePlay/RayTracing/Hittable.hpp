@@ -24,7 +24,7 @@ public:
     // equation: ||(origin + t * (dir) - center)|| = radius
 	float hit(const RayCast& ray) override {
         Vec3 oc = ray.origin() - m_center;
-        auto a = glm::dot(ray.direction(), ray.direction());
+        auto a = dot(ray.direction(), ray.direction());
         auto b = 2.0 * dot(oc, ray.direction());
         auto c = dot(oc, oc) - m_radius * m_radius;
         auto discriminant = b * b - 4 * a * c;
