@@ -24,7 +24,8 @@ void Mesh::build() {
 void Mesh::reset()
 {
     // TODO这个类应该是opengl mesh封装类，真正的mesh类应该只调用rhi
-    glDeleteVertexArrays(1, &m_VAO);
+    if (m_VAO)
+        glDeleteVertexArrays(1, &m_VAO);
     m_vertices.clear();
     m_indices.clear();
 }
@@ -380,6 +381,36 @@ Mesh Mesh::create_quad_mesh(const Point3& origin, const Vec3& positive_dir_u, co
     };
     for (int i = 0; i < sizeof(cubeIndices) / sizeof(cubeIndices[0]); i++) {
         indices.push_back(cubeIndices[i]);
+    }
+
+    return Mesh(vertices, indices);
+}
+
+Mesh Mesh::create_ground_mesh()
+{
+    std::vector<Vertex> vertices;
+    std::vector<unsigned int> indices;
+
+    Point3 start_point = Point3(-15.0f, 0.0f, 15.0f);
+    Vec3 u = Vec3(30.0f, 0, 0);
+    Vec3 v = Vec3(0, 0, -30.0f);
+    Point3 end_point = start_point + u + v;
+
+    size_t sub_quad_num = 40;
+    Vec3 sub_u = u / (float)sub_quad_num;
+    Vec3 sub_v = v / (float)sub_quad_num;
+    for (int i = 0; i < sub_quad_num; i++) {
+        for (int j = 0; j < sub_quad_num; j++)
+        {
+            Point3 sub_start_point = start_point + (float)j * sub_u + (float)i * sub_v;
+            Point3 sub_end_point = sub_start_point + sub_u + sub_v;
+            Mesh& submesh = create_quad_mesh(sub_start_point, sub_u, sub_v);
+            vertices.insert(vertices.end(), submesh.m_vertices.begin(), submesh.m_vertices.end());
+            for (auto& index : submesh.m_indices) {
+                index += 4 * (j + i * sub_quad_num);
+            }
+            indices.insert(indices.end(), submesh.m_indices.begin(), submesh.m_indices.end());
+        }
     }
 
     return Mesh(vertices, indices);

@@ -19,6 +19,7 @@ public:
 	Mesh() = default;
 	Mesh(std::vector<Vertex> vertices);
 	Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices);
+	//~Mesh() { reset(); }
 
 	void build();
 	void reset();
@@ -42,6 +43,7 @@ public:
 	static Mesh create_cube_mesh();
 	static Mesh create_icosphere_mesh(int regression_depth);
 	static Mesh create_quad_mesh(const Point3& origin, const Vec3& positive_dir_u, const Vec3& positive_dir_v);
+	static Mesh create_ground_mesh();
 	static Mesh create_screen_mesh();
 };
 

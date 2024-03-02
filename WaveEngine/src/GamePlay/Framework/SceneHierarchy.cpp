@@ -130,14 +130,14 @@ void SceneHierarchy::init() {
     auto ground_entity = world.create_entity();
     world.addComponent<ecs::NameComponent>(ground_entity).name = "ground";
     auto& ground_transform = world.addComponent<ecs::TransformComponent>(ground_entity);
-	ground_transform.scale = Vec3(40.0f);
+	ground_transform.scale = Vec3(1.0f);
 	auto& ground_renderable = world.addComponent<ecs::RenderableComponent>(ground_entity);
 	ecs::Primitive ground_primitive;
-	ground_primitive.mesh = Mesh::create_quad_mesh(Point3(-0.5f, 0.0f, 0.5f), Vec3(1.0f, 0.0f, 0.0f), Vec3(0.0f, 0.0f, -1.0f));
+	ground_primitive.mesh = Mesh::create_ground_mesh();
     Material ground_material;
-    ground_material.shader = new Shader(resource_dir + "/shader/model.vs", resource_dir + "/shader/model.fs", resource_dir + "/shader/model.gs");
-    ground_material.set_diffuse_map(resource_dir + "/images/grid.png");
-    ground_material.set_specular_map(resource_dir + "/images/grid.png");
+    ground_material.shader = new Shader(resource_dir + "/shader/model.vs", resource_dir + "/shader/wireframe.fs", resource_dir + "/shader/wireframe.gs");
+    //ground_material.set_diffuse_map(resource_dir + "/images/grid.png");
+    //ground_material.set_specular_map(resource_dir + "/images/grid.png");
 	ground_primitive.material = ground_material;
 	ground_renderable.setPrimitives({ ground_primitive });
 
