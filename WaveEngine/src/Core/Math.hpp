@@ -30,25 +30,25 @@ inline float random(float min, float max) {
 inline Vec3 randomInUnitSphere() {
     while (true) {
         Vec3 unit_cube(random(-1, 1), random(-1, 1), random(-1, 1));
-        if (dot(unit_cube, unit_cube) < 1.0f) { //为了均匀分布，否则归一化后沿立方体对角线的抽样比较多
+        if (Dot(unit_cube, unit_cube) < 1.0f) { //为了均匀分布，否则归一化后沿立方体对角线的抽样比较多
             return unit_cube;
         }
     }
 }
 // generate a vector on a unit sphere
 inline Vec3 randomUnitVec() {
-    return normalize(randomInUnitSphere());
+    return Normalize(randomInUnitSphere());
 }
 inline Vec3 randomOnHemisphere(const Vec3& normal) {
     Vec3 unit = randomUnitVec();
-    if (dot(unit, normal) > 0.0)
+    if (Dot(unit, normal) > 0.0)
         return unit;
     else
         return -unit;
 }
 
 inline Point3 getPointOnUnitSphere(const Point3& plane_point, const Vec3& normal) {
-    float r_square = dot(plane_point, plane_point);
+    float r_square = Dot(plane_point, plane_point);
     if (r_square > 1)
         return{};
 
@@ -69,8 +69,8 @@ inline Vec3 randomLambertianDistribution(const Vec3& normal) {
     if (normal == up)
         local_u = Vec3(1, 0, 0);
     else
-        local_u = cross(normal, up);
-    Vec3 local_v = cross(normal, local_u);
+        local_u = Cross(normal, up);
+    Vec3 local_v = Cross(normal, local_u);
 
     // 2. 在切平面的单位圆内均匀取点
     Point3 random_plane_point;
@@ -81,7 +81,8 @@ inline Vec3 randomLambertianDistribution(const Vec3& normal) {
     return getPointOnUnitSphere(random_plane_point, normal);
 }
 
-template<typename T> bool isApproxTo(const T& val, const T& to_val, double tolerance = MathConstant::epsilon) {
+template<typename T> 
+bool isApproxTo(const T& val, const T& to_val, double tolerance = MathConstant::epsilon) {
     return std::fabs((double)val - (double)to_val) < tolerance;
 }
 

@@ -148,6 +148,9 @@ public:
 
     CameraComponent* getMainCameraComponent();
 
+    std::vector<Entity> getPickedEntities();
+
+    // TODO only for EnttView class, don't provide for public
     const std::vector<Entity>& getAllEntities() const {
         return m_entities;
     }

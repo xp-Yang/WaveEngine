@@ -1,7 +1,6 @@
 #ifndef Material_hpp
 #define Material_hpp
 
-#include <glm/glm.hpp>
 #include <string>
 #include <vector>
 

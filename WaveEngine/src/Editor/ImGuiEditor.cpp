@@ -200,7 +200,7 @@ void ImGuiEditor::renderCameraController()
 
     ImGui::NewLine();
     ImGui::Text("inverse view matrix:");
-    std::string inverse_view = matrix_log(glm::inverse(camera.view));
+    std::string inverse_view = matrix_log(Inverse(camera.view));
     ImGui::Text(inverse_view.c_str());
 
     ImGui::NewLine();
@@ -220,7 +220,8 @@ void ImGuiEditor::renderPickedEntityController()
     // TODO 考虑对材质的编辑放入MaterialSystem
     auto& world = ecs::World::get();
 
-    for (auto entity : world.entityView<ecs::NameComponent, ecs::PickedComponent, ecs::RenderableComponent, ecs::TransformComponent>()) {
+    auto picked_entities = world.getPickedEntities();
+    for (auto entity : picked_entities) {
         auto& renderable = *world.getComponent<ecs::RenderableComponent>(entity);
         auto& transform_component = *world.getComponent<ecs::TransformComponent>(entity);
         std::string obj_name = world.getComponent<ecs::NameComponent>(entity)->name;
@@ -317,7 +318,8 @@ void ImGuiEditor::renderGizmos()
     auto& world = ecs::World::get();
     ecs::CameraComponent* camera = world.getMainCameraComponent();
     ecs::TransformComponent* transform_component = nullptr;
-    for (auto entity : world.entityView<ecs::NameComponent, ecs::PickedComponent, ecs::RenderableComponent, ecs::TransformComponent>()) {
+    auto picked_entities = world.getPickedEntities();
+    for (auto entity : picked_entities) {
         transform_component = world.getComponent<ecs::TransformComponent>(entity);
         break;
     }

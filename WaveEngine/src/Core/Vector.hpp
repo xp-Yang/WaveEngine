@@ -20,23 +20,23 @@ using Points4 = std::vector<Point4>;
 using Color4 = glm::vec4;
 
 template<typename Vec>
-Vec dot(const Vec& vec1, const Vec& vec2) {
+float Dot(const Vec& vec1, const Vec& vec2) {
     return glm::dot(vec1, vec2);
 }
 
 template<typename Vec>
-Vec cross(const Vec& vec1, const Vec& vec2) {
+Vec Cross(const Vec& vec1, const Vec& vec2) {
     return glm::cross(vec1, vec2);
 }
 
 template<typename Vec>
-Vec normalize(const Vec& vec) {
+Vec Normalize(const Vec& vec) {
     return glm::normalize(vec);
 }
 
 template<typename Vec>
-inline Vec reflect(Vec v, Vec n) {
-    return v + 2 * dot(-v, n) * n;
+Vec Reflect(Vec v, Vec n) {
+    return v + 2 * Dot(-v, n) * n;
 }
 
 }

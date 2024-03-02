@@ -324,13 +324,13 @@ Mesh Mesh::create_icosphere_mesh(int regression_depth) {
     std::vector<Vertex> all_vertices;
     for (auto& triangle : m_triangles) {
         for (auto& vertex : triangle.vertices) {
-            vertex = m_center + normalize(vertex - m_center);
+            vertex = m_center + Normalize(vertex - m_center);
         }
         for (auto& vertex : triangle.vertices) {
             //Vec3 a = triangle.vertices[0] - triangle.vertices[1];
             //Vec3 b = triangle.vertices[0] - triangle.vertices[2];
-            //Vec3 normal = normalize(cross(a, b));
-            Vec3 normal = normalize(vertex - m_center);
+            //Vec3 normal = Normalize(Cross(a, b));
+            Vec3 normal = Normalize(vertex - m_center);
 
             Vertex v;
             v.position = vertex;
@@ -355,7 +355,7 @@ Mesh Mesh::create_quad_mesh(const Point3& origin, const Vec3& positive_dir_u, co
     std::vector<Vertex> vertices;
     std::vector<unsigned int> indices;
 
-    Vec3 normal = normalize(cross(positive_dir_u, positive_dir_v));
+    Vec3 normal = Normalize(Cross(positive_dir_u, positive_dir_v));
     Point3 origin_p = origin;
     Point3 right_p = origin_p + positive_dir_u;
     Point3 upper_right_p = origin_p + positive_dir_u + positive_dir_v;
@@ -392,8 +392,8 @@ Mesh Mesh::create_ground_mesh()
     std::vector<unsigned int> indices;
 
     Point3 start_point = Point3(-15.0f, 0.0f, 15.0f);
-    Vec3 u = Vec3(30.0f, 0, 0);
-    Vec3 v = Vec3(0, 0, -30.0f);
+    Vec3 u = Vec3(-2 * start_point.x, 0, 0);
+    Vec3 v = Vec3(0, 0, -2 * start_point.z);
     Point3 end_point = start_point + u + v;
 
     size_t sub_quad_num = 40;

@@ -142,7 +142,8 @@ void MainCameraPass::draw()
     //        camera_view = camera.view;
     //        camera_projection = camera.projection;
 
-    //    for (auto entity : world.entityView<ecs::PickedComponent, ecs::RenderableComponent, ecs::TransformComponent>()) {
+    //    auto picked_entities = world.getPickedEntities();
+    //    for (auto entity : picked_entities) {
     //        auto& renderable = *world.getComponent<ecs::RenderableComponent>(entity);
     //        auto& model_matrix = *world.getComponent<ecs::TransformComponent>(entity);
 
@@ -177,7 +178,7 @@ void MainCameraPass::draw()
     //        glStencilMask(0x00);
 
     //        border_shader->start_using();
-    //        auto scale = glm::scale(Mat4(1.0f), Vec3(1.05f));
+    //        auto scale = Scale(Vec3(1.05f));
     //        border_shader->setMatrix("model", 1, model_matrix.transform() * scale * Mat4(1.0f));
     //        border_shader->setMatrix("view", 1, camera_view);
     //        border_shader->setMatrix("projection", 1, camera_projection);

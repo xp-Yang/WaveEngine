@@ -14,6 +14,15 @@ CameraComponent* World::getMainCameraComponent()
     }
 }
 
+std::vector<Entity> World::getPickedEntities()
+{
+    std::vector<Entity> result;
+    for (auto entity : entityView<PickedComponent>()) {
+        result.push_back(entity);
+    }
+    return result;
+}
+
 World::~World()
 {
     for (int i = 0; i < m_component_pools.size(); i++)

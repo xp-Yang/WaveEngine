@@ -18,16 +18,16 @@ struct NameComponent {
 
 struct TransformComponent {
 	Vec3 translation = { 0.0f, 0.0f, 0.0f };
-	Vec3 rotation = { 0.0f, 0.0f, 0.0f }; //角度制
+	Vec3 rotation = { 0.0f, 0.0f, 0.0f }; //角度制 // TODO 搞清楚绕3个轴旋转的顺序
 	Vec3 scale = { 1.0f, 1.0f, 1.0f };
 
 	Mat4 transform() const
 	{
-		glm::qua<float> rotation_qua = glm::qua<float>(glm::radians(rotation));
+		glm::qua<float> rotation_qua = glm::qua<float>(Vec3(deg2rad(rotation.x), deg2rad(rotation.y), deg2rad(rotation.z)));
 		Mat4 rotation = glm::mat4_cast(rotation_qua);
-		Mat4 result = glm::translate(Mat4(1.0f), translation)
+		Mat4 result = Translate(translation)
 			* rotation
-			* glm::scale(Mat4(1.0f), scale);
+			* Scale(scale);
 		return result;
 	}
 
@@ -64,19 +64,19 @@ struct CameraComponent {
 	static const float ZoomUnit;
 	static Vec3 global_up; //vec3(0.0f, 1.0f, 0.0f) (y为上) or vec3(0.0f, 0.0f, 1.0f) (z为上)
 
-	float originFov = deg2rad(45.0f); //水平fov
+	float originFov = deg2rad(45.0f); //竖直fov
 	float zoom = 1.0f;
 	float fov = originFov / zoom;
-	Vec3 direction = normalize(Vec3(0.0f, -1.0f , -1.0f));
+	Vec3 direction = Normalize(Vec3(0.0f, -1.0f , -1.0f));
 	Vec3 pos = Vec3(0.0f) - 20.0f * direction;
-	Vec3 camera_up = normalize(global_up - dot(global_up, direction) * direction);
+	Vec3 camera_up = Normalize(global_up - Dot(global_up, direction) * direction);
 	Mat4 view = lookAt(pos, pos + direction, global_up);
-	Mat4 projection = projection_mode == Perspective ? glm::perspective(fov, ASPECT_RATIO, 0.1f, 100.0f)
-		: glm::ortho(-15.0f * ASPECT_RATIO, 15.0f * ASPECT_RATIO, -15.0f, 15.0f, 0.1f, 100.0f);
+	Mat4 projection = projection_mode == Perspective ? Core::Perspective(fov, ASPECT_RATIO, 0.1f, 100.0f)
+		: Core::Ortho(-15.0f * ASPECT_RATIO, 15.0f * ASPECT_RATIO, -15.0f, 15.0f, 0.1f, 100.0f);
 
 	Vec3 getRightDirection() const { // camera 的 x 轴
-		return cross(direction, camera_up);
-		Vec3 cameraRight = normalize(cross(direction, global_up));
+		return Cross(direction, camera_up);
+		Vec3 cameraRight = Normalize(Cross(direction, global_up));
 		return cameraRight;
 	}
 
@@ -123,13 +123,13 @@ struct LightComponent {
 	Mat4 lightReferenceMatrix()
 	{
 		auto& world = ecs::World::get();
-		Mat4 light_projection = glm::ortho(-15.0f * WINDOW_WIDTH / WINDOW_HEIGHT, 15.0f * WINDOW_WIDTH / WINDOW_HEIGHT, -15.0f, 15.0f, 0.1f, 100.0f);
-		//lightProjection = glm::perspective(deg2rad(45.0f), /*1.0f*/WINDOW_WIDTH / WINDOW_HEIGHT, 0.1f, 100.0f);
+		Mat4 light_projection = Ortho(-15.0f * WINDOW_WIDTH / WINDOW_HEIGHT, 15.0f * WINDOW_WIDTH / WINDOW_HEIGHT, -15.0f, 15.0f, 0.1f, 100.0f);
+		//lightProjection = Perspective(deg2rad(45.0f), /*1.0f*/WINDOW_WIDTH / WINDOW_HEIGHT, 0.1f, 100.0f);
 		Vec3 light_pos = Vec3(0.0f);
 		for (auto entity : world.entityView<ecs::LightComponent>()) {
 			light_pos = world.getComponent<ecs::TransformComponent>(entity)->translation;
 		}
-		Mat4 light_view = glm::lookAt(light_pos, Vec3(0.0f, 0.0f, 0.0f), ecs::CameraComponent::global_up);
+		Mat4 light_view = LookAt(light_pos, Vec3(0.0f, 0.0f, 0.0f), ecs::CameraComponent::global_up);
 		Mat4 ret = light_projection * light_view;
 		return ret;
 	}

@@ -156,7 +156,7 @@ void Shader::setFloat3(const std::string& name, const Vec3& value) const
 void Shader::setMatrix(const std::string& name, int count, const Mat4& mat_value) const
 {
     GLuint transformLoc = glGetUniformLocation(m_id, name.c_str());
-    glUniformMatrix4fv(transformLoc, count, GL_FALSE, glm::value_ptr(mat_value));
+    glUniformMatrix4fv(transformLoc, count, GL_FALSE, /*glm::value_ptr(mat_value)*/&(mat_value[0].x));
 }
 void Shader::setTexture(const std::string& name, int texture_unit, unsigned int texture_id) const
 {
