@@ -320,8 +320,10 @@ void ImGuiEditor::renderGizmos()
     ecs::TransformComponent* transform_component = nullptr;
     auto picked_entities = world.getPickedEntities();
     for (auto entity : picked_entities) {
-        transform_component = world.getComponent<ecs::TransformComponent>(entity);
-        break;
+        if (!world.hasComponent<ecs::BaseGridGroundComponent>(entity)) {
+            transform_component = world.getComponent<ecs::TransformComponent>(entity);
+            break;
+        }
     }
 
     if (camera && transform_component) {

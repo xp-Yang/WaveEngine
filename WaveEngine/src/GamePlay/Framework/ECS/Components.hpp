@@ -46,7 +46,7 @@ struct CameraComponent {
 	enum ZoomMode {
 		ZoomToCenter,
 		ZoomToMouse,
-	} zoom_mode{ ZoomToMouse };
+	} zoom_mode{ ZoomToCenter };
 
 	// FPS style
 	// ≈∑¿≠Ω«±Ì æ£∫

@@ -18,7 +18,8 @@ struct Light {
     //float Linear;
     //float Quadratic;
 };
-const int LIGHT_COUNT = 3;//256;
+const int LIGHT_COUNT = 5;
+// TODO shader里怎么用动态数组
 uniform Light lights[LIGHT_COUNT];
 uniform vec3 view_pos;
 
@@ -73,7 +74,7 @@ void main()
     for(int i = 0; i < LIGHT_COUNT; i++){
         //ambient_light += lights[i].color.xyz * material.ambient * Diffuse);
         vec3 lightDir = normalize(lights[i].position - Position);
-        lighting += LightCalculation(lights[i], Normal, viewDir, lightDir, Diffuse, Specular);
+        lighting += LightCalculation(lights[i], Normal, viewDir, lightDir, Diffuse, Specular) / LIGHT_COUNT;
     }
 
     vec4 LightSpacePos = lightSpaceMatrix * vec4(Position, 1.0);

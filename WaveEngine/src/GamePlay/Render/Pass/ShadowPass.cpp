@@ -39,7 +39,7 @@ void ShadowPass::draw() {
     depth_shader->start_using();
     depth_shader->setMatrix("vp", 1, light_ref_matrix);
 
-    for (auto entity : world.entityView<ecs::RenderableComponent, ecs::TransformComponent>()) {
+    for (auto entity : world.entityView<ecs::RenderableComponent>()) {
 		if (world.hasComponent<ecs::SkyboxComponent>(entity) || world.hasComponent<ecs::LightComponent>(entity))
 			continue;
         auto& renderable = *world.getComponent<ecs::RenderableComponent>(entity);

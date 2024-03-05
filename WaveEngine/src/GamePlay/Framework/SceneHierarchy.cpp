@@ -67,31 +67,23 @@ void SceneHierarchy::init() {
 	//directional_light_primitive.material = directional_light_material;
 	//directional_light_renderable.setPrimitives({ directional_light_primitive });
 
-	static const int LIGHT_COUNT = 3;
+	static const int LIGHT_COUNT = 5;
 	static Shader* light_shader = new Shader(resource_dir + "/shader/light.vs", resource_dir + "/shader/light.fs");
 	for (int i = 0; i < LIGHT_COUNT; i++) {
 		auto light_entity = world.create_entity();
 		world.addComponent<ecs::NameComponent>(light_entity).name = std::string("light") + std::to_string(i);
 		world.addComponent<ecs::LightComponent>(light_entity);
 		auto& light_transform = world.addComponent<ecs::TransformComponent>(light_entity);
-		srand(i * i * i * i + 5363 * i * i * i - 251 * i * i + 6455);
-		double r = (rand() / double(RAND_MAX) - 0.5) * 2;
-		srand(- i * i * i + 73425 * i * i - 97825 * i + 12532);
-		double r2 = rand() / double(RAND_MAX);
-		srand(i * i * i * i * i + 2351425 * i * i * i - 1522532);
-		double r3 = (rand() / double(RAND_MAX) - 0.5) * 2;
-		light_transform.translation = { 12.0f * r, 10.0f * r2, 12.0f * r3 };
+		double r1 = random(-20.0f, 20.0f);
+		double r2 = random(5.0f, 10.0f);
+		double r3 = random(-20.0f, 20.0f);
+		light_transform.translation = { r1, r2, r3 };
 		light_transform.scale = Vec3(0.2f);
 		auto& light_renderable = world.addComponent<ecs::RenderableComponent>(light_entity);
 		auto& light_properties = world.addComponent<ecs::LightComponent>(light_entity);
 		ecs::Primitive light_primitive;
-		//light_primitive.mesh = Mesh::create_cube_mesh();
 		light_primitive.mesh = Mesh::create_icosphere_mesh(5);
-		light_properties.color = { 255.f * std::abs(r) / 255.0f, 255.f * std::abs(r2) / 255.0f, 255.f * std::abs(r3) / 255.0f, 175.f / 255.0f };
-		if (LIGHT_COUNT >= 3)
-			light_properties.color /= LIGHT_COUNT / 3;
-		else
-			light_properties.color = { 1.0f, 1.0f, 1.0f, 1.0f };
+		light_properties.color = { randomUnit(), randomUnit(), randomUnit(), 175.f / 255.0f};
 		Material light_material;
 		light_material.shader = light_shader;
 		light_primitive.material = light_material;
@@ -101,7 +93,7 @@ void SceneHierarchy::init() {
 	auto cube_entity = world.create_entity();
 	world.addComponent<ecs::NameComponent>(cube_entity).name = "cube";
 	auto& cube_transform = world.addComponent<ecs::TransformComponent>(cube_entity);
-	cube_transform.translation = { 0.0f, 1.0f, -10.0f };
+	cube_transform.translation = { 0.0f, 0.5f, -10.0f };
 	auto& cube_renderable = world.addComponent<ecs::RenderableComponent>(cube_entity);
 	ecs::Primitive cube_primitive;
 	cube_primitive.mesh = Mesh::create_cube_mesh();
@@ -116,7 +108,7 @@ void SceneHierarchy::init() {
 	auto sphere_entity = world.create_entity();
 	world.addComponent<ecs::NameComponent>(sphere_entity).name = "sphere";
 	auto& sphere_transform = world.addComponent<ecs::TransformComponent>(sphere_entity);
-    sphere_transform.translation = { 5.0f, 2.0f, 5.0f };
+    sphere_transform.translation = { 5.0f, 1.0f, 5.0f };
 	auto& sphere_renderable = world.addComponent<ecs::RenderableComponent>(sphere_entity);
 	ecs::Primitive sphere_primitive;
 	sphere_primitive.mesh = Mesh::create_icosphere_mesh(5);

@@ -58,7 +58,7 @@ void MainCameraPass::draw()
     }
 
     int primitives_count = 0;
-    for (auto entity : world.entityView<ecs::RenderableComponent, ecs::TransformComponent>()) {
+    for (auto entity : world.entityView<ecs::RenderableComponent>()) {
         auto& renderable = *world.getComponent<ecs::RenderableComponent>(entity);
         auto& model_matrix = *world.getComponent<ecs::TransformComponent>(entity);
         float explosion_ratio = 0.0f;
@@ -203,7 +203,7 @@ void MainCameraPass::draw()
         normal_shader->start_using();
         normal_shader->setMatrix("view", 1, camera_view);
         normal_shader->setMatrix("projection", 1, camera_projection);
-        for (auto entity : world.entityView<ecs::RenderableComponent, ecs::TransformComponent>()) {
+        for (auto entity : world.entityView<ecs::RenderableComponent>()) {
             auto& renderable = *world.getComponent<ecs::RenderableComponent>(entity);
             auto& model_matrix = *world.getComponent<ecs::TransformComponent>(entity);
 
@@ -229,7 +229,7 @@ void MainCameraPass::draw()
         wireframe_shader->start_using();
         wireframe_shader->setMatrix("view", 1, camera_view);
         wireframe_shader->setMatrix("projection", 1, camera_projection);
-        for (auto entity : world.entityView<ecs::RenderableComponent, ecs::TransformComponent>()) {
+        for (auto entity : world.entityView<ecs::RenderableComponent>()) {
             auto& renderable = *world.getComponent<ecs::RenderableComponent>(entity);
             auto& model_matrix = *world.getComponent<ecs::TransformComponent>(entity);
 

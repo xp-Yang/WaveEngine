@@ -35,27 +35,27 @@ void LightingPass::draw()
 	camera_view = camera.view;
 	camera_projection = camera.projection;
 
-	//// skybox
-	//for (auto entity : world.entityView<ecs::SkyboxComponent>()) {
-	//	auto& renderable = *world.getComponent<ecs::RenderableComponent>(entity);
-	//	auto& model_matrix = *world.getComponent<ecs::TransformComponent>(entity);
-	//	auto skybox_texture_id = world.getComponent<ecs::SkyboxComponent>(entity)->texture;
-	//	for (int i = 0; i < renderable.primitives.size(); i++) {
-	//		auto& mesh = renderable.primitives[i].mesh;
-	//		auto& material = renderable.primitives[i].material;
-	//		Shader* shader = material.shader;
-	//		material.update_shader_binding();
-	//		shader->start_using();
-	//		glDepthMask(GL_FALSE);
-	//		shader->setMatrix("model", 1, model_matrix.transform());
-	//		shader->setMatrix("view", 1, Mat4(Mat3(camera_view)));
-	//		shader->setMatrix("projection", 1, camera_projection);
-	//		shader->setCubeTexture("skybox", 6, skybox_texture_id);
-	//		Renderer::drawIndex(*shader, mesh.get_VAO(), mesh.get_indices_count());
-	//		shader->stop_using();
-	//	}
-	//}
-	//glDepthMask(GL_TRUE);
+	// skybox
+	for (auto entity : world.entityView<ecs::SkyboxComponent>()) {
+		auto& renderable = *world.getComponent<ecs::RenderableComponent>(entity);
+		auto& model_matrix = *world.getComponent<ecs::TransformComponent>(entity);
+		auto skybox_texture_id = world.getComponent<ecs::SkyboxComponent>(entity)->texture;
+		for (int i = 0; i < renderable.primitives.size(); i++) {
+			auto& mesh = renderable.primitives[i].mesh;
+			auto& material = renderable.primitives[i].material;
+			Shader* shader = material.shader;
+			material.update_shader_binding();
+			shader->start_using();
+			glDepthMask(GL_FALSE);
+			shader->setMatrix("model", 1, model_matrix.transform());
+			shader->setMatrix("view", 1, Mat4(Mat3(camera_view)));
+			shader->setMatrix("projection", 1, camera_projection);
+			shader->setCubeTexture("skybox", 6, skybox_texture_id);
+			Renderer::drawIndex(*shader, mesh.get_VAO(), mesh.get_indices_count());
+			shader->stop_using();
+		}
+	}
+	glDepthMask(GL_TRUE);
 
 	// lighting
 	Shader* lighting_shader = Shader::getShader(ShaderType::LightingShader);

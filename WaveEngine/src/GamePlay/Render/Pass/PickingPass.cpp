@@ -36,7 +36,7 @@ void PickingPass::draw()
     picking_shader->setMatrix("view", 1, camera_view);
     picking_shader->setMatrix("projection", 1, camera_projection);
 
-    for (auto entity : world.entityView<ecs::RenderableComponent, ecs::TransformComponent>()) {
+    for (auto entity : world.entityView<ecs::RenderableComponent>()) {
         if (world.hasComponent<ecs::SkyboxComponent>(entity))
             continue;
         auto name = world.getComponent<ecs::NameComponent>(entity);
@@ -62,7 +62,7 @@ void PickingPass::draw()
     // Ultra-mega-over slow ! 
     // There are usually a long time between glDrawElements() and
     // all the fragments completely rasterized.
-    if (ImGui::GetIO().MouseDown[0]) {
+    if (ImGui::GetIO().MouseReleased[0]) {
         glFlush();
         glFinish();
 
@@ -77,7 +77,7 @@ void PickingPass::draw()
         glReadPixels(x, y, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, data);
         int picked_id = (int)data[0] + (((int)data[1]) << 8) + (((int)data[2]) << 16);
 
-        for (auto entity : world.entityView<ecs::RenderableComponent, ecs::TransformComponent>()) {
+        for (auto entity : world.entityView<ecs::RenderableComponent>()) {
             if (entity.getId() * 50000 == picked_id) {
                 world.addComponent<ecs::PickedComponent>(entity);
             }
