@@ -173,3 +173,41 @@ void Shader::setCubeTexture(const std::string& name, int texture_unit, unsigned 
     setInt(name, texture_unit);
     glActiveTexture(GL_TEXTURE0);
 }
+
+Shader* Shader::getShader(const ShaderType& type)
+{
+    std::string resource_dir = RESOURCE_DIR;
+    switch (type)
+    {
+    case ShaderType::GBufferShader:
+        static Shader* g_shader = new Shader(resource_dir + "/shader/gBufferPass.vs", resource_dir + "/shader/gBufferPass.fs");
+        return g_shader;
+    case ShaderType::LightingShader:
+        //static Shader* light_shader = new Shader(resource_dir + "/shader/light.vs", resource_dir + "/shader/light.fs");
+        static Shader* light_shader = new Shader(resource_dir + "/shader/lightingPass.vs", resource_dir + "/shader/lightingPass.fs");
+        return light_shader;
+    case ShaderType::BorderShader:
+        static Shader* border_shader = new Shader(resource_dir + "/shader/border.vs", resource_dir + "/shader/border.fs");
+        return border_shader;
+    case ShaderType::NormalShader:
+        static Shader* normal_shader = new Shader(resource_dir + "/shader/model.vs", resource_dir + "/shader/normal.fs", resource_dir + "/shader/normal.gs");
+        return normal_shader;
+    case ShaderType::WireframeShader:
+        static Shader* wireframe_shader = new Shader(resource_dir + "/shader/model.vs", resource_dir + "/shader/wireframe.fs", resource_dir + "/shader/wireframe.gs");
+        return wireframe_shader;
+    case ShaderType::PickingShader:
+        static Shader* picking_shader = new Shader(resource_dir + "/shader/picking.vs", resource_dir + "/shader/picking.fs");
+        return picking_shader;
+    case ShaderType::RayTracingShader:
+        static Shader* rt_shader = new Shader(resource_dir + "/shader/RayTracing.vs", resource_dir + "/shader/RayTracing.fs");
+        return rt_shader;
+    case ShaderType::QuadShader:
+        static Shader* quad_shader = new Shader(resource_dir + "/shader/frame.vs", resource_dir + "/shader/frame.fs");
+        return quad_shader;
+    case ShaderType::DepthShader:
+        static Shader* depth_shader = new Shader(resource_dir + "/shader/depth.vs", resource_dir + "/shader/depth.fs");
+        return depth_shader;
+    default:
+        return nullptr;
+    }
+}

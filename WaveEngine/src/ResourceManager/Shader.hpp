@@ -4,6 +4,18 @@
 #include "Core/Matrix.hpp"
 #include <string>
 
+enum class ShaderType {
+	GBufferShader,
+	LightingShader,
+	BorderShader,
+	NormalShader,
+	WireframeShader,
+	PickingShader,
+	RayTracingShader,
+	QuadShader,
+	DepthShader,
+};
+
 class Shader{
 public:
 	Shader(const char* vertexPath, const char* fragmentPath, const char* geometryPath);
@@ -22,6 +34,8 @@ public:
 	void setMatrix(const std::string& name, int count, const Mat4& mat_value) const;
 	void setTexture(const std::string& name, int texture_unit, unsigned int texture_id) const;
 	void setCubeTexture(const std::string& name, int texture_unit, unsigned int texture_id) const;
+
+	static Shader* getShader(const ShaderType& type);
 
 private:
 	unsigned int m_id;

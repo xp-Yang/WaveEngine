@@ -20,8 +20,7 @@ void RayTracingPass::draw()
 	m_framebuffer->bind();
 	m_framebuffer->clear();
 
-	std::string resource_dir = RESOURCE_DIR;
-	static Shader* rt_shader = new Shader(resource_dir + "/shader/RayTracing.vs", resource_dir + "/shader/RayTracing.fs");
+	Shader* rt_shader = Shader::getShader(ShaderType::RayTracingShader);
 	auto& world = ecs::World::get();
 	ecs::CameraComponent* camera = world.getMainCameraComponent();
 

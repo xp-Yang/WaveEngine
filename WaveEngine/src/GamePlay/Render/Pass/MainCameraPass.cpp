@@ -149,8 +149,7 @@ void MainCameraPass::draw()
 
     //        // render border
     //        glClear(GL_STENCIL_BUFFER_BIT);
-    //        // TODO 去掉所有地方的static Shader*
-    //        static Shader* border_shader = new Shader("resource/shader/border.vs", "resource/shader/border.fs");
+    //        Shader* border_shader = Shader::getShader(ShaderType::BorderShader);
 
     //        glStencilFunc(GL_ALWAYS, 1, 0xFF); //总是通过模板测试
     //        glStencilOp(GL_KEEP, GL_REPLACE, GL_REPLACE); //如果模板测试通过了，设置模板缓冲区为1
@@ -192,8 +191,7 @@ void MainCameraPass::draw()
 
     if (m_normal_debug)
     {
-        std::string resource_dir = RESOURCE_DIR;
-        static Shader* normal_shader = new Shader(resource_dir + "/shader/model.vs", resource_dir + "/shader/normal.fs", resource_dir + "/shader/normal.gs");
+        Shader* normal_shader = Shader::getShader(ShaderType::NormalShader);
 
         auto& world = ecs::World::get();
         Mat4 camera_view;
@@ -219,8 +217,7 @@ void MainCameraPass::draw()
     }
 
     if (m_wireframe) {
-        std::string resource_dir = RESOURCE_DIR;
-        static Shader* wireframe_shader = new Shader(resource_dir + "/shader/model.vs", resource_dir + "/shader/wireframe.fs", resource_dir + "/shader/wireframe.gs");
+        Shader* wireframe_shader = Shader::getShader(ShaderType::WireframeShader);
 
         auto& world = ecs::World::get();
         Mat4 camera_view;

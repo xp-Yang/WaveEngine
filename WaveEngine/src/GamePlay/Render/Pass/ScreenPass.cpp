@@ -26,8 +26,7 @@ void ScreenPass::draw()
 	auto main_viewport = Application::GetApp().getWindow()->getMainViewport().value_or(Viewport());
 	Application::GetApp().getWindow()->setMainViewport(main_viewport);
 	glDisable(GL_DEPTH_TEST);
-	std::string resource_dir = RESOURCE_DIR;
-	static Shader* frame_shader = new Shader(resource_dir + "/shader/frame.vs", resource_dir + "/shader/frame.fs");
+	Shader* frame_shader = Shader::getShader(ShaderType::QuadShader);
 	frame_shader->start_using();
 	frame_shader->setTexture("Texture", 0, m_framebuffer->getFirstAttachmentOf(AttachmentType::RGBA).getMap());
 	Renderer::drawIndex(*frame_shader, m_screen_quad.get_VAO(), m_screen_quad.get_indices_count());
