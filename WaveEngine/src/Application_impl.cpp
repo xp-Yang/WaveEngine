@@ -21,6 +21,11 @@ Application& Application::GetApp()
 	return app;
 }
 
+std::string Application::resourceDirectory()
+{
+	return RESOURCE_DIR;
+}
+
 void Application::run() {
 	while (!m_window->shouldClose()) {
 #if PERFORMANCE_TEST

@@ -71,7 +71,7 @@ void PickingPass::draw()
 
         //glReadBuffer(GL_COLOR_ATTACHMENT0);
         unsigned char data[4] = { 0,0,0,0 };
-        // 注意这里传给glReadPixels()的坐标是相对于屏幕左下角的
+        // glReadPixels()的坐标是相对于屏幕左下角的
         int x = (int)ImGui::GetIO().MousePos.x;
         int y = (int)(WINDOW_HEIGHT - ImGui::GetIO().MousePos.y);
         glReadPixels(x, y, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, data);

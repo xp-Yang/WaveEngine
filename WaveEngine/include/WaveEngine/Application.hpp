@@ -14,6 +14,7 @@ class Application {
 public:
 	~Application();
 	static Application& GetApp();
+	static std::string resourceDirectory();
 	void run();
 	void init();
 	void shutdown();

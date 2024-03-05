@@ -30,9 +30,6 @@ struct TransformComponent {
 			* Scale(scale);
 		return result;
 	}
-
-	// TODO Ð´¸ödecomposition ºÍ composition
-	void decomposition() {}
 };
 
 struct CameraComponent {

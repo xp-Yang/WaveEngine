@@ -3,12 +3,15 @@
 #include "ResourceManager/MyModel.hpp"
 #include "ResourceManager/Texture.hpp"
 #include "Platform/RHI/rhi.hpp"
+#include "Application_impl.hpp"
 
 SceneHierarchy::SceneHierarchy() {
 	init();
 }
 
 void SceneHierarchy::init() {
+	std::string resource_dir = Application::resourceDirectory();
+
     // TODO 这些需要被SceneHierarchy管理吗，参考filament
 	auto& world = ecs::World::get();
 
@@ -65,7 +68,6 @@ void SceneHierarchy::init() {
 	//directional_light_renderable.setPrimitives({ directional_light_primitive });
 
 	static const int LIGHT_COUNT = 3;
-	std::string resource_dir = RESOURCE_DIR;
 	static Shader* light_shader = new Shader(resource_dir + "/shader/light.vs", resource_dir + "/shader/light.fs");
 	for (int i = 0; i < LIGHT_COUNT; i++) {
 		auto light_entity = world.create_entity();
