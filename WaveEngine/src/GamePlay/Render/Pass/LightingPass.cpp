@@ -26,14 +26,6 @@ void LightingPass::draw()
 	m_framebuffer->bind();
 	m_framebuffer->clear();
 
-	Shader* lighting_shader = Shader::getShader(ShaderType::LightingShader);
-	auto g_position_map = m_gbuffer_framebuffer->getFirstAttachmentOf(AttachmentType::RGB16F).getMap();
-	lighting_shader->start_using();
-	lighting_shader->setTexture("gPosition", 0, g_position_map);
-	lighting_shader->setTexture("gNormal", 1, g_position_map + 1);
-	lighting_shader->setTexture("gDiffuse", 2, g_position_map + 2);
-	lighting_shader->setTexture("gSpecular", 3, g_position_map + 3);
-
 	auto& world = ecs::World::get();
 	Vec3 camera_pos;
 	Mat4 camera_view = Mat4(1.0f);
@@ -42,7 +34,39 @@ void LightingPass::draw()
 	camera_pos = camera.pos;
 	camera_view = camera.view;
 	camera_projection = camera.projection;
+
+	//// skybox
+	//for (auto entity : world.entityView<ecs::SkyboxComponent>()) {
+	//	auto& renderable = *world.getComponent<ecs::RenderableComponent>(entity);
+	//	auto& model_matrix = *world.getComponent<ecs::TransformComponent>(entity);
+	//	auto skybox_texture_id = world.getComponent<ecs::SkyboxComponent>(entity)->texture;
+	//	for (int i = 0; i < renderable.primitives.size(); i++) {
+	//		auto& mesh = renderable.primitives[i].mesh;
+	//		auto& material = renderable.primitives[i].material;
+	//		Shader* shader = material.shader;
+	//		material.update_shader_binding();
+	//		shader->start_using();
+	//		glDepthMask(GL_FALSE);
+	//		shader->setMatrix("model", 1, model_matrix.transform());
+	//		shader->setMatrix("view", 1, Mat4(Mat3(camera_view)));
+	//		shader->setMatrix("projection", 1, camera_projection);
+	//		shader->setCubeTexture("skybox", 6, skybox_texture_id);
+	//		Renderer::drawIndex(*shader, mesh.get_VAO(), mesh.get_indices_count());
+	//		shader->stop_using();
+	//	}
+	//}
+	//glDepthMask(GL_TRUE);
+
+	// lighting
+	Shader* lighting_shader = Shader::getShader(ShaderType::LightingShader);
+	auto g_position_map = m_gbuffer_framebuffer->getFirstAttachmentOf(AttachmentType::RGB16F).getMap();
+	lighting_shader->start_using();
+	lighting_shader->setTexture("gPosition", 0, g_position_map);
+	lighting_shader->setTexture("gNormal", 1, g_position_map + 1);
+	lighting_shader->setTexture("gDiffuse", 2, g_position_map + 2);
+	lighting_shader->setTexture("gSpecular", 3, g_position_map + 3);
 	lighting_shader->setFloat3("view_pos", camera_pos);
+
 	Mat4 light_ref_matrix;
 	int k = 0;
 	for (auto entity : world.entityView<ecs::LightComponent>()) {
@@ -76,10 +100,33 @@ void LightingPass::draw()
 	Renderer::drawIndex(*lighting_shader, m_screen_quad.get_VAO(), m_screen_quad.get_indices_count());
 	lighting_shader->stop_using();
 
-	// lights
+
 	glEnable(GL_DEPTH_TEST);
+	glDepthMask(GL_TRUE);
 	m_gbuffer_framebuffer->blitDepthMapTo(m_framebuffer.get());
-	for (auto entity : world.entityView<ecs::LightComponent, ecs::RenderableComponent, ecs::TransformComponent>()) {
+
+
+	// lights
+	for (auto entity : world.entityView<ecs::LightComponent>()) {
+		auto& renderable = *world.getComponent<ecs::RenderableComponent>(entity);
+		auto& model_matrix = *world.getComponent<ecs::TransformComponent>(entity);
+
+		for (int i = 0; i < renderable.primitives.size(); i++) {
+			auto& mesh = renderable.primitives[i].mesh;
+			auto& material = renderable.primitives[i].material;
+			Shader* shader = material.shader;
+			material.update_shader_binding();
+			shader->start_using();
+			shader->setMatrix("model", 1, model_matrix.transform());
+			shader->setMatrix("view", 1, camera_view);
+			shader->setMatrix("projection", 1, camera_projection);
+			Renderer::drawIndex(*shader, mesh.get_VAO(), mesh.get_indices_count());
+			shader->stop_using();
+		}
+	}
+
+	// base grid ground
+	for (auto entity : world.entityView<ecs::BaseGridGroundComponent>()) {
 		auto& renderable = *world.getComponent<ecs::RenderableComponent>(entity);
 		auto& model_matrix = *world.getComponent<ecs::TransformComponent>(entity);
 

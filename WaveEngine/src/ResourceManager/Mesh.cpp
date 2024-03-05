@@ -404,6 +404,7 @@ Mesh Mesh::create_ground_mesh()
                 index += 4 * (j + i * sub_quad_num);
             }
             indices.insert(indices.end(), submesh.m_indices.begin(), submesh.m_indices.end());
+            submesh.reset();
         }
     }
 

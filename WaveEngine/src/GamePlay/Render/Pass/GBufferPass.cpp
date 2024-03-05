@@ -29,8 +29,8 @@ void GBufferPass::draw()
     camera_view = camera.view;
     camera_projection = camera.projection;
 
-    for (auto entity : world.entityView<ecs::RenderableComponent, ecs::TransformComponent>()) {
-        if (world.hasComponent<ecs::LightComponent>(entity))
+    for (auto entity : world.entityView<ecs::RenderableComponent>()) {
+        if (world.hasComponent<ecs::LightComponent>(entity) || world.hasComponent<ecs::BaseGridGroundComponent>(entity) || world.hasComponent<ecs::SkyboxComponent>(entity))
             continue;
         auto& renderable = *world.getComponent<ecs::RenderableComponent>(entity);
         auto& model_matrix = *world.getComponent<ecs::TransformComponent>(entity);

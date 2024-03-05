@@ -128,8 +128,10 @@ void SceneHierarchy::init() {
 	sphere_renderable.setPrimitives({ sphere_primitive });
 	world.addComponent<ecs::ExplosionComponent>(sphere_entity);
 
+	//TODO shader在延迟渲染中没用到。shader是否不应该在这里创建
     auto ground_entity = world.create_entity();
     world.addComponent<ecs::NameComponent>(ground_entity).name = "ground";
+	world.addComponent<ecs::BaseGridGroundComponent>(ground_entity);
     auto& ground_transform = world.addComponent<ecs::TransformComponent>(ground_entity);
 	ground_transform.scale = Vec3(1.0f);
 	auto& ground_renderable = world.addComponent<ecs::RenderableComponent>(ground_entity);
@@ -137,8 +139,8 @@ void SceneHierarchy::init() {
 	ground_primitive.mesh = Mesh::create_ground_mesh();
     Material ground_material;
     ground_material.shader = new Shader(resource_dir + "/shader/model.vs", resource_dir + "/shader/wireframe.fs", resource_dir + "/shader/wireframe.gs");
-    //ground_material.set_diffuse_map(resource_dir + "/images/grid.png");
-    //ground_material.set_specular_map(resource_dir + "/images/grid.png");
+    ground_material.set_diffuse_map(resource_dir + "/images/pure_white_map.png");
+    ground_material.set_specular_map(resource_dir + "/images/pure_white_map.png");
 	ground_primitive.material = ground_material;
 	ground_renderable.setPrimitives({ ground_primitive });
 

@@ -142,6 +142,8 @@ struct LightComponent {
 // 不需要数据，仅用作标记选中的entity
 struct PickedComponent {};
 
+struct BaseGridGroundComponent {};
+
 //struct ReceiveShadowComponent {};
 //
 //struct ReceiveReflectionComponent {};
