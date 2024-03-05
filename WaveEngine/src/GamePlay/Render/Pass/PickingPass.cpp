@@ -38,6 +38,8 @@ void PickingPass::draw()
     picking_shader->setMatrix("projection", 1, camera_projection);
 
     for (auto entity : world.entityView<ecs::RenderableComponent, ecs::TransformComponent>()) {
+        if (world.hasComponent<ecs::SkyboxComponent>(entity))
+            continue;
         auto name = world.getComponent<ecs::NameComponent>(entity);
         auto& renderable = *world.getComponent<ecs::RenderableComponent>(entity);
         auto& model_matrix = *world.getComponent<ecs::TransformComponent>(entity);
@@ -54,8 +56,6 @@ void PickingPass::draw()
 
             Renderer::drawIndex(*picking_shader, mesh.get_VAO(), mesh.get_indices_count());
         }
-
-        // TODO skybox 的模型矩阵是mat4(1.0f)，picking也是按照这个位置记录的
     }
 
     // TODO 用事件处理

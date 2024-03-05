@@ -1,24 +1,15 @@
 #ifndef Mesh_hpp
 #define Mesh_hpp
-#include <Core/Vector.hpp>
+#include <Core/Math.hpp>
 #include <vector>
 #include <string>
-
-struct Vertex {
-	Vec3 position;
-	Vec3 normal;
-	Vec2 texture_uv;
-};
-
-struct Triangle {
-	Vec3 vertices[3];
-};
 
 class Mesh {
 public:
 	Mesh() = default;
-	Mesh(std::vector<Vertex> vertices);
-	Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices);
+	Mesh(const std::vector<Vertex>& vertices);
+	Mesh(const std::vector<Vertex>& vertices, const std::vector<unsigned int>& indices);
+	Mesh(const std::vector<Triangle>& triangles);
 	//~Mesh() { reset(); }
 
 	void build();

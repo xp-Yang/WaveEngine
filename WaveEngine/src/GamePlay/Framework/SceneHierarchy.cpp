@@ -100,7 +100,7 @@ void SceneHierarchy::init() {
 	auto cube_entity = world.create_entity();
 	world.addComponent<ecs::NameComponent>(cube_entity).name = "cube";
 	auto& cube_transform = world.addComponent<ecs::TransformComponent>(cube_entity);
-	cube_transform.translation = { 0.0f, 1.0f, 0.0f };
+	cube_transform.translation = { 0.0f, 1.0f, -10.0f };
 	auto& cube_renderable = world.addComponent<ecs::RenderableComponent>(cube_entity);
 	ecs::Primitive cube_primitive;
 	cube_primitive.mesh = Mesh::create_cube_mesh();
@@ -115,7 +115,7 @@ void SceneHierarchy::init() {
 	auto sphere_entity = world.create_entity();
 	world.addComponent<ecs::NameComponent>(sphere_entity).name = "sphere";
 	auto& sphere_transform = world.addComponent<ecs::TransformComponent>(sphere_entity);
-    sphere_transform.translation = { 1.0f, 2.0f, -2.0f };
+    sphere_transform.translation = { 5.0f, 2.0f, 5.0f };
 	auto& sphere_renderable = world.addComponent<ecs::RenderableComponent>(sphere_entity);
 	ecs::Primitive sphere_primitive;
 	sphere_primitive.mesh = Mesh::create_icosphere_mesh(5);

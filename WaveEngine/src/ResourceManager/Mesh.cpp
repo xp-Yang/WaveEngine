@@ -3,13 +3,13 @@
 #include <iostream>
 #include "Platform/RHI/rhi.hpp"
 
-Mesh::Mesh(std::vector<Vertex> vertices)
+Mesh::Mesh(const std::vector<Vertex>& vertices)
     : m_vertices(vertices)
 {
     build();
 }
 
-Mesh::Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices)
+Mesh::Mesh(const std::vector<Vertex>& vertices, const std::vector<unsigned int>& indices)
     : m_vertices(vertices)
     , m_indices(indices)
 {
@@ -235,44 +235,39 @@ static void create_tetrahedron(std::vector<Triangle>& triangles, Vec3& center) {
     center -= center;
 
     triangles = {
-        { c,b,a },
-        { a,b,d },
-        { b,c,d },
-        { c,a,d },
+        Triangle(c,b,a),
+        Triangle(a,b,d),
+        Triangle(b,c,d),
+        Triangle(c,a,d),
     };
 }
 
 static std::vector<Triangle> subdivide(Triangle triangle) {
-    Vec3 new_vertex0 = (triangle.vertices[0] + triangle.vertices[1]) / 2.0f;
-    Vec3 new_vertex1 = (triangle.vertices[1] + triangle.vertices[2]) / 2.0f;
-    Vec3 new_vertex2 = (triangle.vertices[2] + triangle.vertices[0]) / 2.0f;
+    Vec3 new_vertex0 = (triangle.vertices[0].position + triangle.vertices[1].position) / 2.0f;
+    Vec3 new_vertex1 = (triangle.vertices[1].position + triangle.vertices[2].position) / 2.0f;
+    Vec3 new_vertex2 = (triangle.vertices[2].position + triangle.vertices[0].position) / 2.0f;
 
-    Triangle new_triangle0 = { triangle.vertices[0], new_vertex0, new_vertex2 };
-    Triangle new_triangle1 = { new_vertex0, triangle.vertices[1], new_vertex1 };
-    Triangle new_triangle2 = { new_vertex0, new_vertex1, new_vertex2 };
-    Triangle new_triangle3 = { new_vertex2, new_vertex1, triangle.vertices[2] };
+    Triangle new_triangle0 = Triangle(triangle.vertices[0].position, new_vertex0, new_vertex2);
+    Triangle new_triangle1 = Triangle(new_vertex0, triangle.vertices[1].position, new_vertex1);
+    Triangle new_triangle2 = Triangle(new_vertex0, new_vertex1, new_vertex2);
+    Triangle new_triangle3 = Triangle(new_vertex2, new_vertex1, triangle.vertices[2].position);
 
     return { new_triangle0, new_triangle1, new_triangle2, new_triangle3 };
 }
 
 static std::vector<Triangle> recursive_subdivide(const Triangle& triangle, int recursive_depth) {
-    //if (abs(triangle.vertices[0] - triangle.vertices[1]).x < 0.05 && 
-    //    abs(triangle.vertices[0] - triangle.vertices[1]).y < 0.05 &&
-    //    abs(triangle.vertices[0] - triangle.vertices[1]).z < 0.05) {
-    //    return { triangle };
-    //}
     if (recursive_depth == 0) {
         return { triangle };
     }
 
-    Vec3 new_vertex0 = (triangle.vertices[0] + triangle.vertices[1]) / 2.0f;
-    Vec3 new_vertex1 = (triangle.vertices[1] + triangle.vertices[2]) / 2.0f;
-    Vec3 new_vertex2 = (triangle.vertices[2] + triangle.vertices[0]) / 2.0f;
+    Vec3 new_vertex0 = (triangle.vertices[0].position + triangle.vertices[1].position) / 2.0f;
+    Vec3 new_vertex1 = (triangle.vertices[1].position + triangle.vertices[2].position) / 2.0f;
+    Vec3 new_vertex2 = (triangle.vertices[2].position + triangle.vertices[0].position) / 2.0f;
 
-    Triangle new_triangle0 = { triangle.vertices[0], new_vertex0, new_vertex2 };
-    Triangle new_triangle1 = { new_vertex0, triangle.vertices[1], new_vertex1 };
-    Triangle new_triangle2 = { new_vertex0, new_vertex1, new_vertex2 };
-    Triangle new_triangle3 = { new_vertex2, new_vertex1, triangle.vertices[2] };
+    Triangle new_triangle0 = Triangle(triangle.vertices[0].position, new_vertex0, new_vertex2);
+    Triangle new_triangle1 = Triangle(new_vertex0, triangle.vertices[1].position, new_vertex1);
+    Triangle new_triangle2 = Triangle(new_vertex0, new_vertex1, new_vertex2);
+    Triangle new_triangle3 = Triangle(new_vertex2, new_vertex1, triangle.vertices[2].position);
 
     std::vector<Triangle> ret;
     recursive_depth--;
@@ -324,23 +319,22 @@ Mesh Mesh::create_icosphere_mesh(int regression_depth) {
     std::vector<Vertex> all_vertices;
     for (auto& triangle : m_triangles) {
         for (auto& vertex : triangle.vertices) {
-            vertex = m_center + Normalize(vertex - m_center);
+            vertex.position = m_center + Normalize(vertex.position - m_center);
         }
         for (auto& vertex : triangle.vertices) {
             //Vec3 a = triangle.vertices[0] - triangle.vertices[1];
             //Vec3 b = triangle.vertices[0] - triangle.vertices[2];
             //Vec3 normal = Normalize(Cross(a, b));
-            Vec3 normal = Normalize(vertex - m_center);
+            Vec3 normal = Normalize(vertex.position - m_center);
 
             Vertex v;
-            v.position = vertex;
+            v.position = vertex.position;
             v.normal = normal;
             all_vertices.push_back(v);
         }
     }
 
     // TODO 优化索引算法
-    // TODO Triangle数据结构改为 Vertex[3], 直接在里面存normal和uv
     std::vector<unsigned int> indices;
     indices.reserve(all_vertices.size() + 1);
     for (int i = 0; i < all_vertices.size(); i++) {

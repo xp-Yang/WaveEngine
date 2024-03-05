@@ -3,6 +3,7 @@
 
 #include <cmath>
 #include <random>
+#include <array>
 #include "Vector.hpp"
 #include "Matrix.hpp"
 
@@ -100,6 +101,21 @@ T lerp(const T& start, const T& end, float t)
 {
     return (1 - t) * start + t * end;
 }
+
+struct Vertex {
+    Vec3 position;
+    Vec3 normal;
+    Vec2 texture_uv;
+};
+
+struct Triangle {
+    Triangle(const Vec3& pos1, const Vec3& pos2, const Vec3& pos3) {
+        vertices[0].position = pos1;
+        vertices[1].position = pos2;
+        vertices[2].position = pos3;
+    }
+    std::array<Vertex, 3> vertices;
+};
 
 struct Interval {
     double min, max;
