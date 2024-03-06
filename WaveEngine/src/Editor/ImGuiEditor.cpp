@@ -248,8 +248,8 @@ void ImGuiEditor::renderPickedEntityController()
         ImGui::PopItemWidth();
 
         if (world.hasComponent<ecs::PointLightComponent>(entity)) {
-            Vec4& color = world.getComponent<ecs::PointLightComponent>(entity)->luminousColor;
-            ImGui::ColorEdit3((std::string("color") + "##" + obj_name).c_str(), (float*)&color);
+            Vec4& luminousColor = world.getComponent<ecs::PointLightComponent>(entity)->luminousColor;
+            ImGui::ColorEdit3((std::string("Luminous Color") + "##" + obj_name).c_str(), (float*)&luminousColor);
         }
 
         // 编辑对象材质属性

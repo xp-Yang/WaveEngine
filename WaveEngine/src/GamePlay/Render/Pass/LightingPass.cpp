@@ -94,6 +94,7 @@ void LightingPass::draw()
 
 	// lights
 	for (auto entity : world.entityView<ecs::PointLightComponent>()) {
+		auto& point_light = *world.getComponent<ecs::PointLightComponent>(entity);
 		auto& renderable = *world.getComponent<ecs::RenderableComponent>(entity);
 		auto& model_matrix = *world.getComponent<ecs::TransformComponent>(entity);
 
@@ -103,6 +104,7 @@ void LightingPass::draw()
 			Shader* shader = material.shader;
 			material.update_shader_binding();
 			shader->start_using();
+			shader->setFloat4("color", point_light.luminousColor);
 			shader->setMatrix("model", 1, model_matrix.transform());
 			shader->setMatrix("view", 1, camera_view);
 			shader->setMatrix("projection", 1, camera_projection);

@@ -50,7 +50,6 @@ void MainCameraPass::draw()
     camera_projection = camera.projection;
     camera_pos = camera.pos;
 
-    int primitives_count = 0;
     for (auto entity : world.entityView<ecs::RenderableComponent>()) {
         if(world.hasComponent<ecs::SkyboxComponent>(entity))
             continue;
@@ -62,25 +61,18 @@ void MainCameraPass::draw()
         }
 
         for (int i = 0; i < renderable.primitives.size(); i++) {
+            if (world.hasComponent<ecs::PointLightComponent>(entity))
+                continue;
             auto& mesh = renderable.primitives[i].mesh;
             auto& material = renderable.primitives[i].material;
             Shader* shader = material.shader;
             material.update_shader_binding();
+            // TODO 能不能想个好方法管理这些shader属性
             shader->start_using();
             shader->setMatrix("view", 1, camera_view);
-
-            // TODO 能不能想个好方法管理这些shader属性
             shader->setMatrix("model", 1, model_matrix.transform());
             shader->setMatrix("projection", 1, camera_projection);
             shader->setFloat3("view_pos", camera_pos);
-            
-            if (world.hasComponent<ecs::PointLightComponent>(entity)) {
-                Renderer::drawIndex(*shader, mesh.get_VAO(), mesh.get_indices_count());
-                shader->stop_using();
-                continue;
-            }
-
-            primitives_count++;
 
             auto dir_light_component = world.getMainDirectionalLightComponent();
             Mat4 light_ref_matrix = dir_light_component->lightReferenceMatrix();
@@ -90,17 +82,9 @@ void MainCameraPass::draw()
             shader->setFloat4("directionalLight.color", light_color);
             
             //// 点光源这里的循环造成了卡顿，需要deferred rendering解决
-            int k = 0;
             //for (auto entity : world.entityView<ecs::PointLightComponent>()) {
-            //    auto& transform = *world.getComponent<ecs::TransformComponent>(entity);
-            //    Vec3 light_pos = transform.transform()[3];
-            //    Vec4 light_color = world.getComponent<ecs::PointLightComponent>(entity)->luminousColor;
-            //    std::string light_id = std::string("pointLights[") + std::to_string(k) + "]";
-            //    shader->setFloat3(light_id + ".position", light_pos);
-            //    shader->setFloat4(light_id + ".color", light_color);
-            //    k++;
             //}
-            shader->setInt("point_light_size", k);
+            shader->setInt("point_light_size", 0);
 
             shader->setCubeTexture("skybox", 6, world.getSkyboxComponent()->texture);
             shader->setBool("enable_skybox_sample", m_reflection);

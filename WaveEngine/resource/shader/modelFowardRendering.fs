@@ -37,8 +37,8 @@ uniform DirectionalLight directionalLight;
 const int MAX_POINT_LIGHTS_COUNT = 16;
 uniform int point_lights_size = 5;
 uniform PointLight pointLights[MAX_POINT_LIGHTS_COUNT];
-uniform vec3 view_pos;
 
+uniform vec3 view_pos;
 
 uniform sampler2D shadow_map;
 uniform samplerCube skybox;
@@ -68,7 +68,7 @@ vec3 LightCalculation(vec3 light_color, vec3 n, vec3 v, vec3 l, vec3 diffuse_coe
     vec3 diffuse_light = light_color * max(dot(l, n), 0.0) * diffuse_coef;
     
     vec3 h = normalize(v + l);
-    vec3 specular_light = light_color * pow(max(dot(n, h), 0.0), 128.0) * specular_coef; // 光线入射能量不对
+    vec3 specular_light = light_color * pow(max(dot(n, h), 0.0), 128.0) * specular_coef; // TODO 光线入射能量不对
 
     // phong
     //vec3 reflect_dir = reflect(-l, n);
@@ -85,22 +85,22 @@ void main()
     vec3 specular_coef = vec3(texture(material.specular_map, fs_in.pass_uv));
 
     vec3 ambient_light = vec3(0);
-    vec3 lighting = vec3(0);
 	
     // Directional Light Source:
 	vec3 lightDir = directionalLight.direction;
-	lighting += LightCalculation(directionalLight.color.xyz, normal, view_direction, -lightDir, diffuse_coef, specular_coef);
+	vec3 lightingByDirectionalLight = LightCalculation(directionalLight.color.xyz, normal, view_direction, -lightDir, diffuse_coef, specular_coef);
 	
 	// Point Light Source:
+    vec3 lightingByPointLight = vec3(0);
     for(int i = 0; i < point_lights_size; i++){
         vec3 lightDir = normalize(fs_in.pass_pos - pointLights[i].position);
-        lighting += LightCalculation(pointLights[i].color.xyz, normal, view_direction, -lightDir, diffuse_coef, specular_coef) / point_lights_size;
+        lightingByPointLight += LightCalculation(pointLights[i].color.xyz, normal, view_direction, -lightDir, diffuse_coef, specular_coef) / point_lights_size;
     }
 
 	// Shadow:
     float shadow = ShadowCalculation(fs_in.FragPosLightSpace);       
     
-    vec3 result = ambient_light + (1.0 - shadow) * lighting;
+    vec3 result = ambient_light + (1.0 - shadow) * lightingByDirectionalLight + lightingByPointLight;
     gl_FragColor = vec4(result, 1.0);
 
     if(enable_skybox_sample){

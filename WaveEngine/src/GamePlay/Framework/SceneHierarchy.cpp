@@ -48,7 +48,7 @@ void SceneHierarchy::init() {
 	dir_light_properties.direction = -dir_light_transform.translation;
 
 
-	static const int POINT_LIGHT_COUNT = 5;
+	static const int POINT_LIGHT_COUNT = 8;
 	static Shader* point_light_shader = new Shader(resource_dir + "/shader/light.vs", resource_dir + "/shader/light.fs");
 	for (int i = 0; i < POINT_LIGHT_COUNT; i++) {
 		auto point_light_entity = world.create_entity();

@@ -30,6 +30,7 @@ uniform DirectionalLight directionalLight;
 const int MAX_POINT_LIGHTS_COUNT = 16;
 uniform int point_lights_size = 5;
 uniform PointLight pointLights[MAX_POINT_LIGHTS_COUNT];
+
 uniform vec3 view_pos;
 
 
@@ -79,21 +80,20 @@ void main()
 
     // TODO 如果采样到GBuffer的空白区域可以直接return
 
-    vec3 lighting = vec3(0);
-	
     // Directional Light Source:
 	vec3 lightDir = directionalLight.direction;
-	lighting += LightCalculation(directionalLight.color.xyz, Normal, viewDir, -lightDir, Diffuse, Specular);
+	vec3 lightingByDirectionalLight = LightCalculation(directionalLight.color.xyz, Normal, viewDir, -lightDir, Diffuse, Specular);
 	
 	// Point Light Source:
+    vec3 lightingByPointLight = vec3(0);
     for(int i = 0; i < point_lights_size; i++){
         vec3 lightDir = normalize(Position - pointLights[i].position);
-        lighting += LightCalculation(pointLights[i].color.xyz, Normal, viewDir, -lightDir, Diffuse, Specular) / point_lights_size;
+        lightingByPointLight += LightCalculation(pointLights[i].color.xyz, Normal, viewDir, -lightDir, Diffuse, Specular) / point_lights_size;
     }
 
 	// Shadow:
     vec4 LightSpacePos = lightSpaceMatrix * vec4(Position, 1.0);
     float shadow = ShadowCalculation(LightSpacePos);
 
-    gl_FragColor = vec4((1.0 - shadow) * lighting, 1.0);
+    gl_FragColor = vec4((1.0 - shadow) * lightingByDirectionalLight + lightingByPointLight, 1.0);
 }
