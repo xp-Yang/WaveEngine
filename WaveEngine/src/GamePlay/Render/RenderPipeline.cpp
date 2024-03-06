@@ -65,6 +65,8 @@ void RenderPipeline::render()
     else if (m_render_params.pipeline_type == PIPELINE_TYPE::DEFERRED) {
         m_gbuffer_pass->draw();
 
+        static_cast<LightingPass*>(m_lighting_pass.get())->enableNormal(m_render_params.normal_debug);
+        static_cast<LightingPass*>(m_lighting_pass.get())->enableWireframe(m_render_params.wireframe);
         if (m_render_params.shadow) {
             static_cast<LightingPass*>(m_lighting_pass.get())->prepare(m_gbuffer_pass->getFrameBuffer(), m_shadow_pass->getFrameBuffer());
         }
