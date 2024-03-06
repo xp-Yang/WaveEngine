@@ -38,56 +38,36 @@ void SceneHierarchy::init() {
 	skybox_primitive.material = skybox_material;
 	skybox_renderable.setPrimitives({ skybox_primitive });
 
-	//auto light_entity = world.create_entity();
-	//world.addComponent<ecs::NameComponent>(light_entity).name = "light";
- //   world.addComponent<ecs::LightComponent>(light_entity);
-	//auto& light_transform = world.addComponent<ecs::TransformComponent>(light_entity);
- //   light_transform.translation = { 12.0f, 12.0f, 0.0f };
- //   light_transform.scale = Vec3(0.5f);
-	//auto& light_renderable = world.addComponent<ecs::RenderableComponent>(light_entity);
-	//ecs::Primitive light_primitive;
-	//light_primitive.mesh = Mesh::create_cube_mesh();
-	//Material light_material;
-	//light_material.color = {255.f / 255.0f, 255.f / 255.0f, 175.f / 255.0f, 175.f / 255.0f };
-	//light_material.shader = new Shader(resource_dir + "/shader/light.vs", resource_dir + "/shader/light.fs");
-	//light_primitive.material = light_material;
-	//light_renderable.setPrimitives({ light_primitive });
 
-	//auto directional_light_entity = world.create_entity();
-	//world.addComponent<ecs::NameComponent>(directional_light_entity).name = "directional_light";
-	//world.addComponent<ecs::LightComponent>(directional_light_entity);
-	//auto& directional_light_transform = world.addComponent<ecs::TransformComponent>(directional_light_entity);
-	//directional_light_transform.translation = { 0.0f, 15.0f, 0.0f };
-	//directional_light_transform.scale = Vec3(0.5f);
-	//auto& directional_light_renderable = world.addComponent<ecs::RenderableComponent>(directional_light_entity);
-	//ecs::Primitive directional_light_primitive;
-	//directional_light_primitive.mesh = Mesh::create_cube_mesh();
-	//Material directional_light_material;
-	//directional_light_material.shader = new Shader(resource_dir + "/shader/light.vs", resource_dir + "/shader/light.fs");
-	//directional_light_primitive.material = directional_light_material;
-	//directional_light_renderable.setPrimitives({ directional_light_primitive });
+	auto dir_light_entity = world.create_entity();
+	world.addComponent<ecs::NameComponent>(dir_light_entity).name = "directionalLight";
+	auto& dir_light_properties = world.addComponent<ecs::DirectionalLightComponent>(dir_light_entity);
+	dir_light_properties.luminousColor = { 0.05f, 0.05f, 0.05f, 1.0f };
+	auto& dir_light_transform = world.addComponent<ecs::TransformComponent>(dir_light_entity);
+	dir_light_transform.translation = { -15.0f, 30.0f, -15.0f };
+	dir_light_properties.direction = -dir_light_transform.translation;
 
-	static const int LIGHT_COUNT = 5;
-	static Shader* light_shader = new Shader(resource_dir + "/shader/light.vs", resource_dir + "/shader/light.fs");
-	for (int i = 0; i < LIGHT_COUNT; i++) {
-		auto light_entity = world.create_entity();
-		world.addComponent<ecs::NameComponent>(light_entity).name = std::string("light") + std::to_string(i);
-		world.addComponent<ecs::LightComponent>(light_entity);
-		auto& light_transform = world.addComponent<ecs::TransformComponent>(light_entity);
+
+	static const int POINT_LIGHT_COUNT = 5;
+	static Shader* point_light_shader = new Shader(resource_dir + "/shader/light.vs", resource_dir + "/shader/light.fs");
+	for (int i = 0; i < POINT_LIGHT_COUNT; i++) {
+		auto point_light_entity = world.create_entity();
+		world.addComponent<ecs::NameComponent>(point_light_entity).name = std::string("light") + std::to_string(i);
+		auto& point_light_transform = world.addComponent<ecs::TransformComponent>(point_light_entity);
 		double r1 = random(-20.0f, 20.0f);
 		double r2 = random(5.0f, 10.0f);
 		double r3 = random(-20.0f, 20.0f);
-		light_transform.translation = { r1, r2, r3 };
-		light_transform.scale = Vec3(0.2f);
-		auto& light_renderable = world.addComponent<ecs::RenderableComponent>(light_entity);
-		auto& light_properties = world.addComponent<ecs::LightComponent>(light_entity);
-		ecs::Primitive light_primitive;
-		light_primitive.mesh = Mesh::create_icosphere_mesh(5);
-		light_properties.color = { randomUnit(), randomUnit(), randomUnit(), 175.f / 255.0f};
-		Material light_material;
-		light_material.shader = light_shader;
-		light_primitive.material = light_material;
-		light_renderable.setPrimitives({ light_primitive });
+		point_light_transform.translation = { r1, r2, r3 };
+		point_light_transform.scale = Vec3(0.2f);
+		auto& point_light_renderable = world.addComponent<ecs::RenderableComponent>(point_light_entity);
+		auto& point_light_properties = world.addComponent<ecs::PointLightComponent>(point_light_entity);
+		point_light_properties.luminousColor = { randomUnit(), randomUnit(), randomUnit(), 1.0f};
+		ecs::Primitive point_light_primitive;
+		point_light_primitive.mesh = Mesh::create_icosphere_mesh(5);
+		Material point_light_material;
+		point_light_material.shader = point_light_shader;
+		point_light_primitive.material = point_light_material;
+		point_light_renderable.setPrimitives({ point_light_primitive });
 	}
 
 	auto cube_entity = world.create_entity();
@@ -98,7 +78,7 @@ void SceneHierarchy::init() {
 	ecs::Primitive cube_primitive;
 	cube_primitive.mesh = Mesh::create_cube_mesh();
 	Material cube_material;
-    cube_material.shader = new Shader(resource_dir + "/shader/model.vs", resource_dir + "/shader/model.fs");
+    cube_material.shader = new Shader(resource_dir + "/shader/model.vs", resource_dir + "/shader/modelFowardRendering.fs");
 	cube_material.set_diffuse_map(resource_dir + "/images/pure_white_map.png");
 	cube_material.set_specular_map(resource_dir + "/images/cube_specular.png");
 	cube_primitive.material = cube_material;
@@ -113,7 +93,7 @@ void SceneHierarchy::init() {
 	ecs::Primitive sphere_primitive;
 	sphere_primitive.mesh = Mesh::create_icosphere_mesh(5);
 	Material sphere_material;
-	sphere_material.shader = new Shader(resource_dir + "/shader/model.vs", resource_dir + "/shader/model.fs");
+	sphere_material.shader = new Shader(resource_dir + "/shader/model.vs", resource_dir + "/shader/modelFowardRendering.fs");
 	sphere_material.set_diffuse_map(resource_dir + "/images/pure_white_map.png");
 	sphere_material.set_specular_map(resource_dir + "/images/pure_white_map.png");
 	sphere_primitive.material = sphere_material;
@@ -144,7 +124,7 @@ void SceneHierarchy::init() {
 	nanosuit_transform.scale = Vec3(0.4f);
 	auto& nanosuit_renderable = world.addComponent<ecs::RenderableComponent>(nanosuit_entity);
 	std::vector<ecs::Primitive> nanosuit_primitives;
-	Shader* nanosuit_shader = new Shader(resource_dir + "/shader/model.vs", resource_dir + "/shader/model.fs");
+	Shader* nanosuit_shader = new Shader(resource_dir + "/shader/model.vs", resource_dir + "/shader/modelFowardRendering.fs");
 	for (int i = 0; i < nanosuit->get_datas().size(); i++) {
 		ecs::Primitive primitive;
 		primitive.mesh = nanosuit->get_datas().at(i).mesh;
@@ -163,7 +143,7 @@ void SceneHierarchy::init() {
 	//yoko_transform.scale = Vec3(0.25f);
 	//auto& yoko_renderable = world.addComponent<ecs::RenderableComponent>(yoko_entity);
 	//std::vector<ecs::Primitive> yoko_primitives;
-	//Shader* yoko_shader = new Shader(resource_dir + "/shader/model.vs", resource_dir + "/shader/model.fs");
+	//Shader* yoko_shader = new Shader(resource_dir + "/shader/model.vs", resource_dir + "/shader/modelFowardRendering.fs");
 	//for (int i = 0; i < yoko->get_datas().size(); i++) {
 	//	ecs::Primitive primitive;
 	//	primitive.mesh = yoko->get_datas().at(i).mesh;
@@ -182,7 +162,7 @@ void SceneHierarchy::init() {
 	bunny_transform.scale = Vec3(25.0f);
 	auto& bunny_renderable = world.addComponent<ecs::RenderableComponent>(bunny_entity);
 	std::vector<ecs::Primitive> bunny_primitives;
-	Shader* bunny_shader = new Shader(resource_dir + "/shader/model.vs", resource_dir + "/shader/model.fs");
+	Shader* bunny_shader = new Shader(resource_dir + "/shader/model.vs", resource_dir + "/shader/modelFowardRendering.fs");
 	for (int i = 0; i < bunny->get_datas().size(); i++) {
 		ecs::Primitive primitive;
 		primitive.mesh = bunny->get_datas().at(i).mesh;

@@ -247,8 +247,8 @@ void ImGuiEditor::renderPickedEntityController()
         ImGui::SliderFloat((std::string("xyz") + "##" + obj_name).c_str(), &transform_component.translation.z, -10.0f, 10.0f);
         ImGui::PopItemWidth();
 
-        if (world.hasComponent<ecs::LightComponent>(entity)) {
-            Vec4& color = world.getComponent<ecs::LightComponent>(entity)->color;
+        if (world.hasComponent<ecs::PointLightComponent>(entity)) {
+            Vec4& color = world.getComponent<ecs::PointLightComponent>(entity)->luminousColor;
             ImGui::ColorEdit3((std::string("color") + "##" + obj_name).c_str(), (float*)&color);
         }
 

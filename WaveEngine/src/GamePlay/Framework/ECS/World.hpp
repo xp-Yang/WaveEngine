@@ -12,7 +12,7 @@ typedef std::bitset<MAX_COMPONENTS> ComponentMask;
 
 // TODO 实现Entity UUID
 // 每个Entity保存一份bitset，大小是MAX_COMPONENTS。标记了该Entity有没有某种类型的Component数据
-// World保存Entitys数组
+// World保存Entities数组
 class Entity {
 public:
     Entity() = delete;
@@ -63,6 +63,8 @@ int getComponentPoolId()
 }
 
 class CameraComponent;
+class DirectionalLightComponent;
+class SkyboxComponent;
 template<typename... ComponentTypes> class EnttView;
 class World {
 public:
@@ -147,6 +149,10 @@ public:
     }
 
     CameraComponent* getMainCameraComponent();
+
+    DirectionalLightComponent* getMainDirectionalLightComponent();
+
+    SkyboxComponent* getSkyboxComponent();
 
     std::vector<Entity> getPickedEntities();
 

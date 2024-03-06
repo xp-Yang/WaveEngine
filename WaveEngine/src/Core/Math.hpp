@@ -18,7 +18,7 @@ inline float deg2rad(float deg) { return deg * MathConstant::PI / 180.0f; }
 inline float rad2deg(float rad) { return rad * 180.0f / MathConstant::PI; }
 inline float randomUnit() {
     static std::uniform_real_distribution<double> distribution(0.0, 1.0);
-    static std::mt19937 generator;
+    std::mt19937 generator(std::random_device{}());
     return distribution(generator);
     //// Returns a random real in [0,1).
     //return rand() / (RAND_MAX + 1.0);

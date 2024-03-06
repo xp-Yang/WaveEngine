@@ -11,16 +11,25 @@ uniform sampler2D shadow_map;
 
 uniform mat4 lightSpaceMatrix;
 
-struct Light {
-    vec3 position;
+struct DirectionalLight
+{
+    vec3 direction;
     vec4 color;
-    
-    //float Linear;
-    //float Quadratic;
 };
-const int LIGHT_COUNT = 5;
+
+struct PointLight
+{
+    vec3  position;
+	vec4  color;
+    float radius;
+    vec3  intensity;
+};
+
+uniform DirectionalLight directionalLight;
 // TODO shader里怎么用动态数组
-uniform Light lights[LIGHT_COUNT];
+const int MAX_POINT_LIGHTS_COUNT = 16;
+uniform int point_lights_size = 5;
+uniform PointLight pointLights[MAX_POINT_LIGHTS_COUNT];
 uniform vec3 view_pos;
 
 
@@ -44,16 +53,16 @@ float ShadowCalculation(vec4 LightSpacePos)
 
 
 // blinn-phong
-vec3 LightCalculation(Light light, vec3 n, vec3 v, vec3 l, vec3 diffuse_coef, vec3 specular_coef)
+vec3 LightCalculation(vec3 light_color, vec3 n, vec3 v, vec3 l, vec3 diffuse_coef, vec3 specular_coef)
 {
-    vec3 diffuse_light = light.color.xyz * max(dot(l, n), 0.0) * diffuse_coef;
+    vec3 diffuse_light = light_color * max(dot(l, n), 0.0) * diffuse_coef;
     
     vec3 h = normalize(v + l);
-    vec3 specular_light = light.color.xyz * pow(max(dot(n, h), 0.0), 128.0) * specular_coef;
+    vec3 specular_light = light_color * pow(max(dot(n, h), 0.0), 128.0) * specular_coef;
 
     // phong
     //vec3 reflect_dir = reflect(-l, n);
-    //vec3 specular_light = light.color.xyz * pow(max(dot(v, reflect_dir), 0.0), 128.0) * specular_coef;
+    //vec3 specular_light = light_color * pow(max(dot(v, reflect_dir), 0.0), 128.0) * specular_coef;
 
     return diffuse_light + specular_light;
 }
@@ -70,15 +79,19 @@ void main()
 
     // TODO 如果采样到GBuffer的空白区域可以直接return
 
-    // 计算光照
-    //vec3 ambient_light = vec3(0);
     vec3 lighting = vec3(0);
-    for(int i = 0; i < LIGHT_COUNT; i++){
-        //ambient_light += lights[i].color.xyz * material.ambient * Diffuse);
-        vec3 lightDir = normalize(lights[i].position - Position);
-        lighting += LightCalculation(lights[i], Normal, viewDir, lightDir, Diffuse, Specular) / LIGHT_COUNT;
+	
+    // Directional Light Source:
+	vec3 lightDir = directionalLight.direction;
+	lighting += LightCalculation(directionalLight.color.xyz, Normal, viewDir, -lightDir, Diffuse, Specular);
+	
+	// Point Light Source:
+    for(int i = 0; i < point_lights_size; i++){
+        vec3 lightDir = normalize(Position - pointLights[i].position);
+        lighting += LightCalculation(pointLights[i].color.xyz, Normal, viewDir, -lightDir, Diffuse, Specular) / point_lights_size;
     }
 
+	// Shadow:
     vec4 LightSpacePos = lightSpaceMatrix * vec4(Position, 1.0);
     float shadow = ShadowCalculation(LightSpacePos);
 

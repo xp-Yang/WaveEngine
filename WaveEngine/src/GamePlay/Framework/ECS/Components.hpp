@@ -115,26 +115,32 @@ struct SkyboxComponent {
 	unsigned int texture;
 };
 
-struct LightComponent {
-	Color4 color = {1.0f, 1.0f, 1.0f, 1.0f};
-	Mat4 lightReferenceMatrix()
+struct PointLightComponent {
+	Color4 luminousColor = { 1.0f, 1.0f, 1.0f, 1.0f };
+	virtual Mat4 lightReferenceMatrix()
 	{
-		auto& world = ecs::World::get();
-		Mat4 light_projection = Ortho(-15.0f * WINDOW_WIDTH / WINDOW_HEIGHT, 15.0f * WINDOW_WIDTH / WINDOW_HEIGHT, -15.0f, 15.0f, 0.1f, 100.0f);
 		//lightProjection = Perspective(deg2rad(45.0f), /*1.0f*/WINDOW_WIDTH / WINDOW_HEIGHT, 0.1f, 100.0f);
-		Vec3 light_pos = Vec3(0.0f);
-		for (auto entity : world.entityView<ecs::LightComponent>()) {
-			light_pos = world.getComponent<ecs::TransformComponent>(entity)->translation;
-		}
-		Mat4 light_view = LookAt(light_pos, Vec3(0.0f, 0.0f, 0.0f), ecs::CameraComponent::global_up);
-		Mat4 ret = light_projection * light_view;
-		return ret;
+		return {};
 	}
 	Mat4 getLightProjMatrix() {
 		Mat4 result = lightReferenceMatrix();
 		return result;
 	}
 };
+
+struct DirectionalLightComponent : public PointLightComponent {
+	Vec3 direction;
+
+	Mat4 lightReferenceMatrix()
+	{
+		auto& world = ecs::World::get();
+		Mat4 light_projection = Ortho(-15.0f * WINDOW_WIDTH / WINDOW_HEIGHT, 15.0f * WINDOW_WIDTH / WINDOW_HEIGHT, -15.0f, 15.0f, 0.1f, 100.0f);
+		Mat4 light_view = LookAt(Vec3(0.0f) - direction, Vec3(0.0f), ecs::CameraComponent::global_up);
+		Mat4 ret = light_projection * light_view;
+		return ret;
+	}
+};
+
 
 // TODO 决定一个data是放在component的属性里还是单独作为一个component的关键判据是什么
 // 为什么Transform总是与Renderable分离

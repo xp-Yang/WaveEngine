@@ -9,9 +9,27 @@ CameraComponent* World::getMainCameraComponent()
 {
     for (auto entity : entityView<CameraComponent>()) {
         CameraComponent* camera = getComponent<CameraComponent>(entity);
-        if (camera)
-            return camera;
+        return camera;
     }
+    return nullptr;
+}
+
+DirectionalLightComponent* World::getMainDirectionalLightComponent()
+{
+    for (auto entity : entityView<DirectionalLightComponent>()) {
+        DirectionalLightComponent* directionalLight = getComponent<DirectionalLightComponent>(entity);
+        return directionalLight;
+    }
+    return nullptr;
+}
+
+SkyboxComponent* World::getSkyboxComponent()
+{
+    for (auto entity : entityView<SkyboxComponent>()) {
+        SkyboxComponent* skybox = getComponent<SkyboxComponent>(entity);
+        return skybox;
+    }
+    return nullptr;
 }
 
 std::vector<Entity> World::getPickedEntities()

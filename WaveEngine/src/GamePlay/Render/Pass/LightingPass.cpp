@@ -45,16 +45,30 @@ void LightingPass::draw()
 	lighting_shader->setTexture("gSpecular", 3, g_position_map + 3);
 	lighting_shader->setFloat3("view_pos", camera_pos);
 
-	Mat4 light_ref_matrix;
+	auto dir_light_component = world.getMainDirectionalLightComponent();
+	Mat4 light_ref_matrix = dir_light_component->lightReferenceMatrix();
+	Vec3 light_direction = dir_light_component->direction;
+	Vec4 light_color = dir_light_component->luminousColor;
+	lighting_shader->setFloat3("directionalLight.direction", light_direction);
+	lighting_shader->setFloat4("directionalLight.color", light_color);
+
+	if (m_shadow_map != 0) {
+		lighting_shader->setMatrix("lightSpaceMatrix", 1, light_ref_matrix);
+		lighting_shader->setTexture("shadow_map", 4, m_shadow_map);
+	}
+	else {
+		// set default map
+		//shader->setTexture("shadow_map", 4, 0);
+	}
+
 	int k = 0;
-	for (auto entity : world.entityView<ecs::LightComponent>()) {
-		light_ref_matrix = world.getComponent<ecs::LightComponent>(entity)->getLightProjMatrix();
+	for (auto entity : world.entityView<ecs::PointLightComponent>()) {
 		auto& transform = *world.getComponent<ecs::TransformComponent>(entity);
 		Vec3 light_pos = transform.transform()[3];
-		Vec4 light_color = world.getComponent<ecs::LightComponent>(entity)->color;
-		std::string light_id = std::string("lights[") + std::to_string(k) + "]";
-		lighting_shader->setFloat4(light_id + ".color", light_color);
+		Vec4 light_color = world.getComponent<ecs::PointLightComponent>(entity)->luminousColor;
+		std::string light_id = std::string("pointLights[") + std::to_string(k) + "]";
 		lighting_shader->setFloat3(light_id + ".position", light_pos);
+		lighting_shader->setFloat4(light_id + ".color", light_color);
 		k++;
 
 		// 模拟正向渲染的嵌套for循环，性能明显下降
@@ -67,14 +81,8 @@ void LightingPass::draw()
 		// shader计算：  每次drawcall，每个VAO绘制时，shader对光栅化后的片段并行计算，每个shader内部循环Lights.size()次
 		//  vs  LightingPass的一次drawcall中，shader对整个屏幕所有像素并行计算，每个shader内部循环Lights.size()次。
 	}
-	if (m_shadow_map != 0) {
-		lighting_shader->setMatrix("lightSpaceMatrix", 1, light_ref_matrix);
-		lighting_shader->setTexture("shadow_map", 4, m_shadow_map);
-	}
-	else {
-		// set default map
-		//shader->setTexture("shadow_map", 4, 0);
-	}
+	lighting_shader->setInt("point_lights_size", k);
+
 	Renderer::drawIndex(*lighting_shader, m_screen_quad.get_VAO(), m_screen_quad.get_indices_count());
 	lighting_shader->stop_using();
 
@@ -85,7 +93,7 @@ void LightingPass::draw()
 
 
 	// lights
-	for (auto entity : world.entityView<ecs::LightComponent>()) {
+	for (auto entity : world.entityView<ecs::PointLightComponent>()) {
 		auto& renderable = *world.getComponent<ecs::RenderableComponent>(entity);
 		auto& model_matrix = *world.getComponent<ecs::TransformComponent>(entity);
 
@@ -123,7 +131,6 @@ void LightingPass::draw()
 	}
 
 	// skybox
-	glDepthFunc(GL_LEQUAL);
 	for (auto entity : world.entityView<ecs::SkyboxComponent>()) {
 		auto& renderable = *world.getComponent<ecs::RenderableComponent>(entity);
 		auto& model_matrix = *world.getComponent<ecs::TransformComponent>(entity);
@@ -142,7 +149,6 @@ void LightingPass::draw()
 			shader->stop_using();
 		}
 	}
-	glDepthFunc(GL_LESS);
 
 	// normal
 	if (m_normal_debug)

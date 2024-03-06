@@ -8,9 +8,18 @@ in VS_OUT {
     vec4 FragPosLightSpace;
 } fs_in;
 
-struct Light {
-    vec3 position;
+struct DirectionalLight
+{
+    vec3 direction;
     vec4 color;
+};
+
+struct PointLight
+{
+    vec3  position;
+	vec4  color;
+    float radius;
+    vec3  intensity;
 };
 
 struct Material {
@@ -23,9 +32,13 @@ struct Material {
 };
 
 uniform Material material;
-#define LIGHT_COUNT 256
-uniform Light lights[LIGHT_COUNT];
+
+uniform DirectionalLight directionalLight;
+const int MAX_POINT_LIGHTS_COUNT = 16;
+uniform int point_lights_size = 5;
+uniform PointLight pointLights[MAX_POINT_LIGHTS_COUNT];
 uniform vec3 view_pos;
+
 
 uniform sampler2D shadow_map;
 uniform samplerCube skybox;
@@ -50,16 +63,16 @@ float ShadowCalculation(vec4 fragPosLightSpace)
 }
 
 // blinn-phong
-vec3 LightCalculation(Light light, vec3 n, vec3 v, vec3 l, vec3 diffuse_coef, vec3 specular_coef)
+vec3 LightCalculation(vec3 light_color, vec3 n, vec3 v, vec3 l, vec3 diffuse_coef, vec3 specular_coef)
 {
-    vec3 diffuse_light = light.color.xyz * max(dot(l, n), 0.0) * diffuse_coef;
+    vec3 diffuse_light = light_color * max(dot(l, n), 0.0) * diffuse_coef;
     
     vec3 h = normalize(v + l);
-    vec3 specular_light = light.color.xyz * pow(max(dot(n, h), 0.0), 128.0) * specular_coef; // 光线入射能量不对
+    vec3 specular_light = light_color * pow(max(dot(n, h), 0.0), 128.0) * specular_coef; // 光线入射能量不对
 
     // phong
     //vec3 reflect_dir = reflect(-l, n);
-    //vec3 specular_light = light.color.xyz * pow(max(dot(v, reflect_dir), 0.0), material.shininess) * specular_coef;
+    //vec3 specular_light = light_color * pow(max(dot(v, reflect_dir), 0.0), material.shininess) * specular_coef;
 
     return diffuse_light + specular_light;
 }
@@ -71,16 +84,20 @@ void main()
     vec3 diffuse_coef = vec3(texture(material.diffuse_map, fs_in.pass_uv));
     vec3 specular_coef = vec3(texture(material.specular_map, fs_in.pass_uv));
 
-    // 计算光照
     vec3 ambient_light = vec3(0);
     vec3 lighting = vec3(0);
-    for(int i = 0; i < LIGHT_COUNT; i++){
-        //ambient_light += lights[i].color.xyz * material.ambient * diffuse_coef;
-        vec3 lightDir = normalize(lights[i].position - fs_in.pass_pos);
-        lighting += LightCalculation(lights[i], normal, view_direction, lightDir, diffuse_coef, specular_coef);
+	
+    // Directional Light Source:
+	vec3 lightDir = directionalLight.direction;
+	lighting += LightCalculation(directionalLight.color.xyz, normal, view_direction, -lightDir, diffuse_coef, specular_coef);
+	
+	// Point Light Source:
+    for(int i = 0; i < point_lights_size; i++){
+        vec3 lightDir = normalize(fs_in.pass_pos - pointLights[i].position);
+        lighting += LightCalculation(pointLights[i].color.xyz, normal, view_direction, -lightDir, diffuse_coef, specular_coef) / point_lights_size;
     }
 
-    // 计算阴影
+	// Shadow:
     float shadow = ShadowCalculation(fs_in.FragPosLightSpace);       
     
     vec3 result = ambient_light + (1.0 - shadow) * lighting;
