@@ -36,7 +36,7 @@ void LightingPass::draw()
 	camera_projection = camera.projection;
 
 	// lighting
-	Shader* lighting_shader = Shader::getShader(ShaderType::LightingShader);
+	Shader* lighting_shader = Shader::getShader(ShaderType::DeferredLightingShader);
 	auto g_position_map = m_gbuffer_framebuffer->getFirstAttachmentOf(AttachmentType::RGB16F).getMap();
 	lighting_shader->start_using();
 	lighting_shader->setTexture("gPosition", 0, g_position_map);

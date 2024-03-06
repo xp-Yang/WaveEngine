@@ -5,8 +5,14 @@
 #include <sstream>
 #include <iostream>
 
-Shader::Shader(const char* vertexPath, const char* fragmentPath, const char* geometryPath)
+Shader::Shader(const std::string vertexPath, const std::string geometryPath, const std::string fragmentPath)
 {
+    assert(!vertexPath.empty());
+    assert(!fragmentPath.empty());
+    bool has_geo_shader = true;
+    if (geometryPath.empty()) {
+        has_geo_shader = false;
+    }
     // 1. 从文件路径中获取顶点/片段着色器
     std::ifstream vShaderFile;
     std::ifstream fShaderFile;
@@ -19,23 +25,23 @@ Shader::Shader(const char* vertexPath, const char* fragmentPath, const char* geo
         // 打开文件
         vShaderFile.open(vertexPath);
         fShaderFile.open(fragmentPath);
-        if (geometryPath != nullptr)
+        if (has_geo_shader)
             gShaderFile.open(geometryPath);
         std::stringstream vShaderStream, fShaderStream, gShaderStream;
         // 读取文件的缓冲内容到数据流中
         vShaderStream << vShaderFile.rdbuf();
         fShaderStream << fShaderFile.rdbuf();
-        if (geometryPath != nullptr)
+        if (has_geo_shader)
             gShaderStream << gShaderFile.rdbuf();
         // 关闭文件处理器
         vShaderFile.close();
         fShaderFile.close();
-        if (geometryPath != nullptr)
+        if (has_geo_shader)
             gShaderFile.close();
         // 转换数据流到string
         m_vertexCode = vShaderStream.str();
         m_fragmentCode = fShaderStream.str();
-        if (geometryPath != nullptr)
+        if (has_geo_shader)
             m_geometryCode = gShaderStream.str();
     }
     catch (std::ifstream::failure e)
@@ -67,7 +73,7 @@ Shader::Shader(const char* vertexPath, const char* fragmentPath, const char* geo
     };
 
     //
-    if (geometryPath != nullptr) {
+    if (has_geo_shader) {
         geometry = glCreateShader(GL_GEOMETRY_SHADER);
         glShaderSource(geometry, 1, &gShaderCode, NULL);
         glCompileShader(geometry);
@@ -96,7 +102,7 @@ Shader::Shader(const char* vertexPath, const char* fragmentPath, const char* geo
     m_id = glCreateProgram();
     glAttachShader(m_id, vertex);
     glAttachShader(m_id, fragment);
-    if (geometryPath != nullptr)
+    if (has_geo_shader)
         glAttachShader(m_id, geometry);
     glLinkProgram(m_id);
     // 打印连接错误（如果有的话）
@@ -109,12 +115,12 @@ Shader::Shader(const char* vertexPath, const char* fragmentPath, const char* geo
     }
     glDeleteShader(vertex);
     glDeleteShader(fragment);
-    if (geometryPath != nullptr)
+    if (has_geo_shader)
         glDeleteShader(geometry);
 }
 
-Shader::Shader(const std::string vertexPath, const std::string fragmentPath, const std::string geometryPath)
-    : Shader(vertexPath.c_str(), fragmentPath.c_str(), geometryPath.empty() ? nullptr : geometryPath.c_str())
+Shader::Shader(const std::string vertexPath, const std::string fragmentPath)
+    :Shader(vertexPath, "", fragmentPath)
 {
 }
 
@@ -182,18 +188,17 @@ Shader* Shader::getShader(const ShaderType& type)
     case ShaderType::GBufferShader:
         static Shader* g_shader = new Shader(resource_dir + "/shader/gBufferPass.vs", resource_dir + "/shader/gBufferPass.fs");
         return g_shader;
-    case ShaderType::LightingShader:
-        //static Shader* light_shader = new Shader(resource_dir + "/shader/light.vs", resource_dir + "/shader/light.fs");
-        static Shader* light_shader = new Shader(resource_dir + "/shader/lightingPass.vs", resource_dir + "/shader/lightingPass.fs");
+    case ShaderType::DeferredLightingShader:
+        static Shader* light_shader = new Shader(resource_dir + "/shader/deferredLighting.vs", resource_dir + "/shader/deferredLighting.fs");
         return light_shader;
     case ShaderType::BorderShader:
         static Shader* border_shader = new Shader(resource_dir + "/shader/border.vs", resource_dir + "/shader/border.fs");
         return border_shader;
     case ShaderType::NormalShader:
-        static Shader* normal_shader = new Shader(resource_dir + "/shader/model.vs", resource_dir + "/shader/normal.fs", resource_dir + "/shader/normal.gs");
+        static Shader* normal_shader = new Shader(resource_dir + "/shader/model.vs", resource_dir + "/shader/normal.gs", resource_dir + "/shader/normal.fs");
         return normal_shader;
     case ShaderType::WireframeShader:
-        static Shader* wireframe_shader = new Shader(resource_dir + "/shader/model.vs", resource_dir + "/shader/wireframe.fs", resource_dir + "/shader/wireframe.gs");
+        static Shader* wireframe_shader = new Shader(resource_dir + "/shader/model.vs", resource_dir + "/shader/wireframe.gs", resource_dir + "/shader/wireframe.fs");
         return wireframe_shader;
     case ShaderType::PickingShader:
         static Shader* picking_shader = new Shader(resource_dir + "/shader/picking.vs", resource_dir + "/shader/picking.fs");

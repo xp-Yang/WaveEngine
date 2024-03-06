@@ -98,7 +98,7 @@ void SceneHierarchy::init() {
 	ecs::Primitive cube_primitive;
 	cube_primitive.mesh = Mesh::create_cube_mesh();
 	Material cube_material;
-    cube_material.shader = new Shader(resource_dir + "/shader/model.vs", resource_dir + "/shader/model.fs", resource_dir + "/shader/model.gs");
+    cube_material.shader = new Shader(resource_dir + "/shader/model.vs", resource_dir + "/shader/model.fs");
 	cube_material.set_diffuse_map(resource_dir + "/images/pure_white_map.png");
 	cube_material.set_specular_map(resource_dir + "/images/cube_specular.png");
 	cube_primitive.material = cube_material;
@@ -113,7 +113,7 @@ void SceneHierarchy::init() {
 	ecs::Primitive sphere_primitive;
 	sphere_primitive.mesh = Mesh::create_icosphere_mesh(5);
 	Material sphere_material;
-	sphere_material.shader = new Shader(resource_dir + "/shader/model.vs", resource_dir + "/shader/model.fs", resource_dir + "/shader/model.gs");
+	sphere_material.shader = new Shader(resource_dir + "/shader/model.vs", resource_dir + "/shader/model.fs");
 	sphere_material.set_diffuse_map(resource_dir + "/images/pure_white_map.png");
 	sphere_material.set_specular_map(resource_dir + "/images/pure_white_map.png");
 	sphere_primitive.material = sphere_material;
@@ -130,7 +130,7 @@ void SceneHierarchy::init() {
 	ecs::Primitive ground_primitive;
 	ground_primitive.mesh = Mesh::create_ground_mesh();
     Material ground_material;
-    ground_material.shader = new Shader(resource_dir + "/shader/model.vs", resource_dir + "/shader/wireframe.fs", resource_dir + "/shader/wireframe.gs");
+    ground_material.shader = new Shader(resource_dir + "/shader/model.vs", resource_dir + "/shader/wireframe.gs", resource_dir + "/shader/wireframe.fs");
     ground_material.set_diffuse_map(resource_dir + "/images/pure_white_map.png");
     ground_material.set_specular_map(resource_dir + "/images/pure_white_map.png");
 	ground_primitive.material = ground_material;
@@ -144,7 +144,7 @@ void SceneHierarchy::init() {
 	nanosuit_transform.scale = Vec3(0.4f);
 	auto& nanosuit_renderable = world.addComponent<ecs::RenderableComponent>(nanosuit_entity);
 	std::vector<ecs::Primitive> nanosuit_primitives;
-	Shader* nanosuit_shader = new Shader(resource_dir + "/shader/model.vs", resource_dir + "/shader/model.fs", resource_dir + "/shader/model.gs");
+	Shader* nanosuit_shader = new Shader(resource_dir + "/shader/model.vs", resource_dir + "/shader/model.fs");
 	for (int i = 0; i < nanosuit->get_datas().size(); i++) {
 		ecs::Primitive primitive;
 		primitive.mesh = nanosuit->get_datas().at(i).mesh;
@@ -163,7 +163,7 @@ void SceneHierarchy::init() {
 	//yoko_transform.scale = Vec3(0.25f);
 	//auto& yoko_renderable = world.addComponent<ecs::RenderableComponent>(yoko_entity);
 	//std::vector<ecs::Primitive> yoko_primitives;
-	//Shader* yoko_shader = new Shader(resource_dir + "/shader/model.vs", resource_dir + "/shader/model.fs", resource_dir + "/shader/model.gs");
+	//Shader* yoko_shader = new Shader(resource_dir + "/shader/model.vs", resource_dir + "/shader/model.fs");
 	//for (int i = 0; i < yoko->get_datas().size(); i++) {
 	//	ecs::Primitive primitive;
 	//	primitive.mesh = yoko->get_datas().at(i).mesh;
@@ -182,7 +182,7 @@ void SceneHierarchy::init() {
 	bunny_transform.scale = Vec3(25.0f);
 	auto& bunny_renderable = world.addComponent<ecs::RenderableComponent>(bunny_entity);
 	std::vector<ecs::Primitive> bunny_primitives;
-	Shader* bunny_shader = new Shader(resource_dir + "/shader/model.vs", resource_dir + "/shader/model.fs", resource_dir + "/shader/model.gs");
+	Shader* bunny_shader = new Shader(resource_dir + "/shader/model.vs", resource_dir + "/shader/model.fs");
 	for (int i = 0; i < bunny->get_datas().size(); i++) {
 		ecs::Primitive primitive;
 		primitive.mesh = bunny->get_datas().at(i).mesh;

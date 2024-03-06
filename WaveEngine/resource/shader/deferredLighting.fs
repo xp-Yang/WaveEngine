@@ -68,6 +68,8 @@ void main()
 
     vec3 viewDir = normalize(view_pos - Position);
 
+    // TODO 如果采样到GBuffer的空白区域可以直接return
+
     // 计算光照
     //vec3 ambient_light = vec3(0);
     vec3 lighting = vec3(0);

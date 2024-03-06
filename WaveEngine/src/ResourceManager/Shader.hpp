@@ -6,7 +6,7 @@
 
 enum class ShaderType {
 	GBufferShader,
-	LightingShader,
+	DeferredLightingShader,
 	BorderShader,
 	NormalShader,
 	WireframeShader,
@@ -18,8 +18,8 @@ enum class ShaderType {
 
 class Shader{
 public:
-	Shader(const char* vertexPath, const char* fragmentPath, const char* geometryPath);
-	Shader(const std::string vertexPath, const std::string fragmentPath, const std::string geometryPath = "");
+	Shader(const std::string vertexPath, const std::string geometryPath, const std::string fragmentPath);
+	Shader(const std::string vertexPath, const std::string fragmentPath);
 
 	void start_using() const;
 	void stop_using() const;
