@@ -66,9 +66,11 @@ void LightingPass::draw()
 		auto& transform = *world.getComponent<ecs::TransformComponent>(entity);
 		Vec3 light_pos = transform.transform()[3];
 		Vec4 light_color = world.getComponent<ecs::PointLightComponent>(entity)->luminousColor;
+		float light_radius = world.getComponent<ecs::PointLightComponent>(entity)->radius;
 		std::string light_id = std::string("pointLights[") + std::to_string(k) + "]";
 		lighting_shader->setFloat3(light_id + ".position", light_pos);
 		lighting_shader->setFloat4(light_id + ".color", light_color);
+		lighting_shader->setFloat(light_id + ".radius", light_radius);
 		k++;
 
 		// 模拟正向渲染的嵌套for循环，性能明显下降

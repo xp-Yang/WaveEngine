@@ -117,19 +117,17 @@ struct SkyboxComponent {
 
 struct PointLightComponent {
 	Color4 luminousColor = { 1.0f, 1.0f, 1.0f, 1.0f };
-	virtual Mat4 lightReferenceMatrix()
+	float radius;
+	Mat4 lightReferenceMatrix()
 	{
 		//lightProjection = Perspective(deg2rad(45.0f), /*1.0f*/WINDOW_WIDTH / WINDOW_HEIGHT, 0.1f, 100.0f);
 		return {};
 	}
-	Mat4 getLightProjMatrix() {
-		Mat4 result = lightReferenceMatrix();
-		return result;
-	}
 };
 
-struct DirectionalLightComponent : public PointLightComponent {
+struct DirectionalLightComponent {
 	Vec3 direction;
+	Color4 luminousColor = { 1.0f, 1.0f, 1.0f, 1.0f };
 
 	Mat4 lightReferenceMatrix()
 	{

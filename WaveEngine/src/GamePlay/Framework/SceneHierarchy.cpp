@@ -58,9 +58,10 @@ void SceneHierarchy::init() {
 		double r2 = random(5.0f, 10.0f);
 		double r3 = random(-20.0f, 20.0f);
 		point_light_transform.translation = { r1, r2, r3 };
-		point_light_transform.scale = Vec3(0.2f);
+		point_light_transform.scale = Vec3(random(0.2f, 0.4f));
 		auto& point_light_renderable = world.addComponent<ecs::RenderableComponent>(point_light_entity);
 		auto& point_light_properties = world.addComponent<ecs::PointLightComponent>(point_light_entity);
+		point_light_properties.radius = (point_light_transform.scale[0] / 0.2f) * 15.0f;
 		point_light_properties.luminousColor = { randomUnit(), randomUnit(), randomUnit(), 1.0f};
 		ecs::Primitive point_light_primitive;
 		point_light_primitive.mesh = Mesh::create_icosphere_mesh(5);

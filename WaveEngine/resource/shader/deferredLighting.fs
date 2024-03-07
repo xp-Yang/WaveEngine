@@ -22,7 +22,6 @@ struct PointLight
     vec3  position;
 	vec4  color;
     float radius;
-    vec3  intensity;
 };
 
 uniform DirectionalLight directionalLight;
@@ -86,9 +85,12 @@ void main()
 	
 	// Point Light Source:
     vec3 lightingByPointLight = vec3(0);
+	float k_quadratic = 0.5;
     for(int i = 0; i < point_lights_size; i++){
         vec3 lightDir = normalize(Position - pointLights[i].position);
-        lightingByPointLight += LightCalculation(pointLights[i].color.xyz, Normal, viewDir, -lightDir, Diffuse, Specular) / point_lights_size;
+		float distance = length(Position - pointLights[i].position);
+		float attenuation = min((1.0 / ( 1.0 + k_quadratic * distance* distance )) * ( 1.0 - distance * distance / pointLights[i].radius * pointLights[i].radius), 0);
+        lightingByPointLight += LightCalculation(pointLights[i].color.xyz * attenuation, Normal, viewDir, -lightDir, Diffuse, Specular);
     }
 
 	// Shadow:
