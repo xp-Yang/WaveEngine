@@ -124,23 +124,46 @@ public:
         return *component;
     }
 
-    template<typename T>
-    void removeComponent(ecs::Entity entity) 
+    //template<typename T>
+    //void removeComponent(ecs::Entity entity) 
+    //{
+    //    int id = entity.getId();
+
+    //    int pool_id = getComponentPoolId<T>();
+    //    m_entities[id].getMask().reset(pool_id);
+
+    //    // 池中都没这个component
+    //    if (pool_id >= m_component_pools.size()) {
+    //        return;
+    //    }
+    //    else {
+    //        // TODO 1.先要判断是否所有entity都不再使用这个component了
+    //        // 2.要正确释放里面内容
+    //        //m_component_pools.erase(m_component_pools.begin() + component_id);
+    //    }
+    //}
+
+    template<typename... ComponentTypes>
+    void removeComponent(ecs::Entity entity)
     {
         int id = entity.getId();
 
-        int pool_id = getComponentPoolId<T>();
-        m_entities[id].getMask().reset(pool_id);
+        // Unpack the template parameters into an initializer list
+        int poolIds[] = { 0, getComponentPoolId<ComponentTypes>() ... };
+        for (int i = 1; i < (sizeof...(ComponentTypes) + 1); i++) {
+            m_entities[id].getMask().reset(poolIds[i]);
 
-        // 池中都没这个component
-        if (pool_id >= m_component_pools.size()) {
-            return;
+            // 池中都没这个component
+            if (poolIds[i] >= m_component_pools.size()) {
+                continue;
+            }
+            else {
+                // TODO 1.先要判断是否所有entity都不再使用这个component了
+                // 2.要正确释放里面内容
+                //m_component_pools.erase(m_component_pools.begin() + component_id);
+            }
         }
-        else {
-            // TODO 1.先要判断是否所有entity都不再使用这个component了
-            // 2.要正确释放里面内容
-            //m_component_pools.erase(m_component_pools.begin() + component_id);
-        }
+
     }
 
     template<typename... ComponentTypes>

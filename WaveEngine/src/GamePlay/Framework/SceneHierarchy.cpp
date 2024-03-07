@@ -9,6 +9,36 @@ SceneHierarchy::SceneHierarchy() {
 	init();
 }
 
+void SceneHierarchy::addPointLight()
+{
+	std::string resource_dir = Application::resourceDirectory();
+	static Shader* point_light_shader = new Shader(resource_dir + "/shader/light.vs", resource_dir + "/shader/light.fs");
+
+	auto& world = ecs::World::get();
+
+	auto point_light_entity = world.create_entity();
+	auto point_light_node = new GameObject(m_root_object, point_light_entity);
+	world.addComponent<ecs::NameComponent>(point_light_entity).name = std::string("Point Light ") + std::to_string(m_point_light_count);
+	auto& point_light_transform = world.addComponent<ecs::TransformComponent>(point_light_entity);
+	double r1 = random(-15.0f, 15.0f);
+	double r2 = random(3.0f, 10.0f);
+	double r3 = random(-15.0f, 15.0f);
+	point_light_transform.translation = { r1, r2, r3 };
+	point_light_transform.scale = Vec3(random(0.1f, 0.3f));
+	auto& point_light_renderable = world.addComponent<ecs::RenderableComponent>(point_light_entity);
+	auto& point_light_properties = world.addComponent<ecs::PointLightComponent>(point_light_entity);
+	point_light_properties.radius = (point_light_transform.scale[0] / 0.1f) * 20.0f;
+	point_light_properties.luminousColor = { randomUnit(), randomUnit(), randomUnit(), 1.0f };
+	ecs::Primitive point_light_primitive;
+	point_light_primitive.mesh = Mesh::create_icosphere_mesh(5);
+	Material point_light_material;
+	point_light_material.shader = point_light_shader;
+	point_light_primitive.material = point_light_material;
+	point_light_renderable.setPrimitives({ point_light_primitive });
+
+	m_point_light_count++;
+}
+
 void SceneHierarchy::init() {
 	std::string resource_dir = Application::resourceDirectory();
 
@@ -50,28 +80,8 @@ void SceneHierarchy::init() {
 	dir_light_properties.direction = -dir_light_transform.translation;
 
 
-	static const int POINT_LIGHT_COUNT = 3;
-	static Shader* point_light_shader = new Shader(resource_dir + "/shader/light.vs", resource_dir + "/shader/light.fs");
-	for (int i = 0; i < POINT_LIGHT_COUNT; i++) {
-		auto point_light_entity = world.create_entity();
-		auto point_light_node = new GameObject(m_root_object, point_light_entity);
-		world.addComponent<ecs::NameComponent>(point_light_entity).name = std::string("Point Light ") + std::to_string(i);
-		auto& point_light_transform = world.addComponent<ecs::TransformComponent>(point_light_entity);
-		double r1 = random(-15.0f, 15.0f);
-		double r2 = random(3.0f, 10.0f);
-		double r3 = random(-15.0f, 15.0f);
-		point_light_transform.translation = { r1, r2, r3 };
-		point_light_transform.scale = Vec3(random(0.1f, 0.3f));
-		auto& point_light_renderable = world.addComponent<ecs::RenderableComponent>(point_light_entity);
-		auto& point_light_properties = world.addComponent<ecs::PointLightComponent>(point_light_entity);
-		point_light_properties.radius = (point_light_transform.scale[0] / 0.1f) * 20.0f;
-		point_light_properties.luminousColor = { randomUnit(), randomUnit(), randomUnit(), 1.0f};
-		ecs::Primitive point_light_primitive;
-		point_light_primitive.mesh = Mesh::create_icosphere_mesh(5);
-		Material point_light_material;
-		point_light_material.shader = point_light_shader;
-		point_light_primitive.material = point_light_material;
-		point_light_renderable.setPrimitives({ point_light_primitive });
+	for (int i = 0; i < 3; i++) {
+		addPointLight();
 	}
 
 	auto cube_entity = world.create_entity();

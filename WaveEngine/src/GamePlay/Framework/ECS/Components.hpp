@@ -151,14 +151,14 @@ struct BaseGridGroundComponent {};
 //struct ReceiveShadowComponent {};
 //
 //struct ReceiveReflectionComponent {};
-
-struct BoxCollider3DComponent {
-
-};
-
-struct BoxCollider2DComponent {
-
-};
+//
+//struct BoxCollider3DComponent {
+//
+//};
+//
+//struct BoxCollider2DComponent {
+//
+//};
 
 struct ExplosionComponent {
 	float explosionRatio = 0.0f;
@@ -169,6 +169,9 @@ struct ExplosionComponent {
 struct InputComponent {
 
 };
+
+
+#define AllComponents ecs::NameComponent, ecs::TransformComponent, ecs::CameraComponent, ecs::RenderableComponent, ecs::SkyboxComponent, ecs::PointLightComponent, ecs::DirectionalLightComponent, ecs::PickedComponent, ecs::BaseGridGroundComponent, ecs::ExplosionComponent, ecs::InputComponent
 
 }
 

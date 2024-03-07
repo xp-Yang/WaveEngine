@@ -26,7 +26,7 @@ struct PointLight
 
 uniform DirectionalLight directionalLight;
 // TODO shader里怎么用动态数组
-const int MAX_POINT_LIGHTS_COUNT = 16;
+const int MAX_POINT_LIGHTS_COUNT = 256;
 uniform int point_lights_size = 5;
 uniform PointLight pointLights[MAX_POINT_LIGHTS_COUNT];
 

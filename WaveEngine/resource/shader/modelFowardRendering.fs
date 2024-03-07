@@ -34,7 +34,7 @@ struct Material {
 uniform Material material;
 
 uniform DirectionalLight directionalLight;
-const int MAX_POINT_LIGHTS_COUNT = 16;
+const int MAX_POINT_LIGHTS_COUNT = 128;
 uniform int point_lights_size = 5;
 uniform PointLight pointLights[MAX_POINT_LIGHTS_COUNT];
 

@@ -140,6 +140,8 @@ void ImGuiEditor::renderGlobalController() {
 
     ImGui::Begin("Global Controller", nullptr, ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse);
 
+    ImGui::PushItemWidth(120.0f);
+
     static unsigned int pipeline_type_option = (int)m_render_params.pipeline_type;
     if (ImGui::BeginCombo("Render Pipeline Type", pipeline_type_option == 0 ? "Forward" : "Deferred")) {
         for (int i = 0; i < 2; i++) {
@@ -184,8 +186,32 @@ void ImGuiEditor::renderGlobalController() {
     ImGui::Checkbox("wireframe", &m_render_params.wireframe);
     //ImGui::SliderInt("pixel style", &m_render_params.pixelate_level, 1, 16);
     
+    auto scene_hierarchy = Application::GetApp().getSceneHierarchy();
+    int point_light_count = scene_hierarchy->pointLightCount(); // readonly
+    float spacing = ImGui::GetStyle().ItemInnerSpacing.x;
+    if (ImGui::Button("+")) {
+        if (point_light_count < scene_hierarchy->maxPointLightCount())
+            scene_hierarchy->addPointLight();
+    }
+    ImGui::SameLine(0.0f, spacing);
+    if (ImGui::Button("-")) { 
+        auto& world = ecs::World::get();
+        auto root_obj = scene_hierarchy->rootObject();
+        GameObject* last_point_light_obj = nullptr;
+        for (auto child : root_obj->children()) {
+            if(world.hasComponent<ecs::PointLightComponent>(child->entity()))
+                last_point_light_obj = child;
+        }
+        if (last_point_light_obj)
+            scene_hierarchy->removeObject(last_point_light_obj);
+    }
+    ImGui::SameLine();
+    ImGui::Text("%d add/delete point light", point_light_count);
+
     ImGuiIO& io = ImGui::GetIO();
-    ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / io.Framerate, io.Framerate);
+    ImGui::Text("average %.3f ms/frame (%.1f FPS)", 1000.0f / io.Framerate, io.Framerate);
+
+    ImGui::PopItemWidth();
 
     ImGui::End();
 }
@@ -198,11 +224,11 @@ void ImGuiEditor::renderSceneHierarchy()
 
     auto& world = ecs::World::get();
     auto scene_hierarchy = Application::GetApp().getSceneHierarchy();
-    auto scene_root = scene_hierarchy->rootObject();
+    auto root_obj = scene_hierarchy->rootObject();
     static const ecs::Entity* picked_entity = nullptr;
-    for (int i = 0; i < scene_root->children().size(); i++)
+    for (int i = 0; i < root_obj->children().size(); i++)
     {
-        auto child = scene_root->children()[i];
+        auto child = root_obj->children()[i];
         const auto& entity = child->entity();
         auto object_name = world.getComponent<ecs::NameComponent>(entity)->name;
 
@@ -300,7 +326,7 @@ void ImGuiEditor::renderPickedEntityController(const ImVec2& pos, const std::vec
         ImGui::SameLine();
         if (ImGui::RadioButton("Scale", m_toolbar_type == ToolbarType::Scale))
             m_toolbar_type = ToolbarType::Scale;
-        ImGui::PushItemWidth(85.0f);
+        ImGui::PushItemWidth(80.0f);
         ImGui::SliderFloat((std::string("##x") + "##" + obj_name).c_str(), &transform_component.translation.x, -10.0f, 10.0f);
         ImGui::SameLine();
         ImGui::SliderFloat((std::string("##y") + "##" + obj_name).c_str(), &transform_component.translation.y, -10.0f, 10.0f);
