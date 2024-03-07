@@ -182,7 +182,7 @@ void ImGuiEditor::renderGlobalController() {
     ImGui::Checkbox("reflection", &m_render_params.reflection);
     ImGui::Checkbox("normal", &m_render_params.normal_debug);
     ImGui::Checkbox("wireframe", &m_render_params.wireframe);
-    ImGui::SliderInt("pixel style", &m_render_params.pixelate_level, 1, 16);
+    //ImGui::SliderInt("pixel style", &m_render_params.pixelate_level, 1, 16);
     
     ImGuiIO& io = ImGui::GetIO();
     ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / io.Framerate, io.Framerate);
@@ -194,15 +194,16 @@ void ImGuiEditor::renderSceneHierarchy()
 {
     ImGui::Begin(("Scene Hierarchy"), nullptr, ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse);
     ImGuiWindow* scene_hierarchy_window = ImGui::GetCurrentWindow();
+    float scene_hierarchy_window_width = ImGui::GetWindowWidth();
 
     auto& world = ecs::World::get();
     auto scene_hierarchy = Application::GetApp().getSceneHierarchy();
-    auto scene_root_node = scene_hierarchy->rootHierarchyNode();
+    auto scene_root = scene_hierarchy->rootObject();
     static const ecs::Entity* picked_entity = nullptr;
-    for (int i = 0; i < scene_root_node->children().size(); i++)
+    for (int i = 0; i < scene_root->children().size(); i++)
     {
-        auto child_node = scene_root_node->children()[i];
-        const auto& entity = child_node->object()->entity();
+        auto child = scene_root->children()[i];
+        const auto& entity = child->entity();
         auto object_name = world.getComponent<ecs::NameComponent>(entity)->name;
 
         static ImGuiTreeNodeFlags node_flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_SpanAvailWidth;
@@ -222,7 +223,22 @@ void ImGuiEditor::renderSceneHierarchy()
         if (node_open)
         {
             // TODO display all components name_str belong to this entity
-            entity.getMask();
+            if (world.hasComponent<ecs::NameComponent>(entity))
+                ImGui::Text("<NameComponent>");
+            if (world.hasComponent<ecs::TransformComponent>(entity))
+                ImGui::Text("<TransformComponent>");
+            if (world.hasComponent<ecs::RenderableComponent>(entity))
+                ImGui::Text("<RenderableComponent>");
+            if (world.hasComponent<ecs::ExplosionComponent>(entity))
+                ImGui::Text("<ExplosionComponent>");
+            if (world.hasComponent<ecs::SkyboxComponent>(entity))
+                ImGui::Text("<SkyboxComponent>");
+            if (world.hasComponent<ecs::PointLightComponent>(entity))
+                ImGui::Text("<PointLightComponent>");
+            if (world.hasComponent<ecs::DirectionalLightComponent>(entity))
+                ImGui::Text("<DirectionalLightComponent>");
+            if (world.hasComponent<ecs::BaseGridGroundComponent>(entity))
+                ImGui::Text("<BaseGridGroundComponent>");
             ImGui::TreePop();
         }
     }
@@ -230,13 +246,14 @@ void ImGuiEditor::renderSceneHierarchy()
     ImGui::End();
 
     if (picked_entity) {
-        renderPickedEntityController(scene_hierarchy_window->Pos, { *picked_entity });
+        ImVec2 pos = ImVec2(scene_hierarchy_window->Pos.x + scene_hierarchy_window_width, scene_hierarchy_window->Pos.y);
+        renderPickedEntityController(pos, { *picked_entity });
     }
 }
 
 void ImGuiEditor::renderCameraController()
 {
-    ImGui::Begin("Camera Controller", nullptr, ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse);
+    ImGui::Begin("Main Camera", nullptr, ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse);
 
     auto& world = ecs::World::get();
     auto& camera = *world.getMainCameraComponent();
@@ -265,18 +282,16 @@ void ImGuiEditor::renderCameraController()
 void ImGuiEditor::renderPickedEntityController(const ImVec2& pos, const std::vector<ecs::Entity>& picked_entities)
 {
     // TODO consider to edit materials in MaterialSystem
-    ImGui::SetNextWindowPos(pos, ImGuiCond_Always, ImVec2(1.0f, 0.0f));
-
     auto& world = ecs::World::get();
+    auto entity = picked_entities[0];
+    if (!world.hasComponent<ecs::NameComponent>(entity))
+        return;
+    std::string obj_name = world.getComponent<ecs::NameComponent>(entity)->name;
+    ImGui::SetNextWindowPos(pos, ImGuiCond_Always, ImVec2(0.0f, 0.0f));
+    ImGui::Begin((obj_name).c_str(), nullptr, ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse);
 
-    for (auto entity : picked_entities) {
-        auto& renderable = *world.getComponent<ecs::RenderableComponent>(entity);
+    if (world.hasComponent<ecs::TransformComponent>(entity)) {
         auto& transform_component = *world.getComponent<ecs::TransformComponent>(entity);
-        std::string obj_name = world.getComponent<ecs::NameComponent>(entity)->name;
-
-        float shininess = renderable.primitives[0].material.shininess;
-
-        ImGui::Begin((obj_name).c_str(), nullptr, ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse);
         if (ImGui::RadioButton("Translate", m_toolbar_type == ToolbarType::Translate))
             m_toolbar_type = ToolbarType::Translate;
         ImGui::SameLine();
@@ -285,8 +300,6 @@ void ImGuiEditor::renderPickedEntityController(const ImVec2& pos, const std::vec
         ImGui::SameLine();
         if (ImGui::RadioButton("Scale", m_toolbar_type == ToolbarType::Scale))
             m_toolbar_type = ToolbarType::Scale;
-
-        ImGui::SliderFloat((std::string("shininess") + "##" + obj_name).c_str(), &shininess, 64.0f, 256.0f);
         ImGui::PushItemWidth(85.0f);
         ImGui::SliderFloat((std::string("##x") + "##" + obj_name).c_str(), &transform_component.translation.x, -10.0f, 10.0f);
         ImGui::SameLine();
@@ -295,54 +308,45 @@ void ImGuiEditor::renderPickedEntityController(const ImVec2& pos, const std::vec
         ImGui::SliderFloat((std::string("xyz") + "##" + obj_name).c_str(), &transform_component.translation.z, -10.0f, 10.0f);
         ImGui::PopItemWidth();
 
-        if (world.hasComponent<ecs::PointLightComponent>(entity)) {
-            Vec4& luminousColor = world.getComponent<ecs::PointLightComponent>(entity)->luminousColor;
-            ImGui::ColorEdit3((std::string("Luminous Color") + "##" + obj_name).c_str(), (float*)&luminousColor);
-        }
-
+        // log
+        ImGui::NewLine();
+        ImGui::Text("model matrix:");
+        std::string matrix_str = matrix_log(transform_component.transform());
+        ImGui::Text(matrix_str.c_str());
+    }
+    if (world.hasComponent<ecs::RenderableComponent>(entity)) {
+        auto renderable = world.getComponent<ecs::RenderableComponent>(entity);
+        float shininess = renderable->primitives[0].material.shininess;
+        ImGui::SliderFloat((std::string("shininess") + "##" + obj_name).c_str(), &shininess, 64.0f, 256.0f);
         // 编辑对象材质属性
         //ecs::MaterialSystem::onUpdate();
-        for (int i = 0; i < renderable.primitives.size(); i++) {
-            auto& material = renderable.primitives[i].material;
+        for (int i = 0; i < renderable->primitives.size(); i++) {
+            auto& material = renderable->primitives[i].material;
             //material.materials[i].ambient_strength;
             material.shininess = shininess;
             //curr_entity->material(i).set_diffuse_map();
             //curr_entity->material(i).set_specular_map();
         }
-        //// 是否开启法向量检查
-        //;
-        //// 编辑对象是否开启反射
-        //if (enable_reflection) {
-        //    world.addComponent<ecs::ReceiveReflectionComponent>(entity);
-        //}
-        //else {
-        //    world.removeComponent<ecs::ReceiveReflectionComponent>(entity);
-        //}
-        // 编辑对象的explosion ratio
-        if (world.hasComponent<ecs::ExplosionComponent>(entity)) {
-            auto& explosion = *world.getComponent<ecs::ExplosionComponent>(entity);
-            ImGui::SliderFloat((std::string("explosion ratio") + "##" + obj_name).c_str(), &explosion.explosionRatio, 0.0f, 1.0f);
-        }
-
-        // log
-        {
-            ImGui::NewLine();
-            ImGui::Text("model matrix:");
-            std::string test_light = matrix_log(transform_component.transform());
-            ImGui::Text(test_light.c_str());
-        }
-
-        //if (obj_name == "sphere") {
-        //    ImGui::SliderInt("icosphere accuracy", &icosphere_accuracy, 0, 10);
-        //    if (icosphere_accuracy != sphere->get_recursive_depth()) {
-        //        mesh.meshes.pop_back();
-        //        mesh.meshes.push_back(Mesh::create_icosphere_mesh(icosphere_accuracy));
-        //    }
-        //}
-
-        ImGui::End();
-        break; //只选择一个
     }
+    if (world.hasComponent<ecs::ExplosionComponent>(entity)) {
+        // 编辑对象的explosion ratio
+        auto& explosion = *world.getComponent<ecs::ExplosionComponent>(entity);
+        ImGui::SliderFloat((std::string("explosion ratio") + "##" + obj_name).c_str(), &explosion.explosionRatio, 0.0f, 1.0f);
+    }
+    if (world.hasComponent<ecs::SkyboxComponent>(entity))
+        ImGui::Text("<SkyboxComponent>");
+    if (world.hasComponent<ecs::PointLightComponent>(entity)) {
+        Vec4& luminousColor = world.getComponent<ecs::PointLightComponent>(entity)->luminousColor;
+        ImGui::ColorEdit3((std::string("Luminous Color") + "##" + obj_name).c_str(), (float*)&luminousColor);
+    }
+    if (world.hasComponent<ecs::DirectionalLightComponent>(entity)) {
+        Vec4& luminousColor = world.getComponent<ecs::DirectionalLightComponent>(entity)->luminousColor;
+        ImGui::ColorEdit3((std::string("Luminous Color") + "##" + obj_name).c_str(), (float*)&luminousColor);
+    }
+    if (world.hasComponent<ecs::BaseGridGroundComponent>(entity))
+        ;
+
+    ImGui::End();
 }
 
 void ImGuiEditor::renderGizmos()

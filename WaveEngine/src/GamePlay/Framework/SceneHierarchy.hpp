@@ -6,15 +6,14 @@
 
 class GameObject {
 public:
-	GameObject();
 	GameObject(GameObject* parent, const ecs::Entity& entity) : m_parent(parent), m_entity(entity) {
 		if (parent)
 			parent->append(this);
 	}
 	void append(GameObject* node) { m_children.push_back(node); }
 	void remove(GameObject* node) {
-		auto it = std::find_if(m_children.begin(), m_children.end(), [](auto& child) {
-			return *child == *node;
+		auto it = std::find_if(m_children.begin(), m_children.end(), [node](GameObject* child) {
+			return (*child).entity().getId() == (*node).entity().getId();
 			});
 		if (it != m_children.end())
 			m_children.erase(it);
@@ -25,13 +24,13 @@ public:
 private:
 	GameObject* m_parent;
 	std::vector<GameObject*> m_children;
-	const ecs::Entity& m_entity;
+	const ecs::Entity m_entity; // TODO 初始化，默认构造被delete了不报错？
 };
 
 class SceneHierarchy {
 public:
 	SceneHierarchy();
-	GameObject* rootHierarchyNode() const { return m_root_node; }
+	GameObject* rootObject() const { return m_root_object; }
 	const std::vector<GameObject*>& selectedObjects() const { return selected_objects; }
 	GameObject* selectedObject() const { return selected_objects.size() == 1 ? selected_objects[0] : nullptr; }
 	void addObject(GameObject* obj);
@@ -58,7 +57,7 @@ protected:
 	void init();
 
 private:
-	GameObject* m_root_node{ nullptr };
+	GameObject* m_root_object{ nullptr };
 	std::vector<GameObject*> selected_objects;
 
 };
