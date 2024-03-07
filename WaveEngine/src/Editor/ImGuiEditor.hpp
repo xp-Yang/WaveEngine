@@ -17,7 +17,7 @@ public:
 	void init(RenderSystem* render_system);
 	void render();
 
-	bool stop_rotate;
+	bool motion;
 	float global_ambient_strength;
 	int icosphere_accuracy;
 

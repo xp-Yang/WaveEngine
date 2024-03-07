@@ -85,11 +85,11 @@ void main()
 	
 	// Point Light Source:
     vec3 lightingByPointLight = vec3(0);
-	float k_quadratic = 0.5;
     for(int i = 0; i < point_lights_size; i++){
         vec3 lightDir = normalize(Position - pointLights[i].position);
 		float distance = length(Position - pointLights[i].position);
-		float attenuation = min((1.0 / ( 1.0 + k_quadratic * distance* distance )) * ( 1.0 - distance * distance / pointLights[i].radius * pointLights[i].radius), 0);
+	    float k_quadratic = 0.2 / pointLights[i].radius;
+		float attenuation = step(0, (pointLights[i].radius - distance)) * (1.0 / (1.0 + k_quadratic * distance* distance));
         lightingByPointLight += LightCalculation(pointLights[i].color.xyz * attenuation, Normal, viewDir, -lightDir, Diffuse, Specular);
     }
 

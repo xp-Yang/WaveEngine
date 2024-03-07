@@ -10,7 +10,7 @@
 
 ImGuiEditor::ImGuiEditor()
 {
-	stop_rotate = false;
+    motion = true;
     global_ambient_strength = 0.1f;
     icosphere_accuracy = 8;
 
@@ -177,6 +177,7 @@ void ImGuiEditor::renderGlobalController() {
         }
         ImGui::EndCombo();
     }
+    ImGui::Checkbox("motion", &motion);
     ImGui::Checkbox("shadow", &m_render_params.shadow);
     ImGui::Checkbox("reflection", &m_render_params.reflection);
     ImGui::Checkbox("normal", &m_render_params.normal_debug);
