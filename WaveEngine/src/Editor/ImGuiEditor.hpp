@@ -3,6 +3,7 @@
 
 #include <imgui/imgui.h>
 #include "GamePlay/Render/RenderSystem.hpp"
+#include "GamePlay/FrameWork/ECS/World.hpp"
 
 enum class ToolbarType : int {
 	Translate,
@@ -22,8 +23,9 @@ public:
 
 protected:
 	void renderGlobalController();
+	void renderSceneHierarchy();
 	void renderCameraController();
-	void renderPickedEntityController();
+	void renderPickedEntityController(const ImVec2& pos, const std::vector<ecs::Entity>& picked_entities);
 	void renderMainViewWindow();
 	void renderPickingViewWindow();
 	void renderShadowViewWindow();

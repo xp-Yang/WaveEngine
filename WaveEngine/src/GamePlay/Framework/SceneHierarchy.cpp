@@ -10,13 +10,15 @@ SceneHierarchy::SceneHierarchy() {
 }
 
 void SceneHierarchy::init() {
+	m_root_node = new GameObjectNode(nullptr, nullptr);
+
 	std::string resource_dir = Application::resourceDirectory();
 
     // TODO 这些需要被SceneHierarchy管理吗，参考filament
 	auto& world = ecs::World::get();
 
 	auto skybox_entity = world.create_entity();
-	world.addComponent<ecs::NameComponent>(skybox_entity).name = "skybox";
+	world.addComponent<ecs::NameComponent>(skybox_entity).name = "Skybox";
 	world.addComponent<ecs::TransformComponent>(skybox_entity);
 	auto& skybox_renderable = world.addComponent<ecs::RenderableComponent>(skybox_entity);
 	ecs::Primitive skybox_primitive;
@@ -40,7 +42,9 @@ void SceneHierarchy::init() {
 
 
 	auto dir_light_entity = world.create_entity();
-	world.addComponent<ecs::NameComponent>(dir_light_entity).name = "directionalLight";
+	auto directional_light_obj = new GameObject(dir_light_entity);
+	auto directional_light_node = new GameObjectNode(m_root_node, directional_light_obj);
+	world.addComponent<ecs::NameComponent>(dir_light_entity).name = "Directional Light";
 	auto& dir_light_properties = world.addComponent<ecs::DirectionalLightComponent>(dir_light_entity);
 	dir_light_properties.luminousColor = { 0.05f, 0.05f, 0.05f, 1.0f };
 	auto& dir_light_transform = world.addComponent<ecs::TransformComponent>(dir_light_entity);
@@ -52,7 +56,9 @@ void SceneHierarchy::init() {
 	static Shader* point_light_shader = new Shader(resource_dir + "/shader/light.vs", resource_dir + "/shader/light.fs");
 	for (int i = 0; i < POINT_LIGHT_COUNT; i++) {
 		auto point_light_entity = world.create_entity();
-		world.addComponent<ecs::NameComponent>(point_light_entity).name = std::string("light") + std::to_string(i);
+		auto point_light_obj = new GameObject(point_light_entity);
+		auto point_light_node = new GameObjectNode(m_root_node, point_light_obj);
+		world.addComponent<ecs::NameComponent>(point_light_entity).name = std::string("Point Light ") + std::to_string(i);
 		auto& point_light_transform = world.addComponent<ecs::TransformComponent>(point_light_entity);
 		double r1 = random(-20.0f, 20.0f);
 		double r2 = random(5.0f, 10.0f);
@@ -72,7 +78,9 @@ void SceneHierarchy::init() {
 	}
 
 	auto cube_entity = world.create_entity();
-	world.addComponent<ecs::NameComponent>(cube_entity).name = "cube";
+	auto cube_object = new GameObject(cube_entity);
+	auto cube_node = new GameObjectNode(m_root_node, cube_object);
+	world.addComponent<ecs::NameComponent>(cube_entity).name = "Cube";
 	auto& cube_transform = world.addComponent<ecs::TransformComponent>(cube_entity);
 	cube_transform.translation = { 0.0f, 0.5f, -10.0f };
 	auto& cube_renderable = world.addComponent<ecs::RenderableComponent>(cube_entity);
@@ -87,7 +95,9 @@ void SceneHierarchy::init() {
     world.addComponent<ecs::ExplosionComponent>(cube_entity);
 
 	auto sphere_entity = world.create_entity();
-	world.addComponent<ecs::NameComponent>(sphere_entity).name = "sphere";
+	auto sphere_object = new GameObject(sphere_entity);
+	auto sphere_node = new GameObjectNode(m_root_node, sphere_object);
+	world.addComponent<ecs::NameComponent>(sphere_entity).name = "Sphere";
 	auto& sphere_transform = world.addComponent<ecs::TransformComponent>(sphere_entity);
     sphere_transform.translation = { 5.0f, 1.0f, 5.0f };
 	auto& sphere_renderable = world.addComponent<ecs::RenderableComponent>(sphere_entity);
@@ -103,7 +113,9 @@ void SceneHierarchy::init() {
 
 	//TODO shader在延迟渲染中没用到。shader是否不应该在这里创建
     auto ground_entity = world.create_entity();
-    world.addComponent<ecs::NameComponent>(ground_entity).name = "ground";
+	auto ground_object = new GameObject(ground_entity);
+	auto ground_node = new GameObjectNode(m_root_node, ground_object);
+    world.addComponent<ecs::NameComponent>(ground_entity).name = "Grid";
 	world.addComponent<ecs::BaseGridGroundComponent>(ground_entity);
     auto& ground_transform = world.addComponent<ecs::TransformComponent>(ground_entity);
 	ground_transform.scale = Vec3(1.0f);
@@ -119,7 +131,9 @@ void SceneHierarchy::init() {
 
 	Model* nanosuit = new Model(resource_dir + "/model/nanosuit/nanosuit.obj");
 	auto nanosuit_entity = world.create_entity();
-	world.addComponent<ecs::NameComponent>(nanosuit_entity).name = "nanosuit";
+	auto nanosuit_object = new GameObject(nanosuit_entity);
+	auto nanosuit_node = new GameObjectNode(m_root_node, nanosuit_object);
+	world.addComponent<ecs::NameComponent>(nanosuit_entity).name = "Nanosuit";
 	auto& nanosuit_transform = world.addComponent<ecs::TransformComponent>(nanosuit_entity);
 	nanosuit_transform.translation = { 5.0f, 0.0f, 0.0f };
 	nanosuit_transform.scale = Vec3(0.4f);
@@ -138,7 +152,7 @@ void SceneHierarchy::init() {
 
 	//Model* yoko = new Model(resource_dir + "/model/yoko/008.obj");
 	//auto yoko_entity = world.create_entity();
-	//world.addComponent<ecs::NameComponent>(yoko_entity).name = "yoko";
+	//world.addComponent<ecs::NameComponent>(yoko_entity).name = "Yoko";
 	//auto& yoko_transform = world.addComponent<ecs::TransformComponent>(yoko_entity);
 	//yoko_transform.translation = { -5.0f, 0.0f, 0.0f };
 	//yoko_transform.scale = Vec3(0.25f);
@@ -157,7 +171,9 @@ void SceneHierarchy::init() {
 
 	Model* bunny = new Model(resource_dir + "/model/bunny.obj");
 	auto bunny_entity = world.create_entity();
-	world.addComponent<ecs::NameComponent>(bunny_entity).name = "bunny";
+	auto bunny_object = new GameObject(bunny_entity);
+	auto bunny_node = new GameObjectNode(m_root_node, bunny_object);
+	world.addComponent<ecs::NameComponent>(bunny_entity).name = "Bunny";
 	auto& bunny_transform = world.addComponent<ecs::TransformComponent>(bunny_entity);
 	bunny_transform.translation = { -5.0f, 0.0f, 0.0f };
 	bunny_transform.scale = Vec3(25.0f);
@@ -176,6 +192,6 @@ void SceneHierarchy::init() {
 	world.addComponent<ecs::ExplosionComponent>(bunny_entity);
 
 	auto camera = world.create_entity();
-	world.addComponent<ecs::NameComponent>(camera).name = "camera";
+	world.addComponent<ecs::NameComponent>(camera).name = "Main Camera";
 	auto& camera_component = world.addComponent<ecs::CameraComponent>(camera);
 }

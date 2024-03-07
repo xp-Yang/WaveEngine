@@ -6,6 +6,7 @@
 #include "GamePlay/Framework/ECS/Components.hpp"
 #include "Core/Logger.hpp"
 #include "Platform/OS/FileDialog.hpp"
+#include "GamePlay/FrameWork/SceneHierarchy.hpp"
 
 ImGuiEditor::ImGuiEditor()
 {
@@ -27,8 +28,9 @@ void ImGuiEditor::render()
 
    ImGui::DockSpaceOverViewport(ImGui::GetMainViewport(), ImGuiDockNodeFlags_PassthruCentralNode);
    renderGlobalController();
+   renderSceneHierarchy();
    renderCameraController();
-   renderPickedEntityController();
+
    renderMainViewWindow();
    renderPickingViewWindow();
    renderShadowViewWindow();
@@ -187,6 +189,50 @@ void ImGuiEditor::renderGlobalController() {
     ImGui::End();
 }
 
+void ImGuiEditor::renderSceneHierarchy()
+{
+    ImGui::Begin(("Scene Hierarchy"), nullptr, ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse);
+    ImGuiWindow* scene_hierarchy_window = ImGui::GetCurrentWindow();
+
+    auto& world = ecs::World::get();
+    auto scene_hierarchy = Application::GetApp().getSceneHierarchy();
+    auto scene_root_node = scene_hierarchy->rootHierarchyNode();
+    static const ecs::Entity* picked_entity = nullptr;
+    for (int i = 0; i < scene_root_node->children().size(); i++)
+    {
+        auto child_node = scene_root_node->children()[i];
+        const auto& entity = child_node->object()->entity();
+        auto object_name = world.getComponent<ecs::NameComponent>(entity)->name;
+
+        static ImGuiTreeNodeFlags node_flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_SpanAvailWidth;
+        bool node_open = ImGui::TreeNodeEx((void*)(intptr_t)i, node_flags, object_name.c_str(), i);
+        if (ImGui::IsItemClicked() && !ImGui::IsItemToggledOpen()) {
+            if (picked_entity && picked_entity == &entity) {
+                picked_entity = nullptr;
+            }
+            else {
+                for (const auto& picked_entity : world.getPickedEntities()) {
+                    world.removeComponent<ecs::PickedComponent>(picked_entity);
+                }
+                world.addComponent<ecs::PickedComponent>(entity);
+                picked_entity = &entity;
+            }
+        }
+        if (node_open)
+        {
+            // TODO display all components name_str belong to this entity
+            entity.getMask();
+            ImGui::TreePop();
+        }
+    }
+
+    ImGui::End();
+
+    if (picked_entity) {
+        renderPickedEntityController(scene_hierarchy_window->Pos, { *picked_entity });
+    }
+}
+
 void ImGuiEditor::renderCameraController()
 {
     ImGui::Begin("Camera Controller", nullptr, ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse);
@@ -215,12 +261,13 @@ void ImGuiEditor::renderCameraController()
     ImGui::End();
 }
 
-void ImGuiEditor::renderPickedEntityController()
+void ImGuiEditor::renderPickedEntityController(const ImVec2& pos, const std::vector<ecs::Entity>& picked_entities)
 {
-    // TODO 考虑对材质的编辑放入MaterialSystem
+    // TODO consider to edit materials in MaterialSystem
+    ImGui::SetNextWindowPos(pos, ImGuiCond_Always, ImVec2(1.0f, 0.0f));
+
     auto& world = ecs::World::get();
 
-    auto picked_entities = world.getPickedEntities();
     for (auto entity : picked_entities) {
         auto& renderable = *world.getComponent<ecs::RenderableComponent>(entity);
         auto& transform_component = *world.getComponent<ecs::TransformComponent>(entity);
@@ -228,7 +275,7 @@ void ImGuiEditor::renderPickedEntityController()
 
         float shininess = renderable.primitives[0].material.shininess;
 
-        ImGui::Begin((obj_name + " controller").c_str(), nullptr, ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse);
+        ImGui::Begin((obj_name).c_str(), nullptr, ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse);
         if (ImGui::RadioButton("Translate", m_toolbar_type == ToolbarType::Translate))
             m_toolbar_type = ToolbarType::Translate;
         ImGui::SameLine();

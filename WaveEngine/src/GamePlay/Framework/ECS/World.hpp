@@ -31,7 +31,6 @@ private:
 class ComponentPool
 {
 public:
-
     ComponentPool(size_t componentTypeSize)
     {
         m_componentTypeSize = componentTypeSize;

@@ -19,6 +19,7 @@ public:
 	void init();
 	void shutdown();
 	Window* getWindow();
+	SceneHierarchy* getSceneHierarchy();
 
 private:
 	Application() = default;
@@ -27,7 +28,7 @@ private:
 
 	std::unique_ptr<Window> m_window;
 	
-	std::unique_ptr<SceneHierarchy> m_scene;
+	std::unique_ptr<SceneHierarchy> m_scene_hierarchy;
 
 	std::unique_ptr<ImGuiEditor> m_editor;
 	std::unique_ptr<RenderSystem> m_render_system;

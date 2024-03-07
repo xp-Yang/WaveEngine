@@ -70,7 +70,7 @@ void Application::init()
 	ImGui_ImplGlfw_InitForOpenGL(m_window->getNativeWindowHandle(), true);
 	ImGui_ImplOpenGL3_Init("#version 330");
 
-	m_scene = std::make_unique<SceneHierarchy>();
+	m_scene_hierarchy = std::make_unique<SceneHierarchy>();
 	m_render_system = std::make_unique<RenderSystem>();
 	m_motion_system = std::make_unique<MotionSystem>();
 	m_input_system = std::make_unique<InputSystem>();
@@ -89,6 +89,11 @@ void Application::shutdown()
 Window* Application::getWindow()
 {
 	return m_window.get();
+}
+
+SceneHierarchy* Application::getSceneHierarchy()
+{
+	return m_scene_hierarchy.get();
 }
 
 void Application::newFrame()
