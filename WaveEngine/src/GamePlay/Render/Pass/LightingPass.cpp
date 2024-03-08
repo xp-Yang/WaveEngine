@@ -43,7 +43,7 @@ void LightingPass::draw()
 	lighting_shader->setTexture("gNormal", 1, g_position_map + 1);
 	lighting_shader->setTexture("gDiffuse", 2, g_position_map + 2);
 	lighting_shader->setTexture("gSpecular", 3, g_position_map + 3);
-	lighting_shader->setFloat3("view_pos", camera_pos);
+	lighting_shader->setFloat3("cameraPos", camera_pos);
 
 	auto dir_light_component = world.getMainDirectionalLightComponent();
 	Mat4 light_ref_matrix = dir_light_component->lightReferenceMatrix();

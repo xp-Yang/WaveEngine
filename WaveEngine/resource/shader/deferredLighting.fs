@@ -27,10 +27,10 @@ struct PointLight
 uniform DirectionalLight directionalLight;
 // TODO shader里怎么用动态数组
 const int MAX_POINT_LIGHTS_COUNT = 256;
-uniform int point_lights_size = 5;
+uniform int point_lights_size;
 uniform PointLight pointLights[MAX_POINT_LIGHTS_COUNT];
 
-uniform vec3 view_pos;
+uniform vec3 cameraPos;
 
 
 float ShadowCalculation(vec4 LightSpacePos)
@@ -75,7 +75,7 @@ void main()
     vec3 Diffuse = texture(gDiffuse, uv).rgb;
     vec3 Specular = texture(gSpecular, uv).rgb;
 
-    vec3 viewDir = normalize(view_pos - Position);
+    vec3 viewDir = normalize(cameraPos - Position);
 
     // TODO 如果采样到GBuffer的空白区域可以直接return
 

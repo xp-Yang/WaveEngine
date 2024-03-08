@@ -7,6 +7,7 @@
 enum class ShaderType {
 	GBufferShader,
 	DeferredLightingShader,
+	PBRShader,
 	BorderShader,
 	NormalShader,
 	WireframeShader,

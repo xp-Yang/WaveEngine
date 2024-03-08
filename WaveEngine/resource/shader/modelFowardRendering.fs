@@ -35,10 +35,10 @@ uniform Material material;
 
 uniform DirectionalLight directionalLight;
 const int MAX_POINT_LIGHTS_COUNT = 128;
-uniform int point_lights_size = 5;
+uniform int point_lights_size;
 uniform PointLight pointLights[MAX_POINT_LIGHTS_COUNT];
 
-uniform vec3 view_pos;
+uniform vec3 cameraPos;
 
 uniform sampler2D shadow_map;
 uniform samplerCube skybox;
@@ -80,7 +80,7 @@ vec3 LightCalculation(vec3 light_color, vec3 n, vec3 v, vec3 l, vec3 diffuse_coe
 void main()
 {
     vec3 normal = normalize(fs_in.pass_normal);//TODO normal需要变换成世界空间，但要注意不能带平移
-    vec3 view_direction = normalize(view_pos - fs_in.pass_pos);
+    vec3 view_direction = normalize(cameraPos - fs_in.pass_pos);
     vec3 diffuse_coef = vec3(texture(material.diffuse_map, fs_in.pass_uv));
     vec3 specular_coef = vec3(texture(material.specular_map, fs_in.pass_uv));
 
@@ -104,7 +104,7 @@ void main()
     gl_FragColor = vec4(result, 1.0);
 
     if(enable_skybox_sample){
-        vec3 I = normalize(fs_in.pass_pos - view_pos);
+        vec3 I = normalize(fs_in.pass_pos - cameraPos);
         vec3 R = reflect(I, normalize(normal));
         gl_FragColor = 0.33 * gl_FragColor + 0.66 * vec4(texture(skybox, R).rgb, 1.0);
     }

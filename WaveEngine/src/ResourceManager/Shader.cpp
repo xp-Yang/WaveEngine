@@ -191,6 +191,9 @@ Shader* Shader::getShader(const ShaderType& type)
     case ShaderType::DeferredLightingShader:
         static Shader* light_shader = new Shader(resource_dir + "/shader/deferredLighting.vs", resource_dir + "/shader/deferredLighting.fs");
         return light_shader;
+    case ShaderType::PBRShader:
+        static Shader* pbr_shader = new Shader(resource_dir + "/shader/pbr.vs", resource_dir + "/shader/pbr.fs");
+        return pbr_shader;
     case ShaderType::BorderShader:
         static Shader* border_shader = new Shader(resource_dir + "/shader/border.vs", resource_dir + "/shader/border.fs");
         return border_shader;

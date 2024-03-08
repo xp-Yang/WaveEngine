@@ -72,7 +72,7 @@ void MainCameraPass::draw()
             shader->setMatrix("view", 1, camera_view);
             shader->setMatrix("model", 1, model_matrix.transform());
             shader->setMatrix("projection", 1, camera_projection);
-            shader->setFloat3("view_pos", camera_pos);
+            shader->setFloat3("cameraPos", camera_pos);
 
             auto dir_light_component = world.getMainDirectionalLightComponent();
             Mat4 light_ref_matrix = dir_light_component->lightReferenceMatrix();
