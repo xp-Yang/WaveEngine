@@ -19,7 +19,6 @@ struct PointLight
     vec3  position;
 	vec4  color;
     float radius;
-    vec3  intensity;
 };
 
 struct Material {
@@ -94,7 +93,7 @@ void main()
     vec3 lightingByPointLight = vec3(0);
     for(int i = 0; i < point_lights_size; i++){
         vec3 lightDir = normalize(fs_in.pass_pos - pointLights[i].position);
-        lightingByPointLight += LightCalculation(pointLights[i].color.xyz, normal, view_direction, -lightDir, diffuse_coef, specular_coef) / point_lights_size;
+        lightingByPointLight += LightCalculation(pointLights[i].color.xyz, normal, view_direction, -lightDir, diffuse_coef, specular_coef);
     }
 
 	// Shadow:

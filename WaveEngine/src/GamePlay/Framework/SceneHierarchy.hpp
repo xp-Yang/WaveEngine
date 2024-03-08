@@ -47,15 +47,10 @@ public:
 		m_root_object->remove(obj); 
 	}
 	void addPointLight();
-	int maxPointLightCount() { return 256; }
-	int pointLightCount() { return m_point_light_count; }
-	//Object* object(const std::string& name) {
-	//	auto it = m_objects.find(name);
-	//	if (it == m_objects.end())
-	//		return nullptr;
-	//	else
-	//		return m_objects[name];
-	//}
+	void addCube();
+	void addSphere();
+	int maxPointLightCount() const { return 256; }
+	int pointLightCount() const { return m_point_light_count; }
 	//Object* object(const std::string& name) const {
 	//	auto it = m_objects.find(name);
 	//	if (it == m_objects.end())
@@ -63,17 +58,16 @@ public:
 	//	else
 	//		return m_objects.at(name);
 	//}
-	//const std::unordered_map<std::string, Object*>& get_objects() const { return m_objects; }
-	//bool insert_object(const std::string& name, Object* object) { return m_objects.insert({ name, object }).second; }
-	//void remove_object(const std::string& name) { m_objects.erase(name); };
 
 protected:
 	void init();
 
 private:
 	GameObject* m_root_object{ nullptr };
-	std::vector<GameObject*> selected_objects;
+	std::vector<GameObject*> selected_objects; //TODO
 	int m_point_light_count = 0;
+	int m_test_cube_count = 0;
+	int m_test_sphere_count = 0;
 };
 
 #endif

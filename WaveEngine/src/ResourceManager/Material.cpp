@@ -9,6 +9,11 @@ void Material::update_shader_binding() const {
 
         shader->setFloat("material.ambient", ambient_strength);
         shader->setFloat("material.shininess", shininess);
+        // pbr debug
+        shader->setFloat3("albedo", albedo);
+        shader->setFloat("metallic", metallic);
+        shader->setFloat("roughness", roughness);
+        shader->setFloat("ao", ao);
 
         std::string resource_dir = RESOURCE_DIR;
         static unsigned int default_map = Texture::generate_texture_from_file(resource_dir + "/images/default_map.png", false);

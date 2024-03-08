@@ -39,6 +39,66 @@ void SceneHierarchy::addPointLight()
 	m_point_light_count++;
 }
 
+void SceneHierarchy::addCube()
+{
+	std::string resource_dir = Application::resourceDirectory();
+
+	auto& world = ecs::World::get();
+
+	auto cube_entity = world.create_entity();
+	auto cube_node = new GameObject(m_root_object, cube_entity);
+	world.addComponent<ecs::NameComponent>(cube_entity).name = std::string("Cube") + std::to_string(m_test_cube_count);
+	auto& cube_transform = world.addComponent<ecs::TransformComponent>(cube_entity);
+	cube_transform.translation = { 0.0f, 0.5f, -10.0f };
+	auto& cube_renderable = world.addComponent<ecs::RenderableComponent>(cube_entity);
+	ecs::Primitive cube_primitive;
+	cube_primitive.mesh = Mesh::create_cube_mesh();
+	Material cube_material;
+	//cube_material.shader = new Shader(resource_dir + "/shader/model.vs", resource_dir + "/shader/modelFowardRendering.fs");
+	cube_material.set_diffuse_map(resource_dir + "/images/pure_white_map.png");
+	cube_material.set_specular_map(resource_dir + "/images/cube_specular.png");
+	cube_material.shader = new Shader(resource_dir + "/shader/pbr.vs", resource_dir + "/shader/pbr.fs");
+	cube_material.albedo = Vec3(0.1);
+	cube_material.metallic = 0.1;
+	cube_material.roughness = 0.1;
+	cube_material.ao = 0.1;
+	cube_primitive.material = cube_material;
+	cube_renderable.setPrimitives({ cube_primitive });
+	//world.addComponent<ecs::ExplosionComponent>(cube_entity);
+
+	m_test_cube_count++;
+}
+
+void SceneHierarchy::addSphere()
+{
+	std::string resource_dir = Application::resourceDirectory();
+
+	auto& world = ecs::World::get();
+
+	auto sphere_entity = world.create_entity();
+	auto sphere_node = new GameObject(m_root_object, sphere_entity);
+	world.addComponent<ecs::NameComponent>(sphere_entity).name = std::string("Sphere") + std::to_string(m_test_sphere_count);
+	auto& sphere_transform = world.addComponent<ecs::TransformComponent>(sphere_entity);
+	sphere_transform.translation = { 2.5f, 1.0f + 2.5f * (m_test_sphere_count / 4), 2.5f * (m_test_sphere_count % 4) };
+	auto& sphere_renderable = world.addComponent<ecs::RenderableComponent>(sphere_entity);
+	ecs::Primitive sphere_primitive;
+	sphere_primitive.mesh = Mesh::create_icosphere_mesh(5);
+	Material sphere_material;
+	//sphere_material.shader = new Shader(resource_dir + "/shader/model.vs", resource_dir + "/shader/modelFowardRendering.fs");
+	sphere_material.set_diffuse_map(resource_dir + "/images/pure_white_map.png");
+	sphere_material.set_specular_map(resource_dir + "/images/pure_white_map.png");
+	sphere_material.shader = new Shader(resource_dir + "/shader/model.vs", resource_dir + "/shader/modelFowardRendering.fs");
+	sphere_material.albedo = Vec3(1.0f, 0.0f, 0.0f);
+	sphere_material.metallic = 0.7;
+	sphere_material.roughness = 0.1;
+	sphere_material.ao = 0.1;
+	sphere_primitive.material = sphere_material;
+	sphere_renderable.setPrimitives({ sphere_primitive });
+	//world.addComponent<ecs::ExplosionComponent>(sphere_entity);
+
+	m_test_sphere_count++;
+}
+
 void SceneHierarchy::init() {
 	std::string resource_dir = Application::resourceDirectory();
 
@@ -84,37 +144,11 @@ void SceneHierarchy::init() {
 		addPointLight();
 	}
 
-	auto cube_entity = world.create_entity();
-	auto cube_node = new GameObject(m_root_object, cube_entity);
-	world.addComponent<ecs::NameComponent>(cube_entity).name = "Cube";
-	auto& cube_transform = world.addComponent<ecs::TransformComponent>(cube_entity);
-	cube_transform.translation = { 0.0f, 0.5f, -10.0f };
-	auto& cube_renderable = world.addComponent<ecs::RenderableComponent>(cube_entity);
-	ecs::Primitive cube_primitive;
-	cube_primitive.mesh = Mesh::create_cube_mesh();
-	Material cube_material;
-    cube_material.shader = new Shader(resource_dir + "/shader/model.vs", resource_dir + "/shader/modelFowardRendering.fs");
-	cube_material.set_diffuse_map(resource_dir + "/images/pure_white_map.png");
-	cube_material.set_specular_map(resource_dir + "/images/cube_specular.png");
-	cube_primitive.material = cube_material;
-	cube_renderable.setPrimitives({ cube_primitive });
-    //world.addComponent<ecs::ExplosionComponent>(cube_entity);
+	addCube();
 
-	auto sphere_entity = world.create_entity();
-	auto sphere_node = new GameObject(m_root_object, sphere_entity);
-	world.addComponent<ecs::NameComponent>(sphere_entity).name = "Sphere";
-	auto& sphere_transform = world.addComponent<ecs::TransformComponent>(sphere_entity);
-    sphere_transform.translation = { 5.0f, 1.0f, 5.0f };
-	auto& sphere_renderable = world.addComponent<ecs::RenderableComponent>(sphere_entity);
-	ecs::Primitive sphere_primitive;
-	sphere_primitive.mesh = Mesh::create_icosphere_mesh(5);
-	Material sphere_material;
-	sphere_material.shader = new Shader(resource_dir + "/shader/model.vs", resource_dir + "/shader/modelFowardRendering.fs");
-	sphere_material.set_diffuse_map(resource_dir + "/images/pure_white_map.png");
-	sphere_material.set_specular_map(resource_dir + "/images/pure_white_map.png");
-	sphere_primitive.material = sphere_material;
-	sphere_renderable.setPrimitives({ sphere_primitive });
-	//world.addComponent<ecs::ExplosionComponent>(sphere_entity);
+	for (int i = 0; i < 16; i++) {
+		addSphere();
+	}
 
 	//TODO shader在延迟渲染中没用到。shader是否不应该在这里创建
     auto ground_entity = world.create_entity();
@@ -187,6 +221,10 @@ void SceneHierarchy::init() {
 		primitive.mesh = bunny->get_datas().at(i).mesh;
 		primitive.material = bunny->get_datas().at(i).material;
 		primitive.material.shader = bunny_shader;
+		Material sphere_material;
+		sphere_material.shader = new Shader(resource_dir + "/shader/model.vs", resource_dir + "/shader/modelFowardRendering.fs");
+		sphere_material.set_diffuse_map(resource_dir + "/images/pure_white_map.png");
+		sphere_material.set_specular_map(resource_dir + "/images/pure_white_map.png");
 		primitive.material = sphere_material;
 		bunny_primitives.push_back(primitive);
 	}

@@ -61,8 +61,6 @@ void MainCameraPass::draw()
         }
 
         for (int i = 0; i < renderable.primitives.size(); i++) {
-            if (world.hasComponent<ecs::PointLightComponent>(entity))
-                continue;
             auto& mesh = renderable.primitives[i].mesh;
             auto& material = renderable.primitives[i].material;
             Shader* shader = material.shader;
@@ -81,10 +79,35 @@ void MainCameraPass::draw()
             shader->setFloat3("directionalLight.direction", light_direction);
             shader->setFloat4("directionalLight.color", light_color);
             
-            //// 点光源这里的循环造成了卡顿，需要deferred rendering解决
-            //for (auto entity : world.entityView<ecs::PointLightComponent>()) {
-            //}
-            shader->setInt("point_light_size", 0);
+            if (world.hasComponent<ecs::PointLightComponent>(entity)) {
+                Vec4 light_color = world.getComponent<ecs::PointLightComponent>(entity)->luminousColor;
+                shader->setFloat4("color", light_color);
+            }
+
+            // 点光源这里的循环造成了卡顿，需要deferred rendering解决
+            int k = 0;
+            for (auto entity : world.entityView<ecs::PointLightComponent>()) {
+                auto& transform = *world.getComponent<ecs::TransformComponent>(entity);
+                Vec3 light_pos = transform.transform()[3];
+                Vec4 light_color = world.getComponent<ecs::PointLightComponent>(entity)->luminousColor;
+                float light_radius = world.getComponent<ecs::PointLightComponent>(entity)->radius;
+                std::string light_id = std::string("pointLights[") + std::to_string(k) + "]";
+                shader->setFloat3(light_id + ".position", light_pos);
+                shader->setFloat4(light_id + ".color", light_color);
+                shader->setFloat(light_id + ".radius", light_radius);
+                k++;
+
+                // 模拟正向渲染的嵌套for循环，性能明显下降
+                //for (int i = 0; i < 45 /*primitives count*/; i++) {
+                //	std::string light_id = std::string("lights[") + std::to_string(i) + "]";
+                //}
+                // 正向vs延迟渲染：
+                // drawcall调用：  renderable.primitives.size()次  vs  gbufferPass：renderable.primitives.size()次 + LightingPass 1次。
+                // for循环设置shader光源属性：  renderable.primitives.size() * Lights.size()次  vs  Lights.size()次。
+                // shader计算：  每次drawcall，每个VAO绘制时，shader对光栅化后的片段并行计算，每个shader内部循环Lights.size()次
+                //  vs  LightingPass的一次drawcall中，shader对整个屏幕所有像素并行计算，每个shader内部循环Lights.size()次。
+            }
+            shader->setInt("point_light_size", k);
 
             shader->setCubeTexture("skybox", 6, world.getSkyboxComponent()->texture);
             shader->setBool("enable_skybox_sample", m_reflection);

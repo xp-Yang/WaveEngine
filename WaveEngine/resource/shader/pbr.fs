@@ -29,9 +29,9 @@ uniform int point_lights_size;
 uniform PointLight pointLights[MAX_POINT_LIGHTS_COUNT];
 
 // TODO should be map
-struct Material {
-};
-uniform Material material;
+// struct Material {
+// };
+// uniform Material material;
 // material parameters
 uniform vec3 albedo;
 uniform float metallic;
@@ -138,8 +138,8 @@ void main()
         vec3 L = normalize(pointLights[i].position - fs_in.fragPos);
         vec3 H = normalize(V + L);
         float distance = length(pointLights[i].position - fs_in.fragPos);
-        float attenuation = 1.0 / (distance * distance);
-        vec3 radiance = pointLights[i].color * attenuation;  
+        float attenuation = 1.0;//1.0 / (distance * distance);
+        vec3 radiance = pointLights[i].color.xyz * attenuation;  
 
         // add to outgoing radiance Lo
         Lo += radiance * BRDF(L, V, N, F0, radiance, metallic, roughness);  // note that we already multiplied the BRDF by the Fresnel (kS) so we won't multiply by kS again
@@ -151,10 +151,10 @@ void main()
 
     vec3 color = ambient + Lo;
 
-    // HDR tonemapping
-    color = color / (color + vec3(1.0));
-    // gamma correct
-    color = pow(color, vec3(1.0/2.2)); 
+    // // HDR tonemapping
+    // color = color / (color + vec3(1.0));
+    // // gamma correct
+    // color = pow(color, vec3(1.0/2.2)); 
 
     FragColor = vec4(color, 1.0);
 }
