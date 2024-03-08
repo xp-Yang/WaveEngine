@@ -5,7 +5,7 @@ in VS_OUT {
     vec3 pass_pos;
     vec2 pass_uv;
     vec3 pass_normal;
-    vec4 FragPosLightSpace;
+    vec4 fragPosLightSpace;
 } fs_in;
 
 struct DirectionalLight
@@ -97,7 +97,7 @@ void main()
     }
 
 	// Shadow:
-    float shadow = ShadowCalculation(fs_in.FragPosLightSpace);       
+    float shadow = ShadowCalculation(fs_in.fragPosLightSpace);       
     
     vec3 result = ambient_light + (1.0 - shadow) * lightingByDirectionalLight + lightingByPointLight;
     gl_FragColor = vec4(result, 1.0);

@@ -18,7 +18,6 @@ public:
 	void render();
 
 	bool motion;
-	float global_ambient_strength;
 	int icosphere_accuracy;
 
 protected:

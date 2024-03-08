@@ -11,10 +11,6 @@ out VS_OUT {
     vec4 fragPosLightSpace; //裁剪坐标
 } vs_out;
 
-out vec2 TexCoords;
-out vec3 WorldPos;
-out vec3 Normal;
-
 uniform mat4 projection;
 uniform mat4 view;
 uniform mat4 model;

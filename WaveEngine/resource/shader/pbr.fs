@@ -145,7 +145,8 @@ void main()
         vec3 L = normalize(pointLights[i].position - fs_in.fragPos);
         vec3 H = normalize(V + L);
         float distance = length(pointLights[i].position - fs_in.fragPos);
-        float attenuation = 1.0;//1.0 / (distance * distance);
+        float k_quadratic = 0.2 / pointLights[i].radius;
+		float attenuation = step(0, (pointLights[i].radius - distance)) * (1.0 / (1.0 + k_quadratic * distance* distance));
         vec3 radiance = pointLights[i].color.xyz * attenuation;  
 
         // add to outgoing radiance Lo
@@ -154,14 +155,14 @@ void main()
     
     // ambient lighting (note that the next IBL tutorial will replace 
     // this ambient lighting with environment lighting).
-    vec3 ambient = vec3(0.03) * albedo * ao;
+    vec3 ambient = 0.03 * albedo * ao;
 
     vec3 color = ambient + Lo;
 
-    // // HDR tonemapping
-    // color = color / (color + vec3(1.0));
-    // // gamma correct
-    // color = pow(color, vec3(1.0/2.2)); 
+    // HDR tonemapping
+    color = color / (color + vec3(1.0));
+    // gamma correct
+    color = pow(color, vec3(1.0/2.2)); 
 
     FragColor = vec4(color, 1.0);
 }

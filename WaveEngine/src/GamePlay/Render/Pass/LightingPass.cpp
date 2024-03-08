@@ -129,6 +129,10 @@ void LightingPass::draw()
 			shader->setMatrix("model", 1, model_matrix.transform());
 			shader->setMatrix("view", 1, camera_view);
 			shader->setMatrix("projection", 1, camera_projection);
+			if (m_shadow_map != 0) {
+				shader->setMatrix("lightSpaceMatrix", 1, light_ref_matrix);
+				shader->setTexture("shadow_map", 4, m_shadow_map);
+			}
 			Renderer::drawIndex(*shader, mesh.get_VAO(), mesh.get_indices_count());
 			shader->stop_using();
 		}

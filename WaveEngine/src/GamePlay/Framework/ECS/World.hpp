@@ -208,6 +208,7 @@ public:
             int poolIds[] = { 0, getComponentPoolId<ComponentTypes>() ... };
             for (int i = 1; i < (sizeof...(ComponentTypes) + 1); i++)
                 view_mask.set(poolIds[i]);
+            view_all = false;
         }
     }
 
@@ -223,7 +224,7 @@ public:
         Iter& operator++() {
             entity_idx++;
             for (; entity_idx < entt_view_ref->world->getAllEntities().size(); entity_idx++) {
-                if (entt_view_ref->view_mask == (entt_view_ref->world->getAllEntities()[entity_idx].getMask() & entt_view_ref->view_mask))
+                if (entt_view_ref->view_all || (entt_view_ref->view_mask == (entt_view_ref->world->getAllEntities()[entity_idx].getMask() & entt_view_ref->view_mask)))
                     break;
             }
             return *this;
@@ -252,7 +253,7 @@ public:
         int i = 0;
         const auto& all_entities = world->getAllEntities();
         for (i = 0; i < all_entities.size(); i++) {
-            if ((all_entities[i].getMask() & view_mask) == view_mask)
+            if (view_all || ((all_entities[i].getMask() & view_mask) == view_mask))
                 break;
         }
         // 如果没找到

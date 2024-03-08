@@ -10,8 +10,7 @@
 
 ImGuiEditor::ImGuiEditor()
 {
-    motion = true;
-    global_ambient_strength = 0.1f;
+    motion = false;
     icosphere_accuracy = 8;
 
     // TODO: editor依赖system，能操控渲染管线，能操控运动，能编辑transform，能编辑mesh，能编辑material...
@@ -225,7 +224,6 @@ void ImGuiEditor::renderSceneHierarchy()
     auto& world = ecs::World::get();
     auto scene_hierarchy = Application::GetApp().getSceneHierarchy();
     auto root_obj = scene_hierarchy->rootObject();
-    static const ecs::Entity* picked_entity = nullptr;
     for (int i = 0; i < root_obj->children().size(); i++)
     {
         auto child = root_obj->children()[i];
@@ -235,15 +233,18 @@ void ImGuiEditor::renderSceneHierarchy()
         static ImGuiTreeNodeFlags node_flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_SpanAvailWidth;
         bool node_open = ImGui::TreeNodeEx((void*)(intptr_t)i, node_flags, object_name.c_str(), i);
         if (ImGui::IsItemClicked() && !ImGui::IsItemToggledOpen()) {
-            if (picked_entity && picked_entity == &entity) {
-                picked_entity = nullptr;
+            bool close = false;
+            for (const auto& picked_entity : world.getPickedEntities()) {
+                if (picked_entity.getId() == entity.getId()) {
+                    world.removeComponent<ecs::PickedComponent>(entity);
+                    close = true;
+                }
             }
-            else {
+            if (!close) {
                 for (const auto& picked_entity : world.getPickedEntities()) {
                     world.removeComponent<ecs::PickedComponent>(picked_entity);
                 }
                 world.addComponent<ecs::PickedComponent>(entity);
-                picked_entity = &entity;
             }
         }
         if (node_open)
@@ -271,10 +272,8 @@ void ImGuiEditor::renderSceneHierarchy()
 
     ImGui::End();
 
-    if (picked_entity) {
-        ImVec2 pos = ImVec2(scene_hierarchy_window->Pos.x + scene_hierarchy_window_width, scene_hierarchy_window->Pos.y);
-        renderPickedEntityController(pos, { *picked_entity });
-    }
+    ImVec2 pos = ImVec2(scene_hierarchy_window->Pos.x + scene_hierarchy_window_width, scene_hierarchy_window->Pos.y);
+    renderPickedEntityController(pos, world.getPickedEntities());
 }
 
 void ImGuiEditor::renderCameraController()
@@ -307,6 +306,8 @@ void ImGuiEditor::renderCameraController()
 
 void ImGuiEditor::renderPickedEntityController(const ImVec2& pos, const std::vector<ecs::Entity>& picked_entities)
 {
+    if (picked_entities.empty())
+        return;
     // TODO consider to edit materials in MaterialSystem
     auto& world = ecs::World::get();
     auto entity = picked_entities[0];
@@ -342,20 +343,26 @@ void ImGuiEditor::renderPickedEntityController(const ImVec2& pos, const std::vec
     }
     if (world.hasComponent<ecs::RenderableComponent>(entity)) {
         auto renderable = world.getComponent<ecs::RenderableComponent>(entity);
-        float shininess = renderable->primitives[0].material.shininess;
-        ImGui::SliderFloat((std::string("shininess") + "##" + obj_name).c_str(), &shininess, 64.0f, 256.0f);
         // 编辑对象材质属性
         //ecs::MaterialSystem::onUpdate();
         for (int i = 0; i < renderable->primitives.size(); i++) {
             auto& material = renderable->primitives[i].material;
-            //material.materials[i].ambient_strength;
-            material.shininess = shininess;
-            //curr_entity->material(i).set_diffuse_map();
-            //curr_entity->material(i).set_specular_map();
+            ImGui::SliderFloat((std::string("shininess") + "##" + obj_name).c_str(), &material.shininess, 64.0f, 256.0f);
+
+            ImGui::PushItemWidth(80.0f);
+            ImGui::SliderFloat((std::string("##albedo.x") + "##" + obj_name).c_str(), &material.albedo.x, 0.0f, 1.0f);
+            ImGui::SameLine();
+            ImGui::SliderFloat((std::string("##albedo.y") + "##" + obj_name).c_str(), &material.albedo.y, 0.0f, 1.0f);
+            ImGui::SameLine();
+            ImGui::SliderFloat((std::string("albedo") + "##" + obj_name).c_str(), &material.albedo.z, 0.0f, 1.0f);
+            ImGui::PopItemWidth();
+
+            ImGui::SliderFloat((std::string("metallic") + "##" + obj_name).c_str(), &material.metallic, 0.0f, 1.0f);
+            ImGui::SliderFloat((std::string("roughness") + "##" + obj_name).c_str(), &material.roughness, 0.0f, 1.0f);
+            ImGui::SliderFloat((std::string("ao") + "##" + obj_name).c_str(), &material.ao, 0.0f, 1.0f);
         }
     }
     if (world.hasComponent<ecs::ExplosionComponent>(entity)) {
-        // 编辑对象的explosion ratio
         auto& explosion = *world.getComponent<ecs::ExplosionComponent>(entity);
         ImGui::SliderFloat((std::string("explosion ratio") + "##" + obj_name).c_str(), &explosion.explosionRatio, 0.0f, 1.0f);
     }
@@ -398,7 +405,7 @@ void ImGuiEditor::renderGizmos()
     ecs::TransformComponent* transform_component = nullptr;
     auto picked_entities = world.getPickedEntities();
     for (auto entity : picked_entities) {
-        if (!world.hasComponent<ecs::BaseGridGroundComponent>(entity)) {
+        if (/*!world.hasComponent<ecs::BaseGridGroundComponent>(entity)*/true) {
             transform_component = world.getComponent<ecs::TransformComponent>(entity);
             break;
         }

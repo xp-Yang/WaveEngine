@@ -13,7 +13,7 @@ out VS_OUT {
     vec3 pass_pos;          //世界坐标
     vec2 pass_uv;
     vec3 pass_normal;       //局部坐标
-    vec4 FragPosLightSpace; //裁剪坐标
+    vec4 fragPosLightSpace; //裁剪坐标
 } vs_out;
 
 void main()
@@ -23,7 +23,7 @@ void main()
     vs_out.pass_pos = vec3(model * vec4(vertex_pos, 1.0));
     //vs_out.pass_normal = vec3(model * vec4(vertex_normal, 0.0));
     vs_out.pass_normal = vertex_normal;
-    vs_out.FragPosLightSpace = lightSpaceMatrix * vec4(vs_out.pass_pos, 1.0);
+    vs_out.fragPosLightSpace = lightSpaceMatrix * vec4(vs_out.pass_pos, 1.0);
     //Normal = mat3(transpose(inverse(model))) * aNormal;  
     //这里输出的gl_Position为裁剪空间，给到gs时还是裁剪空间，到fs时已经自动做了透视除法，变成了NDC空间
     //裁剪坐标

@@ -9,7 +9,6 @@ class Shader;
 struct Material {
     //float diffuse_strength{ 1.0f };
     //float specular_strength{ 1.0f };
-    float ambient_strength{ 0.1f };
     unsigned int diffuse_map{ 0 };
     unsigned int specular_map{ 0 };
     unsigned int normal_map{ 0 };
@@ -20,10 +19,10 @@ struct Material {
     unsigned int roughness_map{ 0 };
     unsigned int ao_map{ 0 };
     // pbr debug
-    Vec3 albedo;
-    float metallic;
-    float roughness;
-    float ao;
+    Vec3 albedo{ Vec3(1.0f) };
+    float metallic{ 1.0f };
+    float roughness{ 0.5f };
+    float ao{ 0.01f };
         //debug
         std::string diffuse_map_path = "";
         std::string specular_map_path = "";

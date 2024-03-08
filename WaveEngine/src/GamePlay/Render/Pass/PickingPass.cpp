@@ -77,12 +77,13 @@ void PickingPass::draw()
         glReadPixels(x, y, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, data);
         int picked_id = (int)data[0] + (((int)data[1]) << 8) + (((int)data[2]) << 16);
 
+        for (const auto& picked_entity : world.getPickedEntities()) {
+            world.removeComponent<ecs::PickedComponent>(picked_entity);
+        }
         for (auto entity : world.entityView<ecs::RenderableComponent>()) {
             if (entity.getId() * 50000 == picked_id) {
                 world.addComponent<ecs::PickedComponent>(entity);
             }
-            else
-                world.removeComponent<ecs::PickedComponent>(entity);
         }
         //glReadBuffer(GL_NONE);
     }

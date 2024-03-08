@@ -8,7 +8,6 @@ uniform sampler2D gDiffuse;
 uniform sampler2D gSpecular;
 
 uniform sampler2D shadow_map;
-
 uniform mat4 lightSpaceMatrix;
 
 struct DirectionalLight
@@ -33,10 +32,10 @@ uniform PointLight pointLights[MAX_POINT_LIGHTS_COUNT];
 uniform vec3 cameraPos;
 
 
-float ShadowCalculation(vec4 LightSpacePos)
+float ShadowCalculation(vec4 fragPosLightSpace)
 {
     // 1.还在裁剪空间，执行透视除法，变换到NDC空间
-    vec3 projCoords = LightSpacePos.xyz / LightSpacePos.w;
+    vec3 projCoords = fragPosLightSpace.xyz / fragPosLightSpace.w;
     // 2.变换到[0,1]的范围, 便于采样和比较
     projCoords = projCoords * 0.5 + 0.5;
     if(projCoords.z > 1.0)
@@ -94,8 +93,8 @@ void main()
     }
 
 	// Shadow:
-    vec4 LightSpacePos = lightSpaceMatrix * vec4(Position, 1.0);
-    float shadow = ShadowCalculation(LightSpacePos);
+    vec4 fragPosLightSpace = lightSpaceMatrix * vec4(Position, 1.0);
+    float shadow = ShadowCalculation(fragPosLightSpace);
 
     gl_FragColor = vec4((1.0 - shadow) * lightingByDirectionalLight + lightingByPointLight, 1.0);
 }
