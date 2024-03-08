@@ -107,7 +107,7 @@ void MainCameraPass::draw()
                 // shader计算：  每次drawcall，每个VAO绘制时，shader对光栅化后的片段并行计算，每个shader内部循环Lights.size()次
                 //  vs  LightingPass的一次drawcall中，shader对整个屏幕所有像素并行计算，每个shader内部循环Lights.size()次。
             }
-            shader->setInt("point_light_size", k);
+            shader->setInt("point_lights_size", k);
 
             shader->setCubeTexture("skybox", 6, world.getSkyboxComponent()->texture);
             shader->setBool("enable_skybox_sample", m_reflection);

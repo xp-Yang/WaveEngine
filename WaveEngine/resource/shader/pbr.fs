@@ -132,6 +132,13 @@ void main()
 
     // reflectance equation
     vec3 Lo = vec3(0.0);
+		
+		// Directional Light
+        vec3 L = normalize(-directionalLight.direction);
+        vec3 H = normalize(V + L);
+        vec3 radiance = directionalLight.color.xyz;  
+        Lo += radiance * BRDF(L, V, N, F0, radiance, metallic, roughness);  // note that we already multiplied the BRDF by the Fresnel (kS) so we won't multiply by kS again
+
     for(int i = 0; i < point_lights_size; ++i) 
     {
         // calculate per-light radiance

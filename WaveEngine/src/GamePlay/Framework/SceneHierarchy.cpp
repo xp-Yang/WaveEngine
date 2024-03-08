@@ -87,10 +87,10 @@ void SceneHierarchy::addSphere()
 	//sphere_material.shader = new Shader(resource_dir + "/shader/model.vs", resource_dir + "/shader/modelFowardRendering.fs");
 	sphere_material.set_diffuse_map(resource_dir + "/images/pure_white_map.png");
 	sphere_material.set_specular_map(resource_dir + "/images/pure_white_map.png");
-	sphere_material.shader = new Shader(resource_dir + "/shader/model.vs", resource_dir + "/shader/modelFowardRendering.fs");
-	sphere_material.albedo = Vec3(1.0f, 0.0f, 0.0f);
-	sphere_material.metallic = 0.7;
-	sphere_material.roughness = 0.1;
+	sphere_material.shader = new Shader(resource_dir + "/shader/pbr.vs", resource_dir + "/shader/pbr.fs");
+	sphere_material.albedo = Vec3(1.0f, 0.6f, 0.6f);
+	sphere_material.metallic = 0.5;
+	sphere_material.roughness = 0.5;
 	sphere_material.ao = 0.1;
 	sphere_primitive.material = sphere_material;
 	sphere_renderable.setPrimitives({ sphere_primitive });
