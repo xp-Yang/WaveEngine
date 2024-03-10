@@ -283,8 +283,8 @@ Shader* Shader::getShader(const ShaderType& type)
     case ShaderType::WireframeShader:
         static Shader* wireframe_shader = new Shader(resource_dir + "/shader/model.vs", resource_dir + "/shader/wireframe.gs", resource_dir + "/shader/wireframe.fs");
         return wireframe_shader;
-    case ShaderType::GridShader:
-        static Shader* grid_shader = new Shader(resource_dir + "/shader/grid.vs", resource_dir + "/shader/grid.fs");
+    case ShaderType::CheckerboardShader:
+        static Shader* grid_shader = new Shader(resource_dir + "/shader/checkerboard.vs", resource_dir + "/shader/checkerboard.fs");
         return grid_shader;
     case ShaderType::PickingShader:
         static Shader* picking_shader = new Shader(resource_dir + "/shader/picking.vs", resource_dir + "/shader/picking.fs");
@@ -293,7 +293,7 @@ Shader* Shader::getShader(const ShaderType& type)
         static Shader* rt_shader = new Shader(resource_dir + "/shader/RayTracing.vs", resource_dir + "/shader/RayTracing.fs");
         return rt_shader;
     case ShaderType::QuadShader:
-        static Shader* quad_shader = new Shader(resource_dir + "/shader/frame.vs", resource_dir + "/shader/frame.fs");
+        static Shader* quad_shader = new Shader(resource_dir + "/shader/screenQuad.vs", resource_dir + "/shader/screenQuad.fs");
         return quad_shader;
     case ShaderType::DepthShader:
         static Shader* depth_shader = new Shader(resource_dir + "/shader/depth.vs", resource_dir + "/shader/depth.fs");

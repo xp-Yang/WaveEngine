@@ -40,9 +40,9 @@ void LightingPass::draw()
 		return;
 	}
 
-	// grid
-	if (m_grid) {
-		drawGridMode();
+	// checkerboard
+	if (m_checkerboard) {
+		drawCheckerboardMode();
 		if (m_normal_debug) {
 			drawNormalMode();
 		}
@@ -57,6 +57,14 @@ void LightingPass::draw()
 	lighting_shader->setTexture("gNormal", 1, g_position_map + 1);
 	lighting_shader->setTexture("gDiffuse", 2, g_position_map + 2);
 	lighting_shader->setTexture("gSpecular", 3, g_position_map + 3);
+	// PBR
+	lighting_shader->setTexture("gAlbedo", 4, g_position_map + 4);
+	lighting_shader->setTexture("gMetallic", 5, g_position_map + 5);
+	lighting_shader->setTexture("gRoughness", 6, g_position_map + 6);
+	lighting_shader->setTexture("gAo", 7, g_position_map + 7);
+
+	lighting_shader->setBool("enablePBR", m_pbr);
+
 	lighting_shader->setFloat3("cameraPos", camera.pos);
 
 	Vec3 light_direction = dir_light_component->direction;
@@ -67,10 +75,6 @@ void LightingPass::draw()
 	if (m_shadow_map != 0) {
 		lighting_shader->setMatrix("lightSpaceMatrix", 1, light_ref_matrix);
 		lighting_shader->setTexture("shadow_map", 4, m_shadow_map);
-	}
-	else {
-		// set default map
-		//shader->setTexture("shadow_map", 4, 0);
 	}
 
 	int k = 0;
@@ -156,22 +160,24 @@ void LightingPass::draw()
 	}
 
 	// skybox
-	for (auto entity : world.entityView<ecs::SkyboxComponent>()) {
-		auto& renderable = *world.getComponent<ecs::RenderableComponent>(entity);
-		auto& model_matrix = *world.getComponent<ecs::TransformComponent>(entity);
-		auto skybox_texture_id = world.getComponent<ecs::SkyboxComponent>(entity)->texture;
-		for (int i = 0; i < renderable.primitives.size(); i++) {
-			auto& mesh = renderable.primitives[i].mesh;
-			auto& material = renderable.primitives[i].material;
-			Shader* shader = material.shader;
-			material.update_shader_binding();
-			shader->start_using();
-			shader->setMatrix("model", 1, model_matrix.transform());
-			shader->setMatrix("view", 1, Mat4(Mat3(camera.view)));
-			shader->setMatrix("projection", 1, camera.projection);
-			shader->setCubeTexture("skybox", 6, skybox_texture_id);
-			Renderer::drawIndex(*shader, mesh.get_VAO(), mesh.get_indices_count());
-			shader->stop_using();
+	if (m_skybox) {
+		for (auto entity : world.entityView<ecs::SkyboxComponent>()) {
+			auto& renderable = *world.getComponent<ecs::RenderableComponent>(entity);
+			auto& model_matrix = *world.getComponent<ecs::TransformComponent>(entity);
+			auto skybox_texture_id = world.getComponent<ecs::SkyboxComponent>(entity)->texture;
+			for (int i = 0; i < renderable.primitives.size(); i++) {
+				auto& mesh = renderable.primitives[i].mesh;
+				auto& material = renderable.primitives[i].material;
+				Shader* shader = material.shader;
+				material.update_shader_binding();
+				shader->start_using();
+				shader->setMatrix("model", 1, model_matrix.transform());
+				shader->setMatrix("view", 1, Mat4(Mat3(camera.view)));
+				shader->setMatrix("projection", 1, camera.projection);
+				shader->setCubeTexture("skybox", 6, skybox_texture_id);
+				Renderer::drawIndex(*shader, mesh.get_VAO(), mesh.get_indices_count());
+				shader->stop_using();
+			}
 		}
 	}
 }
@@ -179,6 +185,11 @@ void LightingPass::draw()
 FrameBuffer* LightingPass::getFrameBuffer()
 {
 	return m_framebuffer.get();
+}
+
+void LightingPass::enableSkybox(bool enable)
+{
+	m_skybox = enable;
 }
 
 void LightingPass::enableNormal(bool enable)
@@ -191,9 +202,14 @@ void LightingPass::enableWireframe(bool enable)
 	m_wireframe = enable;
 }
 
-void LightingPass::enableGrid(bool enable)
+void LightingPass::enableCheckerboard(bool enable)
 {
-	m_grid = enable;
+	m_checkerboard = enable;
+}
+
+void LightingPass::enablePBR(bool enable)
+{
+	m_pbr = enable;
 }
 
 void LightingPass::drawNormalMode()
@@ -241,14 +257,14 @@ void LightingPass::drawWireframeMode()
 	}
 }
 
-void LightingPass::drawGridMode()
+void LightingPass::drawCheckerboardMode()
 {
 	auto& world = ecs::World::get();
 	ecs::CameraComponent& camera = *world.getMainCameraComponent();
 	auto dir_light_component = world.getMainDirectionalLightComponent();
 
 	Mat4 light_ref_matrix = dir_light_component->lightReferenceMatrix();
-	Shader* grid_shader = Shader::getShader(ShaderType::GridShader);
+	Shader* grid_shader = Shader::getShader(ShaderType::CheckerboardShader);
 	for (auto entity : world.entityView<ecs::RenderableComponent>()) {
 		auto& renderable = *world.getComponent<ecs::RenderableComponent>(entity);
 		auto& model_matrix = *world.getComponent<ecs::TransformComponent>(entity);

@@ -47,11 +47,11 @@ void ScreenPass::draw()
 	frame_shader->setTexture("Texture", 0, m_shadow_view_ref->getFirstAttachmentOf(AttachmentType::DEPTH).getMap());
 	Renderer::drawIndex(*frame_shader, m_screen_quad.get_VAO(), m_screen_quad.get_indices_count());
 
-	Viewport rt_viewport = Application::GetApp().getWindow()->getViewport(ViewportType::RayTracing).value_or(Viewport());
-	Application::GetApp().getWindow()->setViewport(ViewportType::RayTracing, rt_viewport);
-	frame_shader->start_using();
-	frame_shader->setTexture("Texture", 0, m_rt_view_ref->getFirstAttachmentOf(AttachmentType::RGB16F).getMap());
-	Renderer::drawIndex(*frame_shader, m_screen_quad.get_VAO(), m_screen_quad.get_indices_count());
+	//Viewport rt_viewport = Application::GetApp().getWindow()->getViewport(ViewportType::RayTracing).value_or(Viewport());
+	//Application::GetApp().getWindow()->setViewport(ViewportType::RayTracing, rt_viewport);
+	//frame_shader->start_using();
+	//frame_shader->setTexture("Texture", 0, m_rt_view_ref->getFirstAttachmentOf(AttachmentType::RGB16F).getMap());
+	//Renderer::drawIndex(*frame_shader, m_screen_quad.get_VAO(), m_screen_quad.get_indices_count());
 }
 
 FrameBuffer* ScreenPass::getFrameBuffer()

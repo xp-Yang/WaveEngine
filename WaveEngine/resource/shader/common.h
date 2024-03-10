@@ -18,15 +18,15 @@ float ShadowCalculation(vec4 fragPosLightSpace, sampler2D shadow_map)
     // 2.变换到[0,1]的范围, 便于采样
     projCoords = projCoords * 0.5 + 0.5;
     if(projCoords.z > 1.0)
-        return 0.0;
+        return 1.0;
 
     float bias = 0.005;
     //float bias = max(0.05 * (1.0 - dot(normal, lightDir)), 0.005);
     float closestDepth = texture(shadow_map, projCoords.xy).r;
     // 检查当前片段是否在阴影中
-    float shadow = projCoords.z - closestDepth > bias ? 1.0 : 0.0;
+    float shadowFactor = projCoords.z - closestDepth > bias ? 0.3 : 1.0;
 
-    return shadow;
+    return shadowFactor;
 }
 
 //in VS_OUT {

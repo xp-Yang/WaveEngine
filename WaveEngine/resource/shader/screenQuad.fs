@@ -1,18 +1,18 @@
 #version 330 core
 
-in vec2 pass_uv;
+in vec2 fragUV;
 uniform sampler2D Texture;
 //uniform sampler2DMS Texture;
 void main()
 {
-    gl_FragColor = texture(Texture, pass_uv);
+    gl_FragColor = texture(Texture, fragUV);
 
     // customize anti-aliasing
     //ivec2 texSize = textureSize(Texture);
-    //gl_FragColor = texelFetch(Texture, ivec2(pass_uv * texSize), 3);
+    //gl_FragColor = texelFetch(Texture, ivec2(fragUV * texSize), 3);
 
     // debug depth
-    //float depthValue = texture(Texture, pass_uv).r;
+    //float depthValue = texture(Texture, fragUV).r;
     //float z = depthValue * 2.0 - 1.0; // back to NDC 
     //float near = 0.1; 
     //float far  = 100.0; 

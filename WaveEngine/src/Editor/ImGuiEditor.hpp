@@ -21,11 +21,12 @@ public:
 	int icosphere_accuracy;
 
 protected:
-	void renderGlobalController();
 	void renderGlobalMenu();
-	void renderSceneHierarchy();
+	void renderGlobalController();
 	void renderCameraController();
+	void renderSceneHierarchy();
 	void renderPickedEntityController(const ImVec2& pos, const std::vector<ecs::Entity>& picked_entities);
+
 	void renderMainViewWindow();
 	void renderPickingViewWindow();
 	void renderShadowViewWindow();

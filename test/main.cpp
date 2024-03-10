@@ -7,7 +7,7 @@
 // done: loop 中的逻辑分离 答: 分离了imgui的渲染
 // done: 材质应该包含shader
 // done: model.gs 的 explode 效果跟着fov缩放变 答：原因：learnOpengl的gs算法在裁剪空间计算法向量，而投影变换是非正交变换。
-// done: 着色器的坐标空间理解和统一
+// done: 着色器的坐标空间理解
 // done: 键盘和鼠标callback事件用imgui处理
 // done: 几何着色器法向量显示
 // done: 键盘事件摄像机移动方向应该是摄像机坐标系方向
@@ -21,22 +21,29 @@
 // done: 抗锯齿
 // done: 帧缓冲的附件理解
 // done: 窗口大小可缩放
-// done: deferred rendering 性能分析，见LightingPass.cpp
+// done: deferred rendering 性能分析 答：见LightingPass.cpp的相关注释
 // done: 集成imgizmo
 // done: 集成imgui窗口停靠，多viewport
 // done: 解决相机运动至极点屏幕反转问题 答：原因是lookat()函数计算view矩阵时，用direction×up计算右矢，使得经过极点时右矢翻转。解决方法：维护相机自身的camera_up，并在计算view矩阵时，传给lookat()函数 camera_up参数而不是全局up参数即可。
+// done: 天空盒的模型矩阵大小代表着什么 答：模型矩阵不需要缩放，因为shader中强行设置gl_Position的深度为1了
+// done: 天空盒的采样和着色器采样坐标系理解
+// done: 学会renderdoc使用 答：学会基本的使用了
+// done: 手动实现glsl 预处理#include
+// done: 引入pbr
+// done: 初步实现sceneHierarchy
+// done: 实现点光源和定向光源的物理模型
+// done: 实时edit点光源数量
+// done: 实现棋盘网格填充shader
+// 9. gamma correction理解，HDR理解
 // 9. 批渲染理解
-// 11. 光源物理模型
+// 11. 各种光源的物理模型
 // 12. tbn矩阵计算
 // 13. 理解peter panning 效应
 // 14. 看一下模型加载那篇文章，贴图文件是相对路径保存的或绝对路径保存的，Assimp的简单原理。
 // 16. 粒子系统
 // 18. low-poly
-// 19. 天空盒的采样和着色器采样坐标系理解
-// 19. 天空盒的模型矩阵大小代表着什么
 // 19. 当前反射算法的弱点：距离不对
 // 20. 动态环境贴图，球面时
-// 24. 学会renderdoc使用
 // 25. 优化cpu和gpu的io调用
 // 26. Editor 编辑材质后，保存文件
 // 27. main的逻辑放入SandBox中

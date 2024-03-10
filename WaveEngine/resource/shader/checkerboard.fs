@@ -25,6 +25,6 @@ void main()
             gl_FragColor = vec4(0.25, 0.25, 0.25, 1.0);
     }
     vec4 fragPosLightSpace = lightSpaceMatrix * vec4(fragScaledModelPos, 1.0);
-    float shadow = ShadowCalculation(fragPosLightSpace, shadow_map);
-    gl_FragColor = gl_FragColor + step(0.5, shadow) * (-0.7 * gl_FragColor);
+    float shadowFactor = ShadowCalculation(fragPosLightSpace, shadow_map);
+    gl_FragColor = shadowFactor * gl_FragColor;
 }

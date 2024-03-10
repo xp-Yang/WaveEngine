@@ -79,7 +79,7 @@ void SceneHierarchy::addSphere()
 	auto sphere_node = new GameObject(m_root_object, sphere_entity);
 	world.addComponent<ecs::NameComponent>(sphere_entity).name = std::string("Sphere") + std::to_string(m_test_sphere_count);
 	auto& sphere_transform = world.addComponent<ecs::TransformComponent>(sphere_entity);
-	sphere_transform.translation = { 2.5f * (m_test_sphere_count % 4), 1.0f + 2.5f * (m_test_sphere_count / 4), 0 };
+	sphere_transform.translation = { 2.5f * (m_test_sphere_count % 5), 1.0f + 2.5f * (m_test_sphere_count / 5), 0 };
 	auto& sphere_renderable = world.addComponent<ecs::RenderableComponent>(sphere_entity);
 	ecs::Primitive sphere_primitive;
 	sphere_primitive.mesh = Mesh::create_icosphere_mesh(5);
@@ -90,7 +90,7 @@ void SceneHierarchy::addSphere()
 	sphere_material.shader = new Shader(resource_dir + "/shader/pbr.vs", resource_dir + "/shader/pbr.fs");
 	sphere_material.albedo = Vec3(1.0f, 1.0f, 1.0f);
 	sphere_material.metallic = 1.0;
-	sphere_material.roughness = 0.5;
+	sphere_material.roughness = (1.0f / 25) * m_test_sphere_count;
 	sphere_material.ao = 0.01;
 	sphere_primitive.material = sphere_material;
 	sphere_renderable.setPrimitives({ sphere_primitive });
@@ -148,7 +148,7 @@ void SceneHierarchy::init() {
 		addCube();
 	}
 
-	for (int i = 0; i < 16; i++) {
+	for (int i = 0; i < 25; i++) {
 		addSphere();
 	}
 
@@ -164,7 +164,7 @@ void SceneHierarchy::init() {
 	ground_primitive.mesh = Mesh::create_ground_mesh();
     Material ground_material;
     //ground_material.shader = new Shader(resource_dir + "/shader/model.vs", resource_dir + "/shader/wireframe.gs", resource_dir + "/shader/wireframe.fs");
-    ground_material.shader = Shader::getShader(ShaderType::GridShader);
+    ground_material.shader = Shader::getShader(ShaderType::CheckerboardShader);
     ground_material.set_diffuse_map(resource_dir + "/images/pure_white_map.png");
     ground_material.set_specular_map(resource_dir + "/images/pure_white_map.png");
 	ground_primitive.material = ground_material;

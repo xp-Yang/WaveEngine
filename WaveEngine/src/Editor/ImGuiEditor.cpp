@@ -35,7 +35,7 @@ void ImGuiEditor::render()
    renderMainViewWindow();
    renderPickingViewWindow();
    renderShadowViewWindow();
-   renderRayTracingViewWindow();
+   //renderRayTracingViewWindow();
 
    updateRenderParams();
 }
@@ -113,12 +113,14 @@ void ImGuiEditor::renderRayTracingViewWindow()
 }
 
 void ImGuiEditor::renderGlobalController() {
-    ImGui::Begin("Global Controller", nullptr, ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse);
+    ImGui::Begin("Console", nullptr, ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse);
 
-    ImGui::PushItemWidth(120.0f);
+    ImVec2 dummy = ImGui::CalcTextSize("A");
 
+    ImGui::Dummy(dummy);
+    ImGui::PushItemWidth(150.0f);
     static unsigned int pipeline_type_option = (int)m_render_params.pipeline_type;
-    if (ImGui::BeginCombo("Render Pipeline Type", pipeline_type_option == 0 ? "Forward" : "Deferred")) {
+    if (ImGui::BeginCombo("Render Pipeline", pipeline_type_option == 0 ? "Forward" : "Deferred")) {
         for (int i = 0; i < 2; i++) {
             bool selected = pipeline_type_option == i;
             std::string label = i == 0 ? "Forward" : "Deferred";
@@ -129,8 +131,15 @@ void ImGuiEditor::renderGlobalController() {
         }
         ImGui::EndCombo();
     }
-    
+    ImGui::PopItemWidth();
+
+    ImGui::Dummy(dummy);
+    ImGui::Separator();
+    ImGui::Dummy(dummy);
+
+    ImGui::Text("Params:");
     if (m_render_params.pipeline_type == PIPELINE_TYPE::FORWARD) {
+        ImGui::PushItemWidth(50.0f);
         static unsigned int curr_item = 1;
         if (ImGui::BeginCombo("MSAA", (std::to_string((int)std::pow(4, curr_item)) + "x").c_str())) {
             for (int i = 0; i < 3; i++) {
@@ -155,29 +164,50 @@ void ImGuiEditor::renderGlobalController() {
             }
             ImGui::EndCombo();
         }
+        ImGui::PopItemWidth();
     }
 
     ImGui::Checkbox("motion", &motion);
+    ImGui::Checkbox("skybox", &m_render_params.skybox);
     ImGui::Checkbox("shadow", &m_render_params.shadow);
     //ImGui::Checkbox("reflection", &m_render_params.reflection);
     ImGui::Checkbox("normal", &m_render_params.normal_debug);
 
-    if (ImGui::RadioButton("None", !m_render_params.wireframe && !m_render_params.grid)) {
+    ImGui::Dummy(dummy);
+    ImGui::Separator();
+    ImGui::Dummy(dummy);
+
+    ImGui::Text("Choose Shader:");
+    if (ImGui::RadioButton("Default", !m_render_params.wireframe && !m_render_params.checkerboard && !m_render_params.pbr)) {
+        m_render_params.pbr = false;
         m_render_params.wireframe = false;
-        m_render_params.grid = false;
+        m_render_params.checkerboard = false;
+    }
+    ImGui::SameLine();
+    if (ImGui::RadioButton("PBR", m_render_params.pbr)) {
+        m_render_params.pbr = true;
+        m_render_params.wireframe = false;
+        m_render_params.checkerboard = false;
     }
     ImGui::SameLine();
     if (ImGui::RadioButton("Wireframe", m_render_params.wireframe)) {
+        m_render_params.pbr = false;
         m_render_params.wireframe = true;
-        m_render_params.grid = false;
+        m_render_params.checkerboard = false;
     }
     ImGui::SameLine();
-    if (ImGui::RadioButton("Grid", m_render_params.grid)) {
+    if (ImGui::RadioButton("Checkerboard", m_render_params.checkerboard)) {
+        m_render_params.pbr = false;
         m_render_params.wireframe = false;
-        m_render_params.grid = true;
+        m_render_params.checkerboard = true;
     }
     //ImGui::SliderInt("pixel style", &m_render_params.pixelate_level, 1, 16);
     
+    ImGui::Dummy(dummy);
+    ImGui::Separator();
+    ImGui::Dummy(dummy);
+
+    ImGui::Text("Add/Delete point light:");
     auto scene_hierarchy = Application::GetApp().getSceneHierarchy();
     int point_light_count = scene_hierarchy->pointLightCount(); // readonly
     float spacing = ImGui::GetStyle().ItemInnerSpacing.x;
@@ -198,12 +228,12 @@ void ImGuiEditor::renderGlobalController() {
             scene_hierarchy->removeObject(last_point_light_obj);
     }
     ImGui::SameLine();
-    ImGui::Text("%d add/delete point light", point_light_count);
+    ImGui::Text("point light number: %d", point_light_count);
 
+    ImGui::Dummy(dummy);
+    ImGui::Separator();
     ImGuiIO& io = ImGui::GetIO();
-    ImGui::Text("average %.3f ms/frame (%.1f FPS)", 1000.0f / io.Framerate, io.Framerate);
-
-    ImGui::PopItemWidth();
+    ImGui::Text("Average %.3f ms/frame (%.1f FPS)", 1000.0f / io.Framerate, io.Framerate);
 
     ImGui::End();
 }
@@ -351,11 +381,11 @@ void ImGuiEditor::renderPickedEntityController(const ImVec2& pos, const std::vec
         if (ImGui::RadioButton("Scale", m_toolbar_type == ToolbarType::Scale))
             m_toolbar_type = ToolbarType::Scale;
         ImGui::PushItemWidth(80.0f);
-        ImGui::SliderFloat((std::string("##x") + "##" + obj_name).c_str(), &transform_component.translation.x, -10.0f, 10.0f);
+        ImGui::SliderFloat((std::string("##x") + "##" + obj_name).c_str(), &transform_component.translation.x, -15.0f, 15.0f);
         ImGui::SameLine();
-        ImGui::SliderFloat((std::string("##y") + "##" + obj_name).c_str(), &transform_component.translation.y, -10.0f, 10.0f);
+        ImGui::SliderFloat((std::string("##y") + "##" + obj_name).c_str(), &transform_component.translation.y, 0.0f, 15.0f);
         ImGui::SameLine();
-        ImGui::SliderFloat((std::string("xyz") + "##" + obj_name).c_str(), &transform_component.translation.z, -10.0f, 10.0f);
+        ImGui::SliderFloat((std::string("xyz") + "##" + obj_name).c_str(), &transform_component.translation.z, -15.0f, 15.0f);
         ImGui::PopItemWidth();
 
         // log
@@ -396,7 +426,9 @@ void ImGuiEditor::renderPickedEntityController(const ImVec2& pos, const std::vec
         ImGui::ColorEdit3((std::string("Luminous Color") + "##" + obj_name).c_str(), (float*)&luminousColor);
     }
     if (world.hasComponent<ecs::DirectionalLightComponent>(entity)) {
-        Vec4& luminousColor = world.getComponent<ecs::DirectionalLightComponent>(entity)->luminousColor;
+        auto dir_light_component = world.getComponent<ecs::DirectionalLightComponent>(entity);
+        dir_light_component->direction = -world.getComponent<ecs::TransformComponent>(entity)->translation;
+        Vec4& luminousColor = dir_light_component->luminousColor;
         ImGui::ColorEdit3((std::string("Luminous Color") + "##" + obj_name).c_str(), (float*)&luminousColor);
     }
     if (world.hasComponent<ecs::BaseGridGroundComponent>(entity))

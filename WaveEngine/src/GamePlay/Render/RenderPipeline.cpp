@@ -39,15 +39,22 @@ void RenderPipeline::setRenderParams(const RenderParams& params)
 
 void RenderPipeline::render()
 {
-    m_ray_tracing_pass->draw();
+    //m_ray_tracing_pass->draw();
 
     if (ImGui::GetIO().WantPassThroughMouse) {
         m_picking_pass->draw();
     }
+
     if (m_render_params.shadow) {
         static_cast<ShadowPass*>(m_shadow_pass.get())->configSamples(m_render_params.shadow_map_sample_count);
         m_shadow_pass->draw();
     }
+    else {
+        m_shadow_pass->getFrameBuffer()->bind();
+        m_shadow_pass->getFrameBuffer()->clear();
+        m_shadow_pass->getFrameBuffer()->unBind();
+    }
+
     if (m_render_params.pipeline_type == PIPELINE_TYPE::FORWARD) {
         if (m_render_params.shadow) {
             m_main_camera_pass->prepare(m_shadow_pass->getFrameBuffer());
@@ -65,9 +72,11 @@ void RenderPipeline::render()
     else if (m_render_params.pipeline_type == PIPELINE_TYPE::DEFERRED) {
         m_gbuffer_pass->draw();
 
+        static_cast<LightingPass*>(m_lighting_pass.get())->enableSkybox(m_render_params.skybox);
         static_cast<LightingPass*>(m_lighting_pass.get())->enableNormal(m_render_params.normal_debug);
         static_cast<LightingPass*>(m_lighting_pass.get())->enableWireframe(m_render_params.wireframe);
-        static_cast<LightingPass*>(m_lighting_pass.get())->enableGrid(m_render_params.grid);
+        static_cast<LightingPass*>(m_lighting_pass.get())->enableCheckerboard(m_render_params.checkerboard);
+        static_cast<LightingPass*>(m_lighting_pass.get())->enablePBR(m_render_params.pbr);
         if (m_render_params.shadow) {
             static_cast<LightingPass*>(m_lighting_pass.get())->prepare(m_gbuffer_pass->getFrameBuffer(), m_shadow_pass->getFrameBuffer());
         }

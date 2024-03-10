@@ -55,9 +55,9 @@ void main()
 
 	// Shadow:
     vec4 fragPosLightSpace = lightSpaceMatrix * vec4(fs_in.fragWorldPos, 1.0);
-    float shadow = ShadowCalculation(fragPosLightSpace, shadow_map);       
+    float shadowFactor = ShadowCalculation(fragPosLightSpace, shadow_map);       
     
-    vec3 result = ambient_light + (1.0 - shadow) * lightingByDirectionalLight + lightingByPointLight;
+    vec3 result = ambient_light + shadowFactor * lightingByDirectionalLight + lightingByPointLight;
     gl_FragColor = vec4(result, 1.0);
 
     if(enable_skybox_sample){

@@ -34,7 +34,6 @@ void ShadowPass::draw() {
     Mat4 light_ref_matrix = world.getMainDirectionalLightComponent()->lightReferenceMatrix();
 
     depth_shader->start_using();
-    depth_shader->setMatrix("vp", 1, light_ref_matrix);
 
     for (auto entity : world.entityView<ecs::RenderableComponent>()) {
 		if (world.hasComponent<ecs::SkyboxComponent>(entity) || world.hasComponent<ecs::PointLightComponent>(entity))
@@ -43,7 +42,7 @@ void ShadowPass::draw() {
         auto& model_matrix = *world.getComponent<ecs::TransformComponent>(entity);
 
         depth_shader->start_using();
-        depth_shader->setMatrix("model", 1, model_matrix.transform());
+        depth_shader->setMatrix("mvp", 1, light_ref_matrix * model_matrix.transform());
         for (int i = 0; i < renderable.primitives.size(); i++) {
             auto& mesh = renderable.primitives[i].mesh;
             Renderer::drawIndex(*depth_shader, mesh.get_VAO(), mesh.get_indices_count());

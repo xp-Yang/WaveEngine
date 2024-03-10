@@ -24,6 +24,9 @@ uniform float metallic;
 uniform float roughness;
 uniform float ao;
 
+uniform sampler2D shadow_map;
+uniform mat4 lightSpaceMatrix;
+
 uniform vec3 cameraPos;
 
 out vec4 FragColor;
@@ -63,9 +66,13 @@ void main()
     
     // ambient lighting (note that the next IBL tutorial will replace 
     // this ambient lighting with environment lighting).
-    vec3 ambient = 0.03 * albedo * ao;
+    vec3 ambient = 0.3 * albedo * ao;
 
-    vec3 color = ambient + Lo;
+	// Shadow:
+    vec4 fragPosLightSpace = lightSpaceMatrix * vec4(fs_in.fragWorldPos, 1.0);
+    float shadowFactor = ShadowCalculation(fragPosLightSpace, shadow_map);
+
+    vec3 color = ambient + shadowFactor * Lo;
 
     // HDR tonemapping
     color = color / (color + vec3(1.0));
