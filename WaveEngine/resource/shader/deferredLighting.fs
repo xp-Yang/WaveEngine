@@ -37,10 +37,13 @@ void main()
     vec3 Diffuse = texture(gDiffuse, fragUV).rgb;
     vec3 Specular = texture(gSpecular, fragUV).rgb;
 
+    if(Normal.xyz == vec3(1.0)){
+        // 如果采样到GBuffer的空白区域可以直接return
+        gl_FragColor = vec4(0.6, 0.6, 0.6, 1.0);
+        return;
+    }
 if(!enablePBR){
     vec3 viewDir = normalize(cameraPos - Position);
-
-    // TODO 如果采样到GBuffer的空白区域可以直接return
 
     // Directional Light Source:
 	vec3 lightDir = directionalLight.direction;

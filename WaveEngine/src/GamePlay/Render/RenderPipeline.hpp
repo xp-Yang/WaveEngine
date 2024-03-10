@@ -11,7 +11,7 @@ enum class PIPELINE_TYPE{
 struct RenderParams {
     PIPELINE_TYPE pipeline_type = PIPELINE_TYPE::DEFERRED;
     int     msaa_sample_count = 4;
-    bool    skybox = true;
+    bool    skybox = false;
     bool    shadow = true;
     int     shadow_map_sample_count = 1;
     // for MainCameraPass

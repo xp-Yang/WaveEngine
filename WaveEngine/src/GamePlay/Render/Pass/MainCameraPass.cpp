@@ -17,9 +17,10 @@ void MainCameraPass::prepare(FrameBuffer* framebuffer)
         m_shadow_map = 0;
 }
 
-void MainCameraPass::configShader(bool reflection, bool normal_debug, bool wireframe)
+void MainCameraPass::configShader(bool skybox, bool reflection, bool normal_debug, bool wireframe)
 {
     //config shader 参数
+    m_skybox = skybox;
     m_reflection = reflection;
     m_normal_debug = normal_debug;
     m_wireframe = wireframe;
@@ -116,34 +117,32 @@ void MainCameraPass::draw()
                 shader->setMatrix("lightSpaceMatrix", 1, light_ref_matrix);
                 shader->setTexture("shadow_map", 7, m_shadow_map);
             }
-            else {
-                // set default map
-                //shader->setTexture("shadow_map", 7, 0);
+            Renderer::drawIndex(*shader, mesh.get_VAO(), mesh.get_indices_count());
+            shader->stop_using();
+        }
+    }
+    
+    if (m_skybox) {
+        for (auto entity : world.entityView<ecs::SkyboxComponent>()) {
+            auto& renderable = *world.getComponent<ecs::RenderableComponent>(entity);
+            auto& model_matrix = *world.getComponent<ecs::TransformComponent>(entity);
+            auto skybox_texture_id = world.getComponent<ecs::SkyboxComponent>(entity)->texture;
+            for (int i = 0; i < renderable.primitives.size(); i++) {
+                auto& mesh = renderable.primitives[i].mesh;
+                auto& material = renderable.primitives[i].material;
+                Shader* shader = material.shader;
+                material.update_shader_binding();
+                shader->start_using();
+                shader->setMatrix("model", 1, model_matrix.transform());
+                shader->setMatrix("view", 1, Mat4(Mat3(camera_view)));
+                shader->setMatrix("projection", 1, camera_projection);
+                shader->setCubeTexture("skybox", 6, skybox_texture_id);
+                Renderer::drawIndex(*shader, mesh.get_VAO(), mesh.get_indices_count());
+                shader->stop_using();
             }
-            Renderer::drawIndex(*shader, mesh.get_VAO(), mesh.get_indices_count());
-            shader->stop_using();
         }
     }
-    
-    for (auto entity : world.entityView<ecs::SkyboxComponent>()) {
-        auto& renderable = *world.getComponent<ecs::RenderableComponent>(entity);
-        auto& model_matrix = *world.getComponent<ecs::TransformComponent>(entity);
-        auto skybox_texture_id = world.getComponent<ecs::SkyboxComponent>(entity)->texture;
-        for (int i = 0; i < renderable.primitives.size(); i++) {
-            auto& mesh = renderable.primitives[i].mesh;
-            auto& material = renderable.primitives[i].material;
-            Shader* shader = material.shader;
-            material.update_shader_binding();
-            shader->start_using();
-            shader->setMatrix("model", 1, model_matrix.transform());
-            shader->setMatrix("view", 1, Mat4(Mat3(camera_view)));
-            shader->setMatrix("projection", 1, camera_projection);
-            shader->setCubeTexture("skybox", 6, skybox_texture_id);
-            Renderer::drawIndex(*shader, mesh.get_VAO(), mesh.get_indices_count());
-            shader->stop_using();
-        }
-    }
-    
+
     // render border,
     // TODO 1.模型坐标原点不是几何中心 2.深度测试和模板测试问题，挡住了wireframe和normal的显示
     //auto it = world.entityView<ecs::PickedComponent>();

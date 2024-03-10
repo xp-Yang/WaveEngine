@@ -62,7 +62,7 @@ void RenderPipeline::render()
         else {
             m_main_camera_pass->prepare(nullptr);
         }
-        static_cast<MainCameraPass*>(m_main_camera_pass.get())->configShader(m_render_params.reflection, m_render_params.normal_debug, m_render_params.wireframe);
+        static_cast<MainCameraPass*>(m_main_camera_pass.get())->configShader(m_render_params.skybox, m_render_params.reflection, m_render_params.normal_debug, m_render_params.wireframe);
         static_cast<MainCameraPass*>(m_main_camera_pass.get())->configSamples(m_render_params.msaa_sample_count);
         m_main_camera_pass->draw();
 
