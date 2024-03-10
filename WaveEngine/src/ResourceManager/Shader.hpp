@@ -11,6 +11,7 @@ enum class ShaderType {
 	BorderShader,
 	NormalShader,
 	WireframeShader,
+	GridShader,
 	PickingShader,
 	RayTracingShader,
 	QuadShader,

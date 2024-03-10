@@ -17,6 +17,7 @@ struct RenderParams {
     bool    reflection = false;
     bool    normal_debug = false;
     bool    wireframe = false;
+    bool    grid = false;
     int     pixelate_level = 1;
 };
 

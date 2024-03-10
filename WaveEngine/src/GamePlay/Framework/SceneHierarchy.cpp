@@ -164,7 +164,7 @@ void SceneHierarchy::init() {
 	ground_primitive.mesh = Mesh::create_ground_mesh();
     Material ground_material;
     //ground_material.shader = new Shader(resource_dir + "/shader/model.vs", resource_dir + "/shader/wireframe.gs", resource_dir + "/shader/wireframe.fs");
-    ground_material.shader = new Shader(resource_dir + "/shader/grid.vs", resource_dir + "/shader/grid.fs");
+    ground_material.shader = Shader::getShader(ShaderType::GridShader);
     ground_material.set_diffuse_map(resource_dir + "/images/pure_white_map.png");
     ground_material.set_specular_map(resource_dir + "/images/pure_white_map.png");
 	ground_primitive.material = ground_material;

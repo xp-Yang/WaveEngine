@@ -1,7 +1,7 @@
 #version 330 core
-in vec4 pass_color;
+in vec4 fragColor;
 
 void main()
 {
-    gl_FragColor = pass_color;
+    gl_FragColor = fragColor;
 }

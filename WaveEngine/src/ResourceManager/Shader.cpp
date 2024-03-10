@@ -5,61 +5,143 @@
 #include <sstream>
 #include <iostream>
 
+class ShaderParser {
+public:
+    struct GlslLine {
+        enum Tag {
+            Include,
+            Code,
+        };
+        Tag tag;
+        std::string line;
+        GlslLine(Tag tag_, const std::string& line_) :tag(tag_), line(line_) {}
+    };
+
+public: 
+    ShaderParser(const std::string& filename) {
+        load_file(filename);
+    }
+
+    std::string getProcessedSourceCode() {
+        std::string res;
+        for (const auto& line : m_lines) {
+            if (line.tag == GlslLine::Code) {
+                res += (line.line + "\n");
+            }
+        }
+        return res;
+    }
+
+protected:
+    bool load_file(const std::string& filename) {
+        std::string directory = filename.substr(0, filename.find_last_of('/'));
+
+        std::stringstream buffer;
+        try
+        {
+            std::ifstream file_stream;
+            file_stream.open(filename);
+            if (file_stream.is_open()) {
+                buffer << file_stream.rdbuf();
+                file_stream.close();
+            }
+            else {
+                assert(false);
+                return false;
+            }
+
+        }
+        catch (...)
+        {
+            std::cout << "ERROR::SHADER FILE NOT SUCCESFULLY READ" << std::endl;
+            assert(false);
+            return false;
+        }
+
+        while (!buffer.eof()) {
+            std::string line;
+            std::getline(buffer, line);
+
+            size_t pos = line.find_first_not_of(" ");
+            if (pos == std::string::npos) {
+                m_lines.push_back(GlslLine(GlslLine::Code, line));
+                continue;
+            }
+
+            if (line[pos] != '#') {
+                m_lines.push_back(GlslLine(GlslLine::Code, line));
+                continue;
+            }
+
+            // the line is started by '#'
+            std::stringstream stm(line);
+            std::string tag;
+            stm >> tag;
+
+            if (tag == "#include") {
+                stm >> tag;
+                tag = tag.substr(0, tag.find("//")); // 过滤注释
+                tag = trim(tag, " \t\r\n\"<>");
+
+                // 加载 include 文件
+                std::string include_filename = directory + '/' + tag;
+                if (!this->load_file(include_filename)) {
+                    assert(false);
+                    return false;
+                }
+
+                m_lines.push_back(GlslLine(GlslLine::Include, std::string("// #include ") + include_filename));
+            }
+            else {
+                m_lines.push_back(GlslLine(GlslLine::Code, line));
+            }
+        }
+
+        return true;
+    }
+
+    std::string trim(const std::string& str, const std::string& spaces = " \t\r\n")
+    {
+        size_t a = str.find_first_not_of(spaces);
+        size_t b = str.find_last_not_of(spaces) + 1;
+        if (b <= a) {
+            return std::string();
+        }
+        return str.substr(a, b - a);
+    }
+
+private:
+    std::vector<GlslLine> m_lines;
+};
+
 Shader::Shader(const std::string vertexPath, const std::string geometryPath, const std::string fragmentPath)
 {
     assert(!vertexPath.empty());
     assert(!fragmentPath.empty());
-    bool has_geo_shader = true;
-    if (geometryPath.empty()) {
-        has_geo_shader = false;
+    bool has_geo_shader = !geometryPath.empty();
+
+    // 1. read the source code and process file include
+    ShaderParser v_parser(vertexPath);
+    m_vertexCode = v_parser.getProcessedSourceCode();
+
+    ShaderParser f_parser(fragmentPath);
+    m_fragmentCode = f_parser.getProcessedSourceCode();
+
+    if (has_geo_shader) {
+        ShaderParser g_parser(geometryPath);
+        m_geometryCode = g_parser.getProcessedSourceCode();
     }
-    // 1. 从文件路径中获取顶点/片段着色器
-    std::ifstream vShaderFile;
-    std::ifstream fShaderFile;
-    std::ifstream gShaderFile;
-    // 保证ifstream对象可以抛出异常：
-    vShaderFile.exceptions(std::ifstream::failbit | std::ifstream::badbit);
-    fShaderFile.exceptions(std::ifstream::failbit | std::ifstream::badbit);
-    try
-    {
-        // 打开文件
-        vShaderFile.open(vertexPath);
-        fShaderFile.open(fragmentPath);
-        if (has_geo_shader)
-            gShaderFile.open(geometryPath);
-        std::stringstream vShaderStream, fShaderStream, gShaderStream;
-        // 读取文件的缓冲内容到数据流中
-        vShaderStream << vShaderFile.rdbuf();
-        fShaderStream << fShaderFile.rdbuf();
-        if (has_geo_shader)
-            gShaderStream << gShaderFile.rdbuf();
-        // 关闭文件处理器
-        vShaderFile.close();
-        fShaderFile.close();
-        if (has_geo_shader)
-            gShaderFile.close();
-        // 转换数据流到string
-        m_vertexCode = vShaderStream.str();
-        m_fragmentCode = fShaderStream.str();
-        if (has_geo_shader)
-            m_geometryCode = gShaderStream.str();
-    }
-    catch (std::ifstream::failure e)
-    {
-        std::cout << "ERROR::SHADER::FILE_NOT_SUCCESFULLY_READ" << std::endl;
-        assert(false);
-    }
+
     const char* vShaderCode = m_vertexCode.c_str();
     const char* fShaderCode = m_fragmentCode.c_str();
     const char* gShaderCode = m_geometryCode.c_str();
 
-    // 2. 编译着色器
+    // 2. compile
     unsigned int vertex, fragment, geometry;
     int success;
     char infoLog[512];
 
     // 顶点着色器
-    // TODO这个类应该是openglshader封装类，真正的shader类应该只调用rhi
     vertex = glCreateShader(GL_VERTEX_SHADER);
     glShaderSource(vertex, 1, &vShaderCode, NULL);
     glCompileShader(vertex);
@@ -72,7 +154,6 @@ Shader::Shader(const std::string vertexPath, const std::string geometryPath, con
         assert(false);
     };
 
-    //
     if (has_geo_shader) {
         geometry = glCreateShader(GL_GEOMETRY_SHADER);
         glShaderSource(geometry, 1, &gShaderCode, NULL);
@@ -86,7 +167,6 @@ Shader::Shader(const std::string vertexPath, const std::string geometryPath, con
         };
     }
 
-    // 片段着色器也类似
     fragment = glCreateShader(GL_FRAGMENT_SHADER);
     glShaderSource(fragment, 1, &fShaderCode, NULL);
     glCompileShader(fragment);
@@ -203,6 +283,9 @@ Shader* Shader::getShader(const ShaderType& type)
     case ShaderType::WireframeShader:
         static Shader* wireframe_shader = new Shader(resource_dir + "/shader/model.vs", resource_dir + "/shader/wireframe.gs", resource_dir + "/shader/wireframe.fs");
         return wireframe_shader;
+    case ShaderType::GridShader:
+        static Shader* grid_shader = new Shader(resource_dir + "/shader/grid.vs", resource_dir + "/shader/grid.fs");
+        return grid_shader;
     case ShaderType::PickingShader:
         static Shader* picking_shader = new Shader(resource_dir + "/shader/picking.vs", resource_dir + "/shader/picking.fs");
         return picking_shader;

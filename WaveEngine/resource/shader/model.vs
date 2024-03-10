@@ -6,25 +6,18 @@ layout (location = 2) in vec2 vertex_uv;
 uniform mat4 model;
 uniform mat4 view;
 uniform mat4 projection;
-uniform mat4 lightSpaceMatrix;
 
 out VS_OUT {
-    mat4 vp;
-    vec3 pass_pos;          //世界坐标
-    vec2 pass_uv;
-    vec3 pass_normal;       //局部坐标
-    vec4 fragPosLightSpace; //裁剪坐标
+    vec3 fragWorldPos;          //世界坐标
+    vec3 fragWorldNormal;       //世界坐标
+    vec2 fragUV;
 } vs_out;
 
 void main()
 {
-    vs_out.vp = projection * view;
-	vs_out.pass_uv = vertex_uv;
-    vs_out.pass_pos = vec3(model * vec4(vertex_pos, 1.0));
-    //vs_out.pass_normal = vec3(model * vec4(vertex_normal, 0.0));
-    vs_out.pass_normal = vertex_normal;
-    vs_out.fragPosLightSpace = lightSpaceMatrix * vec4(vs_out.pass_pos, 1.0);
-    //Normal = mat3(transpose(inverse(model))) * aNormal;  
+	vs_out.fragUV = vertex_uv;
+    vs_out.fragWorldPos = vec3(model * vec4(vertex_pos, 1.0));
+    vs_out.fragWorldNormal = normalize(mat3(model) * vertex_normal);
     //这里输出的gl_Position为裁剪空间，给到gs时还是裁剪空间，到fs时已经自动做了透视除法，变成了NDC空间
     //裁剪坐标
     gl_Position = projection * view * model * vec4(vertex_pos, 1.0);

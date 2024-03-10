@@ -22,6 +22,7 @@ public:
 
 protected:
 	void renderGlobalController();
+	void renderGlobalMenu();
 	void renderSceneHierarchy();
 	void renderCameraController();
 	void renderPickedEntityController(const ImVec2& pos, const std::vector<ecs::Entity>& picked_entities);

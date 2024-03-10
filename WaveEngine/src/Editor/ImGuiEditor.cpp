@@ -26,14 +26,17 @@ void ImGuiEditor::render()
    m_ref_render_system->onUpdate();
 
    ImGui::DockSpaceOverViewport(ImGui::GetMainViewport(), ImGuiDockNodeFlags_PassthruCentralNode);
-   renderGlobalController();
+
+   renderGlobalMenu();
    renderSceneHierarchy();
+   renderGlobalController();
    renderCameraController();
 
    renderMainViewWindow();
    renderPickingViewWindow();
    renderShadowViewWindow();
    renderRayTracingViewWindow();
+
    updateRenderParams();
 }
 
@@ -110,33 +113,6 @@ void ImGuiEditor::renderRayTracingViewWindow()
 }
 
 void ImGuiEditor::renderGlobalController() {
-    if (ImGui::BeginMainMenuBar())
-    {
-        if (ImGui::BeginMenu("File"))
-        {
-            if (ImGui::MenuItem("Open", "Ctrl+O")) {
-                FileDialog* file_dlg = FileDialog::create();
-                file_dlg->OpenFile("");
-            }
-            if (ImGui::MenuItem("Save As..", "Ctrl+S")) {
-                FileDialog* file_dlg = FileDialog::create();
-                file_dlg->SaveFile("");
-            }
-            ImGui::EndMenu();
-        }
-        if (ImGui::BeginMenu("Edit"))
-        {
-            if (ImGui::MenuItem("Undo", "CTRL+Z")) {}
-            if (ImGui::MenuItem("Redo", "CTRL+Y", false, false)) {}  // Disabled item
-            ImGui::Separator();
-            if (ImGui::MenuItem("Cut", "CTRL+X")) {}
-            if (ImGui::MenuItem("Copy", "CTRL+C")) {}
-            if (ImGui::MenuItem("Paste", "CTRL+V")) {}
-            ImGui::EndMenu();
-        }
-        ImGui::EndMainMenuBar();
-    }
-
     ImGui::Begin("Global Controller", nullptr, ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse);
 
     ImGui::PushItemWidth(120.0f);
@@ -154,35 +130,52 @@ void ImGuiEditor::renderGlobalController() {
         ImGui::EndCombo();
     }
     
-    static unsigned int curr_item = 1;
-    if (ImGui::BeginCombo("MSAA", (std::to_string((int)std::pow(4, curr_item)) + "x").c_str())) {
-        for (int i = 0; i < 3; i++) {
-            bool selected = curr_item == i;
-            std::string label = std::to_string((int)std::pow(4, i)) + "x";
-            if (ImGui::Selectable(label.c_str(), selected)) {
-                curr_item = i;
-                m_render_params.msaa_sample_count = (int)std::pow(4, i);
+    if (m_render_params.pipeline_type == PIPELINE_TYPE::FORWARD) {
+        static unsigned int curr_item = 1;
+        if (ImGui::BeginCombo("MSAA", (std::to_string((int)std::pow(4, curr_item)) + "x").c_str())) {
+            for (int i = 0; i < 3; i++) {
+                bool selected = curr_item == i;
+                std::string label = std::to_string((int)std::pow(4, i)) + "x";
+                if (ImGui::Selectable(label.c_str(), selected)) {
+                    curr_item = i;
+                    m_render_params.msaa_sample_count = (int)std::pow(4, i);
+                }
             }
+            ImGui::EndCombo();
         }
-        ImGui::EndCombo();
-    }
-    static unsigned int shadow_curr_item = 0;
-    if (ImGui::BeginCombo("Shadow Map Resolution", (std::to_string((int)std::pow(4, shadow_curr_item)) + "x").c_str())) {
-        for (int i = 0; i < 3; i++) {
-            bool selected = shadow_curr_item == i;
-            std::string label = std::to_string((int)std::pow(4, i)) + "x";
-            if (ImGui::Selectable(label.c_str(), selected)) {
-                shadow_curr_item = i;
-                m_render_params.shadow_map_sample_count = (int)std::pow(4, i);
+        static unsigned int shadow_curr_item = 0;
+        if (ImGui::BeginCombo("Shadow Map Resolution", (std::to_string((int)std::pow(4, shadow_curr_item)) + "x").c_str())) {
+            for (int i = 0; i < 3; i++) {
+                bool selected = shadow_curr_item == i;
+                std::string label = std::to_string((int)std::pow(4, i)) + "x";
+                if (ImGui::Selectable(label.c_str(), selected)) {
+                    shadow_curr_item = i;
+                    m_render_params.shadow_map_sample_count = (int)std::pow(4, i);
+                }
             }
+            ImGui::EndCombo();
         }
-        ImGui::EndCombo();
     }
+
     ImGui::Checkbox("motion", &motion);
     ImGui::Checkbox("shadow", &m_render_params.shadow);
-    ImGui::Checkbox("reflection", &m_render_params.reflection);
+    //ImGui::Checkbox("reflection", &m_render_params.reflection);
     ImGui::Checkbox("normal", &m_render_params.normal_debug);
-    ImGui::Checkbox("wireframe", &m_render_params.wireframe);
+
+    if (ImGui::RadioButton("None", !m_render_params.wireframe && !m_render_params.grid)) {
+        m_render_params.wireframe = false;
+        m_render_params.grid = false;
+    }
+    ImGui::SameLine();
+    if (ImGui::RadioButton("Wireframe", m_render_params.wireframe)) {
+        m_render_params.wireframe = true;
+        m_render_params.grid = false;
+    }
+    ImGui::SameLine();
+    if (ImGui::RadioButton("Grid", m_render_params.grid)) {
+        m_render_params.wireframe = false;
+        m_render_params.grid = true;
+    }
     //ImGui::SliderInt("pixel style", &m_render_params.pixelate_level, 1, 16);
     
     auto scene_hierarchy = Application::GetApp().getSceneHierarchy();
@@ -213,6 +206,36 @@ void ImGuiEditor::renderGlobalController() {
     ImGui::PopItemWidth();
 
     ImGui::End();
+}
+
+void ImGuiEditor::renderGlobalMenu()
+{
+    if (ImGui::BeginMainMenuBar())
+    {
+        if (ImGui::BeginMenu("File"))
+        {
+            if (ImGui::MenuItem("Open", "Ctrl+O")) {
+                FileDialog* file_dlg = FileDialog::create();
+                file_dlg->OpenFile("");
+            }
+            if (ImGui::MenuItem("Save As..", "Ctrl+S")) {
+                FileDialog* file_dlg = FileDialog::create();
+                file_dlg->SaveFile("");
+            }
+            ImGui::EndMenu();
+        }
+        if (ImGui::BeginMenu("Edit"))
+        {
+            if (ImGui::MenuItem("Undo", "CTRL+Z")) {}
+            if (ImGui::MenuItem("Redo", "CTRL+Y", false, false)) {}  // Disabled item
+            ImGui::Separator();
+            if (ImGui::MenuItem("Cut", "CTRL+X")) {}
+            if (ImGui::MenuItem("Copy", "CTRL+C")) {}
+            if (ImGui::MenuItem("Paste", "CTRL+V")) {}
+            ImGui::EndMenu();
+        }
+        ImGui::EndMainMenuBar();
+    }
 }
 
 void ImGuiEditor::renderSceneHierarchy()

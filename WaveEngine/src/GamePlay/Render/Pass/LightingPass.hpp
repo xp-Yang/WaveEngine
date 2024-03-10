@@ -12,6 +12,12 @@ public:
     FrameBuffer* getFrameBuffer() override;
     void enableNormal(bool enable);
     void enableWireframe(bool enable);
+    void enableGrid(bool enable);
+
+protected:
+    void drawNormalMode();
+    void drawWireframeMode();
+    void drawGridMode();
 
 private:
     FrameBuffer* m_gbuffer_framebuffer{ nullptr };
@@ -20,6 +26,7 @@ private:
 
     bool m_normal_debug = false;
     bool m_wireframe = false;
+    bool m_grid = false;
 };
 
 #endif

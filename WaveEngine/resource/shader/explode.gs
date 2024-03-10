@@ -3,19 +3,18 @@ layout (triangles) in;
 layout (triangle_strip, max_vertices = 3) out;
 
 in VS_OUT {
-    mat4 vp;
-    vec3 pass_pos;
-    vec2 pass_uv;
-    vec3 pass_normal;
-    vec4 FragPosLightSpace;
+    vec3 fragWorldPos;          //ä¸–ç•Œåæ ‡
+    vec3 fragWorldNormal;       //ä¸–ç•Œåæ ‡
+    vec2 fragUV;
 } gs_in[];
 
 out GS_OUT{
-    vec3 pass_pos;
-    vec2 pass_uv;
-    vec3 pass_normal;
-    vec4 FragPosLightSpace;
+    vec3 fragWorldPos;          //ä¸–ç•Œåæ ‡
+    vec3 fragWorldNormal;       //ä¸–ç•Œåæ ‡
+    vec2 fragUV;
 } gs_out;
+
+uniform mat4 projectionView;
 
 uniform float explosionRatio;
 
@@ -27,34 +26,31 @@ vec4 explode(vec3 position, vec3 dir)
 
 vec3 GetNormal()
 {
-   vec3 a = vec3(gs_in[0].pass_pos) - vec3(gs_in[1].pass_pos);
-   vec3 b = vec3(gs_in[2].pass_pos) - vec3(gs_in[1].pass_pos);
+   vec3 a = vec3(gs_in[0].fragWorldPos) - vec3(gs_in[1].fragWorldPos);
+   vec3 b = vec3(gs_in[2].fragWorldPos) - vec3(gs_in[1].fragWorldPos);
    return normalize(cross(b, a));
 }
 
 void main() {    
     //vec3 normal = GetNormal();
-    vec3 normal = (gs_in[0].pass_normal + gs_in[1].pass_normal + gs_in[2].pass_normal) / 3;
+    vec3 normal = (gs_in[0].fragWorldNormal + gs_in[1].fragWorldNormal + gs_in[2].fragWorldNormal) / 3;
 
-    //ÊäÈëµÄgs_in[0].pass_posÎªÊÀ½ç×ø±ê
-    //ÊäÈëºÍÊä³öµÄgl_PositionÎª²Ã¼ô¿Õ¼ä×ø±ê
-    gl_Position = gs_in[0].vp * explode(gs_in[0].pass_pos, normal);
-    gs_out.pass_uv = gs_in[0].pass_uv;
-    gs_out.pass_normal = gs_in[0].pass_normal;
-    gs_out.pass_pos = gs_in[0].pass_pos;
-    gs_out.FragPosLightSpace = gs_in[0].FragPosLightSpace;
+    //ï¿½ï¿½ï¿½ï¿½ï¿½gs_in[0].fragWorldPosÎªï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+    //ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½gl_PositionÎªï¿½Ã¼ï¿½ï¿½Õ¼ï¿½ï¿½ï¿½ï¿½ï¿½
+    gl_Position = projectionView * explode(gs_in[0].fragWorldPos, normal);
+    gs_out.fragUV = gs_in[0].fragUV;
+    gs_out.fragWorldNormal = gs_in[0].fragWorldNormal;
+    gs_out.fragWorldPos = gs_in[0].fragWorldPos;
     EmitVertex();
-    gl_Position = gs_in[1].vp * explode(gs_in[1].pass_pos, normal);
-    gs_out.pass_uv = gs_in[1].pass_uv;
-    gs_out.pass_normal = gs_in[1].pass_normal;
-    gs_out.pass_pos = gs_in[1].pass_pos;
-    gs_out.FragPosLightSpace = gs_in[1].FragPosLightSpace;
+    gl_Position = projectionView * explode(gs_in[1].fragWorldPos, normal);
+    gs_out.fragUV = gs_in[1].fragUV;
+    gs_out.fragWorldNormal = gs_in[1].fragWorldNormal;
+    gs_out.fragWorldPos = gs_in[1].fragWorldPos;
     EmitVertex();
-    gl_Position = gs_in[2].vp * explode(gs_in[2].pass_pos, normal);
-    gs_out.pass_uv = gs_in[2].pass_uv;
-    gs_out.pass_normal = gs_in[2].pass_normal;
-    gs_out.pass_pos = gs_in[2].pass_pos;
-    gs_out.FragPosLightSpace = gs_in[2].FragPosLightSpace;
+    gl_Position = projectionView * explode(gs_in[2].fragWorldPos, normal);
+    gs_out.fragUV = gs_in[2].fragUV;
+    gs_out.fragWorldNormal = gs_in[2].fragWorldNormal;
+    gs_out.fragWorldPos = gs_in[2].fragWorldPos;
     EmitVertex();
     EndPrimitive();
 }

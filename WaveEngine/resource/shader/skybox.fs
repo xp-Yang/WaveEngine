@@ -1,10 +1,10 @@
 #version 330 core
 
-in vec3 pass_uv;
+in vec3 fragUV;
 
 uniform samplerCube skybox;
 
 void main()
 {    
-    gl_FragColor = texture(skybox, pass_uv);
+    gl_FragColor = texture(skybox, fragUV);
 }

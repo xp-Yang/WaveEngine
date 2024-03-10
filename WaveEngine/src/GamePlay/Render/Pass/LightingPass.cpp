@@ -27,15 +27,29 @@ void LightingPass::draw()
 	m_framebuffer->clear();
 
 	auto& world = ecs::World::get();
-	Vec3 camera_pos;
-	Mat4 camera_view = Mat4(1.0f);
-	Mat4 camera_projection;
 	ecs::CameraComponent& camera = *world.getMainCameraComponent();
-	camera_pos = camera.pos;
-	camera_view = camera.view;
-	camera_projection = camera.projection;
+	auto dir_light_component = world.getMainDirectionalLightComponent();
+	Mat4 light_ref_matrix = dir_light_component->lightReferenceMatrix();
 
-	// lighting
+	// wireframe
+	if (m_wireframe) {
+		drawWireframeMode();
+		if (m_normal_debug) {
+			drawNormalMode();
+		}
+		return;
+	}
+
+	// grid
+	if (m_grid) {
+		drawGridMode();
+		if (m_normal_debug) {
+			drawNormalMode();
+		}
+		return;
+	}
+
+	// deferred lighting
 	Shader* lighting_shader = Shader::getShader(ShaderType::DeferredLightingShader);
 	auto g_position_map = m_gbuffer_framebuffer->getFirstAttachmentOf(AttachmentType::RGB16F).getMap();
 	lighting_shader->start_using();
@@ -43,10 +57,8 @@ void LightingPass::draw()
 	lighting_shader->setTexture("gNormal", 1, g_position_map + 1);
 	lighting_shader->setTexture("gDiffuse", 2, g_position_map + 2);
 	lighting_shader->setTexture("gSpecular", 3, g_position_map + 3);
-	lighting_shader->setFloat3("cameraPos", camera_pos);
+	lighting_shader->setFloat3("cameraPos", camera.pos);
 
-	auto dir_light_component = world.getMainDirectionalLightComponent();
-	Mat4 light_ref_matrix = dir_light_component->lightReferenceMatrix();
 	Vec3 light_direction = dir_light_component->direction;
 	Vec4 light_color = dir_light_component->luminousColor;
 	lighting_shader->setFloat3("directionalLight.direction", light_direction);
@@ -89,12 +101,11 @@ void LightingPass::draw()
 	lighting_shader->stop_using();
 
 
+	// lights
 	glEnable(GL_DEPTH_TEST);
 	glDepthMask(GL_TRUE);
+	// TODO 拷贝深度图后才能画法线
 	m_gbuffer_framebuffer->blitDepthMapTo(m_framebuffer.get());
-
-
-	// lights
 	for (auto entity : world.entityView<ecs::PointLightComponent>()) {
 		auto& point_light = *world.getComponent<ecs::PointLightComponent>(entity);
 		auto& renderable = *world.getComponent<ecs::RenderableComponent>(entity);
@@ -108,11 +119,16 @@ void LightingPass::draw()
 			shader->start_using();
 			shader->setFloat4("color", point_light.luminousColor);
 			shader->setMatrix("model", 1, model_matrix.transform());
-			shader->setMatrix("view", 1, camera_view);
-			shader->setMatrix("projection", 1, camera_projection);
+			shader->setMatrix("view", 1, camera.view);
+			shader->setMatrix("projection", 1, camera.projection);
 			Renderer::drawIndex(*shader, mesh.get_VAO(), mesh.get_indices_count());
 			shader->stop_using();
 		}
+	}
+
+	// normal
+	if (m_normal_debug) {
+		drawNormalMode();
 	}
 
 	// base grid ground
@@ -126,9 +142,10 @@ void LightingPass::draw()
 			Shader* shader = material.shader;
 			material.update_shader_binding();
 			shader->start_using();
+			shader->setMatrix("modelScale", 1, Scale(model_matrix.scale));
 			shader->setMatrix("model", 1, model_matrix.transform());
-			shader->setMatrix("view", 1, camera_view);
-			shader->setMatrix("projection", 1, camera_projection);
+			shader->setMatrix("view", 1, camera.view);
+			shader->setMatrix("projection", 1, camera.projection);
 			if (m_shadow_map != 0) {
 				shader->setMatrix("lightSpaceMatrix", 1, light_ref_matrix);
 				shader->setTexture("shadow_map", 4, m_shadow_map);
@@ -150,66 +167,11 @@ void LightingPass::draw()
 			material.update_shader_binding();
 			shader->start_using();
 			shader->setMatrix("model", 1, model_matrix.transform());
-			shader->setMatrix("view", 1, Mat4(Mat3(camera_view)));
-			shader->setMatrix("projection", 1, camera_projection);
+			shader->setMatrix("view", 1, Mat4(Mat3(camera.view)));
+			shader->setMatrix("projection", 1, camera.projection);
 			shader->setCubeTexture("skybox", 6, skybox_texture_id);
 			Renderer::drawIndex(*shader, mesh.get_VAO(), mesh.get_indices_count());
 			shader->stop_using();
-		}
-	}
-
-	// normal
-	if (m_normal_debug)
-	{
-		Shader* normal_shader = Shader::getShader(ShaderType::NormalShader);
-
-		auto& world = ecs::World::get();
-		Mat4 camera_view;
-		Mat4 camera_projection;
-		ecs::CameraComponent& camera = *world.getMainCameraComponent();
-		camera_view = camera.view;
-		camera_projection = camera.projection;
-
-		normal_shader->start_using();
-		normal_shader->setMatrix("view", 1, camera_view);
-		normal_shader->setMatrix("projection", 1, camera_projection);
-		for (auto entity : world.entityView<ecs::RenderableComponent>()) {
-			auto& renderable = *world.getComponent<ecs::RenderableComponent>(entity);
-			auto& model_matrix = *world.getComponent<ecs::TransformComponent>(entity);
-
-			normal_shader->start_using();
-			normal_shader->setMatrix("model", 1, model_matrix.transform());
-			for (int i = 0; i < renderable.primitives.size(); i++) {
-				auto& mesh = renderable.primitives[i].mesh;
-				Renderer::drawIndex(*normal_shader, mesh.get_VAO(), mesh.get_indices_count());
-			}
-		}
-	}
-
-	// wireframe
-	if (m_wireframe) {
-		Shader* wireframe_shader = Shader::getShader(ShaderType::WireframeShader);
-
-		auto& world = ecs::World::get();
-		Mat4 camera_view;
-		Mat4 camera_projection;
-		ecs::CameraComponent& camera = *world.getMainCameraComponent();
-		camera_view = camera.view;
-		camera_projection = camera.projection;
-
-		wireframe_shader->start_using();
-		wireframe_shader->setMatrix("view", 1, camera_view);
-		wireframe_shader->setMatrix("projection", 1, camera_projection);
-		for (auto entity : world.entityView<ecs::RenderableComponent>()) {
-			auto& renderable = *world.getComponent<ecs::RenderableComponent>(entity);
-			auto& model_matrix = *world.getComponent<ecs::TransformComponent>(entity);
-
-			wireframe_shader->start_using();
-			wireframe_shader->setMatrix("model", 1, model_matrix.transform());
-			for (int i = 0; i < renderable.primitives.size(); i++) {
-				auto& mesh = renderable.primitives[i].mesh;
-				Renderer::drawIndex(*wireframe_shader, mesh.get_VAO(), mesh.get_indices_count());
-			}
 		}
 	}
 }
@@ -227,4 +189,83 @@ void LightingPass::enableNormal(bool enable)
 void LightingPass::enableWireframe(bool enable)
 {
 	m_wireframe = enable;
+}
+
+void LightingPass::enableGrid(bool enable)
+{
+	m_grid = enable;
+}
+
+void LightingPass::drawNormalMode()
+{
+	auto& world = ecs::World::get();
+	ecs::CameraComponent& camera = *world.getMainCameraComponent();
+
+	Shader* normal_shader = Shader::getShader(ShaderType::NormalShader);
+	normal_shader->start_using();
+	normal_shader->setMatrix("view", 1, camera.view);
+	normal_shader->setMatrix("projection", 1, camera.projection);
+	normal_shader->setMatrix("projectionView", 1, camera.projection * camera.view);
+	for (auto entity : world.entityView<ecs::RenderableComponent>()) {
+		auto& renderable = *world.getComponent<ecs::RenderableComponent>(entity);
+		auto& model_matrix = *world.getComponent<ecs::TransformComponent>(entity);
+
+		normal_shader->start_using();
+		normal_shader->setMatrix("model", 1, model_matrix.transform());
+		for (int i = 0; i < renderable.primitives.size(); i++) {
+			auto& mesh = renderable.primitives[i].mesh;
+			Renderer::drawIndex(*normal_shader, mesh.get_VAO(), mesh.get_indices_count());
+		}
+	}
+}
+
+void LightingPass::drawWireframeMode()
+{
+	auto& world = ecs::World::get();
+	ecs::CameraComponent& camera = *world.getMainCameraComponent();
+
+	Shader* wireframe_shader = Shader::getShader(ShaderType::WireframeShader);
+	wireframe_shader->start_using();
+	wireframe_shader->setMatrix("view", 1, camera.view);
+	wireframe_shader->setMatrix("projection", 1, camera.projection);
+	for (auto entity : world.entityView<ecs::RenderableComponent>()) {
+		auto& renderable = *world.getComponent<ecs::RenderableComponent>(entity);
+		auto& model_matrix = *world.getComponent<ecs::TransformComponent>(entity);
+
+		wireframe_shader->start_using();
+		wireframe_shader->setMatrix("model", 1, model_matrix.transform());
+		for (int i = 0; i < renderable.primitives.size(); i++) {
+			auto& mesh = renderable.primitives[i].mesh;
+			Renderer::drawIndex(*wireframe_shader, mesh.get_VAO(), mesh.get_indices_count());
+		}
+	}
+}
+
+void LightingPass::drawGridMode()
+{
+	auto& world = ecs::World::get();
+	ecs::CameraComponent& camera = *world.getMainCameraComponent();
+	auto dir_light_component = world.getMainDirectionalLightComponent();
+
+	Mat4 light_ref_matrix = dir_light_component->lightReferenceMatrix();
+	Shader* grid_shader = Shader::getShader(ShaderType::GridShader);
+	for (auto entity : world.entityView<ecs::RenderableComponent>()) {
+		auto& renderable = *world.getComponent<ecs::RenderableComponent>(entity);
+		auto& model_matrix = *world.getComponent<ecs::TransformComponent>(entity);
+
+		for (int i = 0; i < renderable.primitives.size(); i++) {
+			auto& mesh = renderable.primitives[i].mesh;
+			grid_shader->start_using();
+			grid_shader->setMatrix("modelScale", 1, Scale(model_matrix.scale));
+			grid_shader->setMatrix("model", 1, model_matrix.transform());
+			grid_shader->setMatrix("view", 1, camera.view);
+			grid_shader->setMatrix("projection", 1, camera.projection);
+			if (m_shadow_map != 0) {
+				grid_shader->setMatrix("lightSpaceMatrix", 1, light_ref_matrix);
+				grid_shader->setTexture("shadow_map", 4, m_shadow_map);
+			}
+			Renderer::drawIndex(*grid_shader, mesh.get_VAO(), mesh.get_indices_count());
+			grid_shader->stop_using();
+		}
+	}
 }
