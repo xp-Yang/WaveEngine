@@ -44,11 +44,15 @@ void main()
     // reflectance equation
     vec3 Lo = vec3(0.0);
 		
+        // Shadow of Directional Light:
+        vec4 fragPosLightSpace = lightSpaceMatrix * vec4(fs_in.fragWorldPos, 1.0);
+        float shadowFactor = ShadowCalculation(fragPosLightSpace, shadow_map);
+
 		// Directional Light
         vec3 L = normalize(-directionalLight.direction);
         vec3 H = normalize(V + L);
         vec3 radiance = directionalLight.color.xyz;  
-        Lo += radiance * BRDF(L, V, N, F0, radiance, metallic, roughness);  // note that we already multiplied the BRDF by the Fresnel (kS) so we won't multiply by kS again
+        Lo += shadowFactor * radiance * BRDF(L, V, N, F0, radiance, metallic, roughness);  // note that we already multiplied the BRDF by the Fresnel (kS) so we won't multiply by kS again
 
     for(int i = 0; i < point_lights_size; ++i) 
     {
@@ -68,11 +72,7 @@ void main()
     // this ambient lighting with environment lighting).
     vec3 ambient = 0.3 * albedo * ao;
 
-	// Shadow:
-    vec4 fragPosLightSpace = lightSpaceMatrix * vec4(fs_in.fragWorldPos, 1.0);
-    float shadowFactor = ShadowCalculation(fragPosLightSpace, shadow_map);
-
-    vec3 color = ambient + shadowFactor * Lo;
+    vec3 color = ambient + Lo;
 
     // HDR tonemapping
     color = color / (color + vec3(1.0));
