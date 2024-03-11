@@ -11,8 +11,24 @@ public:
 			parent->append(this);
 	}
 	void append(GameObject* node) { m_children.push_back(node); }
+	void remove(const ecs::Entity& entity) {
+		// TODO 改深度递归为循环
+		for (auto child : m_children) {
+			child->remove(entity);
+		}
+		auto it = std::find_if(m_children.begin(), m_children.end(), [entity](GameObject* child) {
+			return (*child).entity().getId() == entity.getId();
+			});
+		if (it != m_children.end()) {
+			ecs::World::get().removeComponent<AllComponents>(entity);
+			m_children.erase(it);
+		}
+	}
 	void remove(GameObject* node) {
-		// TODO 深度遍历
+		// TODO 改深度递归为循环
+		for (auto child : m_children) {
+			child->remove(node);
+		}
 		auto it = std::find_if(m_children.begin(), m_children.end(), [node](GameObject* child) {
 			return (*child).entity().getId() == (*node).entity().getId();
 			});
@@ -41,6 +57,11 @@ public:
 			m_point_light_count++;
 		parent ? parent->append(obj) : m_root_object->append(obj); 
 	}
+	void removeObject(const ecs::Entity& entity) {
+		if (ecs::World::get().hasComponent<ecs::PointLightComponent>(entity))
+			m_point_light_count--;
+		m_root_object->remove(entity);
+	}
 	void removeObject(GameObject* obj) { 
 		if (ecs::World::get().hasComponent<ecs::PointLightComponent>(obj->entity()))
 			m_point_light_count--;
@@ -64,6 +85,9 @@ protected:
 
 private:
 	GameObject* m_root_object{ nullptr };
+	GameObject* m_root_point_light_object{ nullptr };
+	GameObject* m_root_cube_object{ nullptr };
+	GameObject* m_root_sphere_object{ nullptr };
 	std::vector<GameObject*> selected_objects; //TODO
 	int m_point_light_count = 0;
 	int m_test_cube_count = 0;

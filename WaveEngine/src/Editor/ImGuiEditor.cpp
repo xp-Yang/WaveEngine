@@ -218,14 +218,15 @@ void ImGuiEditor::renderGlobalController() {
     ImGui::SameLine(0.0f, spacing);
     if (ImGui::Button("-")) { 
         auto& world = ecs::World::get();
-        auto root_obj = scene_hierarchy->rootObject();
-        GameObject* last_point_light_obj = nullptr;
-        for (auto child : root_obj->children()) {
-            if(world.hasComponent<ecs::PointLightComponent>(child->entity()))
-                last_point_light_obj = child;
+        int last_point_entity_id = -1;
+        auto it = world.entityView<ecs::PointLightComponent>().begin();
+        while(it != world.entityView<ecs::PointLightComponent>().end())
+        {
+            last_point_entity_id = (*it).getId();
+            it++;
         }
-        if (last_point_light_obj)
-            scene_hierarchy->removeObject(last_point_light_obj);
+        if (last_point_entity_id != -1)
+            scene_hierarchy->removeObject(ecs::Entity(last_point_entity_id));
     }
     ImGui::SameLine();
     ImGui::Text("point light number: %d", point_light_count);
@@ -279,8 +280,8 @@ void ImGuiEditor::renderSceneHierarchy()
     auto root_obj = scene_hierarchy->rootObject();
     for (int i = 0; i < root_obj->children().size(); i++)
     {
-        auto child = root_obj->children()[i];
-        const auto& entity = child->entity();
+        auto child_obj = root_obj->children()[i];
+        const auto& entity = child_obj->entity();
         auto object_name = world.getComponent<ecs::NameComponent>(entity)->name;
 
         static ImGuiTreeNodeFlags node_flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_SpanAvailWidth;
@@ -302,24 +303,71 @@ void ImGuiEditor::renderSceneHierarchy()
         }
         if (node_open)
         {
-            // TODO display all components name_str belong to this entity
-            if (world.hasComponent<ecs::NameComponent>(entity))
-                ImGui::Text("<NameComponent>");
-            if (world.hasComponent<ecs::TransformComponent>(entity))
-                ImGui::Text("<TransformComponent>");
-            if (world.hasComponent<ecs::RenderableComponent>(entity))
-                ImGui::Text("<RenderableComponent>");
-            if (world.hasComponent<ecs::ExplosionComponent>(entity))
-                ImGui::Text("<ExplosionComponent>");
-            if (world.hasComponent<ecs::SkyboxComponent>(entity))
-                ImGui::Text("<SkyboxComponent>");
-            if (world.hasComponent<ecs::PointLightComponent>(entity))
-                ImGui::Text("<PointLightComponent>");
-            if (world.hasComponent<ecs::DirectionalLightComponent>(entity))
-                ImGui::Text("<DirectionalLightComponent>");
-            if (world.hasComponent<ecs::BaseGridGroundComponent>(entity))
-                ImGui::Text("<BaseGridGroundComponent>");
-            ImGui::TreePop();
+            if (child_obj->children().empty()) {
+                // TODO display all components name_str belong to this entity
+                if (world.hasComponent<ecs::NameComponent>(entity))
+                    ImGui::Text("<NameComponent>");
+                if (world.hasComponent<ecs::TransformComponent>(entity))
+                    ImGui::Text("<TransformComponent>");
+                if (world.hasComponent<ecs::RenderableComponent>(entity))
+                    ImGui::Text("<RenderableComponent>");
+                if (world.hasComponent<ecs::ExplosionComponent>(entity))
+                    ImGui::Text("<ExplosionComponent>");
+                if (world.hasComponent<ecs::SkyboxComponent>(entity))
+                    ImGui::Text("<SkyboxComponent>");
+                if (world.hasComponent<ecs::PointLightComponent>(entity))
+                    ImGui::Text("<PointLightComponent>");
+                if (world.hasComponent<ecs::DirectionalLightComponent>(entity))
+                    ImGui::Text("<DirectionalLightComponent>");
+                if (world.hasComponent<ecs::BaseGridGroundComponent>(entity))
+                    ImGui::Text("<BaseGridGroundComponent>");
+                ImGui::TreePop();
+            }
+            else {
+                for (int i = 0; i < child_obj->children().size(); i++) {
+                    auto child_obj_ = child_obj->children()[i];
+                    const auto& entity_ = child_obj_->entity();
+                    auto object_name_ = world.getComponent<ecs::NameComponent>(entity_)->name;
+                    bool node_open_ = ImGui::TreeNodeEx((void*)(intptr_t)i, node_flags, object_name_.c_str(), i);
+                    if (ImGui::IsItemClicked() && !ImGui::IsItemToggledOpen()) {
+                        bool close = false;
+                        for (const auto& picked_entity : world.getPickedEntities()) {
+                            if (picked_entity.getId() == entity_.getId()) {
+                                world.removeComponent<ecs::PickedComponent>(entity_);
+                                close = true;
+                            }
+                        }
+                        if (!close) {
+                            for (const auto& picked_entity : world.getPickedEntities()) {
+                                world.removeComponent<ecs::PickedComponent>(picked_entity);
+                            }
+                            world.addComponent<ecs::PickedComponent>(entity_);
+                        }
+                    }
+                    if (node_open_)
+                    {
+                        // TODO display all components name_str belong to this entity
+                        if (world.hasComponent<ecs::NameComponent>(entity_))
+                            ImGui::Text("<NameComponent>");
+                        if (world.hasComponent<ecs::TransformComponent>(entity_))
+                            ImGui::Text("<TransformComponent>");
+                        if (world.hasComponent<ecs::RenderableComponent>(entity_))
+                            ImGui::Text("<RenderableComponent>");
+                        if (world.hasComponent<ecs::ExplosionComponent>(entity_))
+                            ImGui::Text("<ExplosionComponent>");
+                        if (world.hasComponent<ecs::SkyboxComponent>(entity_))
+                            ImGui::Text("<SkyboxComponent>");
+                        if (world.hasComponent<ecs::PointLightComponent>(entity_))
+                            ImGui::Text("<PointLightComponent>");
+                        if (world.hasComponent<ecs::DirectionalLightComponent>(entity_))
+                            ImGui::Text("<DirectionalLightComponent>");
+                        if (world.hasComponent<ecs::BaseGridGroundComponent>(entity_))
+                            ImGui::Text("<BaseGridGroundComponent>");
+                        ImGui::TreePop();
+                    }
+                }
+                ImGui::TreePop();
+            }
         }
     }
 

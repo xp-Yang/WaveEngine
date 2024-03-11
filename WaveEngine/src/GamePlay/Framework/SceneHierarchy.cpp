@@ -17,7 +17,7 @@ void SceneHierarchy::addPointLight()
 	auto& world = ecs::World::get();
 
 	auto point_light_entity = world.create_entity();
-	auto point_light_node = new GameObject(m_root_object, point_light_entity);
+	auto point_light_node = new GameObject(m_root_point_light_object, point_light_entity);
 	world.addComponent<ecs::NameComponent>(point_light_entity).name = std::string("Point Light ") + std::to_string(m_point_light_count);
 	auto& point_light_transform = world.addComponent<ecs::TransformComponent>(point_light_entity);
 	double r1 = random(-15.0f, 15.0f);
@@ -46,7 +46,7 @@ void SceneHierarchy::addCube()
 	auto& world = ecs::World::get();
 
 	auto cube_entity = world.create_entity();
-	auto cube_node = new GameObject(m_root_object, cube_entity);
+	auto cube_node = new GameObject(m_root_cube_object, cube_entity);
 	world.addComponent<ecs::NameComponent>(cube_entity).name = std::string("Cube") + std::to_string(m_test_cube_count);
 	auto& cube_transform = world.addComponent<ecs::TransformComponent>(cube_entity);
 	cube_transform.translation = { 1.5f * (m_test_cube_count % 6), 0.5f + 1.5f * (m_test_cube_count / 6), -10.0f };
@@ -76,7 +76,7 @@ void SceneHierarchy::addSphere()
 	auto& world = ecs::World::get();
 
 	auto sphere_entity = world.create_entity();
-	auto sphere_node = new GameObject(m_root_object, sphere_entity);
+	auto sphere_node = new GameObject(m_root_sphere_object, sphere_entity);
 	world.addComponent<ecs::NameComponent>(sphere_entity).name = std::string("Sphere") + std::to_string(m_test_sphere_count);
 	auto& sphere_transform = world.addComponent<ecs::TransformComponent>(sphere_entity);
 	sphere_transform.translation = { 2.5f * (m_test_sphere_count % 5), 1.0f + 2.5f * (m_test_sphere_count / 5), 0 };
@@ -105,6 +105,10 @@ void SceneHierarchy::init() {
     // TODO 这些需要被SceneHierarchy管理吗，参考filament
 	auto& world = ecs::World::get();
 
+	auto root_entity = world.create_entity();
+	world.addComponent<ecs::NameComponent>(root_entity).name = "Root";
+	m_root_object = new GameObject(nullptr, root_entity);
+
 	auto skybox_entity = world.create_entity();
 	world.addComponent<ecs::NameComponent>(skybox_entity).name = "Skybox";
 	world.addComponent<ecs::TransformComponent>(skybox_entity);
@@ -128,8 +132,6 @@ void SceneHierarchy::init() {
 	skybox_primitive.material = skybox_material;
 	skybox_renderable.setPrimitives({ skybox_primitive });
 
-	m_root_object = new GameObject(nullptr, skybox_entity);
-
 	auto dir_light_entity = world.create_entity();
 	auto directional_light_node = new GameObject(m_root_object, dir_light_entity);
 	world.addComponent<ecs::NameComponent>(dir_light_entity).name = "Directional Light";
@@ -139,15 +141,23 @@ void SceneHierarchy::init() {
 	dir_light_transform.translation = { -15.0f, 30.0f, -15.0f };
 	dir_light_properties.direction = -dir_light_transform.translation;
 
-
+	auto root_point_lights_entity = world.create_entity();
+	world.addComponent<ecs::NameComponent>(root_point_lights_entity).name = "Point Lights";
+	m_root_point_light_object = new GameObject(m_root_object, root_point_lights_entity);
 	for (int i = 0; i < 3; i++) {
 		addPointLight();
 	}
 
+	auto root_cube_entity = world.create_entity();
+	world.addComponent<ecs::NameComponent>(root_cube_entity).name = "Cubes";
+	m_root_cube_object = new GameObject(m_root_object, root_cube_entity);
 	for (int i = 0; i < 36; i++) {
 		addCube();
 	}
 
+	auto root_sphere_entity = world.create_entity();
+	world.addComponent<ecs::NameComponent>(root_sphere_entity).name = "Spheres";
+	m_root_sphere_object = new GameObject(m_root_object, root_sphere_entity);
 	for (int i = 0; i < 25; i++) {
 		addSphere();
 	}
@@ -155,7 +165,7 @@ void SceneHierarchy::init() {
 	//TODO shader在延迟渲染中没用到。shader是否不应该在这里创建
     auto ground_entity = world.create_entity();
 	auto ground_node = new GameObject(m_root_object, ground_entity);
-    world.addComponent<ecs::NameComponent>(ground_entity).name = "Grid";
+    world.addComponent<ecs::NameComponent>(ground_entity).name = "Gound";
 	world.addComponent<ecs::BaseGridGroundComponent>(ground_entity);
     auto& ground_transform = world.addComponent<ecs::TransformComponent>(ground_entity);
 	ground_transform.scale = Vec3(1.0f);
