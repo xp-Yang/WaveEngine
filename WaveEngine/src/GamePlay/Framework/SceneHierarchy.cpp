@@ -9,6 +9,10 @@ SceneHierarchy::SceneHierarchy() {
 	init();
 }
 
+void SceneHierarchy::loadModal(const std::string& filepath)
+{
+}
+
 void SceneHierarchy::addPointLight()
 {
 	std::string resource_dir = Application::resourceDirectory();
