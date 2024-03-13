@@ -9,8 +9,38 @@ SceneHierarchy::SceneHierarchy() {
 	init();
 }
 
-void SceneHierarchy::loadModal(const std::string& filepath)
+GameObject* SceneHierarchy::loadModal(const std::string& filepath)
 {
+	std::string resource_dir = Application::resourceDirectory();
+
+	auto& world = ecs::World::get();
+
+	Model* model = new Model(filepath);
+	auto entity = world.create_entity();
+	std::string name = filepath.substr(filepath.find_last_of("/\\") + 1, filepath.find_last_of('.') - filepath.find_last_of("/\\") - 1);
+	world.addComponent<ecs::NameComponent>(entity).name = name;
+	world.addComponent<ecs::TransformComponent>(entity);
+	//world.addComponent<ecs::ExplosionComponent>(bunny_entity);
+	auto& renderable = world.addComponent<ecs::RenderableComponent>(entity);
+	std::vector<ecs::Primitive> primitives;
+	for (int i = 0; i < model->get_datas().size(); i++) {
+		ecs::Primitive primitive;
+		primitive.mesh = model->get_datas().at(i).mesh;
+		if (model->get_datas().at(i).material.diffuse_map == 0 && model->get_datas().at(i).material.specular_map == 0) {
+			Material material;
+			material.set_diffuse_map(resource_dir + "/images/pure_white_map.png");
+			material.set_specular_map(resource_dir + "/images/pure_white_map.png");
+			primitive.material = material;
+		}
+		else
+			primitive.material = model->get_datas().at(i).material;
+		Shader* shader = new Shader(resource_dir + "/shader/pbr.vs", resource_dir + "/shader/pbr.fs");
+		primitive.material.shader = shader;
+		primitives.push_back(primitive);
+	}
+	renderable.setPrimitives(primitives);
+
+	return new GameObject(m_root_object, entity);
 }
 
 void SceneHierarchy::addPointLight()
@@ -184,69 +214,9 @@ void SceneHierarchy::init() {
 	ground_primitive.material = ground_material;
 	ground_renderable.setPrimitives({ ground_primitive });
 
-	Model* nanosuit = new Model(resource_dir + "/model/nanosuit/nanosuit.obj");
-	auto nanosuit_entity = world.create_entity();
-	auto nanosuit_node = new GameObject(m_root_object, nanosuit_entity);
-	world.addComponent<ecs::NameComponent>(nanosuit_entity).name = "Nanosuit";
-	auto& nanosuit_transform = world.addComponent<ecs::TransformComponent>(nanosuit_entity);
-	nanosuit_transform.translation = { -10.0f, 0.0f, 0.0f };
-	nanosuit_transform.scale = Vec3(0.4f);
-	auto& nanosuit_renderable = world.addComponent<ecs::RenderableComponent>(nanosuit_entity);
-	std::vector<ecs::Primitive> nanosuit_primitives;
-	Shader* nanosuit_shader = new Shader(resource_dir + "/shader/pbr.vs", resource_dir + "/shader/pbr.fs");
-	for (int i = 0; i < nanosuit->get_datas().size(); i++) {
-		ecs::Primitive primitive;
-		primitive.mesh = nanosuit->get_datas().at(i).mesh;
-		primitive.material = nanosuit->get_datas().at(i).material;
-		primitive.material.shader = nanosuit_shader;
-		nanosuit_primitives.push_back(primitive);
-	}
-	nanosuit_renderable.setPrimitives(nanosuit_primitives);
-	//world.addComponent<ecs::ExplosionComponent>(nanosuit_entity);
+	loadModal(resource_dir + "/model/nanosuit/nanosuit.obj");
 
-	//Model* yoko = new Model(resource_dir + "/model/yoko/008.obj");
-	//auto yoko_entity = world.create_entity();
-	//world.addComponent<ecs::NameComponent>(yoko_entity).name = "Yoko";
-	//auto& yoko_transform = world.addComponent<ecs::TransformComponent>(yoko_entity);
-	//yoko_transform.translation = { -5.0f, 0.0f, 0.0f };
-	//yoko_transform.scale = Vec3(0.25f);
-	//auto& yoko_renderable = world.addComponent<ecs::RenderableComponent>(yoko_entity);
-	//std::vector<ecs::Primitive> yoko_primitives;
-	//Shader* yoko_shader = new Shader(resource_dir + "/shader/model.vs", resource_dir + "/shader/modelFowardRendering.fs");
-	//for (int i = 0; i < yoko->get_datas().size(); i++) {
-	//	ecs::Primitive primitive;
-	//	primitive.mesh = yoko->get_datas().at(i).mesh;
-	//	primitive.material = yoko->get_datas().at(i).material;
-	//	primitive.material.shader = yoko_shader;
-	//	yoko_primitives.push_back(primitive);
-	//}
-	//yoko_renderable.setPrimitives(yoko_primitives);
-	//world.addComponent<ecs::ExplosionComponent>(yoko_entity);
-
-	Model* bunny = new Model(resource_dir + "/model/bunny.obj");
-	auto bunny_entity = world.create_entity();
-	auto bunny_node = new GameObject(m_root_object, bunny_entity);
-	world.addComponent<ecs::NameComponent>(bunny_entity).name = "Bunny";
-	auto& bunny_transform = world.addComponent<ecs::TransformComponent>(bunny_entity);
-	bunny_transform.translation = { -5.0f, 0.0f, 0.0f };
-	bunny_transform.scale = Vec3(25.0f);
-	auto& bunny_renderable = world.addComponent<ecs::RenderableComponent>(bunny_entity);
-	std::vector<ecs::Primitive> bunny_primitives;
-	Shader* bunny_shader = new Shader(resource_dir + "/shader/pbr.vs", resource_dir + "/shader/pbr.fs");
-	for (int i = 0; i < bunny->get_datas().size(); i++) {
-		ecs::Primitive primitive;
-		primitive.mesh = bunny->get_datas().at(i).mesh;
-		primitive.material = bunny->get_datas().at(i).material;
-		primitive.material.shader = bunny_shader;
-		Material sphere_material;
-		sphere_material.shader = new Shader(resource_dir + "/shader/pbr.vs", resource_dir + "/shader/pbr.fs");
-		sphere_material.set_diffuse_map(resource_dir + "/images/pure_white_map.png");
-		sphere_material.set_specular_map(resource_dir + "/images/pure_white_map.png");
-		primitive.material = sphere_material;
-		bunny_primitives.push_back(primitive);
-	}
-	bunny_renderable.setPrimitives(bunny_primitives);
-	//world.addComponent<ecs::ExplosionComponent>(bunny_entity);
+	loadModal(resource_dir + "/model/bunny.obj");
 
 	auto camera = world.create_entity();
 	world.addComponent<ecs::NameComponent>(camera).name = "Main Camera";

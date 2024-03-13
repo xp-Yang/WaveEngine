@@ -34,7 +34,7 @@ public:
 
 protected:
     bool load_file(const std::string& filename) {
-        std::string directory = filename.substr(0, filename.find_last_of('/'));
+        std::string directory = filename.substr(0, filename.find_last_of("/\\"));
 
         std::stringstream buffer;
         try

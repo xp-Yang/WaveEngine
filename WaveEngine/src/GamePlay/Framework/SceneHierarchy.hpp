@@ -52,7 +52,7 @@ public:
 	GameObject* rootObject() const { return m_root_object; }
 	const std::vector<GameObject*>& selectedObjects() const { return selected_objects; }
 	GameObject* selectedObject() const { return selected_objects.size() == 1 ? selected_objects[0] : nullptr; }
-	void loadModal(const std::string& filepath);
+	GameObject* loadModal(const std::string& filepath);
 	void addObject(GameObject* obj, GameObject* parent = nullptr) { 
 		if (ecs::World::get().hasComponent<ecs::PointLightComponent>(obj->entity()))
 			m_point_light_count++;

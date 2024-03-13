@@ -19,7 +19,7 @@ void Model::load_model(const std::string& file_path)
         auto error_str = importer.GetErrorString();
         return;
     }
-    directory = file_path.substr(0, file_path.find_last_of('/'));
+    directory = file_path.substr(0, file_path.find_last_of("/\\"));
 
     processNode(scene->mRootNode, scene);
 }
