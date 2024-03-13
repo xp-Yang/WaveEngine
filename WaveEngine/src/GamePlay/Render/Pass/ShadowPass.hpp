@@ -10,6 +10,10 @@ public:
     void configSamples(int samples);
     void draw() override;
     FrameBuffer* getFrameBuffer() override;
+
+protected:
+    void drawDirectionalLightShadowMap();
+    void drawPointLightShadowMap();
 };
 
 #endif

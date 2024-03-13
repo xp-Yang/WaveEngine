@@ -118,10 +118,32 @@ struct SkyboxComponent {
 struct PointLightComponent {
 	Color4 luminousColor = { 1.0f, 1.0f, 1.0f, 1.0f };
 	float radius;
-	Mat4 lightReferenceMatrix()
+	std::vector<Mat4> lightReferenceMatrix()
 	{
-		//lightProjection = Perspective(deg2rad(45.0f), /*1.0f*/WINDOW_WIDTH / WINDOW_HEIGHT, 0.1f, 100.0f);
-		return {};
+		Mat4 light_projection = Perspective(deg2rad(90.0f), /*1.0f*/ASPECT_RATIO, /*0.1f, 100.0f*/1.0f, 20.0f);
+		Vec3 light_pos;
+		auto& world = ecs::World::get();
+		for (auto entity : world.entityView<ecs::PointLightComponent>()) {
+			if(world.getComponent<ecs::PointLightComponent>(entity) == this) {
+				light_pos = world.getComponent<ecs::TransformComponent>(entity)->translation;
+			}
+		}
+		light_pos = Vec3(0.0f);
+		Mat4 light_view_up = LookAt(light_pos, light_pos + Vec3(0.0f, 1.0f, 0.0f), Vec3(0.0f, 0.0f, 1.0f)); //上
+		Mat4 light_view_down = LookAt(light_pos, light_pos + Vec3(0.0f, -1.0f, 0.0f), Vec3(0.0f, 0.0f, -1.0f));//下
+		Mat4 light_view_left = LookAt(light_pos, light_pos + Vec3(-1.0f, 0.0f, 0.0f), Vec3(0.0f, 1.0f, 0.0f));//左
+		Mat4 light_view_right = LookAt(light_pos, light_pos + Vec3(1.0f, 0.0f, 0.0f), Vec3(0.0f, 1.0f, 0.0f)); //右
+		Mat4 light_view_front = LookAt(light_pos, light_pos + Vec3(0.0f, 0.0f, 1.0f), Vec3(0.0f, 1.0f, 0.0f)); //前
+		Mat4 light_view_back = LookAt(light_pos, light_pos + Vec3(0.0f, 0.0f, -1.0f), Vec3(0.0f, 1.0f, 0.0f));//后
+		
+		std::vector<Mat4> result;
+		result.push_back(light_projection * light_view_up);
+		result.push_back(light_projection * light_view_down);
+		result.push_back(light_projection * light_view_left);
+		result.push_back(light_projection * light_view_right);
+		result.push_back(light_projection * light_view_front);
+		result.push_back(light_projection * light_view_back);
+		return result;
 	}
 };
 
@@ -131,11 +153,9 @@ struct DirectionalLightComponent {
 
 	Mat4 lightReferenceMatrix()
 	{
-		auto& world = ecs::World::get();
 		Mat4 light_projection = Ortho(-15.0f * WINDOW_WIDTH / WINDOW_HEIGHT, 15.0f * WINDOW_WIDTH / WINDOW_HEIGHT, -15.0f, 15.0f, 0.1f, 100.0f);
 		Mat4 light_view = LookAt(Vec3(0.0f) - direction, Vec3(0.0f), ecs::CameraComponent::global_up);
-		Mat4 ret = light_projection * light_view;
-		return ret;
+		return light_projection * light_view;
 	}
 };
 

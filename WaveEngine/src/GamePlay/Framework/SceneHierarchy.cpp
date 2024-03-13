@@ -133,15 +133,20 @@ void SceneHierarchy::addSphere()
 	m_test_sphere_count++;
 }
 
-void SceneHierarchy::init() {
-	std::string resource_dir = Application::resourceDirectory();
-
-    // TODO 这些需要被SceneHierarchy管理吗，参考filament
+void SceneHierarchy::initMainCamera()
+{
 	auto& world = ecs::World::get();
 
-	auto root_entity = world.create_entity();
-	world.addComponent<ecs::NameComponent>(root_entity).name = "Root";
-	m_root_object = new GameObject(nullptr, root_entity);
+	auto camera = world.create_entity();
+	world.addComponent<ecs::NameComponent>(camera).name = "Main Camera";
+	auto& camera_component = world.addComponent<ecs::CameraComponent>(camera);
+}
+
+void SceneHierarchy::createSkybox()
+{
+	std::string resource_dir = Application::resourceDirectory();
+
+	auto& world = ecs::World::get();
 
 	auto skybox_entity = world.create_entity();
 	world.addComponent<ecs::NameComponent>(skybox_entity).name = "Skybox";
@@ -165,6 +170,13 @@ void SceneHierarchy::init() {
 	skybox_material.shader = new Shader(resource_dir + "/shader/skybox.vs", resource_dir + "/shader/skybox.fs");
 	skybox_primitive.material = skybox_material;
 	skybox_renderable.setPrimitives({ skybox_primitive });
+}
+
+void SceneHierarchy::createDirectionalLight()
+{
+	std::string resource_dir = Application::resourceDirectory();
+
+	auto& world = ecs::World::get();
 
 	auto dir_light_entity = world.create_entity();
 	auto directional_light_node = new GameObject(m_root_object, dir_light_entity);
@@ -174,6 +186,22 @@ void SceneHierarchy::init() {
 	auto& dir_light_transform = world.addComponent<ecs::TransformComponent>(dir_light_entity);
 	dir_light_transform.translation = { -15.0f, 30.0f, -15.0f };
 	dir_light_properties.direction = -dir_light_transform.translation;
+}
+
+void SceneHierarchy::init() {
+	std::string resource_dir = Application::resourceDirectory();
+
+	auto& world = ecs::World::get();
+
+	auto root_entity = world.create_entity();
+	world.addComponent<ecs::NameComponent>(root_entity).name = "Root";
+	m_root_object = new GameObject(nullptr, root_entity);
+
+	initMainCamera();
+
+	createSkybox();
+
+	createDirectionalLight();
 
 	auto root_point_lights_entity = world.create_entity();
 	world.addComponent<ecs::NameComponent>(root_point_lights_entity).name = "Point Lights";
@@ -217,8 +245,4 @@ void SceneHierarchy::init() {
 	loadModal(resource_dir + "/model/nanosuit/nanosuit.obj");
 
 	loadModal(resource_dir + "/model/bunny.obj");
-
-	auto camera = world.create_entity();
-	world.addComponent<ecs::NameComponent>(camera).name = "Main Camera";
-	auto& camera_component = world.addComponent<ecs::CameraComponent>(camera);
 }
