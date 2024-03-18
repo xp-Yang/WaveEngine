@@ -9,8 +9,8 @@ public:
 	GameObject(const ecs::Entity& entity) : GameObject(nullptr, entity) {}
 	GameObject(GameObject* parent, const ecs::Entity& entity) : m_parent(parent), m_entity(entity) { if (parent) parent->append(this); }
 	void append(GameObject* node) { m_children.push_back(node); }
+	// TODO 这些方法如果自己是leaf就不对了
 	void remove(const ecs::Entity& entity) {
-		// TODO 改深度递归为循环
 		for (auto child : m_children) {
 			child->remove(entity);
 		}
@@ -24,7 +24,6 @@ public:
 	}
 	void remove(GameObject* node) { remove(node->entity()); }
 	GameObject* find(const ecs::Entity& entity) {
-		// TODO 改深度递归为循环
 		for (auto child : m_children) {
 			auto res = child->find(entity);
 			if (res)
@@ -32,6 +31,44 @@ public:
 		}
 		return m_entity.getId() == entity.getId() ? this : nullptr;
 	}
+	const std::vector<GameObject*> allLeaves2() {
+		if (m_children.empty())
+			return { this };
+		// 深度优先
+		std::vector<GameObject*> leaves;
+		for (auto child : m_children) {
+			if (child->children().empty()) {
+				leaves.push_back(child);
+			}
+			else {
+				auto child_leaves = child->allLeaves2();
+				leaves.insert(leaves.end(), child_leaves.begin(), child_leaves.end());
+			}
+		}
+		return leaves;
+	}
+	const std::vector<GameObject*> allLeaves() {
+		if (m_children.empty())
+			return { this };
+		// 广度优先
+		std::vector<GameObject*> leaves;
+		std::vector<GameObject*> nodes;
+		nodes.push_back(this);
+		while (!nodes.empty()) {
+			auto node = nodes.back();
+			nodes.pop_back();
+			for (auto child : node->children()) {
+				if (!child->children().empty()) {
+					nodes.push_back(child);
+				}
+				else {
+					leaves.push_back(child);
+				}
+			}
+		}
+		return leaves;
+	}
+	bool isLeaf() const { return m_children.empty(); }
 	const std::vector<GameObject*>& children() const { return m_children; }
 	const ecs::Entity& entity() const { return m_entity; }
 
@@ -72,6 +109,7 @@ protected:
 	void init();
 	void initMainCamera();
 	void createSkybox();
+	void createGround();
 	void createDirectionalLight();
 
 private:

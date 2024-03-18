@@ -20,7 +20,7 @@ GameObject* SceneHierarchy::loadModal(const std::string& filepath)
 	std::string name = filepath.substr(filepath.find_last_of("/\\") + 1, filepath.find_last_of('.') - filepath.find_last_of("/\\") - 1);
 	world.addComponent<ecs::NameComponent>(entity).name = name;
 	world.addComponent<ecs::TransformComponent>(entity);
-	//world.addComponent<ecs::ExplosionComponent>(bunny_entity);
+	//world.addComponent<ecs::ExplosionComponent>(entity);
 	auto& renderable = world.addComponent<ecs::RenderableComponent>(entity);
 	std::vector<ecs::Primitive> primitives;
 	for (int i = 0; i < model->get_datas().size(); i++) {
@@ -61,8 +61,8 @@ void SceneHierarchy::addPointLight()
 	point_light_transform.scale = Vec3(random(0.1f, 0.3f));
 	auto& point_light_renderable = world.addComponent<ecs::RenderableComponent>(point_light_entity);
 	auto& point_light_properties = world.addComponent<ecs::PointLightComponent>(point_light_entity);
-	point_light_properties.radius = (point_light_transform.scale[0] / 0.1f) * 20.0f;
-	point_light_properties.luminousColor = { randomUnit(), randomUnit(), randomUnit(), 1.0f };
+	point_light_properties.radius = (point_light_transform.scale[0]) * 40.0f;
+	point_light_properties.luminousColor = Color4(0.8f);//{ randomUnit(), randomUnit(), randomUnit(), 1.0f };
 	ecs::Primitive point_light_primitive;
 	point_light_primitive.mesh = Mesh::create_icosphere_mesh(5);
 	Material point_light_material;
@@ -114,6 +114,8 @@ void SceneHierarchy::addSphere()
 	world.addComponent<ecs::NameComponent>(sphere_entity).name = std::string("Sphere") + std::to_string(m_test_sphere_count);
 	auto& sphere_transform = world.addComponent<ecs::TransformComponent>(sphere_entity);
 	sphere_transform.translation = { 2.5f * (m_test_sphere_count % 5), 1.0f + 2.5f * (m_test_sphere_count / 5), 0 };
+	//float theta = (2 * Core::MathConstant::PI / 25.0f) * m_test_sphere_count;
+	//sphere_transform.translation = { 10.0f * cos(theta), 1.0f , 10.0f * sin(theta) };
 	auto& sphere_renderable = world.addComponent<ecs::RenderableComponent>(sphere_entity);
 	ecs::Primitive sphere_primitive;
 	sphere_primitive.mesh = Mesh::create_icosphere_mesh(5);
@@ -172,6 +174,34 @@ void SceneHierarchy::createSkybox()
 	skybox_renderable.setPrimitives({ skybox_primitive });
 }
 
+void SceneHierarchy::createGround()
+{
+	std::string resource_dir = Application::resourceDirectory();
+
+	auto& world = ecs::World::get();
+
+	//TODO shader在延迟渲染中没用到。shader是否不应该在这里创建
+	auto ground_entity = world.create_entity();
+	auto ground_node = new GameObject(m_root_object, ground_entity);
+	world.addComponent<ecs::NameComponent>(ground_entity).name = "Gound";
+	world.addComponent<ecs::GroundComponent>(ground_entity);
+	auto& ground_transform = world.addComponent<ecs::TransformComponent>(ground_entity);
+	ground_transform.scale = Vec3(1.0f);
+	auto& ground_renderable = world.addComponent<ecs::RenderableComponent>(ground_entity);
+	ecs::Primitive ground_primitive;
+	ground_primitive.mesh = Mesh::create_ground_mesh();
+	Material ground_material;
+	ground_material.shader = new Shader(resource_dir + "/shader/pbr.vs", resource_dir + "/shader/pbr.fs");
+	ground_material.albedo = Vec3(1.0f, 1.0f, 1.0f);
+	ground_material.metallic = 0.0f;
+	ground_material.roughness = 1.0f;
+	ground_material.ao = 0.01;
+	ground_material.set_diffuse_map(resource_dir + "/images/pure_white_map.png");
+	ground_material.set_specular_map(resource_dir + "/images/pure_white_map.png");
+	ground_primitive.material = ground_material;
+	ground_renderable.setPrimitives({ ground_primitive });
+}
+
 void SceneHierarchy::createDirectionalLight()
 {
 	std::string resource_dir = Application::resourceDirectory();
@@ -182,15 +212,13 @@ void SceneHierarchy::createDirectionalLight()
 	auto directional_light_node = new GameObject(m_root_object, dir_light_entity);
 	world.addComponent<ecs::NameComponent>(dir_light_entity).name = "Directional Light";
 	auto& dir_light_properties = world.addComponent<ecs::DirectionalLightComponent>(dir_light_entity);
-	dir_light_properties.luminousColor = { 2.0f / 255.0f, 2.0f / 255.0f, 2.0f / 255.0f, 1.0f };
+	dir_light_properties.luminousColor = Color4(1.0f);
 	auto& dir_light_transform = world.addComponent<ecs::TransformComponent>(dir_light_entity);
 	dir_light_transform.translation = { -15.0f, 30.0f, -15.0f };
 	dir_light_properties.direction = -dir_light_transform.translation;
 }
 
 void SceneHierarchy::init() {
-	std::string resource_dir = Application::resourceDirectory();
-
 	auto& world = ecs::World::get();
 
 	auto root_entity = world.create_entity();
@@ -206,7 +234,7 @@ void SceneHierarchy::init() {
 	auto root_point_lights_entity = world.create_entity();
 	world.addComponent<ecs::NameComponent>(root_point_lights_entity).name = "Point Lights";
 	m_root_point_light_object = new GameObject(m_root_object, root_point_lights_entity);
-	for (int i = 0; i < 3; i++) {
+	for (int i = 0; i < 1; i++) {
 		addPointLight();
 	}
 
@@ -224,25 +252,13 @@ void SceneHierarchy::init() {
 		addSphere();
 	}
 
-	//TODO shader在延迟渲染中没用到。shader是否不应该在这里创建
-    auto ground_entity = world.create_entity();
-	auto ground_node = new GameObject(m_root_object, ground_entity);
-    world.addComponent<ecs::NameComponent>(ground_entity).name = "Gound";
-	world.addComponent<ecs::BaseGridGroundComponent>(ground_entity);
-    auto& ground_transform = world.addComponent<ecs::TransformComponent>(ground_entity);
-	ground_transform.scale = Vec3(1.0f);
-	auto& ground_renderable = world.addComponent<ecs::RenderableComponent>(ground_entity);
-	ecs::Primitive ground_primitive;
-	ground_primitive.mesh = Mesh::create_ground_mesh();
-    Material ground_material;
-    //ground_material.shader = new Shader(resource_dir + "/shader/model.vs", resource_dir + "/shader/wireframe.gs", resource_dir + "/shader/wireframe.fs");
-    ground_material.shader = Shader::getShader(ShaderType::CheckerboardShader);
-    ground_material.set_diffuse_map(resource_dir + "/images/pure_white_map.png");
-    ground_material.set_specular_map(resource_dir + "/images/pure_white_map.png");
-	ground_primitive.material = ground_material;
-	ground_renderable.setPrimitives({ ground_primitive });
+	createGround();
 
-	loadModal(resource_dir + "/model/nanosuit/nanosuit.obj");
+	std::string resource_dir = Application::resourceDirectory();
 
-	loadModal(resource_dir + "/model/bunny.obj");
+	//loadModal(resource_dir + "/model/nanosuit/nanosuit.obj");
+
+	//loadModal(resource_dir + "/model/bunny.obj");
+
+	//loadModal(resource_dir + "/model/dragon.obj");
 }

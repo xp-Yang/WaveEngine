@@ -9,11 +9,6 @@ in VS_OUT {
     vec2 fragUV;
 } fs_in;
 
-uniform DirectionalLight directionalLight;
-const int MAX_POINT_LIGHTS_COUNT = 128;
-uniform int point_lights_size;
-uniform PointLight pointLights[MAX_POINT_LIGHTS_COUNT];
-
 // TODO should be map
 // struct Material {
 // };
@@ -23,9 +18,6 @@ uniform vec3 albedo;
 uniform float metallic;
 uniform float roughness;
 uniform float ao;
-
-uniform sampler2D shadow_map;
-uniform mat4 lightSpaceMatrix;
 
 uniform vec3 cameraPos;
 

@@ -34,6 +34,12 @@ void FrameBuffer::create(const std::vector<AttachmentType>& attachments_type)
         delete[] attachments;
         //glDrawBuffers函数并不是一个Draw Call,而是一个状态机参数设置的函数,它的作用是告诉OpenGL,把绘制output put填充到这些Attachment对应的Buffer里,所以这个函数在创建Framebuffer的时候就可以被调用了。
     }
+
+    int status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+    if (status != GL_FRAMEBUFFER_COMPLETE) {
+        printf(" ::ENGINE:: FBO Creation Failed! glError: %i\n", status);
+        assert(false);
+    }
 }
 
 void FrameBuffer::createDefault()

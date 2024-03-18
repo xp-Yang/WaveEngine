@@ -322,8 +322,8 @@ void ImGuiEditor::renderSceneHierarchy()
                     ImGui::Text("<PointLightComponent>");
                 if (world.hasComponent<ecs::DirectionalLightComponent>(entity))
                     ImGui::Text("<DirectionalLightComponent>");
-                if (world.hasComponent<ecs::BaseGridGroundComponent>(entity))
-                    ImGui::Text("<BaseGridGroundComponent>");
+                if (world.hasComponent<ecs::GroundComponent>(entity))
+                    ImGui::Text("<GroundComponent>");
                 ImGui::TreePop();
             }
             else {
@@ -364,8 +364,8 @@ void ImGuiEditor::renderSceneHierarchy()
                             ImGui::Text("<PointLightComponent>");
                         if (world.hasComponent<ecs::DirectionalLightComponent>(entity_))
                             ImGui::Text("<DirectionalLightComponent>");
-                        if (world.hasComponent<ecs::BaseGridGroundComponent>(entity_))
-                            ImGui::Text("<BaseGridGroundComponent>");
+                        if (world.hasComponent<ecs::GroundComponent>(entity_))
+                            ImGui::Text("<GroundComponent>");
                         ImGui::TreePop();
                     }
                 }
@@ -482,7 +482,7 @@ void ImGuiEditor::renderPickedEntityController(const ImVec2& pos, const std::vec
         Vec4& luminousColor = dir_light_component->luminousColor;
         ImGui::ColorEdit3((std::string("Luminous Color") + "##" + obj_name).c_str(), (float*)&luminousColor);
     }
-    if (world.hasComponent<ecs::BaseGridGroundComponent>(entity))
+    if (world.hasComponent<ecs::GroundComponent>(entity))
         ;
 
     ImGui::End();
@@ -511,7 +511,7 @@ void ImGuiEditor::renderGizmos()
     ecs::TransformComponent* transform_component = nullptr;
     auto picked_entities = world.getPickedEntities();
     for (auto entity : picked_entities) {
-        if (/*!world.hasComponent<ecs::BaseGridGroundComponent>(entity)*/true) {
+        if (/*!world.hasComponent<ecs::GroundComponent>(entity)*/true) {
             transform_component = world.getComponent<ecs::TransformComponent>(entity);
             break;
         }

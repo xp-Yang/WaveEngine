@@ -4,8 +4,8 @@
 #include "BlinnPhong.h"
 
 in VS_OUT {
-    vec3 fragWorldPos;          //ÊÀ½ç×ø±ê
-    vec3 fragWorldNormal;       //ÊÀ½ç×ø±ê
+    vec3 fragWorldPos;          //ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+    vec3 fragWorldNormal;       //ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
     vec2 fragUV;
 } fs_in;
 
@@ -20,22 +20,14 @@ struct Material {
 
 uniform Material material;
 
-uniform DirectionalLight directionalLight;
-const int MAX_POINT_LIGHTS_COUNT = 128;
-uniform int point_lights_size;
-uniform PointLight pointLights[MAX_POINT_LIGHTS_COUNT];
-
 uniform vec3 cameraPos;
-
-uniform sampler2D shadow_map;
-uniform mat4 lightSpaceMatrix;
 
 uniform samplerCube skybox;
 uniform bool enable_skybox_sample;
 
 void main()
 {
-    vec3 normal = normalize(fs_in.fragWorldNormal);//TODO normalÐèÒª±ä»»³ÉÊÀ½ç¿Õ¼ä£¬µ«Òª×¢Òâ²»ÄÜ´øÆ½ÒÆ
+    vec3 normal = normalize(fs_in.fragWorldNormal);//TODO normalï¿½ï¿½Òªï¿½ä»»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Õ¼ä£¬ï¿½ï¿½Òª×¢ï¿½â²»ï¿½Ü´ï¿½Æ½ï¿½ï¿?
     vec3 view_direction = normalize(cameraPos - fs_in.fragWorldPos);
     vec3 diffuse_coef = vec3(texture(material.diffuse_map, fs_in.fragUV));
     vec3 specular_coef = vec3(texture(material.specular_map, fs_in.fragUV));

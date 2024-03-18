@@ -50,9 +50,7 @@ void RenderPipeline::render()
         m_shadow_pass->draw();
     }
     else {
-        m_shadow_pass->getFrameBuffer()->bind();
-        m_shadow_pass->getFrameBuffer()->clear();
-        m_shadow_pass->getFrameBuffer()->unBind();
+        static_cast<ShadowPass*>(m_shadow_pass.get())->clear();
     }
 
     if (m_render_params.pipeline_type == PIPELINE_TYPE::FORWARD) {
@@ -64,6 +62,7 @@ void RenderPipeline::render()
         }
         static_cast<MainCameraPass*>(m_main_camera_pass.get())->configShader(m_render_params.skybox, m_render_params.reflection, m_render_params.normal_debug, m_render_params.wireframe);
         static_cast<MainCameraPass*>(m_main_camera_pass.get())->configSamples(m_render_params.msaa_sample_count);
+        static_cast<MainCameraPass*>(m_main_camera_pass.get())->setCubeMap(static_cast<ShadowPass*>(m_shadow_pass.get())->getCubeMap());
         m_main_camera_pass->draw();
 
         m_screen_pass->prepare(m_main_camera_pass->getFrameBuffer());
@@ -77,6 +76,7 @@ void RenderPipeline::render()
         static_cast<LightingPass*>(m_lighting_pass.get())->enableWireframe(m_render_params.wireframe);
         static_cast<LightingPass*>(m_lighting_pass.get())->enableCheckerboard(m_render_params.checkerboard);
         static_cast<LightingPass*>(m_lighting_pass.get())->enablePBR(m_render_params.pbr);
+        static_cast<LightingPass*>(m_lighting_pass.get())->setCubeMap(static_cast<ShadowPass*>(m_shadow_pass.get())->getCubeMap());
         if (m_render_params.shadow) {
             static_cast<LightingPass*>(m_lighting_pass.get())->prepare(m_gbuffer_pass->getFrameBuffer(), m_shadow_pass->getFrameBuffer());
         }

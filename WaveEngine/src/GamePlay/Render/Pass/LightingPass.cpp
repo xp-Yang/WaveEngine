@@ -75,6 +75,8 @@ void LightingPass::draw()
 	if (m_shadow_map != 0) {
 		lighting_shader->setMatrix("lightSpaceMatrix", 1, light_ref_matrix);
 		lighting_shader->setTexture("shadow_map", 4, m_shadow_map);
+
+		lighting_shader->setCubeTexture("cube_shadow_map", 9, m_cube_map);
 	}
 
 	int k = 0;
@@ -135,36 +137,12 @@ void LightingPass::draw()
 		drawNormalMode();
 	}
 
-	// base grid ground
-	for (auto entity : world.entityView<ecs::BaseGridGroundComponent>()) {
-		auto& renderable = *world.getComponent<ecs::RenderableComponent>(entity);
-		auto& model_matrix = *world.getComponent<ecs::TransformComponent>(entity);
-
-		for (int i = 0; i < renderable.primitives.size(); i++) {
-			auto& mesh = renderable.primitives[i].mesh;
-			auto& material = renderable.primitives[i].material;
-			Shader* shader = material.shader;
-			material.update_shader_binding();
-			shader->start_using();
-			shader->setMatrix("modelScale", 1, Scale(model_matrix.scale));
-			shader->setMatrix("model", 1, model_matrix.transform());
-			shader->setMatrix("view", 1, camera.view);
-			shader->setMatrix("projection", 1, camera.projection);
-			if (m_shadow_map != 0) {
-				shader->setMatrix("lightSpaceMatrix", 1, light_ref_matrix);
-				shader->setTexture("shadow_map", 4, m_shadow_map);
-			}
-			Renderer::drawIndex(*shader, mesh.get_VAO(), mesh.get_indices_count());
-			shader->stop_using();
-		}
-	}
-
 	// skybox
 	if (m_skybox) {
 		for (auto entity : world.entityView<ecs::SkyboxComponent>()) {
 			auto& renderable = *world.getComponent<ecs::RenderableComponent>(entity);
 			auto& model_matrix = *world.getComponent<ecs::TransformComponent>(entity);
-			auto skybox_texture_id = world.getComponent<ecs::SkyboxComponent>(entity)->texture;
+			auto skybox_texture_id = m_cube_map;// world.getComponent<ecs::SkyboxComponent>(entity)->texture;
 			for (int i = 0; i < renderable.primitives.size(); i++) {
 				auto& mesh = renderable.primitives[i].mesh;
 				auto& material = renderable.primitives[i].material;

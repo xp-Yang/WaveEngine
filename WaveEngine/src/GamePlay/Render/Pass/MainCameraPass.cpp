@@ -116,6 +116,8 @@ void MainCameraPass::draw()
             if (m_shadow_map != 0) {
                 shader->setMatrix("lightSpaceMatrix", 1, light_ref_matrix);
                 shader->setTexture("shadow_map", 7, m_shadow_map);
+
+                shader->setCubeTexture("cube_shadow_map", 9, m_cube_map);
             }
             Renderer::drawIndex(*shader, mesh.get_VAO(), mesh.get_indices_count());
             shader->stop_using();

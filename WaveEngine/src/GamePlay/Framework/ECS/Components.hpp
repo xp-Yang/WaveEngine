@@ -118,29 +118,33 @@ struct SkyboxComponent {
 struct PointLightComponent {
 	Color4 luminousColor = { 1.0f, 1.0f, 1.0f, 1.0f };
 	float radius;
-	std::vector<Mat4> lightReferenceMatrix()
-	{
-		Mat4 light_projection = Perspective(deg2rad(90.0f), /*1.0f*/ASPECT_RATIO, /*0.1f, 100.0f*/1.0f, 20.0f);
-		Vec3 light_pos;
+	Vec3 position() {
 		auto& world = ecs::World::get();
 		for (auto entity : world.entityView<ecs::PointLightComponent>()) {
-			if(world.getComponent<ecs::PointLightComponent>(entity) == this) {
-				light_pos = world.getComponent<ecs::TransformComponent>(entity)->translation;
+			if (world.getComponent<ecs::PointLightComponent>(entity) == this) {
+				return world.getComponent<ecs::TransformComponent>(entity)->translation;
 			}
 		}
-		light_pos = Vec3(0.0f);
+		return{};
+	}
+	std::vector<Mat4> lightReferenceMatrix()
+	{
+		Mat4 light_projection = Perspective(deg2rad(90.0f), 1.0f, 0.1f, radius);
+		Vec3 light_pos = position();
+
+		// 这里up向量朝下，因为cubeMap从内部采样，是反过来的
+		Mat4 light_view_right = LookAt(light_pos, light_pos + Vec3(1.0f, 0.0f, 0.0f), Vec3(0.0f, -1.0f, 0.0f)); //右
+		Mat4 light_view_left = LookAt(light_pos, light_pos + Vec3(-1.0f, 0.0f, 0.0f), Vec3(0.0f, -1.0f, 0.0f));//左
 		Mat4 light_view_up = LookAt(light_pos, light_pos + Vec3(0.0f, 1.0f, 0.0f), Vec3(0.0f, 0.0f, 1.0f)); //上
 		Mat4 light_view_down = LookAt(light_pos, light_pos + Vec3(0.0f, -1.0f, 0.0f), Vec3(0.0f, 0.0f, -1.0f));//下
-		Mat4 light_view_left = LookAt(light_pos, light_pos + Vec3(-1.0f, 0.0f, 0.0f), Vec3(0.0f, 1.0f, 0.0f));//左
-		Mat4 light_view_right = LookAt(light_pos, light_pos + Vec3(1.0f, 0.0f, 0.0f), Vec3(0.0f, 1.0f, 0.0f)); //右
-		Mat4 light_view_front = LookAt(light_pos, light_pos + Vec3(0.0f, 0.0f, 1.0f), Vec3(0.0f, 1.0f, 0.0f)); //前
-		Mat4 light_view_back = LookAt(light_pos, light_pos + Vec3(0.0f, 0.0f, -1.0f), Vec3(0.0f, 1.0f, 0.0f));//后
+		Mat4 light_view_front = LookAt(light_pos, light_pos + Vec3(0.0f, 0.0f, 1.0f), Vec3(0.0f, -1.0f, 0.0f)); //近
+		Mat4 light_view_back = LookAt(light_pos, light_pos + Vec3(0.0f, 0.0f, -1.0f), Vec3(0.0f, -1.0f, 0.0f));//远
 		
 		std::vector<Mat4> result;
+		result.push_back(light_projection * light_view_right);
+		result.push_back(light_projection * light_view_left);
 		result.push_back(light_projection * light_view_up);
 		result.push_back(light_projection * light_view_down);
-		result.push_back(light_projection * light_view_left);
-		result.push_back(light_projection * light_view_right);
 		result.push_back(light_projection * light_view_front);
 		result.push_back(light_projection * light_view_back);
 		return result;
@@ -166,7 +170,7 @@ struct DirectionalLightComponent {
 // 不需要数据，仅用作标记选中的entity
 struct PickedComponent {};
 
-struct BaseGridGroundComponent {};
+struct GroundComponent {};
 
 //struct ReceiveShadowComponent {};
 //
@@ -191,7 +195,7 @@ struct InputComponent {
 };
 
 
-#define AllComponents ecs::NameComponent, ecs::TransformComponent, ecs::CameraComponent, ecs::RenderableComponent, ecs::SkyboxComponent, ecs::PointLightComponent, ecs::DirectionalLightComponent, ecs::PickedComponent, ecs::BaseGridGroundComponent, ecs::ExplosionComponent, ecs::InputComponent
+#define AllComponents ecs::NameComponent, ecs::TransformComponent, ecs::CameraComponent, ecs::RenderableComponent, ecs::SkyboxComponent, ecs::PointLightComponent, ecs::DirectionalLightComponent, ecs::PickedComponent, ecs::GroundComponent, ecs::ExplosionComponent, ecs::InputComponent
 
 }
 

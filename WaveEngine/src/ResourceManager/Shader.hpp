@@ -16,6 +16,7 @@ enum class ShaderType {
 	RayTracingShader,
 	QuadShader,
 	DepthShader,
+	CubeMapShader,
 };
 
 class Shader{

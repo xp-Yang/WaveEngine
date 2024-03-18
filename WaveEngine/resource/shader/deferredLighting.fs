@@ -18,15 +18,6 @@ uniform sampler2D gAo;
 
 uniform bool enablePBR;
 
-uniform sampler2D shadow_map;
-uniform mat4 lightSpaceMatrix;
-
-uniform DirectionalLight directionalLight;
-// TODO shader里怎么用动态数组
-const int MAX_POINT_LIGHTS_COUNT = 256;
-uniform int point_lights_size;
-uniform PointLight pointLights[MAX_POINT_LIGHTS_COUNT];
-
 uniform vec3 cameraPos;
 
 void main()
@@ -47,23 +38,24 @@ if(!enablePBR){
 
     // Directional Light Source:
 	vec3 lightDir = directionalLight.direction;
-	vec3 lightingByDirectionalLight = BlinnPhong(directionalLight.color.xyz, Normal, viewDir, -lightDir, Diffuse, Specular);
-	
+	vec3 lightingByDirectionalLight = BlinnPhong(directionalLight.color.xyz * 0.0157, Normal, viewDir, -lightDir, Diffuse, Specular);
+    // Directional Shadow:
+    vec4 fragPosLightSpace = lightSpaceMatrix * vec4(Position, 1.0);
+    float shadowFactor = ShadowCalculation(fragPosLightSpace, shadow_map);
+	lightingByDirectionalLight *= shadowFactor;
 	// Point Light Source:
     vec3 lightingByPointLight = vec3(0);
     for(int i = 0; i < point_lights_size; i++){
         vec3 lightDir = normalize(Position - pointLights[i].position);
 		float distance = length(Position - pointLights[i].position);
-	    float k_quadratic = 0.2 / pointLights[i].radius;
-		float attenuation = step(0, (pointLights[i].radius - distance)) * (1.0 / (1.0 + k_quadratic * distance* distance));
+        float attenuation = PointLightAttenuation(distance, pointLights[i].radius);
         lightingByPointLight += BlinnPhong(pointLights[i].color.xyz * attenuation, Normal, viewDir, -lightDir, Diffuse, Specular);
+        // Omnidirectional Shadow:
+        float pointShadowFactor = OmnidirectionalShadowCalculation(Position - pointLights[i].position, cube_shadow_map, pointLights[i].radius);
+        lightingByPointLight *= pointShadowFactor;
     }
 
-	// Shadow:
-    vec4 fragPosLightSpace = lightSpaceMatrix * vec4(Position, 1.0);
-    float shadowFactor = ShadowCalculation(fragPosLightSpace, shadow_map);
-
-    gl_FragColor = vec4(shadowFactor * lightingByDirectionalLight + lightingByPointLight, 1.0);
+    gl_FragColor = vec4(lightingByDirectionalLight + lightingByPointLight, 1.0);
 }
 else{
     vec3 albedo = Diffuse;
@@ -102,8 +94,11 @@ else{
 		float attenuation = step(0, (pointLights[i].radius - distance)) * (1.0 / (1.0 + k_quadratic * distance* distance));
         vec3 radiance = pointLights[i].color.xyz * attenuation;  
 
+        // Omnidirectional Shadow:
+        float pointShadowFactor = OmnidirectionalShadowCalculation(Position - pointLights[i].position, cube_shadow_map, pointLights[i].radius);
+
         // add to outgoing radiance Lo
-        Lo += radiance * BRDF(L, V, N, F0, radiance, metallic, roughness);  // note that we already multiplied the BRDF by the Fresnel (kS) so we won't multiply by kS again
+        Lo += pointShadowFactor * radiance * BRDF(L, V, N, F0, radiance, metallic, roughness);  // note that we already multiplied the BRDF by the Fresnel (kS) so we won't multiply by kS again
     }   
     
     // ambient lighting (note that the next IBL tutorial will replace 

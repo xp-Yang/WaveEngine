@@ -7,9 +7,11 @@ uniform mat4 model;
 uniform mat4 modelScale;
 
 out vec3 fragScaledModelPos;
+out vec3 fragWorldPos;
 
 void main()
 {
     fragScaledModelPos = vec3(modelScale * vec4(vertex_pos, 1.0));
+    fragWorldPos = vec3(model * vec4(vertex_pos, 1.0));
     gl_Position = projection * view * model * vec4(vertex_pos, 1.0);
 }

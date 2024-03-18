@@ -298,6 +298,10 @@ Shader* Shader::getShader(const ShaderType& type)
     case ShaderType::DepthShader:
         static Shader* depth_shader = new Shader(resource_dir + "/shader/depth.vs", resource_dir + "/shader/depth.fs");
         return depth_shader;
+    case ShaderType::CubeMapShader:
+        static Shader* cube_map_shader = new Shader(resource_dir + "/shader/cubeMap.vs", resource_dir + "/shader/cubeMap.fs");
+        //static Shader* cube_map_shader = new Shader(resource_dir + "/shader/cubeMap2.vs", resource_dir + "/shader/cubeMap2.gs", resource_dir + "/shader/cubeMap2.fs");
+        return cube_map_shader;
     default:
         return nullptr;
     }

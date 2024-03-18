@@ -15,6 +15,7 @@ public:
     void enableWireframe(bool enable);
     void enableCheckerboard(bool enable);
     void enablePBR(bool enable);
+    void setCubeMap(unsigned int cube_map) { m_cube_map = cube_map; }
 
 protected:
     void drawNormalMode();
@@ -31,6 +32,8 @@ private:
     bool m_wireframe = false;
     bool m_checkerboard = false;
     bool m_pbr = false;
+
+    unsigned int m_cube_map = 0;
 };
 
 #endif
