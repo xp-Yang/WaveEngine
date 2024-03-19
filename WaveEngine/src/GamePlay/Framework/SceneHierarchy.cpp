@@ -62,7 +62,7 @@ void SceneHierarchy::addPointLight()
 	auto& point_light_renderable = world.addComponent<ecs::RenderableComponent>(point_light_entity);
 	auto& point_light_properties = world.addComponent<ecs::PointLightComponent>(point_light_entity);
 	point_light_properties.radius = (point_light_transform.scale[0]) * 40.0f;
-	point_light_properties.luminousColor = Color4(0.8f);//{ randomUnit(), randomUnit(), randomUnit(), 1.0f };
+	point_light_properties.luminousColor = Color4(1.0f);//{ randomUnit(), randomUnit(), randomUnit(), 1.0f };
 	ecs::Primitive point_light_primitive;
 	point_light_primitive.mesh = Mesh::create_icosphere_mesh(5);
 	Material point_light_material;
@@ -95,7 +95,7 @@ void SceneHierarchy::addCube()
 	cube_material.albedo = Vec3(1.0f);
 	cube_material.metallic = 1.0;
 	cube_material.roughness = 0.5;
-	cube_material.ao = 0.0;
+	cube_material.ao = 0.01;
 	cube_primitive.material = cube_material;
 	cube_renderable.setPrimitives({ cube_primitive });
 	//world.addComponent<ecs::ExplosionComponent>(cube_entity);
@@ -126,7 +126,7 @@ void SceneHierarchy::addSphere()
 	sphere_material.shader = new Shader(resource_dir + "/shader/pbr.vs", resource_dir + "/shader/pbr.fs");
 	sphere_material.albedo = Vec3(1.0f, 1.0f, 1.0f);
 	sphere_material.metallic = 1.0;
-	sphere_material.roughness = (1.0f / 25) * m_test_sphere_count;
+	sphere_material.roughness = (1.0f / 25) * (m_test_sphere_count + 1);
 	sphere_material.ao = 0.01;
 	sphere_primitive.material = sphere_material;
 	sphere_renderable.setPrimitives({ sphere_primitive });

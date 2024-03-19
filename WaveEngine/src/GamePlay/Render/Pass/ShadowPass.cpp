@@ -115,6 +115,9 @@ void ShadowPass::drawPointLightShadowMap()
         light_pos = point_light->position();
         light_radius = point_light->radius;
     }
+    if (light_ref_matrix.empty())
+        return;
+
     for (int i = 0; i < 6; i++) {
         glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, m_cube_map, 0);
         glClearColor(1.0f, 1.0f, 1.0f, 1.0f);

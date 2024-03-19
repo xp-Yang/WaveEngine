@@ -385,7 +385,7 @@ Mesh Mesh::create_ground_mesh()
     std::vector<Vertex> vertices;
     std::vector<unsigned int> indices;
 
-    Point3 start_point = Point3(-15.0f, 0.0f, 15.0f);
+    Point3 start_point = Point3(-30.0f, 0.0f, 30.0f);
     Vec3 u = Vec3(-2 * start_point.x, 0, 0);
     Vec3 v = Vec3(0, 0, -2 * start_point.z);
     Point3 end_point = start_point + u + v;

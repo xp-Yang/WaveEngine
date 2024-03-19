@@ -41,8 +41,8 @@ float ShadowCalculation(vec4 fragPosLightSpace, sampler2D shadow_map)
 
 float PointLightAttenuation(float distance, float radius)
 {
-    float k_quadratic = 0.2 / radius;
-    float attenuation = step(0, (radius - distance)) * (1.0 / (1.0 + k_quadratic * distance* distance));
+    float k_quadratic = 0.2;
+    float attenuation = step(0, (radius - distance)) * (1.0 / (1.0 + k_quadratic * distance * distance));
     return attenuation;
 }
 
@@ -55,7 +55,7 @@ float OmnidirectionalShadowCalculation(vec3 lightToFrag, samplerCube cube_map, f
     float worldDepth = closestDepth * far_plane;
     float bias = 0.5;
     float attenuation = PointLightAttenuation(distance, far_plane);
-    float shadowFactor = distance - worldDepth > bias ? 0.1 : 1.0;
+    float shadowFactor = distance - worldDepth > bias ? 0 : 1.0;
 
     return shadowFactor;
 }

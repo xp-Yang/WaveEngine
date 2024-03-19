@@ -41,6 +41,11 @@ std::vector<Entity> World::getPickedEntities()
     return result;
 }
 
+World::World()
+{
+    init<AllComponents>();
+}
+
 World::~World()
 {
     for (int i = 0; i < m_component_pools.size(); i++)

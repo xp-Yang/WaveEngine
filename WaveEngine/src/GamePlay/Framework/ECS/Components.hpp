@@ -65,7 +65,7 @@ struct CameraComponent {
 	float zoom = 1.0f;
 	float fov = originFov / zoom;
 	Vec3 direction = Normalize(Vec3(0.0f, -1.0f , -1.0f));
-	Vec3 pos = Vec3(0.0f) - 20.0f * direction;
+	Vec3 pos = Vec3(0.0f) - 40.0f * direction;
 	Vec3 camera_up = Normalize(global_up - Dot(global_up, direction) * direction);
 	Mat4 view = lookAt(pos, pos + direction, global_up);
 	Mat4 projection = projection_mode == Perspective ? Core::Perspective(fov, ASPECT_RATIO, 0.1f, 100.0f)

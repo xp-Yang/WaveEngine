@@ -288,7 +288,7 @@ void ImGuiEditor::renderSceneHierarchy()
         auto object_name = world.getComponent<ecs::NameComponent>(entity)->name;
 
         static ImGuiTreeNodeFlags node_flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_SpanAvailWidth;
-        bool node_open = ImGui::TreeNodeEx((void*)(intptr_t)i, node_flags, object_name.c_str(), i);
+        bool node_open = ImGui::TreeNodeEx((void*)(intptr_t)i, node_flags | ImGuiTreeNodeFlags_DefaultOpen, object_name.c_str(), i);
         if (ImGui::IsItemClicked() && !ImGui::IsItemToggledOpen()) {
             bool close = false;
             for (const auto& picked_entity : world.getPickedEntities()) {
@@ -462,7 +462,7 @@ void ImGuiEditor::renderPickedEntityController(const ImVec2& pos, const std::vec
             ImGui::PopItemWidth();
 
             ImGui::SliderFloat((std::string("metallic") + "##" + obj_name).c_str(), &material.metallic, 0.0f, 1.0f);
-            ImGui::SliderFloat((std::string("roughness") + "##" + obj_name).c_str(), &material.roughness, 0.0f, 1.0f);
+            ImGui::SliderFloat((std::string("roughness") + "##" + obj_name).c_str(), &material.roughness, 0.01f, 1.0f);
             ImGui::SliderFloat((std::string("ao") + "##" + obj_name).c_str(), &material.ao, 0.0f, 1.0f);
         }
     }
@@ -474,7 +474,9 @@ void ImGuiEditor::renderPickedEntityController(const ImVec2& pos, const std::vec
         ImGui::Text("<SkyboxComponent>");
     if (world.hasComponent<ecs::PointLightComponent>(entity)) {
         Vec4& luminousColor = world.getComponent<ecs::PointLightComponent>(entity)->luminousColor;
+        float* radius = &world.getComponent<ecs::PointLightComponent>(entity)->radius;
         ImGui::ColorEdit3((std::string("Luminous Color") + "##" + obj_name).c_str(), (float*)&luminousColor);
+        ImGui::SliderFloat((std::string("Radius") + "##" + obj_name).c_str(), radius, 5.0f, 50.0f);
     }
     if (world.hasComponent<ecs::DirectionalLightComponent>(entity)) {
         auto dir_light_component = world.getComponent<ecs::DirectionalLightComponent>(entity);

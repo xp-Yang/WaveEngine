@@ -29,7 +29,7 @@ void main()
     vec3 Specular = texture(gSpecular, fragUV).rgb;
 
     if(Normal.xyz == vec3(1.0)){
-        // 如果采样到GBuffer的空白区域可以直接return
+        // return if sample the blank area in GBuffer
         gl_FragColor = vec4(0.6, 0.6, 0.6, 1.0);
         return;
     }

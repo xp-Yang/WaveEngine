@@ -4,6 +4,8 @@
 #include <bitset>
 #include <vector>
 
+#include <assert.h>
+
 namespace ecs{
 
 const int MAX_ENTITIES = 512;
@@ -117,6 +119,7 @@ public:
 
         if (pool_id >= m_component_pools.size()) {
             m_component_pools.push_back(new ComponentPool(sizeof(T)));
+            assert(false);
         }
 
         // Looks up the component in the pool, and initializes it with placement new
@@ -155,12 +158,10 @@ public:
 
             // 池中都没这个component
             if (poolIds[i] >= m_component_pools.size()) {
-                continue;
+                assert(false);
             }
             else {
-                // TODO 1.先要判断是否所有entity都不再使用这个component了
-                // 2.要正确释放里面内容
-                //m_component_pools.erase(m_component_pools.begin() + component_id);
+                // free
             }
         }
 
@@ -189,9 +190,23 @@ private:
     std::vector<ComponentPool*> m_component_pools;
 
 private:
-    World() = default;
+    World();
     World(const World&) = delete;
     ~World();
+
+    template<typename T>
+    void init_()
+    {
+        int pool_id = getComponentPoolId<T>();
+        assert(pool_id == m_component_pools.size());
+        m_component_pools.push_back(new ComponentPool(sizeof(T)));
+    }
+
+    template<typename... ComponentTypes>
+    void init()
+    {
+        int poolIds[] = { 0, (init_<ComponentTypes>(), 0) ... };
+    }
 };
 
 template<typename... ComponentTypes>
