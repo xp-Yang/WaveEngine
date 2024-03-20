@@ -76,7 +76,10 @@ void LightingPass::draw()
 		lighting_shader->setMatrix("lightSpaceMatrix", 1, light_ref_matrix);
 		lighting_shader->setTexture("shadow_map", 4, m_shadow_map);
 
-		lighting_shader->setCubeTexture("cube_shadow_map", 9, m_cube_map);
+		for (int i = 0; i < m_cube_maps.size(); i++) {
+			std::string cube_map_id = std::string("cube_shadow_maps[") + std::to_string(i) + "]";
+			lighting_shader->setCubeTexture(cube_map_id + ".map", 9, m_cube_maps[i]);
+		}
 	}
 
 	int k = 0;
@@ -142,7 +145,7 @@ void LightingPass::draw()
 		for (auto entity : world.entityView<ecs::SkyboxComponent>()) {
 			auto& renderable = *world.getComponent<ecs::RenderableComponent>(entity);
 			auto& model_matrix = *world.getComponent<ecs::TransformComponent>(entity);
-			auto skybox_texture_id = m_cube_map;// world.getComponent<ecs::SkyboxComponent>(entity)->texture;
+			auto skybox_texture_id = m_cube_maps.back();// world.getComponent<ecs::SkyboxComponent>(entity)->texture;
 			for (int i = 0; i < renderable.primitives.size(); i++) {
 				auto& mesh = renderable.primitives[i].mesh;
 				auto& material = renderable.primitives[i].material;

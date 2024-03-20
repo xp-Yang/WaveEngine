@@ -51,7 +51,7 @@ if(!enablePBR){
         float attenuation = PointLightAttenuation(distance, pointLights[i].radius);
         lightingByPointLight += BlinnPhong(pointLights[i].color.xyz * attenuation, Normal, viewDir, -lightDir, Diffuse, Specular);
         // Omnidirectional Shadow:
-        float pointShadowFactor = OmnidirectionalShadowCalculation(Position - pointLights[i].position, cube_shadow_map, pointLights[i].radius);
+        float pointShadowFactor = OmnidirectionalShadowCalculation(Position - pointLights[i].position, cube_shadow_maps[i].map, pointLights[i].radius);
         lightingByPointLight *= pointShadowFactor;
     }
 
@@ -95,7 +95,7 @@ else{
         vec3 radiance = pointLights[i].color.xyz * attenuation;  
 
         // Omnidirectional Shadow:
-        float pointShadowFactor = OmnidirectionalShadowCalculation(Position - pointLights[i].position, cube_shadow_map, pointLights[i].radius);
+        float pointShadowFactor = OmnidirectionalShadowCalculation(Position - pointLights[i].position, cube_shadow_maps[i].map, pointLights[i].radius);
 
         // add to outgoing radiance Lo
         Lo += pointShadowFactor * radiance * BRDF(L, V, N, F0, radiance, metallic, roughness);  // note that we already multiplied the BRDF by the Fresnel (kS) so we won't multiply by kS again

@@ -39,7 +39,7 @@ void Application::run() {
 		m_input_system->mouse_and_key_callback();
 
 		// motion System
-		if (m_editor->motion)
+		if (m_editor->motion())
 			m_motion_system->onUpdate();
 
 		// render

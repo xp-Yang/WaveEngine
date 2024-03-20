@@ -61,7 +61,7 @@ void SceneHierarchy::addPointLight()
 	point_light_transform.scale = Vec3(random(0.1f, 0.3f));
 	auto& point_light_renderable = world.addComponent<ecs::RenderableComponent>(point_light_entity);
 	auto& point_light_properties = world.addComponent<ecs::PointLightComponent>(point_light_entity);
-	point_light_properties.radius = (point_light_transform.scale[0]) * 40.0f;
+	point_light_properties.radius = (point_light_transform.scale[0]) * 100.0f;
 	point_light_properties.luminousColor = Color4(1.0f);//{ randomUnit(), randomUnit(), randomUnit(), 1.0f };
 	ecs::Primitive point_light_primitive;
 	point_light_primitive.mesh = Mesh::create_icosphere_mesh(4);
@@ -289,9 +289,9 @@ void SceneHierarchy::init() {
 
 	std::string resource_dir = Application::resourceDirectory();
 
-	//loadModal(resource_dir + "/model/nanosuit/nanosuit.obj");
+	loadModal(resource_dir + "/model/nanosuit/nanosuit.obj");
 
-	//loadModal(resource_dir + "/model/bunny.obj");
+	loadModal(resource_dir + "/model/bunny.obj");
 
-	//loadModal(resource_dir + "/model/dragon.obj");
+	loadModal(resource_dir + "/model/dragon.obj");
 }

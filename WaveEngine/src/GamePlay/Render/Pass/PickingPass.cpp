@@ -37,7 +37,7 @@ void PickingPass::draw()
     picking_shader->setMatrix("projection", 1, camera_projection);
 
     for (auto entity : world.entityView<ecs::RenderableComponent>()) {
-        if (world.hasComponent<ecs::SkyboxComponent>(entity))
+        if (world.hasComponent<ecs::SkyboxComponent>(entity) || world.hasComponent<ecs::GroundComponent>(entity))
             continue;
         auto name = world.getComponent<ecs::NameComponent>(entity);
         auto& renderable = *world.getComponent<ecs::RenderableComponent>(entity);
@@ -55,37 +55,6 @@ void PickingPass::draw()
 
             Renderer::drawIndex(*picking_shader, mesh.get_VAO(), mesh.get_indices_count());
         }
-    }
-
-    // TODO 用事件处理
-    // Wait until all the pending drawing commands are really done.
-    // Ultra-mega-over slow ! 
-    // There are usually a long time between glDrawElements() and
-    // all the fragments completely rasterized.
-    if (ImGui::GetIO().MouseReleased[0]) {
-        glFlush();
-        glFinish();
-
-        // TODO: 含义？
-        glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-
-        //glReadBuffer(GL_COLOR_ATTACHMENT0);
-        unsigned char data[4] = { 0,0,0,0 };
-        // glReadPixels()的坐标是相对于屏幕左下角的
-        int x = (int)ImGui::GetIO().MousePos.x;
-        int y = (int)(WINDOW_HEIGHT - ImGui::GetIO().MousePos.y);
-        glReadPixels(x, y, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, data);
-        int picked_id = (int)data[0] + (((int)data[1]) << 8) + (((int)data[2]) << 16);
-
-        for (const auto& picked_entity : world.getPickedEntities()) {
-            world.removeComponent<ecs::PickedComponent>(picked_entity);
-        }
-        for (auto entity : world.entityView<ecs::RenderableComponent>()) {
-            if (entity.getId() * 50000 == picked_id) {
-                world.addComponent<ecs::PickedComponent>(entity);
-            }
-        }
-        //glReadBuffer(GL_NONE);
     }
 }
 

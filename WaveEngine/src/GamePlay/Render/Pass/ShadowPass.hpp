@@ -11,7 +11,7 @@ public:
     void draw() override;
     void clear();
     FrameBuffer* getFrameBuffer() override;
-    unsigned int getCubeMap() { return m_cube_map; }
+    const std::vector<unsigned int>& getCubeMaps() const { return m_cube_maps; }
 
 protected:
     void drawDirectionalLightShadowMap();
@@ -19,7 +19,7 @@ protected:
 
 private:
     FrameBuffer* m_cube_map_framebuffer{ nullptr };
-    unsigned int m_cube_map = 0;
+    std::vector<unsigned int> m_cube_maps;
     unsigned int m_cube_map_fbo = 0;
 };
 

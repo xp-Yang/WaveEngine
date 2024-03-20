@@ -11,6 +11,11 @@ struct PointLight
     float radius;
 };
 
+struct CubeMap
+{
+    samplerCube map;
+};
+
 uniform DirectionalLight directionalLight;
 uniform sampler2D shadow_map;
 uniform mat4 lightSpaceMatrix;
@@ -19,7 +24,7 @@ uniform mat4 lightSpaceMatrix;
 const int MAX_POINT_LIGHTS_COUNT = 128;
 uniform int point_lights_size;
 uniform PointLight pointLights[MAX_POINT_LIGHTS_COUNT];
-uniform samplerCube cube_shadow_map;
+uniform CubeMap cube_shadow_maps[2];
 
 float ShadowCalculation(vec4 fragPosLightSpace, sampler2D shadow_map)
 {

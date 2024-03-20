@@ -1,18 +1,13 @@
 #include "ImGuiEditor.hpp"
-#include <string>
-#include <imgui/imgui.h>
-#include <imgui/imgui_internal.h>
-#include <imgui/ImGuizmo.h>
-#include "GamePlay/Framework/ECS/Components.hpp"
+
 #include "Core/Logger.hpp"
 #include "Platform/OS/FileDialog.hpp"
-#include "GamePlay/FrameWork/SceneHierarchy.hpp"
 
 ImGuiEditor::ImGuiEditor()
+    : world(ecs::World::get())
 {
-    motion = false;
-    icosphere_accuracy = 8;
-
+    m_motion = false;
+    m_view_manager = std::make_unique<ViewRectManager>();
     // TODO: editor依赖system，能操控渲染管线，能操控运动，能编辑transform，能编辑mesh，能编辑material...
 }
 
@@ -29,90 +24,16 @@ void ImGuiEditor::render()
 
    renderGlobalMenu();
    renderSceneHierarchy();
-   renderGlobalController();
+   renderGlobalConsole();
    renderCameraController();
 
-   renderMainViewWindow();
-   renderPickingViewWindow();
-   renderShadowViewWindow();
-   //renderRayTracingViewWindow();
+   m_view_manager->render();
+   renderGizmos();
 
    updateRenderParams();
 }
 
-void ImGuiEditor::renderMainViewWindow()
-{
-    static ImGuiWindowFlags window_flags = 0;
-    ImGui::SetNextWindowSize(ImVec2(1280, 720 + 20), ImGuiCond_Appearing);
-    if (ImGui::Begin("MainView", nullptr, window_flags | ImGuiWindowFlags_NoBackground)) {
-        ImGuiWindow* window = ImGui::GetCurrentWindow();
-        bool hovered_window = ImGui::IsWindowHovered() && ImGui::IsMouseHoveringRect(window->InnerRect.Min, window->InnerRect.Max);
-        window_flags = hovered_window ? ImGuiWindowFlags_NoMove : 0;
-        ImGui::GetIO().WantPassThroughMouse = hovered_window && !ImGuizmo::IsUsing();
-        ImVec2 window_pos = ImGui::GetWindowPos();
-        ImVec2 window_size = ImGui::GetWindowSize();
-        Viewport viewport = { (int)window_pos.x, (int)window_pos.y + 20, (int)window_size.x, (int)window_size.y - 20, Viewport::Coordinates::ScreenCoordinates };
-        ImGuizmo::SetOrthographic(true);
-        ImGuizmo::SetDrawlist();
-        // ImGuizmo的绘制范围是main viewport
-        ImGuizmo::SetRect(viewport.x, viewport.y, viewport.width, viewport.height);
-        Application::GetApp().getWindow()->setMainViewport(viewport.transToGLCoordinates());
-        renderGizmos();
-    }
-    ImGui::End();
-}
-
-void ImGuiEditor::renderPickingViewWindow()
-{
-    static ImGuiWindowFlags window_flags = 0;
-    ImGui::SetNextWindowSize(ImVec2(400, 225), ImGuiCond_Appearing);
-    if (ImGui::Begin("PickingView", nullptr, window_flags | ImGuiWindowFlags_NoBackground)) {
-        ImGuiWindow* window = ImGui::GetCurrentWindow();
-        bool hovered_window = ImGui::IsWindowHovered() && ImGui::IsMouseHoveringRect(window->InnerRect.Min, window->InnerRect.Max);
-        window_flags = hovered_window ? ImGuiWindowFlags_NoMove : 0;
-        ImGui::GetIO().WantPassThroughMouse = ImGui::GetIO().WantPassThroughMouse || hovered_window && !ImGuizmo::IsUsing();
-        ImVec2 window_pos = ImGui::GetWindowPos();
-        ImVec2 window_size = ImGui::GetWindowSize();
-        Viewport viewport = { (int)window_pos.x, (int)window_pos.y, (int)window_size.x, (int)window_size.y, Viewport::Coordinates::ScreenCoordinates };
-        Application::GetApp().getWindow()->setViewport(ViewportType::Pick, viewport.transToGLCoordinates());
-    }
-    ImGui::End();
-}
-
-void ImGuiEditor::renderShadowViewWindow()
-{
-    static ImGuiWindowFlags window_flags = 0;
-    ImGui::SetNextWindowSize(ImVec2(400, 225), ImGuiCond_Appearing);
-    if (ImGui::Begin("ShadowView", nullptr, window_flags | ImGuiWindowFlags_NoBackground)) {
-        ImGuiWindow* window = ImGui::GetCurrentWindow();
-        bool hovered_window = ImGui::IsWindowHovered() && ImGui::IsMouseHoveringRect(window->InnerRect.Min, window->InnerRect.Max);
-        window_flags = hovered_window ? ImGuiWindowFlags_NoMove : 0;
-        ImVec2 window_pos = ImGui::GetWindowPos();
-        ImVec2 window_size = ImGui::GetWindowSize();
-        Viewport viewport = { (int)window_pos.x, (int)window_pos.y, (int)window_size.x, (int)window_size.y, Viewport::Coordinates::ScreenCoordinates };
-        Application::GetApp().getWindow()->setViewport(ViewportType::Shadow, viewport.transToGLCoordinates());
-    }
-    ImGui::End();
-}
-
-void ImGuiEditor::renderRayTracingViewWindow()
-{
-    static ImGuiWindowFlags window_flags = 0;
-    ImGui::SetNextWindowSize(ImVec2(800, 450), ImGuiCond_Appearing);
-    if (ImGui::Begin("RayTracingView", nullptr, window_flags | ImGuiWindowFlags_NoBackground)) {
-        ImGuiWindow* window = ImGui::GetCurrentWindow();
-        bool hovered_window = ImGui::IsWindowHovered() && ImGui::IsMouseHoveringRect(window->InnerRect.Min, window->InnerRect.Max);
-        window_flags = hovered_window ? ImGuiWindowFlags_NoMove : 0;
-        ImGui::GetIO().WantPassThroughMouse = ImGui::GetIO().WantPassThroughMouse || hovered_window && !ImGuizmo::IsUsing();
-        ImVec2 window_pos = ImGui::GetWindowPos();
-        ImVec2 window_size = ImGui::GetWindowSize();
-        Viewport viewport = { (int)window_pos.x, (int)window_pos.y, (int)window_size.x, (int)window_size.y, Viewport::Coordinates::ScreenCoordinates };
-        Application::GetApp().getWindow()->setViewport(ViewportType::RayTracing, viewport.transToGLCoordinates());
-    }
-    ImGui::End();
-}
-
-void ImGuiEditor::renderGlobalController() {
+void ImGuiEditor::renderGlobalConsole() {
     ImGui::Begin("Console", nullptr, ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse);
 
     ImVec2 dummy = ImGui::CalcTextSize("A");
@@ -167,7 +88,7 @@ void ImGuiEditor::renderGlobalController() {
         ImGui::PopItemWidth();
     }
 
-    ImGui::Checkbox("motion", &motion);
+    ImGui::Checkbox("motion", &m_motion);
     ImGui::Checkbox("skybox", &m_render_params.skybox);
     ImGui::Checkbox("shadow", &m_render_params.shadow);
     //ImGui::Checkbox("reflection", &m_render_params.reflection);
@@ -217,7 +138,6 @@ void ImGuiEditor::renderGlobalController() {
     }
     ImGui::SameLine(0.0f, spacing);
     if (ImGui::Button((std::string("-") + "##pointLight").c_str())) {
-        auto& world = ecs::World::get();
         int last_point_entity_id = -1;
         auto it = world.entityView<ecs::PointLightComponent>().begin();
         while(it != world.entityView<ecs::PointLightComponent>().end())
@@ -274,17 +194,73 @@ void ImGuiEditor::renderGlobalMenu()
             }
             ImGui::EndMenu();
         }
-        if (ImGui::BeginMenu("Edit"))
-        {
-            if (ImGui::MenuItem("Undo", "CTRL+Z")) {}
-            if (ImGui::MenuItem("Redo", "CTRL+Y", false, false)) {}  // Disabled item
-            ImGui::Separator();
-            if (ImGui::MenuItem("Cut", "CTRL+X")) {}
-            if (ImGui::MenuItem("Copy", "CTRL+C")) {}
-            if (ImGui::MenuItem("Paste", "CTRL+V")) {}
-            ImGui::EndMenu();
-        }
+        //if (ImGui::BeginMenu("Edit"))
+        //{
+        //    if (ImGui::MenuItem("Undo", "CTRL+Z")) {}
+        //    if (ImGui::MenuItem("Redo", "CTRL+Y", false, false)) {}  // Disabled item
+        //    ImGui::Separator();
+        //    if (ImGui::MenuItem("Cut", "CTRL+X")) {}
+        //    if (ImGui::MenuItem("Copy", "CTRL+C")) {}
+        //    if (ImGui::MenuItem("Paste", "CTRL+V")) {}
+        //    ImGui::EndMenu();
+        //}
         ImGui::EndMainMenuBar();
+    }
+}
+
+void ImGuiEditor::renderSceneHierarchyNode(GameObject* node)
+{
+    for (int i = 0; i < node->children().size(); i++)
+    {
+        auto child_node = node->children()[i];
+        const auto& childe_entity = child_node->entity();
+
+        static ImGuiTreeNodeFlags node_flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_SpanAvailWidth;
+        std::string node_name = world.getComponent<ecs::NameComponent>(childe_entity)->name;
+        std::string display_text = node_name + " (Entity: " + std::to_string(childe_entity.getId()) + ")";
+        bool node_open = ImGui::TreeNodeEx((void*)(intptr_t)i, node_flags, display_text.c_str());
+        if (ImGui::IsItemClicked() && !ImGui::IsItemToggledOpen()) {
+            bool close = false;
+            for (const auto& picked_entity : world.getPickedEntities()) {
+                if (picked_entity.getId() == childe_entity.getId()) {
+                    world.removeComponent<ecs::PickedComponent>(childe_entity);
+                    close = true;
+                }
+            }
+            if (!close) {
+                for (const auto& picked_entity : world.getPickedEntities()) {
+                    world.removeComponent<ecs::PickedComponent>(picked_entity);
+                }
+                world.addComponent<ecs::PickedComponent>(childe_entity);
+            }
+        }
+        if (node_open)
+        {
+            if (child_node->children().empty()) {
+                // TODO display all components name_str belong to this entity
+                ImGui::Text("Entity: %d", childe_entity);
+                if (world.hasComponent<ecs::NameComponent>(childe_entity))
+                    ImGui::Text("<NameComponent>");
+                if (world.hasComponent<ecs::TransformComponent>(childe_entity))
+                    ImGui::Text("<TransformComponent>");
+                if (world.hasComponent<ecs::RenderableComponent>(childe_entity))
+                    ImGui::Text("<RenderableComponent>");
+                if (world.hasComponent<ecs::ExplosionComponent>(childe_entity))
+                    ImGui::Text("<ExplosionComponent>");
+                if (world.hasComponent<ecs::SkyboxComponent>(childe_entity))
+                    ImGui::Text("<SkyboxComponent>");
+                if (world.hasComponent<ecs::PointLightComponent>(childe_entity))
+                    ImGui::Text("<PointLightComponent>");
+                if (world.hasComponent<ecs::DirectionalLightComponent>(childe_entity))
+                    ImGui::Text("<DirectionalLightComponent>");
+                if (world.hasComponent<ecs::GroundComponent>(childe_entity))
+                    ImGui::Text("<GroundComponent>");
+            }
+            else {
+                renderSceneHierarchyNode(child_node);
+            }
+            ImGui::TreePop();
+        }
     }
 }
 
@@ -294,101 +270,10 @@ void ImGuiEditor::renderSceneHierarchy()
     ImGuiWindow* scene_hierarchy_window = ImGui::GetCurrentWindow();
     float scene_hierarchy_window_width = ImGui::GetWindowWidth();
 
-    auto& world = ecs::World::get();
     auto scene_hierarchy = Application::GetApp().getSceneHierarchy();
-    auto root_obj = scene_hierarchy->rootObject();
-    for (int i = 0; i < root_obj->children().size(); i++)
-    {
-        auto child_obj = root_obj->children()[i];
-        const auto& entity = child_obj->entity();
-        auto object_name = world.getComponent<ecs::NameComponent>(entity)->name;
+    auto root_node = scene_hierarchy->rootObject();
 
-        static ImGuiTreeNodeFlags node_flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_SpanAvailWidth;
-        bool node_open = ImGui::TreeNodeEx((void*)(intptr_t)i, node_flags | ImGuiTreeNodeFlags_DefaultOpen, object_name.c_str(), i);
-        if (ImGui::IsItemClicked() && !ImGui::IsItemToggledOpen()) {
-            bool close = false;
-            for (const auto& picked_entity : world.getPickedEntities()) {
-                if (picked_entity.getId() == entity.getId()) {
-                    world.removeComponent<ecs::PickedComponent>(entity);
-                    close = true;
-                }
-            }
-            if (!close) {
-                for (const auto& picked_entity : world.getPickedEntities()) {
-                    world.removeComponent<ecs::PickedComponent>(picked_entity);
-                }
-                world.addComponent<ecs::PickedComponent>(entity);
-            }
-        }
-        if (node_open)
-        {
-            if (child_obj->children().empty()) {
-                // TODO display all components name_str belong to this entity
-                if (world.hasComponent<ecs::NameComponent>(entity))
-                    ImGui::Text("<NameComponent>");
-                if (world.hasComponent<ecs::TransformComponent>(entity))
-                    ImGui::Text("<TransformComponent>");
-                if (world.hasComponent<ecs::RenderableComponent>(entity))
-                    ImGui::Text("<RenderableComponent>");
-                if (world.hasComponent<ecs::ExplosionComponent>(entity))
-                    ImGui::Text("<ExplosionComponent>");
-                if (world.hasComponent<ecs::SkyboxComponent>(entity))
-                    ImGui::Text("<SkyboxComponent>");
-                if (world.hasComponent<ecs::PointLightComponent>(entity))
-                    ImGui::Text("<PointLightComponent>");
-                if (world.hasComponent<ecs::DirectionalLightComponent>(entity))
-                    ImGui::Text("<DirectionalLightComponent>");
-                if (world.hasComponent<ecs::GroundComponent>(entity))
-                    ImGui::Text("<GroundComponent>");
-                ImGui::TreePop();
-            }
-            else {
-                for (int i = 0; i < child_obj->children().size(); i++) {
-                    auto child_obj_ = child_obj->children()[i];
-                    const auto& entity_ = child_obj_->entity();
-                    auto object_name_ = world.getComponent<ecs::NameComponent>(entity_)->name;
-                    bool node_open_ = ImGui::TreeNodeEx((void*)(intptr_t)i, node_flags, object_name_.c_str(), i);
-                    if (ImGui::IsItemClicked() && !ImGui::IsItemToggledOpen()) {
-                        bool close = false;
-                        for (const auto& picked_entity : world.getPickedEntities()) {
-                            if (picked_entity.getId() == entity_.getId()) {
-                                world.removeComponent<ecs::PickedComponent>(entity_);
-                                close = true;
-                            }
-                        }
-                        if (!close) {
-                            for (const auto& picked_entity : world.getPickedEntities()) {
-                                world.removeComponent<ecs::PickedComponent>(picked_entity);
-                            }
-                            world.addComponent<ecs::PickedComponent>(entity_);
-                        }
-                    }
-                    if (node_open_)
-                    {
-                        // TODO display all components name_str belong to this entity
-                        if (world.hasComponent<ecs::NameComponent>(entity_))
-                            ImGui::Text("<NameComponent>");
-                        if (world.hasComponent<ecs::TransformComponent>(entity_))
-                            ImGui::Text("<TransformComponent>");
-                        if (world.hasComponent<ecs::RenderableComponent>(entity_))
-                            ImGui::Text("<RenderableComponent>");
-                        if (world.hasComponent<ecs::ExplosionComponent>(entity_))
-                            ImGui::Text("<ExplosionComponent>");
-                        if (world.hasComponent<ecs::SkyboxComponent>(entity_))
-                            ImGui::Text("<SkyboxComponent>");
-                        if (world.hasComponent<ecs::PointLightComponent>(entity_))
-                            ImGui::Text("<PointLightComponent>");
-                        if (world.hasComponent<ecs::DirectionalLightComponent>(entity_))
-                            ImGui::Text("<DirectionalLightComponent>");
-                        if (world.hasComponent<ecs::GroundComponent>(entity_))
-                            ImGui::Text("<GroundComponent>");
-                        ImGui::TreePop();
-                    }
-                }
-                ImGui::TreePop();
-            }
-        }
-    }
+    renderSceneHierarchyNode(root_node);
 
     ImGui::End();
 
@@ -400,7 +285,6 @@ void ImGuiEditor::renderCameraController()
 {
     ImGui::Begin("Main Camera", nullptr, ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse);
 
-    auto& world = ecs::World::get();
     auto& camera = *world.getMainCameraComponent();
     ImGui::NewLine();
     ImGui::Text("view matrix:");
@@ -429,7 +313,6 @@ void ImGuiEditor::renderPickedEntityController(const ImVec2& pos, const std::vec
     if (picked_entities.empty())
         return;
     // TODO consider to edit materials in MaterialSystem
-    auto& world = ecs::World::get();
     auto entity = picked_entities[0];
     if (!world.hasComponent<ecs::NameComponent>(entity))
         return;
@@ -524,15 +407,12 @@ void ImGuiEditor::renderGizmos()
         break;
     }
 
-    auto& world = ecs::World::get();
     ecs::CameraComponent* camera = world.getMainCameraComponent();
     ecs::TransformComponent* transform_component = nullptr;
     auto picked_entities = world.getPickedEntities();
     for (auto entity : picked_entities) {
-        if (/*!world.hasComponent<ecs::GroundComponent>(entity)*/true) {
-            transform_component = world.getComponent<ecs::TransformComponent>(entity);
-            break;
-        }
+        transform_component = world.getComponent<ecs::TransformComponent>(entity);
+        break;
     }
 
     if (camera && transform_component) {

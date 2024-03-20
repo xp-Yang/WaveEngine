@@ -117,7 +117,10 @@ void MainCameraPass::draw()
                 shader->setMatrix("lightSpaceMatrix", 1, light_ref_matrix);
                 shader->setTexture("shadow_map", 7, m_shadow_map);
 
-                shader->setCubeTexture("cube_shadow_map", 9, m_cube_map);
+                for (int i = 0; i < m_cube_maps.size(); i++) {
+                    std::string cube_map_id = std::string("cube_shadow_maps[") + std::to_string(i) + "]";
+                    shader->setCubeTexture(cube_map_id, 9, m_cube_maps[i]);
+                }
             }
             Renderer::drawIndex(*shader, mesh.get_VAO(), mesh.get_indices_count());
             shader->stop_using();
