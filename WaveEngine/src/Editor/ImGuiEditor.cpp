@@ -209,14 +209,14 @@ void ImGuiEditor::renderGlobalController() {
 
     ImGui::Text("Add/Delete point light:");
     auto scene_hierarchy = Application::GetApp().getSceneHierarchy();
-    int point_light_count = scene_hierarchy->pointLightCount(); // readonly
+    int point_light_count = scene_hierarchy->pointLightCount();
     float spacing = ImGui::GetStyle().ItemInnerSpacing.x;
-    if (ImGui::Button("+")) {
+    if (ImGui::Button((std::string("+") + "##pointLight").c_str())) {
         if (point_light_count < scene_hierarchy->maxPointLightCount())
             scene_hierarchy->addPointLight();
     }
     ImGui::SameLine(0.0f, spacing);
-    if (ImGui::Button("-")) { 
+    if (ImGui::Button((std::string("-") + "##pointLight").c_str())) {
         auto& world = ecs::World::get();
         int last_point_entity_id = -1;
         auto it = world.entityView<ecs::PointLightComponent>().begin();
@@ -230,6 +230,22 @@ void ImGuiEditor::renderGlobalController() {
     }
     ImGui::SameLine();
     ImGui::Text("point light number: %d", point_light_count);
+
+    ImGui::Dummy(dummy);
+    ImGui::Separator();
+    ImGui::Dummy(dummy);
+
+    ImGui::Text("Add/Delete sphere:");
+    int sphere_count = scene_hierarchy->sphereCount();
+    if (ImGui::Button((std::string("+") + "##sphere").c_str())) {
+        scene_hierarchy->addSphere();
+    }
+    ImGui::SameLine(0.0f, spacing);
+    if (ImGui::Button((std::string("-") + "##sphere").c_str())) {
+        scene_hierarchy->removeSphere();
+    }
+    ImGui::SameLine();
+    ImGui::Text("sphere number: %d", sphere_count);
 
     ImGui::Dummy(dummy);
     ImGui::Separator();
@@ -432,11 +448,11 @@ void ImGuiEditor::renderPickedEntityController(const ImVec2& pos, const std::vec
         if (ImGui::RadioButton("Scale", m_toolbar_type == ToolbarType::Scale))
             m_toolbar_type = ToolbarType::Scale;
         ImGui::PushItemWidth(80.0f);
-        ImGui::SliderFloat((std::string("##x") + "##" + obj_name).c_str(), &transform_component.translation.x, -15.0f, 15.0f);
+        ImGui::SliderFloat((std::string("##x") + "##" + obj_name).c_str(), &transform_component.translation.x, -30.0f, 30.0f);
         ImGui::SameLine();
-        ImGui::SliderFloat((std::string("##y") + "##" + obj_name).c_str(), &transform_component.translation.y, 0.0f, 15.0f);
+        ImGui::SliderFloat((std::string("##y") + "##" + obj_name).c_str(), &transform_component.translation.y, 0.0f, 30.0f);
         ImGui::SameLine();
-        ImGui::SliderFloat((std::string("xyz") + "##" + obj_name).c_str(), &transform_component.translation.z, -15.0f, 15.0f);
+        ImGui::SliderFloat((std::string("xyz") + "##" + obj_name).c_str(), &transform_component.translation.z, -30.0f, 30.0f);
         ImGui::PopItemWidth();
 
         // log

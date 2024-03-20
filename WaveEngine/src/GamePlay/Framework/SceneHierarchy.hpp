@@ -101,8 +101,10 @@ public:
 	void addPointLight();
 	void addCube();
 	void addSphere();
+	void removeSphere(size_t index = -1);
 	int maxPointLightCount() const { return 256; }
 	int pointLightCount() const { return m_point_light_count; }
+	int sphereCount() const { return m_test_sphere_count; }
 	GameObject* object(const ecs::Entity& entity) { return m_root_object->find(entity); }
 
 protected:
@@ -111,6 +113,8 @@ protected:
 	void createSkybox();
 	void createGround();
 	void createDirectionalLight();
+
+	void updateSpheresPosition();
 
 private:
 	GameObject* m_root_object{ nullptr };

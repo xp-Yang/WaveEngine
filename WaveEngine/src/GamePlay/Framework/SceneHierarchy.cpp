@@ -64,7 +64,7 @@ void SceneHierarchy::addPointLight()
 	point_light_properties.radius = (point_light_transform.scale[0]) * 40.0f;
 	point_light_properties.luminousColor = Color4(1.0f);//{ randomUnit(), randomUnit(), randomUnit(), 1.0f };
 	ecs::Primitive point_light_primitive;
-	point_light_primitive.mesh = Mesh::create_icosphere_mesh(5);
+	point_light_primitive.mesh = Mesh::create_icosphere_mesh(4);
 	Material point_light_material;
 	point_light_material.shader = point_light_shader;
 	point_light_primitive.material = point_light_material;
@@ -103,22 +103,41 @@ void SceneHierarchy::addCube()
 	m_test_cube_count++;
 }
 
+
+void SceneHierarchy::updateSpheresPosition()
+{
+	int max_sequence_num = 16;
+	int cols = m_test_sphere_count > max_sequence_num ? sqrt(max_sequence_num) : std::ceil(sqrt(m_test_sphere_count));
+
+
+	auto& world = ecs::World::get();
+	float space = 3.0f;
+	int i = 0;
+	for (auto sphere_obj : m_root_sphere_object->children()) {
+		auto& sphere_translation = world.getComponent<ecs::TransformComponent>(sphere_obj->entity())->translation;
+		int col = i % cols;
+		int row = (i / cols) % cols;
+		int sequence = i / max_sequence_num;
+		sphere_translation = { space * col, 1.0f + space * row, space * sequence };
+		//float theta = (2 * Core::MathConstant::PI / 25.0f) * m_test_sphere_count;
+		//sphere_translation = { 10.0f * cos(theta), 1.0f , 10.0f * sin(theta) };
+		i++;
+	}
+}
+
 void SceneHierarchy::addSphere()
 {
 	std::string resource_dir = Application::resourceDirectory();
-
 	auto& world = ecs::World::get();
 
 	auto sphere_entity = world.create_entity();
 	auto sphere_node = new GameObject(m_root_sphere_object, sphere_entity);
 	world.addComponent<ecs::NameComponent>(sphere_entity).name = std::string("Sphere") + std::to_string(m_test_sphere_count);
-	auto& sphere_transform = world.addComponent<ecs::TransformComponent>(sphere_entity);
-	sphere_transform.translation = { 2.5f * (m_test_sphere_count % 5), 1.0f + 2.5f * (m_test_sphere_count / 5), 0 };
-	//float theta = (2 * Core::MathConstant::PI / 25.0f) * m_test_sphere_count;
-	//sphere_transform.translation = { 10.0f * cos(theta), 1.0f , 10.0f * sin(theta) };
+	world.addComponent<ecs::TransformComponent>(sphere_entity);
+
 	auto& sphere_renderable = world.addComponent<ecs::RenderableComponent>(sphere_entity);
 	ecs::Primitive sphere_primitive;
-	sphere_primitive.mesh = Mesh::create_icosphere_mesh(5);
+	sphere_primitive.mesh = Mesh::create_icosphere_mesh(4);
 	Material sphere_material;
 	//sphere_material.shader = new Shader(resource_dir + "/shader/model.vs", resource_dir + "/shader/modelFowardRendering.fs");
 	sphere_material.set_diffuse_map(resource_dir + "/images/pure_white_map.png");
@@ -126,13 +145,27 @@ void SceneHierarchy::addSphere()
 	sphere_material.shader = new Shader(resource_dir + "/shader/pbr.vs", resource_dir + "/shader/pbr.fs");
 	sphere_material.albedo = Vec3(1.0f, 1.0f, 1.0f);
 	sphere_material.metallic = 1.0;
-	sphere_material.roughness = (1.0f / 25) * (m_test_sphere_count + 1);
+	sphere_material.roughness = (1.0f / 64) * (m_test_sphere_count + 1);
 	sphere_material.ao = 0.01;
 	sphere_primitive.material = sphere_material;
 	sphere_renderable.setPrimitives({ sphere_primitive });
 	//world.addComponent<ecs::ExplosionComponent>(sphere_entity);
 
 	m_test_sphere_count++;
+
+	updateSpheresPosition();
+}
+
+void SceneHierarchy::removeSphere(size_t index)
+{
+	if (index >= m_root_sphere_object->children().size())
+		m_root_sphere_object->remove(m_root_sphere_object->children().back());
+	else
+		m_root_sphere_object->remove(m_root_sphere_object->children()[index]);
+
+	m_test_sphere_count--;
+
+	updateSpheresPosition();
 }
 
 void SceneHierarchy::initMainCamera()
@@ -248,7 +281,7 @@ void SceneHierarchy::init() {
 	auto root_sphere_entity = world.create_entity();
 	world.addComponent<ecs::NameComponent>(root_sphere_entity).name = "Spheres";
 	m_root_sphere_object = new GameObject(m_root_object, root_sphere_entity);
-	for (int i = 0; i < 25; i++) {
+	for (int i = 0; i < 64; i++) {
 		addSphere();
 	}
 
