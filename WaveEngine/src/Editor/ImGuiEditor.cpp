@@ -185,7 +185,7 @@ void ImGuiEditor::renderGlobalMenu()
                 FileDialog* file_dlg = FileDialog::create();
                 auto filepath = file_dlg->OpenFile("");
                 if (!filepath.empty()) {
-                    Application::GetApp().getSceneHierarchy()->loadModal(filepath);
+                    Application::GetApp().getSceneHierarchy()->loadModel(filepath);
                 }
             }
             if (ImGui::MenuItem("Save As..", "Ctrl+S")) {

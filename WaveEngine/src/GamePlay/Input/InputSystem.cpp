@@ -9,17 +9,17 @@ void InputSystem::update()
 	ImGuiIO& io = ImGui::GetIO();
 
 	m_mouse_button = MouseButton::None;
-	if (io.MouseDown[0]) {
-		m_mouse_button |= MouseButton::Left;
+	if (io.MouseDown[0] || ImGui::IsMouseReleased(ImGuiMouseButton_Left)) {
+		m_mouse_button = MouseButton::Left;
 	}
-	if (io.MouseDown[1]) {
-		m_mouse_button |= MouseButton::Right;
+	else if (io.MouseDown[1] || ImGui::IsMouseReleased(ImGuiMouseButton_Right)) {
+		m_mouse_button = MouseButton::Right;
 	}
-	if (io.MouseDown[2]) {
-		m_mouse_button |= MouseButton::Middle;
+	else if (io.MouseDown[2] || ImGui::IsMouseReleased(ImGuiMouseButton_Middle)) {
+		m_mouse_button = MouseButton::Middle;
 	}
 
-	m_mouse_state = MouseState::None;
+	m_mouse_state = MouseState::Moving;
 	if (ImGui::IsMouseDragging(ImGuiMouseButton_Left) || 
 		ImGui::IsMouseDragging(ImGuiMouseButton_Right) || 
 		ImGui::IsMouseDragging(ImGuiMouseButton_Middle)) {
@@ -70,7 +70,7 @@ void InputSystem::mouse_and_key_callback()
 		float delta_y = -(m_mouse_y - m_last_mouse_y);
 		m_last_mouse_x = m_mouse_x;
 		m_last_mouse_y = m_mouse_y;
-		ecs::CameraSystem::onMouseUpdate(delta_x, delta_y, m_mouse_button / 2);
+		ecs::CameraSystem::onMouseUpdate(delta_x, delta_y, m_mouse_button);
 	}
 
 	if (!isApproxZero(io.MouseWheel))

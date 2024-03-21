@@ -80,6 +80,7 @@ public:
     GLFWwindow* getNativeWindowHandle() const;
     int getWidth() const;
     int getHeight() const;
+
 private:
     GLFWwindow* m_window{ nullptr };
     int m_width;

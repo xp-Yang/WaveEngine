@@ -1,10 +1,20 @@
 #include "Window_impl.hpp"
+#include "Application_impl.hpp"
+#include "GamePlay/Framework/SceneHierarchy.hpp"
 #include <assert.h>
 #include <utility>
 
 float WINDOW_WIDTH(1920.0f);
 float WINDOW_HEIGHT(1080.0f);
 float ASPECT_RATIO(16.0f / 9.0f);
+
+static void drop_file_callback(GLFWwindow* window, int count, const char** paths)
+{
+	for (int i = 0; i < count; i++) {
+		std::string filepath = paths[i];
+		Application::GetApp().getSceneHierarchy()->loadModel(filepath);
+	}
+}
 
 Window::Window(int width, int height)
 {
@@ -43,6 +53,8 @@ Window::Window(int width, int height)
 		//TODO ·â×°½ørhi
 		//glViewport(main_viewport.x, main_viewport.y, main_viewport.width, main_viewport.height);
 		});
+
+	glfwSetDropCallback(m_window, drop_file_callback);
 }
 
 void Window::shutdown()

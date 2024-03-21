@@ -13,7 +13,12 @@
 
 #define PERFORMANCE_TEST 0
 
-Application::~Application() = default;
+Application::Application()
+{
+	init();
+}
+
+Application::~Application() {};
 
 Application& Application::GetApp()
 {

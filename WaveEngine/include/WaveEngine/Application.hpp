@@ -22,7 +22,7 @@ public:
 	SceneHierarchy* getSceneHierarchy();
 
 private:
-	Application() = default;
+	Application();
 	void newFrame();
 	void endFrame();
 

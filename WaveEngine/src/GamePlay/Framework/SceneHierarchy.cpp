@@ -9,7 +9,7 @@ SceneHierarchy::SceneHierarchy() {
 	init();
 }
 
-GameObject* SceneHierarchy::loadModal(const std::string& filepath)
+GameObject* SceneHierarchy::loadModel(const std::string& filepath)
 {
 	std::string resource_dir = Application::resourceDirectory();
 
@@ -106,19 +106,30 @@ void SceneHierarchy::addCube()
 
 void SceneHierarchy::updateSpheresPosition()
 {
-	int max_sequence_num = 16;
-	int cols = m_test_sphere_count > max_sequence_num ? sqrt(max_sequence_num) : std::ceil(sqrt(m_test_sphere_count));
-
+	int one_sequence_max_num = 16;
+	int max_cols = sqrt(one_sequence_max_num);
+	int max_rows = max_cols;
+	int sequences = m_test_sphere_count / one_sequence_max_num + 1;
+	int cols = std::ceil(sqrt((m_test_sphere_count - 1) % one_sequence_max_num + 1));
+	int rows = cols;
 
 	auto& world = ecs::World::get();
 	float space = 3.0f;
 	int i = 0;
 	for (auto sphere_obj : m_root_sphere_object->children()) {
 		auto& sphere_translation = world.getComponent<ecs::TransformComponent>(sphere_obj->entity())->translation;
-		int col = i % cols;
-		int row = (i / cols) % cols;
-		int sequence = i / max_sequence_num;
-		sphere_translation = { space * col, 1.0f + space * row, space * sequence };
+		int sequence = i / one_sequence_max_num;
+		if (sequence == sequences - 1) {
+			int j = i - sequence * one_sequence_max_num;
+			int col = j % cols;
+			int row = (j / cols) % rows;
+			sphere_translation = { space * col, 1.0f + space * row, space * sequence };
+		}
+		else {
+			int col = i % max_cols;
+			int row = (i / max_cols) % max_rows;
+			sphere_translation = { space * col, 1.0f + space * row, space * sequence };
+		}
 		//float theta = (2 * Core::MathConstant::PI / 25.0f) * m_test_sphere_count;
 		//sphere_translation = { 10.0f * cos(theta), 1.0f , 10.0f * sin(theta) };
 		i++;
@@ -158,6 +169,9 @@ void SceneHierarchy::addSphere()
 
 void SceneHierarchy::removeSphere(size_t index)
 {
+	if (m_root_sphere_object->children().empty())
+		return;
+
 	if (index >= m_root_sphere_object->children().size())
 		m_root_sphere_object->remove(m_root_sphere_object->children().back());
 	else
@@ -289,9 +303,9 @@ void SceneHierarchy::init() {
 
 	std::string resource_dir = Application::resourceDirectory();
 
-	loadModal(resource_dir + "/model/nanosuit/nanosuit.obj");
+	SceneHierarchy::loadModel(resource_dir + "/model/nanosuit/nanosuit.obj");
 
-	loadModal(resource_dir + "/model/bunny.obj");
+	SceneHierarchy::loadModel(resource_dir + "/model/bunny.obj");
 
-	loadModal(resource_dir + "/model/dragon.obj");
+	SceneHierarchy::loadModel(resource_dir + "/model/dragon.obj");
 }

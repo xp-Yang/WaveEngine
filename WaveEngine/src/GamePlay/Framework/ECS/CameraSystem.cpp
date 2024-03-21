@@ -53,7 +53,7 @@ void CameraSystem::onKeyUpdate(int key, float frame_time)
     camera.view = LookAt(camera.pos, camera.pos + camera.direction, camera_up);
 }
 
-void CameraSystem::onMouseUpdate(double delta_x, double delta_y, int mouse_button)
+void CameraSystem::onMouseUpdate(double delta_x, double delta_y, MouseButton mouse_button)
 {
     // Viewing Style 转方向，并且相机位置也转动，聚焦于(0, 0, 0)点
 	auto& world = ecs::World::get();
@@ -63,7 +63,7 @@ void CameraSystem::onMouseUpdate(double delta_x, double delta_y, int mouse_butto
 
     ecs::CameraComponent& camera = *p_camera;
     if (camera.mode == ecs::CameraComponent::Mode::Orbit) {
-        if (mouse_button == 0) {
+        if (mouse_button == MouseButton::Left) {
             auto rotate_Y = Rotate(-(float)(0.3f * delta_x * ecs::CameraComponent::Sensitivity), ecs::CameraComponent::global_up);
             camera.pos = rotate_Y * Vec4(camera.pos, 1.0f);
             camera.direction = rotate_Y * Vec4(camera.direction, 1.0f);
@@ -78,7 +78,7 @@ void CameraSystem::onMouseUpdate(double delta_x, double delta_y, int mouse_butto
 
             camera.view = LookAt(camera.pos, camera.pos + camera.direction, camera.camera_up);
         }
-        else if (mouse_button == 1) {
+        else if (mouse_button == MouseButton::Right) {
             camera.pos += -(float)(delta_x * ecs::CameraComponent::Sensitivity) * camera.getRightDirection();
             camera.pos += -(float)(delta_y * ecs::CameraComponent::Sensitivity) * camera.getUpDirection();
 
@@ -88,7 +88,7 @@ void CameraSystem::onMouseUpdate(double delta_x, double delta_y, int mouse_butto
 
     if (camera.mode == ecs::CameraComponent::Mode::FPS) {
         // FPS style 自己不动，只转方向
-        if (mouse_button == 0) {
+        if (mouse_button == MouseButton::Left) {
             // get pitch
             camera.fps_params.pitch += delta_y * ecs::CameraComponent::Sensitivity;
             // get yaw

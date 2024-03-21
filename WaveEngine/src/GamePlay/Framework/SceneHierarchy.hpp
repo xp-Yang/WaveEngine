@@ -82,7 +82,7 @@ class SceneHierarchy {
 public:
 	SceneHierarchy();
 	GameObject* rootObject() const { return m_root_object; }
-	GameObject* loadModal(const std::string& filepath);
+	GameObject* loadModel(const std::string& filepath);
 	//const std::vector<GameObject*>& selectedObjects() const { return selected_objects; }
 	//GameObject* selectedObject() const { return selected_objects.size() == 1 ? selected_objects[0] : nullptr; }
 	void addObject(GameObject* obj, GameObject* parent = nullptr) { 
