@@ -2,13 +2,15 @@
 #define InputSystem_hpp
 
 #include "InputEnums.hpp"
+#include "GamePlay/Framework/ECS/CameraSystem.hpp"
 
 class InputSystem {
 public:
-	void update();
-	void mouse_and_key_callback();
+	void onUpdate();
 
 protected:
+	void refreshState();
+
 	void pick();
 
 protected:
@@ -21,6 +23,8 @@ protected:
 
 	float m_mouse_x;
 	float m_mouse_y;
+
+	ecs::CameraSystem m_camera_system;
 };
 
 #endif // !InputSystem_hpp

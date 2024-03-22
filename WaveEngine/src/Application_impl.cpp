@@ -41,7 +41,7 @@ void Application::run() {
 		newFrame(); // automatically handle imgui input
 
 		// input System
-		m_input_system->mouse_and_key_callback();
+		m_input_system->onUpdate();
 
 		// motion System
 		if (m_editor->motion())

@@ -102,7 +102,7 @@ public:
 	void addCube();
 	void addSphere();
 	void removeSphere(size_t index = -1);
-	int maxPointLightCount() const { return 256; }
+	int maxPointLightCount() const { return 128; }
 	int pointLightCount() const { return m_point_light_count; }
 	int sphereCount() const { return m_test_sphere_count; }
 	GameObject* object(const ecs::Entity& entity) { return m_root_object->find(entity); }

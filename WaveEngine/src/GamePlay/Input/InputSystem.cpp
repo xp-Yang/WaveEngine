@@ -2,9 +2,8 @@
 #include <imgui/imgui.h>
 #include "Core/Math.hpp"
 #include "GamePlay/Framework/ECS/Components.hpp"
-#include "GamePlay/Framework/ECS/CameraSystem.hpp"
 
-void InputSystem::update()
+void InputSystem::refreshState()
 {
 	ImGuiIO& io = ImGui::GetIO();
 
@@ -45,51 +44,53 @@ void InputSystem::update()
 	m_mouse_y = (float)io.MousePos.y;
 }
 
-void InputSystem::mouse_and_key_callback()
+void InputSystem::onUpdate()
 {
-	update();
-
 	ImGuiIO& io = ImGui::GetIO();
 	if (!io.WantPassThroughMouse) {
 		// ImGui级别的鼠标输入，移动窗口等。
 		return;
 	}
 
+	refreshState();
+
 	if (m_last_mouse_state == MouseState::Holding && m_mouse_state == MouseState::Released) {
 		pick();
 	}
 
-	if (m_last_mouse_state != m_mouse_state) {
-		m_last_mouse_x = m_mouse_x;
-		m_last_mouse_y = m_mouse_y;
-		m_last_mouse_state = m_mouse_state;
-	}
+	m_camera_system.onUpdate();
 
 	if (m_mouse_state == MouseState::Dragging) {
 		float delta_x = m_mouse_x - m_last_mouse_x;
 		float delta_y = -(m_mouse_y - m_last_mouse_y);
 		m_last_mouse_x = m_mouse_x;
 		m_last_mouse_y = m_mouse_y;
-		ecs::CameraSystem::onMouseUpdate(delta_x, delta_y, m_mouse_button);
+		m_camera_system.onMouseUpdate(delta_x, delta_y, m_mouse_button);
 	}
 
 	if (!isApproxZero(io.MouseWheel))
-		ecs::CameraSystem::onMouseWheelUpdate(io.MouseWheel, m_mouse_x, m_mouse_y);
+		m_camera_system.onMouseWheelUpdate(io.MouseWheel, m_mouse_x, m_mouse_y);
 
 	float avrg_frame_time = 1.0f / io.Framerate;
 	if (io.KeyShift)
 		avrg_frame_time /= 10.0f;
 	if (io.KeysDown['W']) {
-		ecs::CameraSystem::onKeyUpdate('W', avrg_frame_time);
+		m_camera_system.onKeyUpdate('W', avrg_frame_time);
 	}
 	if (io.KeysDown['A']) {
-		ecs::CameraSystem::onKeyUpdate('A', avrg_frame_time);
+		m_camera_system.onKeyUpdate('A', avrg_frame_time);
 	}
 	if (io.KeysDown['S']) {
-		ecs::CameraSystem::onKeyUpdate('S', avrg_frame_time);
+		m_camera_system.onKeyUpdate('S', avrg_frame_time);
 	}
 	if (io.KeysDown['D']) {
-		ecs::CameraSystem::onKeyUpdate('D', avrg_frame_time);
+		m_camera_system.onKeyUpdate('D', avrg_frame_time);
+	}
+
+	if (m_last_mouse_state != m_mouse_state) {
+		m_last_mouse_x = m_mouse_x;
+		m_last_mouse_y = m_mouse_y;
+		m_last_mouse_state = m_mouse_state;
 	}
 }
 

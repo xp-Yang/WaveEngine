@@ -1,6 +1,4 @@
 #include "CameraSystem.hpp"
-#include "World.hpp"
-#include "Components.hpp"
 #include <GLFW/glfw3.h>
 #include <Application_impl.hpp>
 
@@ -9,33 +7,50 @@
 
 namespace ecs {
 
+CameraSystem::CameraSystem()
+    : world(ecs::World::get())
+    , main_camera(*ecs::World::get().getMainCameraComponent())
+{
+}
+
+void CameraSystem::onUpdate()
+{
+    if (!m_need_update)
+        return;
+    
+    main_camera.fov = lerp(main_camera.fov, m_goal_fov, 0.1f);
+    main_camera.projection = Perspective(main_camera.fov, WINDOW_WIDTH / WINDOW_HEIGHT, 0.1f, 100.0f);
+
+    if (isApproxZero(main_camera.fov - m_goal_fov))
+        m_need_update = false;
+
+}
+
 void CameraSystem::onKeyUpdate(int key, float frame_time)
 {
-	auto& world = ecs::World::get();
-    ecs::CameraComponent& camera = *world.getMainCameraComponent();
     // 每一帧持续时间越长，意味着上一帧的渲染花费了越多时间，所以这一帧的速度应该越大，来平衡渲染所花去的时间
     float frame_speed = ecs::CameraComponent::CameraMovementSpeed * frame_time;
-	auto camera_forward = camera.direction;
-	auto camera_right = camera.getRightDirection();
-	auto camera_up = camera.getUpDirection();
+	auto camera_forward = main_camera.direction;
+	auto camera_right = main_camera.getRightDirection();
+	auto camera_up = main_camera.getUpDirection();
     switch (key) {
     case GLFW_KEY_W:
-        camera.pos += camera_forward * frame_speed;
+        main_camera.pos += camera_forward * frame_speed;
         break;
     case GLFW_KEY_A:
-        camera.pos -= camera_right * frame_speed;
+        main_camera.pos -= camera_right * frame_speed;
         break;
     case GLFW_KEY_D:
-        camera.pos += camera_right * frame_speed;
+        main_camera.pos += camera_right * frame_speed;
         break;
     case GLFW_KEY_S:
-        camera.pos -= camera_forward * frame_speed;
+        main_camera.pos -= camera_forward * frame_speed;
         break;
     case GLFW_KEY_Z:
-        camera.pos += camera_up * frame_speed;
+        main_camera.pos += camera_up * frame_speed;
         break;
     case GLFW_KEY_C:
-        camera.pos -= camera_up * frame_speed;
+        main_camera.pos -= camera_up * frame_speed;
         break;
     case GLFW_KEY_1:
         break;
@@ -50,117 +65,98 @@ void CameraSystem::onKeyUpdate(int key, float frame_time)
     default:
         break;
     }
-    camera.view = LookAt(camera.pos, camera.pos + camera.direction, camera_up);
+    main_camera.view = LookAt(main_camera.pos, main_camera.pos + main_camera.direction, camera_up);
 }
 
 void CameraSystem::onMouseUpdate(double delta_x, double delta_y, MouseButton mouse_button)
 {
     // Viewing Style 转方向，并且相机位置也转动，聚焦于(0, 0, 0)点
-	auto& world = ecs::World::get();
-    ecs::CameraComponent* p_camera = world.getMainCameraComponent();
-    if (!p_camera)
-        return;
 
-    ecs::CameraComponent& camera = *p_camera;
-    if (camera.mode == ecs::CameraComponent::Mode::Orbit) {
+    if (main_camera.mode == ecs::CameraComponent::Mode::Orbit) {
         if (mouse_button == MouseButton::Left) {
             auto rotate_Y = Rotate(-(float)(0.3f * delta_x * ecs::CameraComponent::Sensitivity), ecs::CameraComponent::global_up);
-            camera.pos = rotate_Y * Vec4(camera.pos, 1.0f);
-            camera.direction = rotate_Y * Vec4(camera.direction, 1.0f);
-            camera.direction = Normalize(camera.direction);
-            camera.camera_up = Vec3(rotate_Y * Vec4(camera.camera_up, 1.0f));
+            main_camera.pos = rotate_Y * Vec4(main_camera.pos, 1.0f);
+            main_camera.direction = rotate_Y * Vec4(main_camera.direction, 1.0f);
+            main_camera.direction = Normalize(main_camera.direction);
+            main_camera.camera_up = Vec3(rotate_Y * Vec4(main_camera.camera_up, 1.0f));
 
-            auto camera_right = camera.getRightDirection();
+            auto camera_right = main_camera.getRightDirection();
             auto rotate_x = Rotate((float)(0.3f * delta_y * ecs::CameraComponent::Sensitivity), camera_right);
-            camera.pos = rotate_x * Vec4(camera.pos, 1.0f);
-            camera.direction = rotate_x * Vec4(camera.direction, 1.0f);
-            camera.camera_up = Vec3(rotate_x * Vec4(camera.camera_up, 1.0f));
+            main_camera.pos = rotate_x * Vec4(main_camera.pos, 1.0f);
+            main_camera.direction = rotate_x * Vec4(main_camera.direction, 1.0f);
+            main_camera.camera_up = Vec3(rotate_x * Vec4(main_camera.camera_up, 1.0f));
 
-            camera.view = LookAt(camera.pos, camera.pos + camera.direction, camera.camera_up);
+            main_camera.view = LookAt(main_camera.pos, main_camera.pos + main_camera.direction, main_camera.camera_up);
         }
         else if (mouse_button == MouseButton::Right) {
-            camera.pos += -(float)(delta_x * ecs::CameraComponent::Sensitivity) * camera.getRightDirection();
-            camera.pos += -(float)(delta_y * ecs::CameraComponent::Sensitivity) * camera.getUpDirection();
+            main_camera.pos += -(float)(delta_x * ecs::CameraComponent::Sensitivity) * main_camera.getRightDirection();
+            main_camera.pos += -(float)(delta_y * ecs::CameraComponent::Sensitivity) * main_camera.getUpDirection();
 
-            camera.view = LookAt(camera.pos, camera.pos + camera.direction, camera.camera_up);
+            main_camera.view = LookAt(main_camera.pos, main_camera.pos + main_camera.direction, main_camera.camera_up);
         }
     }
 
-    if (camera.mode == ecs::CameraComponent::Mode::FPS) {
+    if (main_camera.mode == ecs::CameraComponent::Mode::FPS) {
         // FPS style 自己不动，只转方向
         if (mouse_button == MouseButton::Left) {
             // get pitch
-            camera.fps_params.pitch += delta_y * ecs::CameraComponent::Sensitivity;
+            main_camera.fps_params.pitch += delta_y * ecs::CameraComponent::Sensitivity;
             // get yaw
-            camera.fps_params.yaw += delta_x * ecs::CameraComponent::Sensitivity;
+            main_camera.fps_params.yaw += delta_x * ecs::CameraComponent::Sensitivity;
 
             // make sure that when pitch is out of bounds, screen doesn't get flipped
             // 使用欧拉角导致的问题：在极点发生死锁，yaw和roll重合，失去了一个自由度
-            if (camera.fps_params.pitch > 89.0f)
-                camera.fps_params.pitch = 89.0f;
-            if (camera.fps_params.pitch < -89.0f)
-                camera.fps_params.pitch = -89.0f;
+            if (main_camera.fps_params.pitch > 89.0f)
+                main_camera.fps_params.pitch = 89.0f;
+            if (main_camera.fps_params.pitch < -89.0f)
+                main_camera.fps_params.pitch = -89.0f;
 
             // update direction
-            camera.direction.x = cos(deg2rad(camera.fps_params.pitch)) * sin(deg2rad(camera.fps_params.yaw));
-            camera.direction.y = sin(deg2rad(camera.fps_params.pitch));
-            camera.direction.z = -cos(deg2rad(camera.fps_params.pitch)) * cos(deg2rad(camera.fps_params.yaw));
+            main_camera.direction.x = cos(deg2rad(main_camera.fps_params.pitch)) * sin(deg2rad(main_camera.fps_params.yaw));
+            main_camera.direction.y = sin(deg2rad(main_camera.fps_params.pitch));
+            main_camera.direction.z = -cos(deg2rad(main_camera.fps_params.pitch)) * cos(deg2rad(main_camera.fps_params.yaw));
             
-            camera.camera_up.x = sin(deg2rad(camera.fps_params.pitch)) * sin(deg2rad(camera.fps_params.yaw));
-            camera.camera_up.y = cos(deg2rad(camera.fps_params.pitch));
-            camera.camera_up.z = -sin(deg2rad(camera.fps_params.pitch)) * cos(deg2rad(camera.fps_params.yaw));
+            main_camera.camera_up.x = sin(deg2rad(main_camera.fps_params.pitch)) * sin(deg2rad(main_camera.fps_params.yaw));
+            main_camera.camera_up.y = cos(deg2rad(main_camera.fps_params.pitch));
+            main_camera.camera_up.z = -sin(deg2rad(main_camera.fps_params.pitch)) * cos(deg2rad(main_camera.fps_params.yaw));
 
-            camera.view = LookAt(camera.pos, camera.pos + camera.direction, camera.camera_up);
+            main_camera.view = LookAt(main_camera.pos, main_camera.pos + main_camera.direction, main_camera.camera_up);
         }
     }
 }
 
 void CameraSystem::orbitRotate(Vec3 start, Vec3 end)
 {
-    auto& world = ecs::World::get();
-    ecs::CameraComponent* p_camera = world.getMainCameraComponent();
-    if (!p_camera)
-        return;
-    ecs::CameraComponent& camera = *p_camera;
-
     // 计算旋转角度角度
     float angle = acos(fmin(1.0f, Dot(start, end)));
     // 计算旋转轴
     Vec3 rotate_axis = Normalize(Cross(start, end));
-    //Vec3 world_rotate_axis = Inverse(Mat3(camera.view)) * rotate_axis;
+    //Vec3 world_rotate_axis = Inverse(Mat3(main_camera.view)) * rotate_axis;
     
     Mat4 rotate_mat = Rotate(angle, rotate_axis);
 
-    camera.pos = rotate_mat * Vec4(camera.pos, 1.0f);
-    camera.direction = rotate_mat * Vec4(camera.direction, 1.0f);
-    camera.camera_up = Vec3(rotate_mat * Vec4(camera.camera_up, 1.0f));
-    camera.view = LookAt(camera.pos, camera.pos + camera.direction, camera.camera_up);
-}
-
-void CameraSystem::onMouseWheelUpdate(double yoffset)
-{
-	auto& world = ecs::World::get();
-    ecs::CameraComponent& camera = *world.getMainCameraComponent();
-    camera.zoom += ecs::CameraComponent::ZoomUnit * (float)yoffset;
-    if (camera.zoom < 0.1f)
-        camera.zoom = 0.1f;
-
-    camera.fov = camera.originFov / camera.zoom;
-    if (camera.fov <= deg2rad(1.0f))
-        camera.fov = deg2rad(1.0f);
-    if (camera.fov >= deg2rad(135.0f))
-        camera.fov = deg2rad(135.0f);
-    camera.projection = Perspective(camera.fov, WINDOW_WIDTH / WINDOW_HEIGHT, 0.1f, 100.0f);
+    main_camera.pos = rotate_mat * Vec4(main_camera.pos, 1.0f);
+    main_camera.direction = rotate_mat * Vec4(main_camera.direction, 1.0f);
+    main_camera.camera_up = Vec3(rotate_mat * Vec4(main_camera.camera_up, 1.0f));
+    main_camera.view = LookAt(main_camera.pos, main_camera.pos + main_camera.direction, main_camera.camera_up);
 }
 
 void CameraSystem::onMouseWheelUpdate(double yoffset, double mouse_x, double mouse_y)
 {
-    auto& world = ecs::World::get();
-    ecs::CameraComponent& camera = *world.getMainCameraComponent();
-    if (camera.zoom_mode == ecs::CameraComponent::ZoomMode::ZoomToCenter) {
-        onMouseWheelUpdate(yoffset);
+    if (main_camera.zoom_mode == ecs::CameraComponent::ZoomMode::ZoomToCenter) {
+        main_camera.zoom += ecs::CameraComponent::ZoomUnit * (float)yoffset;
+        if (main_camera.zoom < 0.1f)
+            main_camera.zoom = 0.1f;
+
+        m_goal_fov = main_camera.originFov / main_camera.zoom;
+        if (m_goal_fov <= deg2rad(1.0f))
+            m_goal_fov = deg2rad(1.0f);
+        if (m_goal_fov >= deg2rad(135.0f))
+            m_goal_fov = deg2rad(135.0f);
+
+        m_need_update = true;
     }
-    if (camera.zoom_mode == ecs::CameraComponent::ZoomMode::ZoomToMouse) {
+    if (main_camera.zoom_mode == ecs::CameraComponent::ZoomMode::ZoomToMouse) {
         auto main_viewport = Application::GetApp().getWindow()->getMainViewport().value_or(Viewport());
         main_viewport.transToScreenCoordinates();
         mouse_x -= main_viewport.x;
@@ -186,36 +182,34 @@ void CameraSystem::onMouseWheelUpdate(double yoffset, double mouse_x, double mou
         if (yoffset == 0.0)
             return;
         // 1. first translate to mouse_3d_pos
-        camera.pos += displacement;
-        float old_zoom = camera.zoom;
+        main_camera.pos += displacement;
+        float old_zoom = main_camera.zoom;
 
         // 2. set zoom
-        camera.zoom += ecs::CameraComponent::ZoomUnit * (float)yoffset;
-        if (camera.zoom < 0.1f)
-            camera.zoom = 0.1f;
+        main_camera.zoom += ecs::CameraComponent::ZoomUnit * (float)yoffset;
+        if (main_camera.zoom < 0.1f)
+            main_camera.zoom = 0.1f;
 
-        camera.fov = camera.originFov / camera.zoom;
-        if (camera.fov <= deg2rad(1.0f))
-            camera.fov = deg2rad(1.0f);
-        if (camera.fov >= deg2rad(135.0f))
-            camera.fov = deg2rad(135.0f);
+        main_camera.fov = main_camera.originFov / main_camera.zoom;
+        if (main_camera.fov <= deg2rad(1.0f))
+            main_camera.fov = deg2rad(1.0f);
+        if (main_camera.fov >= deg2rad(135.0f))
+            main_camera.fov = deg2rad(135.0f);
 
         // 3. second translate back to original pos
-        //camera.pos -= displacement * (old_zoom / camera.zoom);
+        //main_camera.pos -= displacement * (old_zoom / main_camera.zoom);
 
         // 4. set view matrix, projection matrix
-        camera.view = LookAt(camera.pos, camera.pos + camera.direction, camera.camera_up);
-        camera.projection = Perspective(camera.fov, WINDOW_WIDTH / WINDOW_HEIGHT, 0.1f, 100.0f);
+        main_camera.view = LookAt(main_camera.pos, main_camera.pos + main_camera.direction, main_camera.camera_up);
+        main_camera.projection = Perspective(main_camera.fov, WINDOW_WIDTH / WINDOW_HEIGHT, 0.1f, 100.0f);
     }
 }
 
 Vec3 CameraSystem::rayCastPlaneZero(double mouse_x, double mouse_y)
 {
-    auto& world = ecs::World::get();
-    ecs::CameraComponent& camera = *world.getMainCameraComponent();
 
     // 1.  get ray direction from mouse position
-    Vec3 cam_right = camera.getRightDirection();
+    Vec3 cam_right = main_camera.getRightDirection();
     auto main_viewport = Application::GetApp().getWindow()->getMainViewport().value_or(Viewport());
     float viewport_width = (float)main_viewport.width;
     float viewport_height = (float)main_viewport.height;
@@ -224,17 +218,17 @@ Vec3 CameraSystem::rayCastPlaneZero(double mouse_x, double mouse_y)
     float v = 2.0f * mouse_y / viewport_height - 1.0f;
     v = -v;
 
-    float tangent = std::tan(camera.fov / 2.0f);
-    Vec3 ray_direction = camera.direction + cam_right * tangent * u * (main_viewport.AspectRatio()) + camera.camera_up * tangent * v;
+    float tangent = std::tan(main_camera.fov / 2.0f);
+    Vec3 ray_direction = main_camera.direction + cam_right * tangent * u * (main_viewport.AspectRatio()) + main_camera.camera_up * tangent * v;
     ray_direction = Normalize(ray_direction);
     // 2.  solve the intersection equation of the ray and the plane: 
     // plane_normal. Dot(m_position + t * ray_direction - p0) = 0 
     //`Vec3 plane_normal = Vec3(0, 1, 0);
-    Vec3 plane_normal = -camera.direction;
+    Vec3 plane_normal = -main_camera.direction;
     Vec4 zero_plane = Vec4(plane_normal.x, plane_normal.y, plane_normal.z, 0);
     Vec3 p0 = plane_normal * zero_plane[3];
-    float t = (Dot(plane_normal, p0) - Dot(plane_normal, camera.pos) / Dot(plane_normal, ray_direction));
-    return Vec3(camera.pos + t * ray_direction);
+    float t = (Dot(plane_normal, p0) - Dot(plane_normal, main_camera.pos) / Dot(plane_normal, ray_direction));
+    return Vec3(main_camera.pos + t * ray_direction);
 }
 
 }

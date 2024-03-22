@@ -132,9 +132,9 @@ void ImGuiEditor::renderGlobalConsole() {
     auto scene_hierarchy = Application::GetApp().getSceneHierarchy();
     int point_light_count = scene_hierarchy->pointLightCount();
     float spacing = ImGui::GetStyle().ItemInnerSpacing.x;
+    ImGui::PushButtonRepeat(true);
     if (ImGui::Button((std::string("+") + "##pointLight").c_str())) {
-        if (point_light_count < scene_hierarchy->maxPointLightCount())
-            scene_hierarchy->addPointLight();
+        scene_hierarchy->addPointLight();
     }
     ImGui::SameLine(0.0f, spacing);
     if (ImGui::Button((std::string("-") + "##pointLight").c_str())) {
@@ -148,6 +148,7 @@ void ImGuiEditor::renderGlobalConsole() {
         if (last_point_entity_id != -1)
             scene_hierarchy->removeObject(ecs::Entity(last_point_entity_id));
     }
+    ImGui::PopButtonRepeat();
     ImGui::SameLine();
     ImGui::Text("point light number: %d", point_light_count);
 
@@ -157,6 +158,7 @@ void ImGuiEditor::renderGlobalConsole() {
 
     ImGui::Text("Add/Delete sphere:");
     int sphere_count = scene_hierarchy->sphereCount();
+    ImGui::PushButtonRepeat(true);
     if (ImGui::Button((std::string("+") + "##sphere").c_str())) {
         scene_hierarchy->addSphere();
     }
@@ -164,6 +166,7 @@ void ImGuiEditor::renderGlobalConsole() {
     if (ImGui::Button((std::string("-") + "##sphere").c_str())) {
         scene_hierarchy->removeSphere();
     }
+    ImGui::PopButtonRepeat();
     ImGui::SameLine();
     ImGui::Text("sphere number: %d", sphere_count);
 
@@ -425,13 +428,13 @@ void ImGuiEditor::renderGizmos()
         transform_component->rotation = Vec3(matrixRotation[0], matrixRotation[1], matrixRotation[2]);
     }
 
-    if (camera) {
-        Viewport viewport = Application::GetApp().getWindow()->getMainViewport().value_or(Viewport());
-        viewport.transToScreenCoordinates();
-        ImVec2 air_window_size = ImVec2(128, 128);
-        float camDistance = 8.f;
-        ImGuizmo::ViewManipulate((float*)(&camera->view), camDistance, ImVec2(viewport.x + viewport.width - air_window_size.x, viewport.y), air_window_size, 0x10101010);
-    }
+    //if (camera) {
+    //    Viewport viewport = Application::GetApp().getWindow()->getMainViewport().value_or(Viewport());
+    //    viewport.transToScreenCoordinates();
+    //    ImVec2 air_window_size = ImVec2(128, 128);
+    //    float camDistance = 8.f;
+    //    ImGuizmo::ViewManipulate((float*)(&camera->view), camDistance, ImVec2(viewport.x + viewport.width - air_window_size.x, viewport.y), air_window_size, 0x10101010);
+    //}
 }
 
 void ImGuiEditor::updateRenderParams()

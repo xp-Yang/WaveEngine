@@ -45,6 +45,9 @@ GameObject* SceneHierarchy::loadModel(const std::string& filepath)
 
 void SceneHierarchy::addPointLight()
 {
+	if (pointLightCount() >= maxPointLightCount())
+		return;
+
 	std::string resource_dir = Application::resourceDirectory();
 	static Shader* point_light_shader = new Shader(resource_dir + "/shader/light.vs", resource_dir + "/shader/light.fs");
 
