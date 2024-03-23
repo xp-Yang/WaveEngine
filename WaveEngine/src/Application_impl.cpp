@@ -1,15 +1,17 @@
 #include "Application_impl.hpp"
 #include <windows.h>
 #include <iostream>
+
 #include <imgui/imgui_impl_glfw.h>
 #include <imgui/imgui_impl_opengl3.h>
 #include <imgui/ImGuizmo.h>
+
 #include "GamePlay/Framework/SceneHierarchy.hpp"
-#include "Editor/ImGuiEditor.hpp"
 #include "GamePlay/Render/RenderSystem.hpp"
 #include "GamePlay/Framework/ECS/Components.hpp"
 #include "GamePlay/Framework/ECS/MotionSystem.hpp"
 #include "GamePlay/Input/InputSystem.hpp"
+#include "Editor/ImGuiEditor.hpp"
 
 #define PERFORMANCE_TEST 0
 

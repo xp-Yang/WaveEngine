@@ -3,18 +3,22 @@
 #include "ResourceManager/MyModel.hpp"
 #include "ResourceManager/Texture.hpp"
 #include "Platform/RHI/rhi.hpp"
+#include "Core/Logger.hpp"
 #include "Application_impl.hpp"
 
-SceneHierarchy::SceneHierarchy() {
+static const std::string resource_dir = Application::resourceDirectory();
+
+SceneHierarchy::SceneHierarchy()
+	: world(ecs::World::get())
+{
+	Logger::get().trace("SceneHierarchy::init()");
 	init();
+	Logger::get().trace("finished SceneHierarchy::init()");
 }
 
 GameObject* SceneHierarchy::loadModel(const std::string& filepath)
 {
-	std::string resource_dir = Application::resourceDirectory();
-
-	auto& world = ecs::World::get();
-
+	Logger::get().info("SceneHierarchy::loadModel({})", filepath);
 	Model* model = new Model(filepath);
 	auto entity = world.create_entity();
 	std::string name = filepath.substr(filepath.find_last_of("/\\") + 1, filepath.find_last_of('.') - filepath.find_last_of("/\\") - 1);
@@ -40,7 +44,8 @@ GameObject* SceneHierarchy::loadModel(const std::string& filepath)
 	}
 	renderable.setPrimitives(primitives);
 
-	return new GameObject(m_root_object, entity);
+	auto res = new GameObject(m_root_object, entity);
+	return res;
 }
 
 void SceneHierarchy::addPointLight()
@@ -48,10 +53,7 @@ void SceneHierarchy::addPointLight()
 	if (pointLightCount() >= maxPointLightCount())
 		return;
 
-	std::string resource_dir = Application::resourceDirectory();
 	static Shader* point_light_shader = new Shader(resource_dir + "/shader/light.vs", resource_dir + "/shader/light.fs");
-
-	auto& world = ecs::World::get();
 
 	auto point_light_entity = world.create_entity();
 	auto point_light_node = new GameObject(m_root_point_light_object, point_light_entity);
@@ -78,10 +80,6 @@ void SceneHierarchy::addPointLight()
 
 void SceneHierarchy::addCube()
 {
-	std::string resource_dir = Application::resourceDirectory();
-
-	auto& world = ecs::World::get();
-
 	auto cube_entity = world.create_entity();
 	auto cube_node = new GameObject(m_root_cube_object, cube_entity);
 	world.addComponent<ecs::NameComponent>(cube_entity).name = std::string("Cube") + std::to_string(m_test_cube_count);
@@ -116,7 +114,6 @@ void SceneHierarchy::updateSpheresPosition()
 	int cols = std::ceil(sqrt((m_test_sphere_count - 1) % one_sequence_max_num + 1));
 	int rows = cols;
 
-	auto& world = ecs::World::get();
 	float space = 3.0f;
 	int i = 0;
 	for (auto sphere_obj : m_root_sphere_object->children()) {
@@ -141,9 +138,6 @@ void SceneHierarchy::updateSpheresPosition()
 
 void SceneHierarchy::addSphere()
 {
-	std::string resource_dir = Application::resourceDirectory();
-	auto& world = ecs::World::get();
-
 	auto sphere_entity = world.create_entity();
 	auto sphere_node = new GameObject(m_root_sphere_object, sphere_entity);
 	world.addComponent<ecs::NameComponent>(sphere_entity).name = std::string("Sphere") + std::to_string(m_test_sphere_count);
@@ -187,8 +181,6 @@ void SceneHierarchy::removeSphere(size_t index)
 
 void SceneHierarchy::initMainCamera()
 {
-	auto& world = ecs::World::get();
-
 	auto camera = world.create_entity();
 	world.addComponent<ecs::NameComponent>(camera).name = "Main Camera";
 	auto& camera_component = world.addComponent<ecs::CameraComponent>(camera);
@@ -196,10 +188,6 @@ void SceneHierarchy::initMainCamera()
 
 void SceneHierarchy::createSkybox()
 {
-	std::string resource_dir = Application::resourceDirectory();
-
-	auto& world = ecs::World::get();
-
 	auto skybox_entity = world.create_entity();
 	world.addComponent<ecs::NameComponent>(skybox_entity).name = "Skybox";
 	world.addComponent<ecs::TransformComponent>(skybox_entity);
@@ -226,10 +214,6 @@ void SceneHierarchy::createSkybox()
 
 void SceneHierarchy::createGround()
 {
-	std::string resource_dir = Application::resourceDirectory();
-
-	auto& world = ecs::World::get();
-
 	//TODO shader在延迟渲染中没用到。shader是否不应该在这里创建
 	auto ground_entity = world.create_entity();
 	auto ground_node = new GameObject(m_root_object, ground_entity);
@@ -254,10 +238,6 @@ void SceneHierarchy::createGround()
 
 void SceneHierarchy::createDirectionalLight()
 {
-	std::string resource_dir = Application::resourceDirectory();
-
-	auto& world = ecs::World::get();
-
 	auto dir_light_entity = world.create_entity();
 	auto directional_light_node = new GameObject(m_root_object, dir_light_entity);
 	world.addComponent<ecs::NameComponent>(dir_light_entity).name = "Directional Light";
@@ -269,46 +249,55 @@ void SceneHierarchy::createDirectionalLight()
 }
 
 void SceneHierarchy::init() {
-	auto& world = ecs::World::get();
-
 	auto root_entity = world.create_entity();
 	world.addComponent<ecs::NameComponent>(root_entity).name = "Root";
 	m_root_object = new GameObject(nullptr, root_entity);
 
+	Logger::get().trace("SceneHierarchy::initMainCamera()");
 	initMainCamera();
 
+	Logger::get().trace("SceneHierarchy::createSkybox()");
 	createSkybox();
 
+	Logger::get().trace("SceneHierarchy::createDirectionalLight()");
 	createDirectionalLight();
 
+	size_t point_lights_count = 1;
+	Logger::get().trace("SceneHierarchy::addPointLights, count:{}", point_lights_count);
 	auto root_point_lights_entity = world.create_entity();
 	world.addComponent<ecs::NameComponent>(root_point_lights_entity).name = "Point Lights";
 	m_root_point_light_object = new GameObject(m_root_object, root_point_lights_entity);
-	for (int i = 0; i < 1; i++) {
+	for (int i = 0; point_lights_count < 1; i++) {
 		addPointLight();
 	}
 
+	size_t cubes_count = 36;
+	Logger::get().trace("SceneHierarchy::addCubes, count:{}", cubes_count);
 	auto root_cube_entity = world.create_entity();
 	world.addComponent<ecs::NameComponent>(root_cube_entity).name = "Cubes";
 	m_root_cube_object = new GameObject(m_root_object, root_cube_entity);
-	for (int i = 0; i < 36; i++) {
+	for (int i = 0; i < cubes_count; i++) {
 		addCube();
 	}
 
+	size_t spheres_count = 64;
+	Logger::get().trace("SceneHierarchy::addSpheres, count:{}", spheres_count);
 	auto root_sphere_entity = world.create_entity();
 	world.addComponent<ecs::NameComponent>(root_sphere_entity).name = "Spheres";
 	m_root_sphere_object = new GameObject(m_root_object, root_sphere_entity);
-	for (int i = 0; i < 64; i++) {
+	for (int i = 0; i < spheres_count; i++) {
 		addSphere();
 	}
 
+	Logger::get().trace("SceneHierarchy::createGround()");
 	createGround();
 
-	std::string resource_dir = Application::resourceDirectory();
+	//SceneHierarchy::loadModel(resource_dir + "/model/nanosuit/nanosuit.obj");
 
-	SceneHierarchy::loadModel(resource_dir + "/model/nanosuit/nanosuit.obj");
+	GameObject* bunny_obj = SceneHierarchy::loadModel(resource_dir + "/model/bunny.obj");
+	auto bunny_transform = world.getComponent<ecs::TransformComponent>(bunny_obj->entity());
+	bunny_transform->scale = Vec3(40.0f);
+	bunny_transform->translation = Vec3(-10.0f, 0.0f, 0.0f);
 
-	SceneHierarchy::loadModel(resource_dir + "/model/bunny.obj");
-
-	SceneHierarchy::loadModel(resource_dir + "/model/dragon.obj");
+	//SceneHierarchy::loadModel(resource_dir + "/model/dragon.obj");
 }

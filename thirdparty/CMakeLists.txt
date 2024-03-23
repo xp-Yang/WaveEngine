@@ -22,6 +22,14 @@ add_library(stb ${STB_HEAD_FILES} ${STB_SRC_FILES})
 set_target_properties(stb PROPERTIES FOLDER ${third_party_folder}/stb)
 target_include_directories(stb PRIVATE ${THIRD_PARTY_DIR}/stb)
 
+#spdlog
+if(NOT TARGET spdlog)
+    option(SPDLOG_BUILD_EXAMPLE "" OFF)
+    option(SPDLOG_INSTALL "" OFF)
+    add_subdirectory(spdlog)
+    set_target_properties(spdlog PROPERTIES FOLDER ${third_party_folder}/spdlog)
+endif()
+
 #glm
 if(NOT TARGET glm)
 	option(BUILD_STATIC_LIBS "" ON)

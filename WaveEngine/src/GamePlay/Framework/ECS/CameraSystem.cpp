@@ -1,8 +1,9 @@
 #include "CameraSystem.hpp"
-#include <GLFW/glfw3.h>
-#include <Application_impl.hpp>
 
+#include <GLFW/glfw3.h>
 #include <imgui/imgui.h>
+
+#include <Application_impl.hpp>
 #include <Core/Logger.hpp>
 
 namespace ecs {
@@ -163,16 +164,10 @@ void CameraSystem::onMouseWheelUpdate(double yoffset, double mouse_x, double mou
         mouse_y -= main_viewport.y;
         Vec3 mouse_3d_pos = rayCastPlaneZero(mouse_x, mouse_y);
 
-        ImGui::Begin("Mouse Ray", nullptr, ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse);
-        ImGui::NewLine();
-        ImGui::Text("mouse 2d position:");
-        std::string test_moue_2d_pos = vec3_log(Vec3(mouse_x, mouse_y, 0));
-        ImGui::Text(test_moue_2d_pos.c_str());
-        ImGui::NewLine();
-        ImGui::Text("mouse 3d position:");
-        std::string test_moue_3d_pos = vec3_log(mouse_3d_pos);
-        ImGui::Text(test_moue_3d_pos.c_str());
-        ImGui::End();
+        Logger::get().trace("\nMouse Ray");
+        Logger::get().trace("Mouse 2d position: {},{}", mouse_x, mouse_y);
+        Logger::get().trace("Mouse 3d position: {},{},{}", mouse_3d_pos.x, mouse_3d_pos.y, mouse_3d_pos.z);
+        Logger::get().trace("\n");
 
         float viewport_width = (float)main_viewport.width;
         float viewport_height = (float)main_viewport.height;

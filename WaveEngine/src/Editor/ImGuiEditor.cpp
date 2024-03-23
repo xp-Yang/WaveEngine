@@ -3,6 +3,37 @@
 #include "Core/Logger.hpp"
 #include "Platform/OS/FileDialog.hpp"
 
+static std::string matrix_str(const Mat4 mat)
+{
+    std::string result;
+    char buf[1024];
+    sprintf_s(buf, "%.3f %.3f %.3f %.3f \n", mat[0].x, mat[1].x, mat[2].x, mat[3].x);
+    result += buf;
+    sprintf_s(buf, "%.3f %.3f %.3f %.3f \n", mat[0].y, mat[1].y, mat[2].y, mat[3].y);
+    result += buf;
+    sprintf_s(buf, "%.3f %.3f %.3f %.3f \n", mat[0].z, mat[1].z, mat[2].z, mat[3].z);
+    result += buf;
+    sprintf_s(buf, "%.3f %.3f %.3f %.3f \n", mat[0].w, mat[1].w, mat[2].w, mat[3].w);
+    result += buf;
+    //printf("%.3f %.3f %.3f %.3f \n", mat[0][0], mat[1][0], mat[2][0], mat[3][0]);
+    //printf("%.3f %.3f %.3f %.3f \n", mat[0][1], mat[1][1], mat[2][1], mat[3][1]);
+    //printf("%.3f %.3f %.3f %.3f \n", mat[0][2], mat[1][2], mat[2][2], mat[3][2]);
+    //printf("%.3f %.3f %.3f %.3f \n", mat[0][3], mat[1][3], mat[2][3], mat[3][3]);
+    sprintf_s(buf, "\n");
+    result += buf;
+    return result;
+}
+
+static std::string vec3_str(const Vec3 vec) {
+    std::string result;
+    char buf[1024];
+    sprintf_s(buf, "%.3f %.3f %.3f \n", vec.x, vec.y, vec.z);
+    result += buf;
+    sprintf_s(buf, "\n");
+    result += buf;
+    return result;
+}
+
 ImGuiEditor::ImGuiEditor()
     : world(ecs::World::get())
 {
@@ -291,22 +322,22 @@ void ImGuiEditor::renderCameraController()
     auto& camera = *world.getMainCameraComponent();
     ImGui::NewLine();
     ImGui::Text("view matrix:");
-    std::string test_view = matrix_log(camera.view);
+    std::string test_view = matrix_str(camera.view);
     ImGui::Text(test_view.c_str());
 
     ImGui::NewLine();
     ImGui::Text("inverse view matrix:");
-    std::string inverse_view = matrix_log(Inverse(camera.view));
+    std::string inverse_view = matrix_str(Inverse(camera.view));
     ImGui::Text(inverse_view.c_str());
 
     ImGui::NewLine();
     ImGui::Text("camera position:");
-    std::string test_camera_pos = vec3_log(camera.pos);
+    std::string test_camera_pos = vec3_str(camera.pos);
     ImGui::Text(test_camera_pos.c_str());
 
     ImGui::NewLine();
     ImGui::Text("camera direction:");
-    std::string test_camera_dir = vec3_log(camera.direction);
+    std::string test_camera_dir = vec3_str(camera.direction);
     ImGui::Text(test_camera_dir.c_str());
     ImGui::End();
 }
@@ -344,8 +375,8 @@ void ImGuiEditor::renderPickedEntityController(const ImVec2& pos, const std::vec
         // log
         ImGui::NewLine();
         ImGui::Text("model matrix:");
-        std::string matrix_str = matrix_log(transform_component.transform());
-        ImGui::Text(matrix_str.c_str());
+        std::string matrix_str_ = matrix_str(transform_component.transform());
+        ImGui::Text(matrix_str_.c_str());
     }
     if (world.hasComponent<ecs::RenderableComponent>(entity)) {
         auto renderable = world.getComponent<ecs::RenderableComponent>(entity);

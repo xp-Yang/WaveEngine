@@ -5,6 +5,8 @@
 #include <sstream>
 #include <iostream>
 
+#include "Core/Logger.hpp"
+
 class ShaderParser {
 public:
     struct GlslLine {
@@ -19,6 +21,7 @@ public:
 
 public: 
     ShaderParser(const std::string& filename) {
+        Logger::get().info("parsing the shader file {}", filename);
         load_file(filename);
     }
 
@@ -53,7 +56,7 @@ protected:
         }
         catch (...)
         {
-            std::cout << "ERROR::SHADER FILE NOT SUCCESFULLY READ" << std::endl;
+            Logger::get().error("SHADER FILE NOT SUCCESFULLY READ");
             assert(false);
             return false;
         }
@@ -116,8 +119,14 @@ private:
 
 Shader::Shader(const std::string vertexPath, const std::string geometryPath, const std::string fragmentPath)
 {
-    assert(!vertexPath.empty());
-    assert(!fragmentPath.empty());
+    if (vertexPath.empty()) {
+        Logger::get().error("a vertex shader is needed!");
+        assert(false);
+    }
+    if (fragmentPath.empty()) {
+        Logger::get().error("a fragment shader is needed!");
+        assert(false);
+    }
     bool has_geo_shader = !geometryPath.empty();
 
     // 1. read the source code and process file include
@@ -150,7 +159,7 @@ Shader::Shader(const std::string vertexPath, const std::string geometryPath, con
     if (!success)
     {
         glGetShaderInfoLog(vertex, 512, NULL, infoLog);
-        std::cout << "ERROR::SHADER::VERTEX::COMPILATION_FAILED\n" << infoLog << std::endl;
+        Logger::get().error("SHADER::VERTEX::COMPILATION_FAILED\n{}\n", infoLog);
         assert(false);
     };
 
@@ -162,7 +171,7 @@ Shader::Shader(const std::string vertexPath, const std::string geometryPath, con
         if (!success)
         {
             glGetShaderInfoLog(geometry, 512, NULL, infoLog);
-            std::cout << "ERROR::SHADER::GEOMETRY::COMPILATION_FAILED\n" << infoLog << std::endl;
+            Logger::get().error("SHADER::GEOMETRY::COMPILATION_FAILED\n{}\n", infoLog);
             assert(false);
         };
     }
@@ -174,7 +183,7 @@ Shader::Shader(const std::string vertexPath, const std::string geometryPath, con
     if (!success)
     {
         glGetShaderInfoLog(fragment, 512, NULL, infoLog);
-        std::cout << "ERROR::SHADER::FRAGMENT::COMPILATION_FAILED\n"<< infoLog << std::endl;
+        Logger::get().error("SHADER::FRAGMENT::COMPILATION_FAILED\n{}\n", infoLog);
         assert(false);
     };
 
@@ -190,7 +199,7 @@ Shader::Shader(const std::string vertexPath, const std::string geometryPath, con
     if (!success)
     {
         glGetProgramInfoLog(m_id, 512, NULL, infoLog);
-        std::cout << "ERROR::SHADER::PROGRAM::LINKING_FAILED\n" << infoLog << std::endl;
+        Logger::get().error("SHADER::PROGRAM::LINKING_FAILED\n{}\n", infoLog);
         assert(false);
     }
     glDeleteShader(vertex);

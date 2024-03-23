@@ -25,7 +25,6 @@ target_include_directories(${WAVE_LIB_NAME}
 	${IMGUI_INCLUDE_DIR} 
 	${GLFW_INCLUDE_DIR} 
 	${GLAD_INCLUDE_DIR} 
-	${STB_INCLUDE_DIR} 
 	${ASSIMP_INCLUDE_DIR} 
 	PRIVATE
 	${ENGINE_SRC_DIR})
@@ -35,6 +34,7 @@ target_link_libraries(${WAVE_LIB_NAME}
 	PUBLIC glad
 	PUBLIC imgui
 	PUBLIC stb
+	PUBLIC spdlog
 	PUBLIC glm
 	PUBLIC glfw
 	PUBLIC assimp)

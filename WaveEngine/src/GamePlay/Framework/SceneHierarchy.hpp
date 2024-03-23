@@ -124,6 +124,8 @@ private:
 	int m_point_light_count = 0;
 	int m_test_cube_count = 0;
 	int m_test_sphere_count = 0;
+
+	ecs::World& world;
 };
 
 #endif

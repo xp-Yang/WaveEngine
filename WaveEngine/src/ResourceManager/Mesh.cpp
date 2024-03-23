@@ -2,6 +2,7 @@
 #include <windows.h>
 #include <iostream>
 #include "Platform/RHI/rhi.hpp"
+#include "Core/Logger.hpp"
 
 Mesh::Mesh(const std::vector<Vertex>& vertices)
     : m_vertices(vertices)
@@ -284,15 +285,15 @@ static std::vector<Triangle> recursive_subdivide(const Triangle& triangle, int r
 }
 
 Mesh Mesh::create_icosphere_mesh(int regression_depth) {
+    LARGE_INTEGER t1, t2, tc;
+    QueryPerformanceFrequency(&tc);
+    QueryPerformanceCounter(&t1);
+
     std::vector<Triangle> m_triangles;
     Vec3 m_center;
 
     // 0. 创建正四面体
     create_tetrahedron(m_triangles, m_center);
-
-    LARGE_INTEGER t1, t2, tc;
-    QueryPerformanceFrequency(&tc);
-    QueryPerformanceCounter(&t1);
 
     // 1. 对每个面细分
     for (int i = 0; i < regression_depth; i++) {
@@ -310,10 +311,6 @@ Mesh Mesh::create_icosphere_mesh(int regression_depth) {
     //    new_triangles.insert(new_triangles.end(), ret.begin(), ret.end());
     //}
     //m_triangles = new_triangles;
-
-    QueryPerformanceCounter(&t2);
-    auto time = (double)(t2.QuadPart - t1.QuadPart) / (double)tc.QuadPart;
-    std::cout << "create_icosphere_mesh(): regerssion: " << time << std::endl;
 
     // 2. 对所有细分顶点到中心的距离做归一化
     std::vector<Vertex> all_vertices;
@@ -340,6 +337,11 @@ Mesh Mesh::create_icosphere_mesh(int regression_depth) {
     for (int i = 0; i < all_vertices.size(); i++) {
         indices.push_back(i);
     }
+
+    QueryPerformanceCounter(&t2);
+    auto time = (double)(t2.QuadPart - t1.QuadPart) / (double)tc.QuadPart;
+
+    Logger::get().info("Mesh::create_icosphere_mesh({}), time:{}", regression_depth, time);
 
     return Mesh(all_vertices, indices);
 }

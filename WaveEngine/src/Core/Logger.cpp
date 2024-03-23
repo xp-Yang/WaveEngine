@@ -1,32 +1,106 @@
 #include "Logger.hpp"
 
-std::string matrix_log(const Mat4 mat)
+Logger& Logger::createLogger(int output)
 {
-    std::string result;
-    char buf[1024];
-    sprintf_s(buf, "%.3f %.3f %.3f %.3f \n", mat[0].x, mat[1].x, mat[2].x, mat[3].x);
-    result += buf;
-    sprintf_s(buf, "%.3f %.3f %.3f %.3f \n", mat[0].y, mat[1].y, mat[2].y, mat[3].y);
-    result += buf;
-    sprintf_s(buf, "%.3f %.3f %.3f %.3f \n", mat[0].z, mat[1].z, mat[2].z, mat[3].z);
-    result += buf;
-    sprintf_s(buf, "%.3f %.3f %.3f %.3f \n", mat[0].w, mat[1].w, mat[2].w, mat[3].w);
-    result += buf;
-    //printf("%.3f %.3f %.3f %.3f \n", mat[0][0], mat[1][0], mat[2][0], mat[3][0]);
-    //printf("%.3f %.3f %.3f %.3f \n", mat[0][1], mat[1][1], mat[2][1], mat[3][1]);
-    //printf("%.3f %.3f %.3f %.3f \n", mat[0][2], mat[1][2], mat[2][2], mat[3][2]);
-    //printf("%.3f %.3f %.3f %.3f \n", mat[0][3], mat[1][3], mat[2][3], mat[3][3]);
-    sprintf_s(buf, "\n");
-    result += buf;
-    return result;
+    if (output == (OutputMode::opm_Console | OutputMode::opm_File))
+    {
+        return *(new MultiLogger());
+    }
+    else if (output == OutputMode::opm_Console)
+    {
+        return *(new ConsoleLogger());
+    }
+    else if ((output == OutputMode::opm_File))
+    {
+        return *(new FileLogger());
+    }
+    else {
+        return *(new MultiLogger());
+    }
 }
 
-std::string vec3_log(const Vec3 vec) {
-    std::string result;
-    char buf[1024];
-    sprintf_s(buf, "%.3f %.3f %.3f \n", vec.x, vec.y, vec.z);
-    result += buf;
-    sprintf_s(buf, "\n");
-    result += buf;
-    return result;
+void Logger::init_filename()
+{
+    struct tm* cur_time;
+    time_t local_time;
+    time(&local_time);
+    cur_time = localtime(&local_time);
+
+    /* 通过时间命名日志文件 */
+    char filename[256];
+    strftime(filename, 100, "%Y-%m-%d_%H-%M-%S.log", cur_time);
+
+    /* log file name, does not contain file path */
+    std::string log_file_name = std::string(filename);
+
+    /* 日志文件全路径 */
+    m_full_filename = m_directory + log_file_name;
+
+    /* 记录日志创建时间，在通过时间长度控制日志文件大小时，该成员变量会被使用 */
+    //logger_create_time = local_time;
+}
+
+void Logger::setLogDirectory(const std::string& dir)
+{
+    m_directory = dir;
+}
+
+void Logger::setLevel(spdlog::level::level_enum level)
+{
+    m_logger->set_level(level);
+}
+
+
+FileLogger::FileLogger()
+{
+    init_filename();
+    create();
+}
+
+void FileLogger::create()
+{
+    m_logger = spdlog::basic_logger_mt("basic_logger", m_full_filename.c_str());
+    spdlog::set_pattern("[%Y-%m-%d %T]%^[%l]%$ %v");
+    m_logger->set_level(spdlog::level::trace);
+}
+
+
+ConsoleLogger::ConsoleLogger()
+{
+    create();
+}
+
+void ConsoleLogger::create()
+{
+    m_logger = spdlog::stdout_color_mt("console");
+    spdlog::set_pattern("[%Y-%m-%d %T]%^[%l]%$ %v");
+    m_logger->set_level(spdlog::level::trace);
+}
+
+
+MultiLogger::MultiLogger()
+{
+    init_filename();
+    create();
+}
+
+void MultiLogger::create()
+{
+    /* 通过multi-sink的方式创建复合logger，实现方式为：先分别创建文件sink和控制台sink，并将两者放入sink 向量中，组成一个复合logger */
+    /* file sink */
+    auto file_sink = std::make_shared<spdlog::sinks::basic_file_sink_mt>(m_full_filename.c_str(), true);
+    file_sink->set_level(spdlog::level::trace);
+    file_sink->set_pattern("[%Y-%m-%d %T]%^%^[%l]%$%$ %v");
+
+    /* 控制台sink */
+    auto console_sink = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
+    console_sink->set_level(spdlog::level::trace);
+    //console_sink->set_pattern("%+");
+    console_sink->set_pattern("[%Y-%m-%d %T]%^[%l]%$ %v");
+
+    /* Sink组合 */
+    std::vector<spdlog::sink_ptr> sinks;
+    sinks.push_back(console_sink);
+    sinks.push_back(file_sink);
+    m_logger = std::make_shared<spdlog::logger>("multi-sink", begin(sinks), end(sinks));
 }
