@@ -11,9 +11,11 @@ static const std::string resource_dir = Application::resourceDirectory();
 SceneHierarchy::SceneHierarchy()
 	: world(ecs::World::get())
 {
-	Logger::get().trace("SceneHierarchy::init()");
 	init();
-	Logger::get().trace("finished SceneHierarchy::init()");
+}
+
+SceneHierarchy::~SceneHierarchy()
+{
 }
 
 GameObject* SceneHierarchy::loadModel(const std::string& filepath)
@@ -48,10 +50,30 @@ GameObject* SceneHierarchy::loadModel(const std::string& filepath)
 	return res;
 }
 
+void SceneHierarchy::addObject(GameObject* obj, GameObject* parent)
+{
+	Logger::get().trace("SceneHierarchy::addObject(entity = {})", obj->entity().getId());
+
+	if (ecs::World::get().hasComponent<ecs::PointLightComponent>(obj->entity()))
+		m_point_light_count++;
+	parent ? parent->append(obj) : m_root_object->append(obj);
+}
+
+void SceneHierarchy::removeObject(const ecs::Entity& entity)
+{
+	Logger::get().trace("SceneHierarchy::removeObject(entity = {})", entity.getId());
+
+	if (ecs::World::get().hasComponent<ecs::PointLightComponent>(entity))
+		m_point_light_count--;
+	m_root_object->remove(entity);
+}
+
 void SceneHierarchy::addPointLight()
 {
 	if (pointLightCount() >= maxPointLightCount())
 		return;
+
+	Logger::get().info("SceneHierarchy::addPointLight(), count:{}", m_point_light_count + 1);
 
 	static Shader* point_light_shader = new Shader(resource_dir + "/shader/light.vs", resource_dir + "/shader/light.fs");
 
@@ -80,6 +102,8 @@ void SceneHierarchy::addPointLight()
 
 void SceneHierarchy::addCube()
 {
+	Logger::get().info("SceneHierarchy::addCube(), count:{}", m_test_cube_count + 1);
+
 	auto cube_entity = world.create_entity();
 	auto cube_node = new GameObject(m_root_cube_object, cube_entity);
 	world.addComponent<ecs::NameComponent>(cube_entity).name = std::string("Cube") + std::to_string(m_test_cube_count);
@@ -138,6 +162,8 @@ void SceneHierarchy::updateSpheresPosition()
 
 void SceneHierarchy::addSphere()
 {
+	Logger::get().info("SceneHierarchy::addSphere(), count:{}", m_test_sphere_count + 1);
+
 	auto sphere_entity = world.create_entity();
 	auto sphere_node = new GameObject(m_root_sphere_object, sphere_entity);
 	world.addComponent<ecs::NameComponent>(sphere_entity).name = std::string("Sphere") + std::to_string(m_test_sphere_count);
@@ -169,6 +195,8 @@ void SceneHierarchy::removeSphere(size_t index)
 	if (m_root_sphere_object->children().empty())
 		return;
 
+	Logger::get().info("SceneHierarchy::removeSphere(), count:{}", m_test_sphere_count - 1);
+
 	if (index >= m_root_sphere_object->children().size())
 		m_root_sphere_object->remove(m_root_sphere_object->children().back());
 	else
@@ -181,6 +209,8 @@ void SceneHierarchy::removeSphere(size_t index)
 
 void SceneHierarchy::initMainCamera()
 {
+	Logger::get().trace("SceneHierarchy::initMainCamera()");
+
 	auto camera = world.create_entity();
 	world.addComponent<ecs::NameComponent>(camera).name = "Main Camera";
 	auto& camera_component = world.addComponent<ecs::CameraComponent>(camera);
@@ -188,6 +218,8 @@ void SceneHierarchy::initMainCamera()
 
 void SceneHierarchy::createSkybox()
 {
+	Logger::get().trace("SceneHierarchy::createSkybox()");
+
 	auto skybox_entity = world.create_entity();
 	world.addComponent<ecs::NameComponent>(skybox_entity).name = "Skybox";
 	world.addComponent<ecs::TransformComponent>(skybox_entity);
@@ -214,6 +246,8 @@ void SceneHierarchy::createSkybox()
 
 void SceneHierarchy::createGround()
 {
+	Logger::get().trace("SceneHierarchy::createGround()");
+
 	//TODO shader在延迟渲染中没用到。shader是否不应该在这里创建
 	auto ground_entity = world.create_entity();
 	auto ground_node = new GameObject(m_root_object, ground_entity);
@@ -238,6 +272,8 @@ void SceneHierarchy::createGround()
 
 void SceneHierarchy::createDirectionalLight()
 {
+	Logger::get().trace("SceneHierarchy::createDirectionalLight()");
+
 	auto dir_light_entity = world.create_entity();
 	auto directional_light_node = new GameObject(m_root_object, dir_light_entity);
 	world.addComponent<ecs::NameComponent>(dir_light_entity).name = "Directional Light";
@@ -249,30 +285,27 @@ void SceneHierarchy::createDirectionalLight()
 }
 
 void SceneHierarchy::init() {
+	Logger::get().trace("SceneHierarchy::init()");
+
 	auto root_entity = world.create_entity();
 	world.addComponent<ecs::NameComponent>(root_entity).name = "Root";
 	m_root_object = new GameObject(nullptr, root_entity);
 
-	Logger::get().trace("SceneHierarchy::initMainCamera()");
 	initMainCamera();
 
-	Logger::get().trace("SceneHierarchy::createSkybox()");
 	createSkybox();
 
-	Logger::get().trace("SceneHierarchy::createDirectionalLight()");
 	createDirectionalLight();
 
 	size_t point_lights_count = 1;
-	Logger::get().trace("SceneHierarchy::addPointLights, count:{}", point_lights_count);
 	auto root_point_lights_entity = world.create_entity();
 	world.addComponent<ecs::NameComponent>(root_point_lights_entity).name = "Point Lights";
 	m_root_point_light_object = new GameObject(m_root_object, root_point_lights_entity);
-	for (int i = 0; point_lights_count < 1; i++) {
+	for (int i = 0; i < point_lights_count; i++) {
 		addPointLight();
 	}
 
 	size_t cubes_count = 36;
-	Logger::get().trace("SceneHierarchy::addCubes, count:{}", cubes_count);
 	auto root_cube_entity = world.create_entity();
 	world.addComponent<ecs::NameComponent>(root_cube_entity).name = "Cubes";
 	m_root_cube_object = new GameObject(m_root_object, root_cube_entity);
@@ -281,7 +314,6 @@ void SceneHierarchy::init() {
 	}
 
 	size_t spheres_count = 64;
-	Logger::get().trace("SceneHierarchy::addSpheres, count:{}", spheres_count);
 	auto root_sphere_entity = world.create_entity();
 	world.addComponent<ecs::NameComponent>(root_sphere_entity).name = "Spheres";
 	m_root_sphere_object = new GameObject(m_root_object, root_sphere_entity);
@@ -289,7 +321,6 @@ void SceneHierarchy::init() {
 		addSphere();
 	}
 
-	Logger::get().trace("SceneHierarchy::createGround()");
 	createGround();
 
 	//SceneHierarchy::loadModel(resource_dir + "/model/nanosuit/nanosuit.obj");
@@ -300,4 +331,6 @@ void SceneHierarchy::init() {
 	bunny_transform->translation = Vec3(-10.0f, 0.0f, 0.0f);
 
 	//SceneHierarchy::loadModel(resource_dir + "/model/dragon.obj");
+
+	Logger::get().trace("finished SceneHierarchy::init()");
 }

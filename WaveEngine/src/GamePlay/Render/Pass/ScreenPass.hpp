@@ -1,7 +1,7 @@
 #ifndef ScreenPass_hpp
 #define ScreenPass_hpp
 
-#include "../RenderPass.hpp"
+#include "RenderPass.hpp"
 
 class ScreenPass : public RenderPass {
 public:

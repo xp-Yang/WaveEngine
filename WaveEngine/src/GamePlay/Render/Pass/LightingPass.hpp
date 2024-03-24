@@ -1,7 +1,7 @@
 #ifndef LightingPass_hpp
 #define LightingPass_hpp
 
-#include "../RenderPass.hpp"
+#include "RenderPass.hpp"
 
 class LightingPass : public RenderPass {
 public:

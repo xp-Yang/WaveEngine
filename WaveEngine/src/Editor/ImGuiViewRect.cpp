@@ -1,4 +1,4 @@
-#include "ViewRect.hpp"
+#include "ImGuiViewRect.hpp"
 #include <WaveEngine/Window.hpp>
 #include <WaveEngine/Application.hpp>
 
@@ -18,11 +18,6 @@ public:
 };
 
 class ShadowView : public ViewRect {
-public:
-    void render() override;
-};
-
-class RayTracingView : public ViewRect {
 public:
     void render() override;
 };
@@ -82,31 +77,13 @@ void ShadowView::render()
     ImGui::End();
 }
 
-void RayTracingView::render()
-{
-    static ImGuiWindowFlags window_flags = 0;
-    ImGui::SetNextWindowSize(ImVec2(800, 450), ImGuiCond_Appearing);
-    if (ImGui::Begin("RayTracingView", nullptr, window_flags | ImGuiWindowFlags_NoBackground)) {
-        ImGuiWindow* window = ImGui::GetCurrentWindow();
-        bool hovered_window = ImGui::IsWindowHovered() && ImGui::IsMouseHoveringRect(window->InnerRect.Min, window->InnerRect.Max);
-        window_flags = hovered_window ? ImGuiWindowFlags_NoMove : 0;
-        ImGui::GetIO().WantPassThroughMouse = ImGui::GetIO().WantPassThroughMouse || hovered_window && !ImGuizmo::IsUsing();
-        ImVec2 window_pos = ImGui::GetWindowPos();
-        ImVec2 window_size = ImGui::GetWindowSize();
-        Viewport viewport = { (int)window_pos.x, (int)window_pos.y, (int)window_size.x, (int)window_size.y, Viewport::Coordinates::ScreenCoordinates };
-        Application::GetApp().getWindow()->setViewport(ViewportType::RayTracing, viewport.transToGLCoordinates());
-    }
-    ImGui::End();
-}
-
 
 ViewRectManager::ViewRectManager()
 {
     ViewRect* main_view = new MainView();
     ViewRect* picking_view = new PickingView();
     ViewRect* shadow_view = new ShadowView();
-    ViewRect* rt_view = new RayTracingView();
-    m_views.assign({ main_view, picking_view, shadow_view, rt_view });
+    m_views.assign({ main_view, picking_view, shadow_view });
 }
 
 ViewRectManager::~ViewRectManager()

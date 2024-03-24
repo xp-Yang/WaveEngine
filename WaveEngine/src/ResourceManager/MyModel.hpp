@@ -26,6 +26,8 @@ private:
 	void processNode(aiNode* node, const aiScene* scene);
 	SubModelData load_mesh(aiMesh* mesh, const aiScene* scene);
 	Material load_material(aiMaterial* material);
+
+	std::string m_dir;
 };
 
 #endif

@@ -5,6 +5,7 @@
 #include <sstream>
 #include <iostream>
 
+#include "Core/Utils.hpp"
 #include "Core/Logger.hpp"
 
 class ShaderParser {
@@ -84,7 +85,7 @@ protected:
             if (tag == "#include") {
                 stm >> tag;
                 tag = tag.substr(0, tag.find("//")); // 过滤注释
-                tag = trim(tag, " \t\r\n\"<>");
+                tag = Utils::trim(tag, " \t\r\n\"<>");
 
                 // 加载 include 文件
                 std::string include_filename = directory + '/' + tag;
@@ -101,16 +102,6 @@ protected:
         }
 
         return true;
-    }
-
-    std::string trim(const std::string& str, const std::string& spaces = " \t\r\n")
-    {
-        size_t a = str.find_first_not_of(spaces);
-        size_t b = str.find_last_not_of(spaces) + 1;
-        if (b <= a) {
-            return std::string();
-        }
-        return str.substr(a, b - a);
     }
 
 private:

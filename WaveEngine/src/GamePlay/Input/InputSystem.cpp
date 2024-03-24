@@ -109,7 +109,7 @@ void InputSystem::pick()
 		//glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
 		// TODO 尝试 glGetTextureImage 
-		glBindFramebuffer(GL_FRAMEBUFFER, 6);
+		glBindFramebuffer(GL_FRAMEBUFFER, 10);
 		//glReadBuffer(GL_COLOR_ATTACHMENT0);
 		unsigned char data[4] = { 0,0,0,0 };
 		// glReadPixels()的坐标是相对于屏幕左下角的

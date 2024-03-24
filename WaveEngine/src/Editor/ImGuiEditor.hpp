@@ -1,7 +1,7 @@
 #ifndef ImGuiEditor_hpp
 #define ImGuiEditor_hpp
 
-#include "ViewRect.hpp"
+#include "ImGuiViewRect.hpp"
 #include "GamePlay/Render/RenderSystem.hpp"
 #include "GamePlay/Framework/ECS/Components.hpp"
 #include "GamePlay/FrameWork/SceneHierarchy.hpp"

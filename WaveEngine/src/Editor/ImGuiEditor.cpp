@@ -71,14 +71,14 @@ void ImGuiEditor::renderGlobalConsole() {
 
     ImGui::Dummy(dummy);
     ImGui::PushItemWidth(150.0f);
-    static unsigned int pipeline_type_option = (int)m_render_params.pipeline_type;
-    if (ImGui::BeginCombo("Render Pipeline", pipeline_type_option == 0 ? "Forward" : "Deferred")) {
+    static unsigned int path_type_option = (int)m_ref_render_system->getRenderPathType();
+    if (ImGui::BeginCombo("Render Path", path_type_option == 0 ? "Forward" : "Deferred")) {
         for (int i = 0; i < 2; i++) {
-            bool selected = pipeline_type_option == i;
+            bool selected = path_type_option == i;
             std::string label = i == 0 ? "Forward" : "Deferred";
             if (ImGui::Selectable(label.c_str(), selected)) {
-                pipeline_type_option = i;
-                m_render_params.pipeline_type = (PIPELINE_TYPE)pipeline_type_option;
+                path_type_option = i;
+                m_ref_render_system->setRenderPathType(static_cast<RenderPath::Type>(path_type_option));
             }
         }
         ImGui::EndCombo();
@@ -90,7 +90,7 @@ void ImGuiEditor::renderGlobalConsole() {
     ImGui::Dummy(dummy);
 
     ImGui::Text("Params:");
-    if (m_render_params.pipeline_type == PIPELINE_TYPE::FORWARD) {
+    if (m_ref_render_system->getRenderPathType() == RenderPath::Type::Forward) {
         ImGui::PushItemWidth(50.0f);
         static unsigned int curr_item = 1;
         if (ImGui::BeginCombo("MSAA", (std::to_string((int)std::pow(4, curr_item)) + "x").c_str())) {

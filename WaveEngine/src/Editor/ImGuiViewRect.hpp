@@ -1,5 +1,5 @@
-#ifndef ViewRect_hpp
-#define ViewRect_hpp
+#ifndef ImGuiViewRect_hpp
+#define ImGuiViewRect_hpp
 
 #include "GamePlay/FrameWork/ECS/World.hpp"
 #include "GamePlay/FrameWork/ECS/Components.hpp"

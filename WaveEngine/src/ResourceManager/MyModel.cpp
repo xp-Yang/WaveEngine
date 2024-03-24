@@ -9,7 +9,6 @@ Model::Model(const std::string& file_path)
 	load_model(file_path);
 }
 
-std::string directory;
 void Model::load_model(const std::string& file_path)
 {
 	Assimp::Importer importer;
@@ -19,7 +18,7 @@ void Model::load_model(const std::string& file_path)
         auto error_str = importer.GetErrorString();
         return;
     }
-    directory = file_path.substr(0, file_path.find_last_of("/\\"));
+    m_dir = file_path.substr(0, file_path.find_last_of("/\\"));
 
     processNode(scene->mRootNode, scene);
 }
@@ -104,26 +103,26 @@ Material Model::load_material(aiMaterial* material) {
     aiString str;
     if (material->GetTextureCount(aiTextureType_DIFFUSE)) {
         material->GetTexture(aiTextureType_DIFFUSE, 0, &str);
-        res.diffuse_map = Texture::generate_texture_from_file(str.C_Str(), directory, false);
-        res.diffuse_map_path = directory + '/' + std::string(str.C_Str());
+        res.diffuse_map = Texture::generate_texture_from_file(str.C_Str(), m_dir, false);
+        res.diffuse_map_path = m_dir + '/' + std::string(str.C_Str());
     }
 
     if (material->GetTextureCount(aiTextureType_SPECULAR)) {
         material->GetTexture(aiTextureType_SPECULAR, 0, &str);
-        res.specular_map = Texture::generate_texture_from_file(str.C_Str(), directory, false);
-        res.specular_map_path = directory + '/' + std::string(str.C_Str());
+        res.specular_map = Texture::generate_texture_from_file(str.C_Str(), m_dir, false);
+        res.specular_map_path = m_dir + '/' + std::string(str.C_Str());
     }
 
     if (material->GetTextureCount(aiTextureType_NORMALS)) {
         material->GetTexture(aiTextureType_NORMALS, 0, &str);
-        res.normal_map = Texture::generate_texture_from_file(str.C_Str(), directory, false);
-        res.normal_map_path = directory + '/' + std::string(str.C_Str());
+        res.normal_map = Texture::generate_texture_from_file(str.C_Str(), m_dir, false);
+        res.normal_map_path = m_dir + '/' + std::string(str.C_Str());
     }
 
     if (material->GetTextureCount(aiTextureType_HEIGHT)) {
         material->GetTexture(aiTextureType_HEIGHT, 0, &str);
-        res.height_map = Texture::generate_texture_from_file(str.C_Str(), directory, false);
-        res.height_map_path = directory + '/' + std::string(str.C_Str());
+        res.height_map = Texture::generate_texture_from_file(str.C_Str(), m_dir, false);
+        res.height_map_path = m_dir + '/' + std::string(str.C_Str());
     }
 
     return res;
