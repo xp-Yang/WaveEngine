@@ -17,6 +17,8 @@ protected:
     void drawDirectionalLightShadowMap();
     void drawPointLightShadowMap();
 
+    void reinit_cube_maps(size_t count);
+
 private:
     FrameBuffer* m_cube_map_framebuffer{ nullptr };
     std::vector<unsigned int> m_cube_maps;

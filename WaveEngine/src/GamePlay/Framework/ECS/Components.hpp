@@ -127,12 +127,13 @@ struct PointLightComponent {
 		}
 		return{};
 	}
-	std::vector<Mat4> lightReferenceMatrix()
+	std::array<Mat4, 6> lightReferenceMatrix()
 	{
 		Mat4 light_projection = Perspective(deg2rad(90.0f), 1.0f, 0.1f, radius);
 		Vec3 light_pos = position();
 
 		// 这里up向量朝下，因为cubeMap从内部采样，是反过来的
+		// TODO 点阴影贴图up矢量朝下，那么上下不也颠倒了
 		Mat4 light_view_right = LookAt(light_pos, light_pos + Vec3(1.0f, 0.0f, 0.0f), Vec3(0.0f, -1.0f, 0.0f)); //右
 		Mat4 light_view_left = LookAt(light_pos, light_pos + Vec3(-1.0f, 0.0f, 0.0f), Vec3(0.0f, -1.0f, 0.0f));//左
 		Mat4 light_view_up = LookAt(light_pos, light_pos + Vec3(0.0f, 1.0f, 0.0f), Vec3(0.0f, 0.0f, 1.0f)); //上
@@ -140,13 +141,13 @@ struct PointLightComponent {
 		Mat4 light_view_front = LookAt(light_pos, light_pos + Vec3(0.0f, 0.0f, 1.0f), Vec3(0.0f, -1.0f, 0.0f)); //近
 		Mat4 light_view_back = LookAt(light_pos, light_pos + Vec3(0.0f, 0.0f, -1.0f), Vec3(0.0f, -1.0f, 0.0f));//远
 		
-		std::vector<Mat4> result;
-		result.push_back(light_projection * light_view_right);
-		result.push_back(light_projection * light_view_left);
-		result.push_back(light_projection * light_view_up);
-		result.push_back(light_projection * light_view_down);
-		result.push_back(light_projection * light_view_front);
-		result.push_back(light_projection * light_view_back);
+		std::array<Mat4, 6> result;
+		result[0] = (light_projection * light_view_right);
+		result[1] = (light_projection * light_view_left);
+		result[2] = (light_projection * light_view_up);
+		result[3] = (light_projection * light_view_down);
+		result[4] = (light_projection * light_view_front);
+		result[5] = (light_projection * light_view_back);
 		return result;
 	}
 };

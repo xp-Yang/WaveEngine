@@ -12,7 +12,6 @@
 // done: 几何着色器法向量显示
 // done: 键盘事件摄像机移动方向应该是摄像机坐标系方向
 // done：当前相机拖动视角为FPS style,会导致相机旋转和平移多次操作会出现问题，相机的拖动导致距离渲染对象变近。需要实现拖动视角令相机在一个圆轨道运行
-// done: 地板铺满
 // done: 定义View、Scene对象职责 答：参考filament
 // done: Model类Mesh和Material对应关系处理
 // done: picking
@@ -34,29 +33,30 @@
 // done: 实现点光源和定向光源的物理模型
 // done: 实时edit点光源数量
 // done: 实现棋盘网格填充shader
-// 9. gamma correction理解，HDR理解
-// 9. 批渲染理解
-// 11. 各种光源的物理模型
-// 12. tbn矩阵计算
-// 13. 理解peter panning 效应
-// 14. 看一下模型加载那篇文章，贴图文件是相对路径保存的或绝对路径保存的，Assimp的简单原理。
-// 16. 粒子系统
-// 18. low-poly
-// 19. 当前反射算法的弱点：距离不对
-// 20. 动态环境贴图，球面时
-// 25. 优化cpu和gpu的io调用
-// 26. Editor 编辑材质后，保存文件
-// 27. main的逻辑放入SandBox中
-// 27. Material 频繁修改, 思考一下它的ECS架构
-// 27. RenderSystem, 思考一下它的ECS架构
-// 28. 线程分离
-// 28. 实现事件机制
-// 28. 加载、保存文件，序列化和反序列化
-// 28. 优化pickingPass, readpixel用鼠标事件处理一次
-// 28. 实现scenegraph场景管理，理清楚bbs的objectlist
-// 28. 调整fov缩放为什么比较合理
-// 28. 去除所有gl裸调用
-// 28. 软光栅+软光追，opengl光栅+opengl光追，opengl光栅+软光追，
+// done: 优化pickingPass, readpixel用鼠标事件处理一次
+// done: 实现scenegraph场景管理
+// 35. gamma correction理解，HDR理解
+// 36. 批渲染理解
+// 37. 各种光源的物理模型
+// 38. tbn矩阵计算
+// 39. 理解peter panning 效应
+// 40. 看一下模型加载那篇文章，贴图文件是相对路径保存的或绝对路径保存的，Assimp的简单原理。
+// 41. 粒子系统
+// 42. low-poly
+// 43. 当前反射算法的弱点：距离不对
+// 44. 动态环境贴图，球面时
+// 45. 优化cpu和gpu的io调用
+// 46. Editor 编辑材质后，保存文件
+// 47. main的逻辑放入SandBox中
+// 48. Material 频繁修改, 思考一下它的ECS架构
+// 49. RenderSystem, 思考一下它的ECS架构
+// 50. 线程分离
+// 51. 实现事件机制
+// 52. 加载、保存文件，序列化和反序列化
+// 53. 调整fov缩放为什么比较合理
+// 54. 去除所有gl裸调用
+// 55. 软光栅+软光追，opengl光栅+opengl光追，opengl光栅+软光追，
+// 56. 重心坐标为什么不是投影不变的
 int main()
 {
     auto& app = Application::GetApp();

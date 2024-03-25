@@ -40,7 +40,7 @@ GameObject* SceneHierarchy::loadModel(const std::string& filepath)
 		}
 		else
 			primitive.material = model->get_datas().at(i).material;
-		Shader* shader = new Shader(resource_dir + "/shader/pbr.vs", resource_dir + "/shader/pbr.fs");
+		Shader* shader = Shader::getShader(ShaderType::PBRShader);
 		primitive.material.shader = shader;
 		primitives.push_back(primitive);
 	}
@@ -113,10 +113,9 @@ void SceneHierarchy::addCube()
 	ecs::Primitive cube_primitive;
 	cube_primitive.mesh = Mesh::create_cube_mesh();
 	Material cube_material;
-	//cube_material.shader = new Shader(resource_dir + "/shader/model.vs", resource_dir + "/shader/modelFowardRendering.fs");
 	cube_material.set_diffuse_map(resource_dir + "/images/pure_white_map.png");
 	cube_material.set_specular_map(resource_dir + "/images/cube_specular.png");
-	cube_material.shader = new Shader(resource_dir + "/shader/pbr.vs", resource_dir + "/shader/pbr.fs");
+	cube_material.shader = Shader::getShader(ShaderType::PBRShader);
 	cube_material.albedo = Vec3(1.0f);
 	cube_material.metallic = 1.0;
 	cube_material.roughness = 0.5;
@@ -173,10 +172,9 @@ void SceneHierarchy::addSphere()
 	ecs::Primitive sphere_primitive;
 	sphere_primitive.mesh = Mesh::create_icosphere_mesh(4);
 	Material sphere_material;
-	//sphere_material.shader = new Shader(resource_dir + "/shader/model.vs", resource_dir + "/shader/modelFowardRendering.fs");
 	sphere_material.set_diffuse_map(resource_dir + "/images/pure_white_map.png");
 	sphere_material.set_specular_map(resource_dir + "/images/pure_white_map.png");
-	sphere_material.shader = new Shader(resource_dir + "/shader/pbr.vs", resource_dir + "/shader/pbr.fs");
+	sphere_material.shader = Shader::getShader(ShaderType::PBRShader);
 	sphere_material.albedo = Vec3(1.0f, 1.0f, 1.0f);
 	sphere_material.metallic = 1.0;
 	sphere_material.roughness = (1.0f / 64) * (m_test_sphere_count + 1);
@@ -259,7 +257,7 @@ void SceneHierarchy::createGround()
 	ecs::Primitive ground_primitive;
 	ground_primitive.mesh = Mesh::create_ground_mesh();
 	Material ground_material;
-	ground_material.shader = new Shader(resource_dir + "/shader/pbr.vs", resource_dir + "/shader/pbr.fs");
+	ground_material.shader = Shader::getShader(ShaderType::PBRShader);
 	ground_material.albedo = Vec3(1.0f, 1.0f, 1.0f);
 	ground_material.metallic = 0.0f;
 	ground_material.roughness = 1.0f;
@@ -297,7 +295,7 @@ void SceneHierarchy::init() {
 
 	createDirectionalLight();
 
-	size_t point_lights_count = 1;
+	size_t point_lights_count = 2;
 	auto root_point_lights_entity = world.create_entity();
 	world.addComponent<ecs::NameComponent>(root_point_lights_entity).name = "Point Lights";
 	m_root_point_light_object = new GameObject(m_root_object, root_point_lights_entity);

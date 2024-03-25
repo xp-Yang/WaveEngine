@@ -16,6 +16,6 @@ void RayTracingRenderPath::render()
 {
     m_ray_tracing_pass->draw();
 
-    //m_screen_pass->prepare(m_ray_tracing_pass->getFrameBuffer());
-    //m_screen_pass->draw();
+    m_screen_pass->prepare(m_ray_tracing_pass->getFrameBuffer());
+    m_screen_pass->draw();
 }

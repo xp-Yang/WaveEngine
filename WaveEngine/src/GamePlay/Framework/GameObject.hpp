@@ -8,6 +8,19 @@ public:
 	GameObject(const ecs::Entity& entity) : GameObject(nullptr, entity) {}
 	GameObject(GameObject* parent, const ecs::Entity& entity) : m_parent(parent), m_entity(entity) { if (parent) parent->append(this); }
 	void append(GameObject* node) { m_children.push_back(node); }
+	int index() const {
+		return m_parent ? m_parent->indexOf(this) : -1;
+	}
+	int indexOf(const GameObject* child) const {
+		if (!child)
+			return -1;
+		for (int i = 0; i < m_children.size(); i++) {
+			if (m_children[i]->entity() == child->entity()) {
+				return i;
+			}
+		}
+		return -1;
+	}
 	// TODO 这些方法如果自己是leaf就不对了
 	void remove(const ecs::Entity& entity) {
 		for (auto child : m_children) {

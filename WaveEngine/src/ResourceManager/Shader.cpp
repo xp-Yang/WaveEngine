@@ -269,8 +269,8 @@ Shader* Shader::getShader(const ShaderType& type)
         static Shader* g_shader = new Shader(resource_dir + "/shader/gBufferPass.vs", resource_dir + "/shader/gBufferPass.fs");
         return g_shader;
     case ShaderType::DeferredLightingShader:
-        static Shader* light_shader = new Shader(resource_dir + "/shader/deferredLighting.vs", resource_dir + "/shader/deferredLighting.fs");
-        return light_shader;
+        static Shader* lighting_shader = new Shader(resource_dir + "/shader/deferredLighting.vs", resource_dir + "/shader/deferredLighting.fs");
+        return lighting_shader;
     case ShaderType::PBRShader:
         static Shader* pbr_shader = new Shader(resource_dir + "/shader/pbr.vs", resource_dir + "/shader/pbr.fs");
         return pbr_shader;
@@ -284,8 +284,8 @@ Shader* Shader::getShader(const ShaderType& type)
         static Shader* wireframe_shader = new Shader(resource_dir + "/shader/model.vs", resource_dir + "/shader/wireframe.gs", resource_dir + "/shader/wireframe.fs");
         return wireframe_shader;
     case ShaderType::CheckerboardShader:
-        static Shader* grid_shader = new Shader(resource_dir + "/shader/checkerboard.vs", resource_dir + "/shader/checkerboard.fs");
-        return grid_shader;
+        static Shader* checkerboard_shader = new Shader(resource_dir + "/shader/checkerboard.vs", resource_dir + "/shader/checkerboard.fs");
+        return checkerboard_shader;
     case ShaderType::PickingShader:
         static Shader* picking_shader = new Shader(resource_dir + "/shader/picking.vs", resource_dir + "/shader/picking.fs");
         return picking_shader;

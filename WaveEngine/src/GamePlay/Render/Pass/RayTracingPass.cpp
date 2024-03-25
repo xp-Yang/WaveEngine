@@ -7,7 +7,7 @@
 void RayTracingPass::init()
 {
 	m_framebuffer = std::make_unique<FrameBuffer>(WINDOW_WIDTH, WINDOW_HEIGHT);
-	m_framebuffer->create({ AttachmentType::RGB16F });
+	m_framebuffer->create({ AttachmentType::RGBA });
 	m_screen_quad = Mesh::create_screen_mesh();
 }
 

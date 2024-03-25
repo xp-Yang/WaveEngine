@@ -2,6 +2,9 @@
 #include "GamePlay/Framework/ECS/Components.hpp"
 #include "Platform/RHI/rhi.hpp"
 
+#include "Application_impl.hpp"
+#include "GamePlay/Framework/SceneHierarchy.hpp"
+
 void LightingPass::init()
 {
     m_framebuffer = std::make_unique<FrameBuffer>(WINDOW_WIDTH, WINDOW_HEIGHT);
@@ -145,7 +148,13 @@ void LightingPass::draw()
 		for (auto entity : world.entityView<ecs::SkyboxComponent>()) {
 			auto& renderable = *world.getComponent<ecs::RenderableComponent>(entity);
 			auto& model_matrix = *world.getComponent<ecs::TransformComponent>(entity);
-			auto skybox_texture_id = m_cube_maps.back();// world.getComponent<ecs::SkyboxComponent>(entity)->texture;
+			if (world.getPickedEntities().empty())
+				break;
+			auto point_light_entity = world.getPickedEntities()[0];
+			if (!world.hasComponent<ecs::PointLightComponent>(point_light_entity))
+				break;
+			int debug_index = Application::GetApp().getSceneHierarchy()->rootObject()->find(point_light_entity)->index();
+			auto skybox_texture_id = m_cube_maps[debug_index];// world.getComponent<ecs::SkyboxComponent>(entity)->texture;
 			for (int i = 0; i < renderable.primitives.size(); i++) {
 				auto& mesh = renderable.primitives[i].mesh;
 				auto& material = renderable.primitives[i].material;

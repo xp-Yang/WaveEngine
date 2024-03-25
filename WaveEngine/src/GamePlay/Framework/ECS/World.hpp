@@ -20,6 +20,9 @@ public:
     Entity() = delete;
     Entity(int id) { m_id = id; }
     Entity(const Entity& rhs) { m_id = rhs.getId(); m_mask = rhs.getMask(); }
+    bool operator==(const Entity& rhs) const {
+        return getId() == rhs.getId();
+    }
     int getId() const { return m_id; }
     ComponentMask& getMask() { return m_mask; }
     const ComponentMask& getMask() const { return m_mask; }

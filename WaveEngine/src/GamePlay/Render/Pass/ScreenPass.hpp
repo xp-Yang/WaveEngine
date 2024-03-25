@@ -13,10 +13,8 @@ public:
     // TODO
     void setPickView(FrameBuffer* frame_buffer);
     void setShadowView(FrameBuffer* frame_buffer);
-    void setRayTracingView(FrameBuffer* frame_buffer);
 private:
     FrameBuffer* m_pick_view_ref{ nullptr };
-    FrameBuffer* m_rt_view_ref{ nullptr };
     FrameBuffer* m_shadow_view_ref{ nullptr };
 
 private:

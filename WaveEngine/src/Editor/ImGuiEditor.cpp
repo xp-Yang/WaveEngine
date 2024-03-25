@@ -71,14 +71,13 @@ void ImGuiEditor::renderGlobalConsole() {
 
     ImGui::Dummy(dummy);
     ImGui::PushItemWidth(150.0f);
-    static unsigned int path_type_option = (int)m_ref_render_system->getRenderPathType();
-    if (ImGui::BeginCombo("Render Path", path_type_option == 0 ? "Forward" : "Deferred")) {
-        for (int i = 0; i < 2; i++) {
+    int path_type_option = (int)m_ref_render_system->getRenderPathType();
+    std::array<std::string, 3> combo_strs = { "Forward", "Deferred", "RayTracing" };
+    if (ImGui::BeginCombo("Render Path", combo_strs[path_type_option].c_str())) {
+        for (int i = 0; i < combo_strs.size(); i++) {
             bool selected = path_type_option == i;
-            std::string label = i == 0 ? "Forward" : "Deferred";
-            if (ImGui::Selectable(label.c_str(), selected)) {
-                path_type_option = i;
-                m_ref_render_system->setRenderPathType(static_cast<RenderPath::Type>(path_type_option));
+            if (ImGui::Selectable(combo_strs[i].c_str(), selected)) {
+                m_ref_render_system->setRenderPathType(RenderPath::Type(i));
             }
         }
         ImGui::EndCombo();

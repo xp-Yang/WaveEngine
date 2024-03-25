@@ -33,25 +33,22 @@ void ScreenPass::draw()
 	glEnable(GL_DEPTH_TEST);
 
 
-	// TODO 可以塞多个小窗口进多个imgui窗口里
 	// child window for debugging
-	Viewport picking_viewport = Application::GetApp().getWindow()->getViewport(ViewportType::Pick).value_or(Viewport());
-	Application::GetApp().getWindow()->setViewport(ViewportType::Pick, picking_viewport);
-	frame_shader->start_using();
-	frame_shader->setTexture("Texture", 0, m_pick_view_ref->getFirstAttachmentOf(AttachmentType::RGBA).getMap());
-	Renderer::drawIndex(*frame_shader, m_screen_quad.get_VAO(), m_screen_quad.get_indices_count());
+	if (m_pick_view_ref) {
+		Viewport picking_viewport = Application::GetApp().getWindow()->getViewport(ViewportType::Pick).value_or(Viewport());
+		Application::GetApp().getWindow()->setViewport(ViewportType::Pick, picking_viewport);
+		frame_shader->start_using();
+		frame_shader->setTexture("Texture", 0, m_pick_view_ref->getFirstAttachmentOf(AttachmentType::RGBA).getMap());
+		Renderer::drawIndex(*frame_shader, m_screen_quad.get_VAO(), m_screen_quad.get_indices_count());
+	}
 
-	Viewport shadow_viewport = Application::GetApp().getWindow()->getViewport(ViewportType::Shadow).value_or(Viewport());
-	Application::GetApp().getWindow()->setViewport(ViewportType::Shadow, shadow_viewport);
-	frame_shader->start_using();
-	frame_shader->setTexture("Texture", 0, m_shadow_view_ref->getFirstAttachmentOf(AttachmentType::DEPTH).getMap());
-	Renderer::drawIndex(*frame_shader, m_screen_quad.get_VAO(), m_screen_quad.get_indices_count());
-
-	//Viewport rt_viewport = Application::GetApp().getWindow()->getViewport(ViewportType::RayTracing).value_or(Viewport());
-	//Application::GetApp().getWindow()->setViewport(ViewportType::RayTracing, rt_viewport);
-	//frame_shader->start_using();
-	//frame_shader->setTexture("Texture", 0, m_rt_view_ref->getFirstAttachmentOf(AttachmentType::RGB16F).getMap());
-	//Renderer::drawIndex(*frame_shader, m_screen_quad.get_VAO(), m_screen_quad.get_indices_count());
+	if (m_shadow_view_ref) {
+		Viewport shadow_viewport = Application::GetApp().getWindow()->getViewport(ViewportType::Shadow).value_or(Viewport());
+		Application::GetApp().getWindow()->setViewport(ViewportType::Shadow, shadow_viewport);
+		frame_shader->start_using();
+		frame_shader->setTexture("Texture", 0, m_shadow_view_ref->getFirstAttachmentOf(AttachmentType::DEPTH).getMap());
+		Renderer::drawIndex(*frame_shader, m_screen_quad.get_VAO(), m_screen_quad.get_indices_count());
+	}
 }
 
 FrameBuffer* ScreenPass::getFrameBuffer()
@@ -67,9 +64,4 @@ void ScreenPass::setPickView(FrameBuffer* frame_buffer)
 void ScreenPass::setShadowView(FrameBuffer* frame_buffer)
 {
 	m_shadow_view_ref = frame_buffer;
-}
-
-void ScreenPass::setRayTracingView(FrameBuffer* frame_buffer)
-{
-	m_rt_view_ref = frame_buffer;
 }
