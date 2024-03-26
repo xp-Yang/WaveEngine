@@ -52,7 +52,6 @@ void PickingView::render()
         ImGuiWindow* window = ImGui::GetCurrentWindow();
         bool hovered_window = ImGui::IsWindowHovered() && ImGui::IsMouseHoveringRect(window->InnerRect.Min, window->InnerRect.Max);
         window_flags = hovered_window ? ImGuiWindowFlags_NoMove : 0;
-        ImGui::GetIO().WantPassThroughMouse = ImGui::GetIO().WantPassThroughMouse || hovered_window && !ImGuizmo::IsUsing();
         ImVec2 window_pos = ImGui::GetWindowPos();
         ImVec2 window_size = ImGui::GetWindowSize();
         Viewport viewport = { (int)window_pos.x, (int)window_pos.y, (int)window_size.x, (int)window_size.y, Viewport::Coordinates::ScreenCoordinates };

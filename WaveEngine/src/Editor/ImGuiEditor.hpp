@@ -26,6 +26,7 @@ public:
 
 protected:
 	void renderGlobalMenu();
+	void renderEmptyMainDockerSpaceWindow();
 	void renderGlobalConsole();
 	void renderCameraController();
 	void renderSceneHierarchyNode(GameObject* node);
@@ -34,6 +35,8 @@ protected:
 
 	void renderGizmos();
 	void updateRenderParams();
+
+	void configUIStyle();
 
 private:
 	std::unique_ptr<ViewRectManager> m_view_manager;

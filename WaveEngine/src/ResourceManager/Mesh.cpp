@@ -4,12 +4,6 @@
 #include "Platform/RHI/rhi.hpp"
 #include "Core/Logger.hpp"
 
-Mesh::Mesh(const std::vector<Vertex>& vertices)
-    : m_vertices(vertices)
-{
-    build();
-}
-
 Mesh::Mesh(const std::vector<Vertex>& vertices, const std::vector<unsigned int>& indices)
     : m_vertices(vertices)
     , m_indices(indices)

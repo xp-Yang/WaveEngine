@@ -164,10 +164,10 @@ void CameraSystem::onMouseWheelUpdate(double yoffset, double mouse_x, double mou
         mouse_y -= main_viewport.y;
         Vec3 mouse_3d_pos = rayCastPlaneZero(mouse_x, mouse_y);
 
-        Logger::get().trace("\nMouse Ray");
-        Logger::get().trace("Mouse 2d position: {},{}", mouse_x, mouse_y);
-        Logger::get().trace("Mouse 3d position: {},{},{}", mouse_3d_pos.x, mouse_3d_pos.y, mouse_3d_pos.z);
-        Logger::get().trace("\n");
+        Logger::get().debug("Mouse Ray");
+        Logger::get().debug("Mouse 2d position: {},{}", mouse_x, mouse_y);
+        Logger::get().debug("Mouse 3d position: {},{},{}", mouse_3d_pos.x, mouse_3d_pos.y, mouse_3d_pos.z);
+        Logger::get().debug("\n");
 
         float viewport_width = (float)main_viewport.width;
         float viewport_height = (float)main_viewport.height;

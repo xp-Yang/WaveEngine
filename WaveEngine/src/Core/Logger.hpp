@@ -33,6 +33,12 @@ public:
 	}
 
 	template<typename... Args>
+	void debug(spdlog::string_view_t fmt, const Args &... args)
+	{
+		m_logger->debug(fmt, args...);
+	}
+
+	template<typename... Args>
 	void info(spdlog::string_view_t fmt, const Args &... args)
 	{
 		m_logger->info(fmt, args...);

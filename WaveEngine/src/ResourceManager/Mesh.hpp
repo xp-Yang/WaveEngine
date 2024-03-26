@@ -6,11 +6,16 @@
 
 class Mesh {
 public:
+	static Mesh create_cube_mesh();
+	static Mesh create_icosphere_mesh(int regression_depth);
+	static Mesh create_quad_mesh(const Point3& origin, const Vec3& positive_dir_u, const Vec3& positive_dir_v);
+	static Mesh create_ground_mesh();
+	static Mesh create_screen_mesh();
+
+public:
 	Mesh() = default;
-	Mesh(const std::vector<Vertex>& vertices);
 	Mesh(const std::vector<Vertex>& vertices, const std::vector<unsigned int>& indices);
-	Mesh(const std::vector<Triangle>& triangles);
-	//~Mesh() { reset(); }
+	//Mesh(const std::vector<Triangle>& triangles);
 
 	void build();
 	void reset();
@@ -29,13 +34,6 @@ protected:
 
 	void create_vbo();
 	void create_vao();
-
-public:
-	static Mesh create_cube_mesh();
-	static Mesh create_icosphere_mesh(int regression_depth);
-	static Mesh create_quad_mesh(const Point3& origin, const Vec3& positive_dir_u, const Vec3& positive_dir_v);
-	static Mesh create_ground_mesh();
-	static Mesh create_screen_mesh();
 };
 
 
