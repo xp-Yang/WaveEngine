@@ -74,7 +74,7 @@ void SceneHierarchy::removeObject(const ecs::Entity& entity)
 
 void SceneHierarchy::addPointLight()
 {
-	if (pointLightCount() >= maxPointLightCount())
+	if (pointLightCount() >= SceneHierarchy::maxPointLightCount())
 		return;
 
 	Logger::get().info("SceneHierarchy::addPointLight(), count:{}", m_point_light_count + 1);

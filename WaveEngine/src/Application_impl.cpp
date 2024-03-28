@@ -24,6 +24,7 @@ Application::~Application() {};
 
 Application& Application::GetApp()
 {
+	// TODO reenter problem
 	static Application app;
 	return app;
 }
