@@ -81,7 +81,8 @@ void LightingPass::draw()
 
 		for (int i = 0; i < m_cube_maps.size(); i++) {
 			std::string cube_map_id = std::string("cube_shadow_maps[") + std::to_string(i) + "]";
-			lighting_shader->setCubeTexture(cube_map_id + ".map", 9, m_cube_maps[i]);
+			// TODO 纹理单元的绑定搞清楚。
+			lighting_shader->setCubeTexture(cube_map_id, 9 + i, m_cube_maps[i]);
 		}
 	}
 

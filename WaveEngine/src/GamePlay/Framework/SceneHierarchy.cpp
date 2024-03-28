@@ -22,6 +22,10 @@ GameObject* SceneHierarchy::loadModel(const std::string& filepath)
 {
 	Logger::get().info("SceneHierarchy::loadModel({})", filepath);
 	Model* model = new Model(filepath);
+	if (model->get_datas().empty()) {
+		Logger::get().error("Model datas is empty. File loading fails. Please check if the filepath is all English.");
+		return nullptr;
+	}
 	auto entity = world.create_entity();
 	std::string name = filepath.substr(filepath.find_last_of("/\\") + 1, filepath.find_last_of('.') - filepath.find_last_of("/\\") - 1);
 	world.addComponent<ecs::NameComponent>(entity).name = name;
@@ -234,7 +238,6 @@ void SceneHierarchy::createSkybox()
 		resource_dir + "/images/skybox/back.jpg"
 	};
 	// TODO 是否可以放到material中
-	// TODO component size crash
 	world.addComponent<ecs::SkyboxComponent>(skybox_entity).texture = Texture::generate_cube_map(faces);
 	Material skybox_material;
 	skybox_material.shader = new Shader(resource_dir + "/shader/skybox.vs", resource_dir + "/shader/skybox.fs");

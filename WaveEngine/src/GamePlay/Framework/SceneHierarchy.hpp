@@ -19,7 +19,7 @@ public:
 	void addCube();
 	void addSphere();
 	void removeSphere(size_t index = -1);
-	size_t maxPointLightCount() const { return 128; }
+	size_t maxPointLightCount() const { return 8; }
 	size_t pointLightCount() const { return m_point_light_count; }
 	size_t sphereCount() const { return m_test_sphere_count; }
 

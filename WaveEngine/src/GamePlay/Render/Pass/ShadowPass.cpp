@@ -1,5 +1,8 @@
 #include "ShadowPass.hpp"
+
+#include "Application_impl.hpp"
 #include "GamePlay/Framework/ECS/Components.hpp"
+#include "GamePlay/Framework/SceneHierarchy.hpp"
 #include "Platform/RHI/rhi.hpp"
 
 void ShadowPass::init()
@@ -7,7 +10,8 @@ void ShadowPass::init()
 	m_framebuffer = std::make_unique<FrameBuffer>(WINDOW_WIDTH, WINDOW_HEIGHT, 1);
 	m_framebuffer->create({ AttachmentType::DEPTH });
 
-    reinit_cube_maps(2);
+    size_t max_point_light_count = Application::GetApp().getSceneHierarchy()->maxPointLightCount();
+    reinit_cube_maps(max_point_light_count);
 
     glGenFramebuffers(1, &m_cube_map_fbo);
     glBindFramebuffer(GL_FRAMEBUFFER, m_cube_map_fbo);

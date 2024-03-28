@@ -11,20 +11,15 @@ struct PointLight
     float radius;
 };
 
-struct CubeMap
-{
-    samplerCube map;
-};
-
 uniform DirectionalLight directionalLight;
 uniform sampler2D shadow_map;
 uniform mat4 lightSpaceMatrix;
 
 // TODO shader里怎么用动态数组
-const int MAX_POINT_LIGHTS_COUNT = 128;
+const int MAX_POINT_LIGHTS_COUNT = 8;
 uniform int point_lights_size;
 uniform PointLight pointLights[MAX_POINT_LIGHTS_COUNT];
-uniform CubeMap cube_shadow_maps[2];
+uniform samplerCube cube_shadow_maps[MAX_POINT_LIGHTS_COUNT];
 
 float ShadowCalculation(vec4 fragPosLightSpace, sampler2D shadow_map)
 {
@@ -59,7 +54,6 @@ float OmnidirectionalShadowCalculation(vec3 lightToFrag, samplerCube cube_map, f
     float closestDepth = texture(cube_map, lightToFrag).r;
     float worldDepth = closestDepth * far_plane;
     float bias = 0.5;
-    float attenuation = PointLightAttenuation(distance, far_plane);
     float shadowFactor = distance - worldDepth > bias ? 0 : 1.0;
 
     return shadowFactor;
