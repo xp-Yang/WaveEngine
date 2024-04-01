@@ -77,11 +77,10 @@ void LightingPass::draw()
 
 	if (m_shadow_map != 0) {
 		lighting_shader->setMatrix("lightSpaceMatrix", 1, light_ref_matrix);
-		lighting_shader->setTexture("shadow_map", 4, m_shadow_map);
+		lighting_shader->setTexture("shadow_map", 8, m_shadow_map);
 
 		for (int i = 0; i < m_cube_maps.size(); i++) {
 			std::string cube_map_id = std::string("cube_shadow_maps[") + std::to_string(i) + "]";
-			// TODO 纹理单元的绑定搞清楚。
 			lighting_shader->setCubeTexture(cube_map_id, 9 + i, m_cube_maps[i]);
 		}
 	}
@@ -165,7 +164,7 @@ void LightingPass::draw()
 				shader->setMatrix("model", 1, model_matrix.transform());
 				shader->setMatrix("view", 1, Mat4(Mat3(camera.view)));
 				shader->setMatrix("projection", 1, camera.projection);
-				shader->setCubeTexture("skybox", 6, skybox_texture_id);
+				shader->setCubeTexture("skybox", 4, skybox_texture_id);
 				Renderer::drawIndex(*shader, mesh.get_VAO(), mesh.get_indices_count());
 				shader->stop_using();
 			}
@@ -269,7 +268,7 @@ void LightingPass::drawCheckerboardMode()
 			grid_shader->setMatrix("projection", 1, camera.projection);
 			if (m_shadow_map != 0) {
 				grid_shader->setMatrix("lightSpaceMatrix", 1, light_ref_matrix);
-				grid_shader->setTexture("shadow_map", 4, m_shadow_map);
+				grid_shader->setTexture("shadow_map", 0, m_shadow_map);
 			}
 			Renderer::drawIndex(*grid_shader, mesh.get_VAO(), mesh.get_indices_count());
 			grid_shader->stop_using();

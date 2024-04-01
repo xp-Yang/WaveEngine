@@ -35,13 +35,12 @@ void GBufferPass::draw()
         for (int i = 0; i < renderable.primitives.size(); i++) {
             auto& mesh = renderable.primitives[i].mesh;
             auto& material = renderable.primitives[i].material;
-            material.update_shader_binding();
             g_shader->start_using();
             g_shader->setMatrix("view", 1, camera.view);
             g_shader->setMatrix("model", 1, model_matrix.transform());
             g_shader->setMatrix("projection", 1, camera.projection);
-            g_shader->setTexture("diffuse_map", 11, material.diffuse_map);
-            g_shader->setTexture("specular_map", 12, material.specular_map);
+            g_shader->setTexture("diffuse_map", 0, material.diffuse_map);
+            g_shader->setTexture("specular_map", 1, material.specular_map);
             g_shader->setFloat3("albedo", material.albedo);
             g_shader->setFloat("metallic", material.metallic);
             g_shader->setFloat("roughness", material.roughness);

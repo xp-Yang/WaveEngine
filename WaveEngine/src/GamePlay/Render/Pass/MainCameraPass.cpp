@@ -110,16 +110,16 @@ void MainCameraPass::draw()
             }
             shader->setInt("point_lights_size", k);
 
-            shader->setCubeTexture("skybox", 6, world.getSkyboxComponent()->texture);
+            shader->setCubeTexture("skybox", 4, world.getSkyboxComponent()->texture);
             shader->setBool("enable_skybox_sample", m_reflection);
             shader->setFloat("explosionRatio", explosion_ratio);
             if (m_shadow_map != 0) {
                 shader->setMatrix("lightSpaceMatrix", 1, light_ref_matrix);
-                shader->setTexture("shadow_map", 7, m_shadow_map);
+                shader->setTexture("shadow_map", 5, m_shadow_map);
 
                 for (int i = 0; i < m_cube_maps.size(); i++) {
                     std::string cube_map_id = std::string("cube_shadow_maps[") + std::to_string(i) + "]";
-                    shader->setCubeTexture(cube_map_id, 9, m_cube_maps[i]);
+                    shader->setCubeTexture(cube_map_id, 6, m_cube_maps[i]);
                 }
             }
             Renderer::drawIndex(*shader, mesh.get_VAO(), mesh.get_indices_count());
@@ -141,7 +141,7 @@ void MainCameraPass::draw()
                 shader->setMatrix("model", 1, model_matrix.transform());
                 shader->setMatrix("view", 1, Mat4(Mat3(camera_view)));
                 shader->setMatrix("projection", 1, camera_projection);
-                shader->setCubeTexture("skybox", 6, skybox_texture_id);
+                shader->setCubeTexture("skybox", 4, skybox_texture_id);
                 Renderer::drawIndex(*shader, mesh.get_VAO(), mesh.get_indices_count());
                 shader->stop_using();
             }
