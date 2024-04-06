@@ -14,11 +14,15 @@ public:
     void setPickView(FrameBuffer* frame_buffer);
     void setShadowView(FrameBuffer* frame_buffer);
     void setBlurredBrightMap(unsigned int map);
+    void setBorderMap(unsigned int map);
+
 private:
     FrameBuffer* m_pick_view_ref{ nullptr };
     FrameBuffer* m_shadow_view_ref{ nullptr };
 
+    unsigned int m_scene_map;
     unsigned int m_blurred_bright_map;
+    unsigned int m_border_map;
 
 private:
     std::unique_ptr<FrameBuffer> m_default_framebuffer{ nullptr };

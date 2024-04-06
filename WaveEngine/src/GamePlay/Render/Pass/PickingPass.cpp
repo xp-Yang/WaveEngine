@@ -7,7 +7,7 @@
 void PickingPass::init()
 {
     m_framebuffer = std::make_unique<FrameBuffer>(WINDOW_WIDTH, WINDOW_HEIGHT);
-    m_framebuffer->create({ AttachmentType::RGBA , AttachmentType::DEPTH});
+    m_framebuffer->create({ AttachmentType::RGB16F , AttachmentType::DEPTH});
 }
 
 void PickingPass::prepare(FrameBuffer* framebuffer)
@@ -19,8 +19,6 @@ void PickingPass::draw()
     // render for picking
     m_framebuffer->bind();
     m_framebuffer->clear();
-    auto main_viewport = Application::GetApp().getWindow()->getMainViewport().value_or(Viewport());
-    Application::GetApp().getWindow()->setMainViewport(main_viewport);
 
     glEnable(GL_DEPTH_TEST);
 
@@ -28,18 +26,13 @@ void PickingPass::draw()
     picking_shader->start_using();
 
     auto& world = ecs::World::get();
-    Mat4 camera_view = Mat4(1.0f);
-    Mat4 camera_projection;
     ecs::CameraComponent& camera = *world.getMainCameraComponent();
-    camera_view = camera.view;
-    camera_projection = camera.projection;
-    picking_shader->setMatrix("view", 1, camera_view);
-    picking_shader->setMatrix("projection", 1, camera_projection);
+    picking_shader->setMatrix("view", 1, camera.view);
+    picking_shader->setMatrix("projection", 1, camera.projection);
 
     for (auto entity : world.entityView<ecs::RenderableComponent>()) {
         if (world.hasComponent<ecs::UnpickableComponent>(entity))
             continue;
-        auto name = world.getComponent<ecs::NameComponent>(entity);
         auto& renderable = *world.getComponent<ecs::RenderableComponent>(entity);
         auto& model_matrix = *world.getComponent<ecs::TransformComponent>(entity);
 

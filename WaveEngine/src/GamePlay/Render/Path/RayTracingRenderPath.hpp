@@ -10,7 +10,6 @@ public:
 
 protected:
     std::unique_ptr<RenderPass> m_ray_tracing_pass;
-    std::unique_ptr<RenderPass> m_post_processing_pass;
     std::unique_ptr<RenderPass> m_screen_pass;
 };
 

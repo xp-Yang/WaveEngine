@@ -15,7 +15,7 @@ protected:
     std::unique_ptr<RenderPass> m_gbuffer_pass;
     std::unique_ptr<RenderPass> m_lighting_pass;
     std::unique_ptr<RenderPass> m_blur_pass;
-    std::unique_ptr<RenderPass> m_post_processing_pass;
+    std::unique_ptr<RenderPass> m_edge_detection_pass;
     std::unique_ptr<RenderPass> m_screen_pass;
 
 };

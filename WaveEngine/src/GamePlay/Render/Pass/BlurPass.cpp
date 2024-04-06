@@ -19,27 +19,6 @@ void BlurPass::init()
 
 void BlurPass::prepare(FrameBuffer* framebuffer)
 {
-    auto& world = ecs::World::get();
-    ecs::CameraComponent& camera = *world.getMainCameraComponent();
-    for (auto entity : world.entityView<ecs::PointLightComponent>()) {
-        auto& point_light = *world.getComponent<ecs::PointLightComponent>(entity);
-        auto& renderable = *world.getComponent<ecs::RenderableComponent>(entity);
-        auto& model_matrix = *world.getComponent<ecs::TransformComponent>(entity);
-
-        for (int i = 0; i < renderable.primitives.size(); i++) {
-            auto& mesh = renderable.primitives[i].mesh;
-            auto& material = renderable.primitives[i].material;
-            Shader* shader = material.shader;
-            material.update_shader_binding();
-            shader->start_using();
-            shader->setFloat4("color", point_light.luminousColor);
-            shader->setMatrix("model", 1, model_matrix.transform());
-            shader->setMatrix("view", 1, camera.view);
-            shader->setMatrix("projection", 1, camera.projection);
-            Renderer::drawIndex(*shader, mesh.get_VAO(), mesh.get_indices_count());
-            shader->stop_using();
-        }
-    }
 }
 
 void BlurPass::draw()

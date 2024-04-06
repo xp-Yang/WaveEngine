@@ -13,7 +13,6 @@ protected:
     std::unique_ptr<RenderPass> m_picking_pass;
     std::unique_ptr<RenderPass> m_shadow_pass;
     std::unique_ptr<RenderPass> m_main_camera_pass;
-    std::unique_ptr<RenderPass> m_post_processing_pass;
     std::unique_ptr<RenderPass> m_screen_pass;
 
 };

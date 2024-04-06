@@ -18,6 +18,7 @@ enum class ShaderType {
 	DepthShader,
 	CubeMapShader,
 	GaussianBlur,
+	EdgeDetection,
 };
 
 class Shader{

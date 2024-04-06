@@ -11,6 +11,7 @@ void Renderer::drawIndex(const Shader& shader, unsigned int vao_id, size_t indic
 
 void Renderer::drawIndex(const Shader& shader, const Mesh& mesh)
 {
+    drawIndex(shader, mesh.get_VAO(), mesh.get_indices_count());
 }
 
 void Renderer::drawTriangle(const Shader& shader, unsigned int vao_id, size_t array_count)
@@ -23,5 +24,5 @@ void Renderer::drawTriangle(const Shader& shader, unsigned int vao_id, size_t ar
 
 void Renderer::drawTriangle(const Shader& shader, const Mesh& mesh)
 {
-
+    drawTriangle(shader, mesh.get_VAO(), mesh.get_vertices_count());
 }

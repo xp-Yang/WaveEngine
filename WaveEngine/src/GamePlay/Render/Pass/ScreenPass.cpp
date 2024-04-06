@@ -7,15 +7,18 @@ void ScreenPass::init()
 {
 	m_default_framebuffer = std::make_unique<FrameBuffer>(WINDOW_WIDTH, WINDOW_HEIGHT);
 	m_default_framebuffer->createDefault();
+
 	// ÓÃÀ´downSampleµÄ
 	m_framebuffer = std::make_unique<FrameBuffer>(WINDOW_WIDTH, WINDOW_HEIGHT);
 	m_framebuffer->create({ AttachmentType::RGBA });
+
 	m_screen_quad = Mesh::create_screen_mesh();
 }
 
 void ScreenPass::prepare(FrameBuffer* framebuffer)
 {
 	framebuffer->blitColorMapTo(m_framebuffer.get());
+	m_scene_map = m_framebuffer->getFirstAttachmentOf(AttachmentType::RGBA).getMap();
 }
 
 void ScreenPass::draw()
@@ -27,19 +30,22 @@ void ScreenPass::draw()
 	Application::GetApp().getWindow()->setMainViewport(main_viewport);
 	Shader* frame_shader = Shader::getShader(ShaderType::QuadShader);
 	frame_shader->start_using();
-	frame_shader->setTexture("Texture", 0, m_framebuffer->getFirstAttachmentOf(AttachmentType::RGBA).getMap());
-	frame_shader->setTexture("bloomBlur", 1, m_blurred_bright_map);
+	frame_shader->setTexture("Texture", 0, m_scene_map);
+	frame_shader->setTexture("bloomBlurMap", 1, m_blurred_bright_map);
+	frame_shader->setTexture("borderMap", 2, m_border_map);
 	frame_shader->setBool("bloom", true);
+	frame_shader->setBool("border", true);
 	Renderer::drawIndex(*frame_shader, m_screen_quad.get_VAO(), m_screen_quad.get_indices_count());
 
 
 	frame_shader->setBool("bloom", false);
+	frame_shader->setBool("border", false);
 	// child window for debugging
 	if (m_pick_view_ref) {
 		Viewport picking_viewport = Application::GetApp().getWindow()->getViewport(ViewportType::Pick).value_or(Viewport());
 		Application::GetApp().getWindow()->setViewport(ViewportType::Pick, picking_viewport);
 		frame_shader->start_using();
-		frame_shader->setTexture("Texture", 0, m_pick_view_ref->getFirstAttachmentOf(AttachmentType::RGBA).getMap());
+		frame_shader->setTexture("Texture", 0, m_pick_view_ref->getFirstAttachmentOf(AttachmentType::RGB16F).getMap());
 		Renderer::drawIndex(*frame_shader, m_screen_quad.get_VAO(), m_screen_quad.get_indices_count());
 	}
 
@@ -70,4 +76,9 @@ void ScreenPass::setShadowView(FrameBuffer* frame_buffer)
 void ScreenPass::setBlurredBrightMap(unsigned int map)
 {
 	m_blurred_bright_map = map;
+}
+
+void ScreenPass::setBorderMap(unsigned int map)
+{
+	m_border_map = map;
 }

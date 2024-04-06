@@ -305,6 +305,9 @@ Shader* Shader::getShader(const ShaderType& type)
     case ShaderType::GaussianBlur:
         static Shader* blur_shader = new Shader(resource_dir + "/shader/gaussianBlur.vs", resource_dir + "/shader/gaussianBlur.fs");
         return blur_shader;
+    case ShaderType::EdgeDetection:
+        static Shader* edge_shader = new Shader(resource_dir + "/shader/edgeDetection.vs", resource_dir + "/shader/edgeDetection.fs");
+        return edge_shader;
     default:
         return nullptr;
     }

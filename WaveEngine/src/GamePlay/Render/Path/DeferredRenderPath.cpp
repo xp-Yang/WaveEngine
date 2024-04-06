@@ -5,6 +5,7 @@
 #include "../Pass/LightingPass.hpp"
 #include "../Pass/BlurPass.hpp"
 #include "../Pass/PickingPass.hpp"
+#include "../Pass/EdgeDetectionPass.hpp"
 #include "../Pass/ScreenPass.hpp"
 
 void DeferredRenderPath::init()
@@ -14,6 +15,7 @@ void DeferredRenderPath::init()
     m_gbuffer_pass = std::make_unique<GBufferPass>();
     m_lighting_pass = std::make_unique<LightingPass>();
     m_blur_pass = std::make_unique<BlurPass>();
+    m_edge_detection_pass = std::make_unique<EdgeDetectionPass>();
     m_screen_pass = std::make_unique<ScreenPass>();
 
     m_picking_pass->init();
@@ -21,6 +23,7 @@ void DeferredRenderPath::init()
     m_gbuffer_pass->init();
     m_lighting_pass->init();
     m_blur_pass->init();
+    m_edge_detection_pass->init();
     m_screen_pass->init();
 
 
@@ -60,8 +63,12 @@ void DeferredRenderPath::render()
     static_cast<BlurPass*>(m_blur_pass.get())->setBrightMap(lighting_pass->getBrightMap());
     m_blur_pass->draw();
 
+    m_edge_detection_pass->prepare(nullptr);
+    m_edge_detection_pass->draw();
+
     auto screen_pass = static_cast<ScreenPass*>(m_screen_pass.get());
     screen_pass->setBlurredBrightMap(static_cast<BlurPass*>(m_blur_pass.get())->getBlurredBrightMap());
-    m_screen_pass->prepare(m_lighting_pass->getFrameBuffer());
-    m_screen_pass->draw();
+    screen_pass->setBorderMap(static_cast<EdgeDetectionPass*>(m_edge_detection_pass.get())->getFrameBuffer()->getFirstAttachmentOf(AttachmentType::RGB16F).getMap());
+    screen_pass->prepare(m_lighting_pass->getFrameBuffer());
+    screen_pass->draw();
 }

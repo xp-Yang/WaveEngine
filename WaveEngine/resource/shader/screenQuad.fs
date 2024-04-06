@@ -6,8 +6,10 @@ in vec2 fragUV;
 
 uniform sampler2D Texture;
 //uniform sampler2DMS Texture;
-uniform sampler2D bloomBlur;
+uniform sampler2D bloomBlurMap;
+uniform sampler2D borderMap;
 uniform bool bloom;
+uniform bool border;
 //uniform float exposure;
 
 out vec4 FragColor;
@@ -16,9 +18,12 @@ void main()
 {
     const float gamma = 2.2;
     vec3 hdrColor = texture(Texture, fragUV).rgb;      
-    vec3 bloomColor = texture(bloomBlur, fragUV).rgb;
+    vec3 bloomColor = texture(bloomBlurMap, fragUV).rgb;
+    vec3 borderColor = texture(borderMap, fragUV).rgb;
     if(bloom)
         hdrColor += bloomColor; // additive blending
+    if(border)
+        hdrColor += borderColor;
     // tone mapping
     vec3 result = ToneMapping(hdrColor, 1.0);
     // gamma correct

@@ -2,6 +2,7 @@
 #include <imgui/imgui.h>
 #include "Core/Math.hpp"
 #include "GamePlay/Framework/ECS/Components.hpp"
+#include <WaveEngine/Application.hpp>
 
 void InputSystem::refreshState()
 {
@@ -111,10 +112,18 @@ void InputSystem::pick()
 		// TODO 尝试 glGetTextureImage 
 		glBindFramebuffer(GL_FRAMEBUFFER, 6);
 		//glReadBuffer(GL_COLOR_ATTACHMENT0);
-		unsigned char data[4] = { 0,0,0,0 };
-		// glReadPixels()的坐标是相对于屏幕左下角的
 		int x = (int)ImGui::GetIO().MousePos.x;
-		int y = (int)(WINDOW_HEIGHT - ImGui::GetIO().MousePos.y);
+		int y = (int)ImGui::GetIO().MousePos.y;
+		// map to picking framebuffer size
+		auto main_viewport = Application::GetApp().getWindow()->getMainViewport().value_or(Viewport()).transToScreenCoordinates();
+		x -= main_viewport.x;
+		y -= main_viewport.y;
+		x *= WINDOW_WIDTH / main_viewport.width;
+		y *= WINDOW_HEIGHT / main_viewport.height;
+		// glReadPixels()的坐标是相对于屏幕左下角的
+		y = WINDOW_HEIGHT - y;
+
+		unsigned char data[4] = { 0,0,0,0 };
 		glReadPixels(x, y, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, data);
 		int picked_id = (int)data[0] + (((int)data[1]) << 8) + (((int)data[2]) << 16);
 
