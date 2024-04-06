@@ -28,7 +28,9 @@ void GBufferPass::draw()
     ecs::CameraComponent& camera = *world.getMainCameraComponent();
 
     for (auto entity : world.entityView<ecs::RenderableComponent>()) {
-        if (world.hasComponent<ecs::PointLightComponent>(entity) || world.hasComponent<ecs::SkyboxComponent>(entity))
+        if (world.hasComponent<ecs::PointLightComponent>(entity) || 
+            world.hasComponent<ecs::SkyboxComponent>(entity) ||
+            world.getComponent<ecs::NameComponent>(entity)->name == "Grid")
             continue;
         auto& renderable = *world.getComponent<ecs::RenderableComponent>(entity);
         auto& model_matrix = *world.getComponent<ecs::TransformComponent>(entity);
@@ -49,7 +51,6 @@ void GBufferPass::draw()
             g_shader->stop_using();
         }
     }
-
 }
 
 FrameBuffer* GBufferPass::getFrameBuffer()

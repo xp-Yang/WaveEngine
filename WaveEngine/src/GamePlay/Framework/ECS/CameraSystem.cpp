@@ -20,7 +20,7 @@ void CameraSystem::onUpdate()
         return;
     
     main_camera.fov = lerp(main_camera.fov, m_goal_fov, 0.1f);
-    main_camera.projection = Perspective(main_camera.fov, WINDOW_WIDTH / WINDOW_HEIGHT, 0.1f, 100.0f);
+    main_camera.projection = Perspective(main_camera.fov, WINDOW_WIDTH / WINDOW_HEIGHT, main_camera.nearPlane, main_camera.farPlane);
 
     if (isApproxZero(main_camera.fov - m_goal_fov))
         m_need_update = false;
@@ -75,6 +75,9 @@ void CameraSystem::onMouseUpdate(double delta_x, double delta_y, MouseButton mou
 
     if (main_camera.mode == ecs::CameraComponent::Mode::Orbit) {
         if (mouse_button == MouseButton::Left) {
+            // TODO ¿òÑ¡
+        }
+        if (mouse_button == MouseButton::Right) {
             auto rotate_Y = Rotate(-(float)(0.3f * delta_x * ecs::CameraComponent::Sensitivity), ecs::CameraComponent::global_up);
             main_camera.pos = rotate_Y * Vec4(main_camera.pos, 1.0f);
             main_camera.direction = rotate_Y * Vec4(main_camera.direction, 1.0f);
@@ -89,7 +92,7 @@ void CameraSystem::onMouseUpdate(double delta_x, double delta_y, MouseButton mou
 
             main_camera.view = LookAt(main_camera.pos, main_camera.pos + main_camera.direction, main_camera.camera_up);
         }
-        else if (mouse_button == MouseButton::Right) {
+        else if (mouse_button == MouseButton::Middle) {
             main_camera.pos += -(float)(delta_x * ecs::CameraComponent::Sensitivity) * main_camera.getRightDirection();
             main_camera.pos += -(float)(delta_y * ecs::CameraComponent::Sensitivity) * main_camera.getUpDirection();
 
@@ -196,7 +199,7 @@ void CameraSystem::onMouseWheelUpdate(double yoffset, double mouse_x, double mou
 
         // 4. set view matrix, projection matrix
         main_camera.view = LookAt(main_camera.pos, main_camera.pos + main_camera.direction, main_camera.camera_up);
-        main_camera.projection = Perspective(main_camera.fov, WINDOW_WIDTH / WINDOW_HEIGHT, 0.1f, 100.0f);
+        main_camera.projection = Perspective(main_camera.fov, WINDOW_WIDTH / WINDOW_HEIGHT, main_camera.nearPlane, main_camera.farPlane);
     }
 }
 

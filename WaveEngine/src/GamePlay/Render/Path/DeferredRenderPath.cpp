@@ -3,21 +3,24 @@
 #include "../Pass/ShadowPass.hpp"
 #include "../Pass/GBufferPass.hpp"
 #include "../Pass/LightingPass.hpp"
+#include "../Pass/BlurPass.hpp"
 #include "../Pass/PickingPass.hpp"
 #include "../Pass/ScreenPass.hpp"
 
 void DeferredRenderPath::init()
 {
+    m_picking_pass = std::make_unique<PickingPass>();
     m_shadow_pass = std::make_unique<ShadowPass>();
     m_gbuffer_pass = std::make_unique<GBufferPass>();
     m_lighting_pass = std::make_unique<LightingPass>();
-    m_picking_pass = std::make_unique<PickingPass>();
+    m_blur_pass = std::make_unique<BlurPass>();
     m_screen_pass = std::make_unique<ScreenPass>();
 
+    m_picking_pass->init();
     m_shadow_pass->init();
     m_gbuffer_pass->init();
     m_lighting_pass->init();
-    m_picking_pass->init();
+    m_blur_pass->init();
     m_screen_pass->init();
 
 
@@ -39,20 +42,26 @@ void DeferredRenderPath::render()
 
     m_gbuffer_pass->draw();
 
-    static_cast<LightingPass*>(m_lighting_pass.get())->enableSkybox(m_render_params.skybox);
-    static_cast<LightingPass*>(m_lighting_pass.get())->enableNormal(m_render_params.normal_debug);
-    static_cast<LightingPass*>(m_lighting_pass.get())->enableWireframe(m_render_params.wireframe);
-    static_cast<LightingPass*>(m_lighting_pass.get())->enableCheckerboard(m_render_params.checkerboard);
-    static_cast<LightingPass*>(m_lighting_pass.get())->enablePBR(m_render_params.pbr);
-    static_cast<LightingPass*>(m_lighting_pass.get())->setCubeMaps(static_cast<ShadowPass*>(m_shadow_pass.get())->getCubeMaps());
+    auto lighting_pass = static_cast<LightingPass*>(m_lighting_pass.get());
+    lighting_pass->enableSkybox(m_render_params.skybox);
+    lighting_pass->enableNormal(m_render_params.normal_debug);
+    lighting_pass->enableWireframe(m_render_params.wireframe);
+    lighting_pass->enableCheckerboard(m_render_params.checkerboard);
+    lighting_pass->enablePBR(m_render_params.pbr);
+    lighting_pass->setCubeMaps(static_cast<ShadowPass*>(m_shadow_pass.get())->getCubeMaps());
     if (m_render_params.shadow) {
-        static_cast<LightingPass*>(m_lighting_pass.get())->prepare(m_gbuffer_pass->getFrameBuffer(), m_shadow_pass->getFrameBuffer());
+        lighting_pass->prepare(m_gbuffer_pass->getFrameBuffer(), m_shadow_pass->getFrameBuffer());
     }
     else {
         m_lighting_pass->prepare(m_gbuffer_pass->getFrameBuffer());
     }
     m_lighting_pass->draw();
 
+    static_cast<BlurPass*>(m_blur_pass.get())->setBrightMap(lighting_pass->getBrightMap());
+    m_blur_pass->draw();
+
+    auto screen_pass = static_cast<ScreenPass*>(m_screen_pass.get());
+    screen_pass->setBlurredBrightMap(static_cast<BlurPass*>(m_blur_pass.get())->getBlurredBrightMap());
     m_screen_pass->prepare(m_lighting_pass->getFrameBuffer());
     m_screen_pass->draw();
 }

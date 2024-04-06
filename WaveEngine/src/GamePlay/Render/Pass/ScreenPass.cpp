@@ -25,14 +25,15 @@ void ScreenPass::draw()
 
 	auto main_viewport = Application::GetApp().getWindow()->getMainViewport().value_or(Viewport());
 	Application::GetApp().getWindow()->setMainViewport(main_viewport);
-	glDisable(GL_DEPTH_TEST);
 	Shader* frame_shader = Shader::getShader(ShaderType::QuadShader);
 	frame_shader->start_using();
 	frame_shader->setTexture("Texture", 0, m_framebuffer->getFirstAttachmentOf(AttachmentType::RGBA).getMap());
+	frame_shader->setTexture("bloomBlur", 1, m_blurred_bright_map);
+	frame_shader->setBool("bloom", true);
 	Renderer::drawIndex(*frame_shader, m_screen_quad.get_VAO(), m_screen_quad.get_indices_count());
-	glEnable(GL_DEPTH_TEST);
 
 
+	frame_shader->setBool("bloom", false);
 	// child window for debugging
 	if (m_pick_view_ref) {
 		Viewport picking_viewport = Application::GetApp().getWindow()->getViewport(ViewportType::Pick).value_or(Viewport());
@@ -64,4 +65,9 @@ void ScreenPass::setPickView(FrameBuffer* frame_buffer)
 void ScreenPass::setShadowView(FrameBuffer* frame_buffer)
 {
 	m_shadow_view_ref = frame_buffer;
+}
+
+void ScreenPass::setBlurredBrightMap(unsigned int map)
+{
+	m_blurred_bright_map = map;
 }

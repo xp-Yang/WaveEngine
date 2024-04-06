@@ -9,6 +9,10 @@ void LightingPass::init()
 {
     m_framebuffer = std::make_unique<FrameBuffer>(WINDOW_WIDTH, WINDOW_HEIGHT);
     m_framebuffer->create({ AttachmentType::RGB16F, AttachmentType::DEPTH });
+
+	m_lights_framebuffer = std::make_unique<FrameBuffer>(WINDOW_WIDTH, WINDOW_HEIGHT);
+	m_lights_framebuffer->create({ AttachmentType::RGB16F, AttachmentType::DEPTH });
+
 	m_screen_quad = Mesh::create_screen_mesh();
 }
 
@@ -26,6 +30,9 @@ void LightingPass::prepare(FrameBuffer* g_fb, FrameBuffer* shadow_fb)
 
 void LightingPass::draw()
 {
+	m_lights_framebuffer->bind();
+	m_lights_framebuffer->clear(Color3(0.0f));
+
 	m_framebuffer->bind();
 	m_framebuffer->clear();
 
@@ -113,11 +120,27 @@ void LightingPass::draw()
 	lighting_shader->stop_using();
 
 
-	// lights
 	glEnable(GL_DEPTH_TEST);
 	glDepthMask(GL_TRUE);
 	// TODO 拷贝深度图后才能画法线
 	m_gbuffer_framebuffer->blitDepthMapTo(m_framebuffer.get());
+	// grid
+	for (auto entity : world.entityView<ecs::RenderableComponent>()) {
+		if (world.getComponent<ecs::NameComponent>(entity)->name == "Grid") {
+			Shader* wireframe_shader = Shader::getShader(ShaderType::WireframeShader);
+			auto& renderable = *world.getComponent<ecs::RenderableComponent>(entity);
+			auto& model_matrix = *world.getComponent<ecs::TransformComponent>(entity);
+			wireframe_shader->start_using();
+			wireframe_shader->setMatrix("view", 1, camera.view);
+			wireframe_shader->setMatrix("projection", 1, camera.projection);
+			wireframe_shader->setMatrix("model", 1, model_matrix.transform());
+			for (int i = 0; i < renderable.primitives.size(); i++) {
+				auto& mesh = renderable.primitives[i].mesh;
+				Renderer::drawIndex(*wireframe_shader, mesh.get_VAO(), mesh.get_indices_count());
+			}
+		}
+	}
+	// lights
 	for (auto entity : world.entityView<ecs::PointLightComponent>()) {
 		auto& point_light = *world.getComponent<ecs::PointLightComponent>(entity);
 		auto& renderable = *world.getComponent<ecs::RenderableComponent>(entity);
@@ -170,11 +193,63 @@ void LightingPass::draw()
 			}
 		}
 	}
+
+	m_gbuffer_framebuffer->blitDepthMapTo(m_lights_framebuffer.get());
+	Shader* light_shader = nullptr;
+	for (auto entity : world.entityView<ecs::PointLightComponent>()) {
+		auto& point_light = *world.getComponent<ecs::PointLightComponent>(entity);
+		auto& renderable = *world.getComponent<ecs::RenderableComponent>(entity);
+		auto& model_matrix = *world.getComponent<ecs::TransformComponent>(entity);
+
+		for (int i = 0; i < renderable.primitives.size(); i++) {
+			auto& mesh = renderable.primitives[i].mesh;
+			auto& material = renderable.primitives[i].material;
+			Shader* shader = material.shader;
+			light_shader = material.shader;
+			material.update_shader_binding();
+			shader->start_using();
+			shader->setFloat4("color", point_light.luminousColor);
+			shader->setMatrix("model", 1, model_matrix.transform());
+			shader->setMatrix("view", 1, camera.view);
+			shader->setMatrix("projection", 1, camera.projection);
+			Renderer::drawIndex(*shader, mesh.get_VAO(), mesh.get_indices_count());
+			shader->stop_using();
+		}
+	}
+	//// border
+	//for (auto entity : world.getPickedEntities()) {
+	//	auto& renderable = *world.getComponent<ecs::RenderableComponent>(entity);
+	//	auto& model_matrix = *world.getComponent<ecs::TransformComponent>(entity);
+	//	for (int i = 0; i < renderable.primitives.size(); i++) {
+	//		auto& mesh = renderable.primitives[i].mesh;
+	//		auto& material = renderable.primitives[i].material;
+	//		Shader* shader = material.shader;
+	//		light_shader = material.shader;
+	//		material.update_shader_binding();
+	//		shader->start_using();
+	//		shader->setFloat4("color", Color4(1.0f));
+	//		shader->setMatrix("model", 1, model_matrix.transform());
+	//		shader->setMatrix("view", 1, camera.view);
+	//		shader->setMatrix("projection", 1, camera.projection);
+	//		Renderer::drawIndex(*shader, mesh.get_VAO(), mesh.get_indices_count());
+	//		shader->stop_using();
+	//	}
+	//}
 }
 
 FrameBuffer* LightingPass::getFrameBuffer()
 {
 	return m_framebuffer.get();
+}
+
+unsigned int LightingPass::getSceneMap() const
+{
+	return m_framebuffer->getAttachments()[0].getMap();
+}
+
+unsigned int LightingPass::getBrightMap() const
+{
+	return m_lights_framebuffer->getAttachments()[0].getMap();
 }
 
 void LightingPass::enableSkybox(bool enable)
@@ -215,8 +290,6 @@ void LightingPass::drawNormalMode()
 	for (auto entity : world.entityView<ecs::RenderableComponent>()) {
 		auto& renderable = *world.getComponent<ecs::RenderableComponent>(entity);
 		auto& model_matrix = *world.getComponent<ecs::TransformComponent>(entity);
-
-		normal_shader->start_using();
 		normal_shader->setMatrix("model", 1, model_matrix.transform());
 		for (int i = 0; i < renderable.primitives.size(); i++) {
 			auto& mesh = renderable.primitives[i].mesh;
@@ -237,8 +310,6 @@ void LightingPass::drawWireframeMode()
 	for (auto entity : world.entityView<ecs::RenderableComponent>()) {
 		auto& renderable = *world.getComponent<ecs::RenderableComponent>(entity);
 		auto& model_matrix = *world.getComponent<ecs::TransformComponent>(entity);
-
-		wireframe_shader->start_using();
 		wireframe_shader->setMatrix("model", 1, model_matrix.transform());
 		for (int i = 0; i < renderable.primitives.size(); i++) {
 			auto& mesh = renderable.primitives[i].mesh;
@@ -254,24 +325,20 @@ void LightingPass::drawCheckerboardMode()
 	auto dir_light_component = world.getMainDirectionalLightComponent();
 
 	Mat4 light_ref_matrix = dir_light_component->lightReferenceMatrix();
-	Shader* grid_shader = Shader::getShader(ShaderType::CheckerboardShader);
+	Shader* shader = Shader::getShader(ShaderType::CheckerboardShader);
+	shader->start_using();
 	for (auto entity : world.entityView<ecs::RenderableComponent>()) {
 		auto& renderable = *world.getComponent<ecs::RenderableComponent>(entity);
 		auto& model_matrix = *world.getComponent<ecs::TransformComponent>(entity);
 
 		for (int i = 0; i < renderable.primitives.size(); i++) {
 			auto& mesh = renderable.primitives[i].mesh;
-			grid_shader->start_using();
-			grid_shader->setMatrix("modelScale", 1, Scale(model_matrix.scale));
-			grid_shader->setMatrix("model", 1, model_matrix.transform());
-			grid_shader->setMatrix("view", 1, camera.view);
-			grid_shader->setMatrix("projection", 1, camera.projection);
-			if (m_shadow_map != 0) {
-				grid_shader->setMatrix("lightSpaceMatrix", 1, light_ref_matrix);
-				grid_shader->setTexture("shadow_map", 0, m_shadow_map);
-			}
-			Renderer::drawIndex(*grid_shader, mesh.get_VAO(), mesh.get_indices_count());
-			grid_shader->stop_using();
+			shader->setMatrix("modelScale", 1, Scale(model_matrix.scale));
+			shader->setMatrix("model", 1, model_matrix.transform());
+			shader->setMatrix("view", 1, camera.view);
+			shader->setMatrix("projection", 1, camera.projection);
+			Renderer::drawIndex(*shader, mesh.get_VAO(), mesh.get_indices_count());
+			shader->stop_using();
 		}
 	}
 }

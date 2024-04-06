@@ -18,6 +18,7 @@ using Points3 = std::vector<Point3>;
 using Points4 = std::vector<Point4>;
 
 using Color4 = glm::vec4;
+using Color3 = glm::vec3;
 
 template<typename Vec>
 float Dot(const Vec& vec1, const Vec& vec2) {

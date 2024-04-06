@@ -376,28 +376,29 @@ Mesh Mesh::create_quad_mesh(const Point3& origin, const Vec3& positive_dir_u, co
     return Mesh(vertices, indices);
 }
 
-Mesh Mesh::create_ground_mesh()
+Mesh Mesh::create_ground_mesh(const Vec2& size)
 {
     std::vector<Vertex> vertices;
     std::vector<unsigned int> indices;
 
-    Point3 start_point = Point3(-30.0f, 0.0f, 30.0f);
+    Point3 start_point = Point3(-size.x / 2, 0.0f, size.y / 2);
     Vec3 u = Vec3(-2 * start_point.x, 0, 0);
     Vec3 v = Vec3(0, 0, -2 * start_point.z);
     Point3 end_point = start_point + u + v;
 
-    size_t sub_quad_num = 40;
-    Vec3 sub_u = u / (float)sub_quad_num;
-    Vec3 sub_v = v / (float)sub_quad_num;
-    for (int i = 0; i < sub_quad_num; i++) {
-        for (int j = 0; j < sub_quad_num; j++)
+    size_t sub_quad_num_u = (size_t)(size.x) / 5;
+    size_t sub_quad_num_v = (size_t)(size.y) / 5;
+    Vec3 sub_u = u / (float)sub_quad_num_u;
+    Vec3 sub_v = v / (float)sub_quad_num_v;
+    for (int i = 0; i < sub_quad_num_v; i++) {
+        for (int j = 0; j < sub_quad_num_u; j++)
         {
             Point3 sub_start_point = start_point + (float)j * sub_u + (float)i * sub_v;
             Point3 sub_end_point = sub_start_point + sub_u + sub_v;
             Mesh& submesh = create_quad_mesh(sub_start_point, sub_u, sub_v);
             vertices.insert(vertices.end(), submesh.m_vertices.begin(), submesh.m_vertices.end());
             for (auto& index : submesh.m_indices) {
-                index += 4 * (j + i * sub_quad_num);
+                index += 4 * (j + i * sub_quad_num_u);
             }
             indices.insert(indices.end(), submesh.m_indices.begin(), submesh.m_indices.end());
             submesh.reset();

@@ -7,14 +7,14 @@
 
 void ForwardRenderPath::init()
 {
-    m_main_camera_pass = std::make_unique<MainCameraPass>();
-    m_shadow_pass = std::make_unique<ShadowPass>();
     m_picking_pass = std::make_unique<PickingPass>();
+    m_shadow_pass = std::make_unique<ShadowPass>();
+    m_main_camera_pass = std::make_unique<MainCameraPass>();
     m_screen_pass = std::make_unique<ScreenPass>();
 
+    m_picking_pass->init();
     m_shadow_pass->init();
     m_main_camera_pass->init();
-    m_picking_pass->init();
     m_screen_pass->init();
 
     static_cast<ScreenPass*>(m_screen_pass.get())->setPickView(m_picking_pass->getFrameBuffer());

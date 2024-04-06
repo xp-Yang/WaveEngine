@@ -83,6 +83,9 @@ void MainCameraPass::draw()
             if (world.hasComponent<ecs::PointLightComponent>(entity)) {
                 Vec4 light_color = world.getComponent<ecs::PointLightComponent>(entity)->luminousColor;
                 shader->setFloat4("color", light_color);
+                Renderer::drawIndex(*shader, mesh.get_VAO(), mesh.get_indices_count());
+                shader->stop_using();
+                continue;
             }
 
             // 点光源这里的循环造成了卡顿，需要deferred rendering解决
@@ -119,7 +122,7 @@ void MainCameraPass::draw()
 
                 for (int i = 0; i < m_cube_maps.size(); i++) {
                     std::string cube_map_id = std::string("cube_shadow_maps[") + std::to_string(i) + "]";
-                    shader->setCubeTexture(cube_map_id, 6, m_cube_maps[i]);
+                    shader->setCubeTexture(cube_map_id, 6 + i, m_cube_maps[i]);
                 }
             }
             Renderer::drawIndex(*shader, mesh.get_VAO(), mesh.get_indices_count());

@@ -37,7 +37,7 @@ void PickingPass::draw()
     picking_shader->setMatrix("projection", 1, camera_projection);
 
     for (auto entity : world.entityView<ecs::RenderableComponent>()) {
-        if (world.hasComponent<ecs::SkyboxComponent>(entity) || world.hasComponent<ecs::GroundComponent>(entity))
+        if (world.hasComponent<ecs::UnpickableComponent>(entity))
             continue;
         auto name = world.getComponent<ecs::NameComponent>(entity);
         auto& renderable = *world.getComponent<ecs::RenderableComponent>(entity);

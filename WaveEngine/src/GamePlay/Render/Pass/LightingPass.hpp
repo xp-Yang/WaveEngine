@@ -10,6 +10,8 @@ public:
     void prepare(FrameBuffer* g_fb, FrameBuffer* shadow_fb);
     void draw() override;
     FrameBuffer* getFrameBuffer() override;
+    unsigned int getSceneMap() const;
+    unsigned int getBrightMap() const;
     void enableSkybox(bool enable);
     void enableNormal(bool enable);
     void enableWireframe(bool enable);
@@ -23,6 +25,7 @@ protected:
     void drawCheckerboardMode();
 
 private:
+    std::unique_ptr<FrameBuffer> m_lights_framebuffer;
     FrameBuffer* m_gbuffer_framebuffer{ nullptr };
     unsigned int m_shadow_map = 0;
     Mesh m_screen_quad;

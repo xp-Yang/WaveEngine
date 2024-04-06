@@ -302,6 +302,9 @@ Shader* Shader::getShader(const ShaderType& type)
         static Shader* cube_map_shader = new Shader(resource_dir + "/shader/cubeMap.vs", resource_dir + "/shader/cubeMap.fs");
         //static Shader* cube_map_shader = new Shader(resource_dir + "/shader/cubeMap2.vs", resource_dir + "/shader/cubeMap2.gs", resource_dir + "/shader/cubeMap2.fs");
         return cube_map_shader;
+    case ShaderType::GaussianBlur:
+        static Shader* blur_shader = new Shader(resource_dir + "/shader/gaussianBlur.vs", resource_dir + "/shader/gaussianBlur.fs");
+        return blur_shader;
     default:
         return nullptr;
     }

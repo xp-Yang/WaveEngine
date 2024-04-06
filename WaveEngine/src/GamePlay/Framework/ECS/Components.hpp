@@ -64,12 +64,14 @@ struct CameraComponent {
 	float originFov = deg2rad(45.0f); //竖直fov
 	float zoom = 1.0f;
 	float fov = originFov / zoom;
+	float nearPlane = 0.1f;
+	float farPlane = 1000.0f;
 	Vec3 direction = Normalize(Vec3(0.0f, -1.0f , -1.0f));
 	Vec3 pos = Vec3(0.0f) - 40.0f * direction;
 	Vec3 camera_up = Normalize(global_up - Dot(global_up, direction) * direction);
 	Mat4 view = lookAt(pos, pos + direction, global_up);
-	Mat4 projection = projection_mode == Perspective ? Core::Perspective(fov, ASPECT_RATIO, 0.1f, 100.0f)
-		: Core::Ortho(-15.0f * ASPECT_RATIO, 15.0f * ASPECT_RATIO, -15.0f, 15.0f, 0.1f, 100.0f);
+	Mat4 projection = projection_mode == Perspective ? Core::Perspective(fov, ASPECT_RATIO, nearPlane, farPlane)
+		: Core::Ortho(-15.0f * ASPECT_RATIO, 15.0f * ASPECT_RATIO, -15.0f, 15.0f, nearPlane, farPlane);
 
 	Vec3 getRightDirection() const { // camera 的 x 轴
 		return Cross(direction, camera_up);
@@ -153,8 +155,8 @@ struct PointLightComponent {
 };
 
 struct DirectionalLightComponent {
-	Vec3 direction;
 	Color4 luminousColor = { 1.0f, 1.0f, 1.0f, 1.0f };
+	Vec3 direction;
 
 	Mat4 lightReferenceMatrix()
 	{
@@ -171,7 +173,7 @@ struct DirectionalLightComponent {
 // 不需要数据，仅用作标记选中的entity
 struct PickedComponent {};
 
-struct GroundComponent {};
+struct UnpickableComponent {};
 
 //struct ReceiveShadowComponent {};
 //
@@ -196,7 +198,7 @@ struct InputComponent {
 };
 
 
-#define AllComponents ecs::NameComponent, ecs::TransformComponent, ecs::CameraComponent, ecs::RenderableComponent, ecs::SkyboxComponent, ecs::PointLightComponent, ecs::DirectionalLightComponent, ecs::PickedComponent, ecs::GroundComponent, ecs::ExplosionComponent, ecs::InputComponent
+#define AllComponents ecs::NameComponent, ecs::TransformComponent, ecs::CameraComponent, ecs::RenderableComponent, ecs::SkyboxComponent, ecs::PointLightComponent, ecs::DirectionalLightComponent, ecs::PickedComponent, ecs::UnpickableComponent, ecs::ExplosionComponent, ecs::InputComponent
 
 }
 

@@ -239,6 +239,12 @@ void ImGuiEditor::renderSceneHierarchyNode(GameObject* node)
         const auto& childe_entity = child_node->entity();
 
         static ImGuiTreeNodeFlags node_flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_SpanAvailWidth;
+        for (const auto& picked_entity : world.getPickedEntities()) {
+            if (picked_entity == childe_entity)
+                node_flags |= ImGuiTreeNodeFlags_Selected;
+            else
+                node_flags &= ~ImGuiTreeNodeFlags_Selected;
+        }
         std::string node_name = world.getComponent<ecs::NameComponent>(childe_entity)->name;
         std::string display_text = node_name + " (Entity: " + std::to_string(childe_entity.getId()) + ")";
         bool node_open = ImGui::TreeNodeEx((void*)(intptr_t)i, node_flags, display_text.c_str());
@@ -276,8 +282,6 @@ void ImGuiEditor::renderSceneHierarchyNode(GameObject* node)
                     ImGui::Text("<PointLightComponent>");
                 if (world.hasComponent<ecs::DirectionalLightComponent>(childe_entity))
                     ImGui::Text("<DirectionalLightComponent>");
-                if (world.hasComponent<ecs::GroundComponent>(childe_entity))
-                    ImGui::Text("<GroundComponent>");
             }
             else {
                 renderSceneHierarchyNode(child_node);
@@ -407,8 +411,6 @@ void ImGuiEditor::renderPickedEntityController(const ImVec2& pos, const std::vec
         Vec4& luminousColor = dir_light_component->luminousColor;
         ImGui::ColorEdit3((std::string("Luminous Color") + "##" + obj_name).c_str(), (float*)&luminousColor);
     }
-    if (world.hasComponent<ecs::GroundComponent>(entity))
-        ;
 
     ImGui::End();
 }

@@ -93,7 +93,7 @@ void SceneHierarchy::addPointLight()
 	auto& point_light_renderable = world.addComponent<ecs::RenderableComponent>(point_light_entity);
 	auto& point_light_properties = world.addComponent<ecs::PointLightComponent>(point_light_entity);
 	point_light_properties.radius = (point_light_transform.scale[0]) * 100.0f;
-	point_light_properties.luminousColor = Color4(1.0f);//{ randomUnit(), randomUnit(), randomUnit(), 1.0f };
+	point_light_properties.luminousColor = m_point_light_count == 0 ? Color4(2.0f, 2.0f, 2.0f, 1.0f) : Color4{ randomUnit(), randomUnit(), randomUnit(), 1.0f };
 	ecs::Primitive point_light_primitive;
 	point_light_primitive.mesh = Mesh::create_icosphere_mesh(4);
 	Material point_light_material;
@@ -225,6 +225,7 @@ void SceneHierarchy::createSkybox()
 	auto skybox_entity = world.create_entity();
 	world.addComponent<ecs::NameComponent>(skybox_entity).name = "Skybox";
 	world.addComponent<ecs::TransformComponent>(skybox_entity);
+	world.addComponent<ecs::UnpickableComponent>(skybox_entity);
 	auto& skybox_renderable = world.addComponent<ecs::RenderableComponent>(skybox_entity);
 	ecs::Primitive skybox_primitive;
 	skybox_primitive.mesh = Mesh::create_cube_mesh();
@@ -245,20 +246,19 @@ void SceneHierarchy::createSkybox()
 	skybox_renderable.setPrimitives({ skybox_primitive });
 }
 
-void SceneHierarchy::createGround()
+void SceneHierarchy::createPlaneGround()
 {
-	Logger::get().trace("SceneHierarchy::createGround()");
+	Logger::get().trace("SceneHierarchy::createPlaneGround()");
 
-	//TODO shader在延迟渲染中没用到。shader是否不应该在这里创建
 	auto ground_entity = world.create_entity();
 	auto ground_node = new GameObject(m_root_object, ground_entity);
 	world.addComponent<ecs::NameComponent>(ground_entity).name = "Gound";
-	world.addComponent<ecs::GroundComponent>(ground_entity);
+	world.addComponent<ecs::UnpickableComponent>(ground_entity);
 	auto& ground_transform = world.addComponent<ecs::TransformComponent>(ground_entity);
 	ground_transform.scale = Vec3(1.0f);
 	auto& ground_renderable = world.addComponent<ecs::RenderableComponent>(ground_entity);
 	ecs::Primitive ground_primitive;
-	ground_primitive.mesh = Mesh::create_ground_mesh();
+	ground_primitive.mesh = Mesh::create_ground_mesh(Vec2(60.0f));
 	Material ground_material;
 	ground_material.shader = Shader::getShader(ShaderType::PBRShader);
 	ground_material.albedo = Vec3(1.0f, 1.0f, 1.0f);
@@ -271,6 +271,24 @@ void SceneHierarchy::createGround()
 	ground_renderable.setPrimitives({ ground_primitive });
 }
 
+void SceneHierarchy::createGridGround()
+{
+	Logger::get().trace("SceneHierarchy::createGridGround()");
+
+	auto ground_entity = world.create_entity();
+	world.addComponent<ecs::NameComponent>(ground_entity).name = "Grid";
+	auto& ground_transform = world.addComponent<ecs::TransformComponent>(ground_entity);
+	ground_transform.translation = Vec3(0.0f, -0.05f, 0.0f);
+	world.addComponent<ecs::UnpickableComponent>(ground_entity);
+	auto& ground_renderable = world.addComponent<ecs::RenderableComponent>(ground_entity);
+	ecs::Primitive ground_primitive;
+	ground_primitive.mesh = Mesh::create_ground_mesh(Vec2(1000.0f));
+	Material ground_material;
+	ground_material.shader = Shader::getShader(ShaderType::WireframeShader);
+	ground_primitive.material = ground_material;
+	ground_renderable.setPrimitives({ ground_primitive });
+}
+
 void SceneHierarchy::createDirectionalLight()
 {
 	Logger::get().trace("SceneHierarchy::createDirectionalLight()");
@@ -279,7 +297,7 @@ void SceneHierarchy::createDirectionalLight()
 	auto directional_light_node = new GameObject(m_root_object, dir_light_entity);
 	world.addComponent<ecs::NameComponent>(dir_light_entity).name = "Directional Light";
 	auto& dir_light_properties = world.addComponent<ecs::DirectionalLightComponent>(dir_light_entity);
-	dir_light_properties.luminousColor = Color4(1.0f);
+	dir_light_properties.luminousColor = Color4(2.0f);
 	auto& dir_light_transform = world.addComponent<ecs::TransformComponent>(dir_light_entity);
 	dir_light_transform.translation = { -15.0f, 30.0f, -15.0f };
 	dir_light_properties.direction = -dir_light_transform.translation;
@@ -322,7 +340,9 @@ void SceneHierarchy::init() {
 		addSphere();
 	}
 
-	createGround();
+	createGridGround();
+
+	createPlaneGround();
 
 	//SceneHierarchy::loadModel(resource_dir + "/model/nanosuit/nanosuit.obj");
 

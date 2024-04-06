@@ -17,6 +17,7 @@ enum class ShaderType {
 	QuadShader,
 	DepthShader,
 	CubeMapShader,
+	GaussianBlur,
 };
 
 class Shader{

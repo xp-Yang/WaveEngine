@@ -2,6 +2,7 @@
 #define FrameBuffer_hpp
 
 #include <vector>
+#include "Core/Math.hpp"
 
 enum class AttachmentType {// TODO 所有纹理格式
 	RGB16F,
@@ -40,7 +41,7 @@ public:
 	void blitDepthMapTo(FrameBuffer* dest);
 	void bind();
 	void unBind();
-	void clear();
+	void clear(Color3 clear_color = Color3(1.0f));
 
 private:
 	unsigned int m_fbo = 0;

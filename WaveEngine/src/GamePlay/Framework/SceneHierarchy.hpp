@@ -32,7 +32,8 @@ protected:
 	void init();
 	void initMainCamera(); // TODO 场景不应该包含摄像机
 	void createSkybox();
-	void createGround();
+	void createPlaneGround();
+	void createGridGround();
 	void createDirectionalLight();
 
 	void updateSpheresPosition();

@@ -21,6 +21,8 @@ uniform int point_lights_size;
 uniform PointLight pointLights[MAX_POINT_LIGHTS_COUNT];
 uniform samplerCube cube_shadow_maps[MAX_POINT_LIGHTS_COUNT];
 
+const float gamma = 2.2;
+
 float ShadowCalculation(vec4 fragPosLightSpace, sampler2D shadow_map)
 {
     // 1.还在裁剪空间，执行透视除法，变换到NDC空间
@@ -41,8 +43,8 @@ float ShadowCalculation(vec4 fragPosLightSpace, sampler2D shadow_map)
 
 float PointLightAttenuation(float distance, float radius)
 {
-    float k_quadratic = 0.2;
-    float attenuation = step(0, (radius - distance)) * (1.0 / (1.0 + k_quadratic * distance * distance));
+    float k_quadratic = 1.0;
+    float attenuation = step(radius, distance) * (1.0 / (1.0 + k_quadratic * distance * distance));
     return attenuation;
 }
 
@@ -57,4 +59,16 @@ float OmnidirectionalShadowCalculation(vec3 lightToFrag, samplerCube cube_map, f
     float shadowFactor = distance - worldDepth > bias ? 0 : 1.0;
 
     return shadowFactor;
+}
+
+vec3 ToneMapping(vec3 color, float exposure)
+{
+	vec3 res = vec3(1.0) - exp(-color * exposure);
+	return res;
+}
+
+vec3 GammaCorrection(vec3 color)
+{
+	vec3 res = pow(color, vec3(1.0 / gamma)); 
+	return res;
 }
