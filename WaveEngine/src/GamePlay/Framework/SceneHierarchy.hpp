@@ -2,18 +2,18 @@
 #define SceneHierarchy_hpp
 
 #include "Core/Math.hpp"
-#include "GamePlay/Framework/GameObject.hpp"
+#include "GamePlay/Framework/GObject.hpp"
 
 class SceneHierarchy {
 public:
 	SceneHierarchy();
 	~SceneHierarchy();
 
-	GameObject* rootObject() const { return m_root_object; }
-	void addObject(GameObject* obj, GameObject* parent = nullptr);
+	GObject* rootObject() const { return m_root_object; }
+	void addObject(GObject* obj, GObject* parent = nullptr);
 	void removeObject(const ecs::Entity& entity);
-	void removeObject(GameObject* obj) { removeObject(obj->entity()); }
-	GameObject* object(const ecs::Entity& entity) { return m_root_object->find(entity); }
+	void removeObject(GObject* obj) { removeObject(obj->entity()); }
+	GObject* object(const ecs::Entity& entity) { return m_root_object->find(entity); }
 
 	void addPointLight();
 	void addCube();
@@ -22,7 +22,7 @@ public:
 	size_t pointLightCount() const { return m_point_light_count; }
 	size_t sphereCount() const { return m_test_sphere_count; }
 
-	GameObject* loadModel(const std::string& filepath);
+	GObject* loadModel(const std::string& filepath);
 	void loadScene();
 
 public:
@@ -41,10 +41,10 @@ protected:
 	void reset();
 
 private:
-	GameObject* m_root_object{ nullptr };
-	GameObject* m_root_point_light_object{ nullptr };
-	GameObject* m_root_cube_object{ nullptr };
-	GameObject* m_root_sphere_object{ nullptr };
+	GObject* m_root_object{ nullptr };
+	GObject* m_root_point_light_object{ nullptr };
+	GObject* m_root_cube_object{ nullptr };
+	GObject* m_root_sphere_object{ nullptr };
 	size_t m_point_light_count = 0;
 	size_t m_test_cube_count = 0;
 	size_t m_test_sphere_count = 0;

@@ -13,10 +13,13 @@
 #include "GamePlay/Input/InputSystem.hpp"
 #include "Editor/ImGuiEditor.hpp"
 
+#include "AllMetaRegister.hpp"
+
 #define PERFORMANCE_TEST 0
 
 Application::Application()
 {
+	MetaType::allMetaRegister();
 	init();
 }
 

@@ -5,6 +5,7 @@
 #include "Platform/RHI/rhi.hpp"
 #include "Core/Logger.hpp"
 #include "Application_impl.hpp"
+#include "Core/Meta/Serializer.hpp"
 
 static const std::string resource_dir = Application::resourceDirectory();
 
@@ -18,7 +19,7 @@ SceneHierarchy::~SceneHierarchy()
 {
 }
 
-GameObject* SceneHierarchy::loadModel(const std::string& filepath)
+GObject* SceneHierarchy::loadModel(const std::string& filepath)
 {
 	Logger::get().info("SceneHierarchy::loadModel({})", filepath);
 	Model* model = new Model(filepath);
@@ -50,11 +51,11 @@ GameObject* SceneHierarchy::loadModel(const std::string& filepath)
 	}
 	renderable.setPrimitives(primitives);
 
-	auto res = new GameObject(m_root_object, entity);
+	auto res = new GObject(m_root_object, entity);
 	return res;
 }
 
-void SceneHierarchy::addObject(GameObject* obj, GameObject* parent)
+void SceneHierarchy::addObject(GObject* obj, GObject* parent)
 {
 	Logger::get().trace("SceneHierarchy::addObject(entity = {})", obj->entity().getId());
 
@@ -82,7 +83,7 @@ void SceneHierarchy::addPointLight()
 	static Shader* point_light_shader = new Shader(resource_dir + "/shader/light.vs", resource_dir + "/shader/light.fs");
 
 	auto point_light_entity = world.create_entity();
-	auto point_light_node = new GameObject(m_root_point_light_object, point_light_entity);
+	auto point_light_node = new GObject(m_root_point_light_object, point_light_entity);
 	world.addComponent<ecs::NameComponent>(point_light_entity).name = std::string("Point Light ") + std::to_string(m_point_light_count);
 	auto& point_light_transform = world.addComponent<ecs::TransformComponent>(point_light_entity);
 	double r1 = random(-15.0f, 15.0f);
@@ -109,7 +110,7 @@ void SceneHierarchy::addCube()
 	Logger::get().info("SceneHierarchy::addCube(), count:{}", m_test_cube_count + 1);
 
 	auto cube_entity = world.create_entity();
-	auto cube_node = new GameObject(m_root_cube_object, cube_entity);
+	auto cube_node = new GObject(m_root_cube_object, cube_entity);
 	world.addComponent<ecs::NameComponent>(cube_entity).name = std::string("Cube") + std::to_string(m_test_cube_count);
 	auto& cube_transform = world.addComponent<ecs::TransformComponent>(cube_entity);
 	cube_transform.translation = { 1.5f * (m_test_cube_count % 6), 0.5f + 1.5f * (m_test_cube_count / 6), -10.0f };
@@ -168,7 +169,7 @@ void SceneHierarchy::addSphere()
 	Logger::get().info("SceneHierarchy::addSphere(), count:{}", m_test_sphere_count + 1);
 
 	auto sphere_entity = world.create_entity();
-	auto sphere_node = new GameObject(m_root_sphere_object, sphere_entity);
+	auto sphere_node = new GObject(m_root_sphere_object, sphere_entity);
 	world.addComponent<ecs::NameComponent>(sphere_entity).name = std::string("Sphere") + std::to_string(m_test_sphere_count);
 	world.addComponent<ecs::TransformComponent>(sphere_entity);
 
@@ -190,6 +191,8 @@ void SceneHierarchy::addSphere()
 	m_test_sphere_count++;
 
 	updateSpheresPosition();
+
+	MetaType::Serializer(world.getComponent<ecs::TransformComponent>(sphere_entity));
 }
 
 void SceneHierarchy::removeSphere(size_t index)
@@ -251,7 +254,7 @@ void SceneHierarchy::createPlaneGround()
 	Logger::get().trace("SceneHierarchy::createPlaneGround()");
 
 	auto ground_entity = world.create_entity();
-	auto ground_node = new GameObject(m_root_object, ground_entity);
+	auto ground_node = new GObject(m_root_object, ground_entity);
 	world.addComponent<ecs::NameComponent>(ground_entity).name = "Gound";
 	world.addComponent<ecs::UnpickableComponent>(ground_entity);
 	auto& ground_transform = world.addComponent<ecs::TransformComponent>(ground_entity);
@@ -294,7 +297,7 @@ void SceneHierarchy::createDirectionalLight()
 	Logger::get().trace("SceneHierarchy::createDirectionalLight()");
 
 	auto dir_light_entity = world.create_entity();
-	auto directional_light_node = new GameObject(m_root_object, dir_light_entity);
+	auto directional_light_node = new GObject(m_root_object, dir_light_entity);
 	world.addComponent<ecs::NameComponent>(dir_light_entity).name = "Directional Light";
 	auto& dir_light_properties = world.addComponent<ecs::DirectionalLightComponent>(dir_light_entity);
 	dir_light_properties.luminousColor = Color4(2.0f);
@@ -308,7 +311,7 @@ void SceneHierarchy::init() {
 
 	auto root_entity = world.create_entity();
 	world.addComponent<ecs::NameComponent>(root_entity).name = "Root";
-	m_root_object = new GameObject(nullptr, root_entity);
+	m_root_object = new GObject(nullptr, root_entity);
 
 	initMainCamera();
 
@@ -319,7 +322,7 @@ void SceneHierarchy::init() {
 	size_t point_lights_count = 2;
 	auto root_point_lights_entity = world.create_entity();
 	world.addComponent<ecs::NameComponent>(root_point_lights_entity).name = "Point Lights";
-	m_root_point_light_object = new GameObject(m_root_object, root_point_lights_entity);
+	m_root_point_light_object = new GObject(m_root_object, root_point_lights_entity);
 	for (int i = 0; i < point_lights_count; i++) {
 		addPointLight();
 	}
@@ -327,7 +330,7 @@ void SceneHierarchy::init() {
 	size_t cubes_count = 36;
 	auto root_cube_entity = world.create_entity();
 	world.addComponent<ecs::NameComponent>(root_cube_entity).name = "Cubes";
-	m_root_cube_object = new GameObject(m_root_object, root_cube_entity);
+	m_root_cube_object = new GObject(m_root_object, root_cube_entity);
 	for (int i = 0; i < cubes_count; i++) {
 		addCube();
 	}
@@ -335,7 +338,7 @@ void SceneHierarchy::init() {
 	size_t spheres_count = 64;
 	auto root_sphere_entity = world.create_entity();
 	world.addComponent<ecs::NameComponent>(root_sphere_entity).name = "Spheres";
-	m_root_sphere_object = new GameObject(m_root_object, root_sphere_entity);
+	m_root_sphere_object = new GObject(m_root_object, root_sphere_entity);
 	for (int i = 0; i < spheres_count; i++) {
 		addSphere();
 	}
@@ -346,7 +349,7 @@ void SceneHierarchy::init() {
 
 	//SceneHierarchy::loadModel(resource_dir + "/model/nanosuit/nanosuit.obj");
 
-	GameObject* bunny_obj = SceneHierarchy::loadModel(resource_dir + "/model/bunny.obj");
+	GObject* bunny_obj = SceneHierarchy::loadModel(resource_dir + "/model/bunny.obj");
 	auto bunny_transform = world.getComponent<ecs::TransformComponent>(bunny_obj->entity());
 	bunny_transform->scale = Vec3(40.0f);
 	bunny_transform->translation = Vec3(-10.0f, 0.0f, 0.0f);

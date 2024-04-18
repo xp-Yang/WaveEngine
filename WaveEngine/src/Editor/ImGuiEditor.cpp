@@ -231,7 +231,7 @@ void ImGuiEditor::renderEmptyMainDockerSpaceWindow()
     ImGui::PopStyleVar(3);
 }
 
-void ImGuiEditor::renderSceneHierarchyNode(GameObject* node)
+void ImGuiEditor::renderSceneHierarchyNode(GObject* node)
 {
     for (int i = 0; i < node->children().size(); i++)
     {

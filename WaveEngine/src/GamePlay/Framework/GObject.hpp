@@ -1,17 +1,17 @@
-#ifndef GameObject_hpp
-#define GameObject_hpp
+#ifndef GObject_hpp
+#define GObject_hpp
 
 #include "GamePlay/Framework/ECS/Components.hpp"
 
-class GameObject {
+class GObject {
 public:
-	GameObject(const ecs::Entity& entity) : GameObject(nullptr, entity) {}
-	GameObject(GameObject* parent, const ecs::Entity& entity) : m_parent(parent), m_entity(entity) { if (parent) parent->append(this); }
-	void append(GameObject* node) { m_children.push_back(node); }
+	GObject(const ecs::Entity& entity) : GObject(nullptr, entity) {}
+	GObject(GObject* parent, const ecs::Entity& entity) : m_parent(parent), m_entity(entity) { if (parent) parent->append(this); }
+	void append(GObject* node) { m_children.push_back(node); }
 	int index() const {
 		return m_parent ? m_parent->indexOf(this) : -1;
 	}
-	int indexOf(const GameObject* child) const {
+	int indexOf(const GObject* child) const {
 		if (!child)
 			return -1;
 		for (int i = 0; i < m_children.size(); i++) {
@@ -26,7 +26,7 @@ public:
 		for (auto child : m_children) {
 			child->remove(entity);
 		}
-		auto it = std::find_if(m_children.begin(), m_children.end(), [entity](GameObject* child) {
+		auto it = std::find_if(m_children.begin(), m_children.end(), [entity](GObject* child) {
 			return (*child).entity().getId() == entity.getId();
 			});
 		if (it != m_children.end()) {
@@ -34,8 +34,8 @@ public:
 			m_children.erase(it);
 		}
 	}
-	void remove(GameObject* node) { remove(node->entity()); }
-	GameObject* find(const ecs::Entity& entity) {
+	void remove(GObject* node) { remove(node->entity()); }
+	GObject* find(const ecs::Entity& entity) {
 		for (auto child : m_children) {
 			auto res = child->find(entity);
 			if (res)
@@ -43,11 +43,11 @@ public:
 		}
 		return m_entity.getId() == entity.getId() ? this : nullptr;
 	}
-	const std::vector<GameObject*> allLeaves2() {
+	const std::vector<GObject*> allLeaves2() {
 		if (isLeaf())
 			return { this };
 		// 深度优先
-		std::vector<GameObject*> leaves;
+		std::vector<GObject*> leaves;
 		for (auto child : m_children) {
 			if (child->children().empty()) {
 				leaves.push_back(child);
@@ -59,12 +59,12 @@ public:
 		}
 		return leaves;
 	}
-	const std::vector<GameObject*> allLeaves() {
+	const std::vector<GObject*> allLeaves() {
 		if (isLeaf())
 			return { this };
 		// 广度优先
-		std::vector<GameObject*> leaves;
-		std::vector<GameObject*> nodes;
+		std::vector<GObject*> leaves;
+		std::vector<GObject*> nodes;
 		nodes.push_back(this);
 		while (!nodes.empty()) {
 			auto node = nodes.back();
@@ -81,12 +81,12 @@ public:
 		return leaves;
 	}
 	bool isLeaf() const { return m_children.empty(); }
-	const std::vector<GameObject*>& children() const { return m_children; }
+	const std::vector<GObject*>& children() const { return m_children; }
 	const ecs::Entity& entity() const { return m_entity; }
 
 private:
-	GameObject* m_parent;
-	std::vector<GameObject*> m_children;
+	GObject* m_parent;
+	std::vector<GObject*> m_children;
 	const ecs::Entity m_entity; // TODO 初始化，默认构造被delete了不报错？
 };
 

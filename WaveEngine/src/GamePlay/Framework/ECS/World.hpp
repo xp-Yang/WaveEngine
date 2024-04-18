@@ -208,7 +208,7 @@ private:
     template<typename... ComponentTypes>
     void init()
     {
-        int poolIds[] = { 0, (init_<ComponentTypes>(), 0) ... };
+        (void)std::initializer_list{ (init_<ComponentTypes>(), 0) ... };
     }
 };
 
@@ -223,8 +223,8 @@ public:
         else
         {
             // Unpack the template parameters into an initializer list
-            int poolIds[] = { 0, getComponentPoolId<ComponentTypes>() ... };
-            for (int i = 1; i < (sizeof...(ComponentTypes) + 1); i++)
+            int poolIds[] = { getComponentPoolId<ComponentTypes>() ... };
+            for (int i = 0; i < sizeof...(ComponentTypes); i++)
                 view_mask.set(poolIds[i]);
             view_all = false;
         }

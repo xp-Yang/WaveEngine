@@ -29,7 +29,7 @@ protected:
 	void renderEmptyMainDockerSpaceWindow();
 	void renderGlobalConsole();
 	void renderCameraController();
-	void renderSceneHierarchyNode(GameObject* node);
+	void renderSceneHierarchyNode(GObject* node);
 	void renderSceneHierarchy();
 	void renderPickedEntityController(const ImVec2& pos, const std::vector<ecs::Entity>& picked_entities);
 
