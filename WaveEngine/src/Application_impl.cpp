@@ -19,7 +19,7 @@
 
 Application::Application()
 {
-	MetaType::allMetaRegister();
+	MetaType::Register::allMetaRegister();
 	init();
 }
 

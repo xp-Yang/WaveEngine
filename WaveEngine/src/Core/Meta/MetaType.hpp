@@ -10,77 +10,75 @@
 
 namespace MetaType {
 
-typedef std::function<void(void*, void*)>      SetFuncion;
-typedef std::function<void* (void*)>           GetFuncion;
-typedef std::function<const char* ()>          GetNameFuncion;
+namespace Register {
 
-using FieldFunctionTuple = std::tuple<SetFuncion/*fieldValueSetter*/, GetFuncion/*fieldValueGetter*/, GetNameFuncion/*fieldName*/, GetNameFuncion/*fieldTypeName*/>;
-//using ClassFunctionTuple = std::tuple<GetBaseClassReflectionInstanceListFunc, ConstructorWithJson, WriteJsonByName>;
+typedef std::function<void* (void*)>           GetFunction;
+typedef std::function<void(void*, void*)>      SetFunction;
+struct ClassInfo;
+struct FieldInfo;
+struct MethodInfo;
+struct BaseInfo;
 
+inline std::unordered_map<std::string, ClassInfo> global_class_infos; // TODO 为什么static有问题
 
-static std::multimap<std::string, FieldFunctionTuple*> global_field_multi_map;
-//static std::map<std::string, ClassFunctionTuple*>       class_map;
-
-struct GlobalMetaInfoManager {
-public:
-    //static void registerToClassMap(const char* name, ClassFunctionTuple* value);
-    static void registerToFieldMap(std::string_view name, FieldFunctionTuple* value);
-    static void unregisterAll();
-};
-
-
-class MetaField;
-class MetaObject {
-public:
-    template<class T>
-    static MetaObject MetaObjectOf(T* obj)
-    {
-        return MetaObject(traits::className<T>());
-    }
-
-public:
-    MetaObject& operator=(const MetaObject& rhs);
-
-    const std::string& className() const;
-
-    int fieldCount() const;
-    MetaField field(int index) const;
-    MetaField field(const std::string& name) const;
-
-    bool isValid() const { return m_is_valid; }
-
-private:
-    MetaObject(const std::string& class_name);
-
-    bool m_is_valid{ false };
-    std::vector<MetaField, std::allocator<MetaField>> m_fields;
-    std::string m_class_name;
-};
-
-class MetaField
+template <class ClassType>
+inline void registerClass()
 {
-public:
-    MetaField& operator=(const MetaField& rhs);
+    global_class_infos.insert(std::make_pair(traits::className<ClassType>(), ClassInfo{ traits::className<ClassType>(), {} }));
+}
 
-    void* get(void* instance) const;
-    void  set(void* instance, void* value);
+template <class ClassType, class FieldType>
+inline void registerField(std::string_view field_name)
+{
+    registerField<ClassType, FieldType>(field_name, nullptr, nullptr);
+}
 
-    const std::string& name() const;
-    const std::string& typeName() const;
+template <class ClassType, class FieldType>
+inline void registerField(std::string_view field_name, GetFunction getter, SetFunction setter)
+{
+    std::string class_name = traits::className<ClassType>();
+    if (global_class_infos.find(class_name) != global_class_infos.end())
+    {
+        std::string field_type_name_ = traits::className<FieldType>();
+        std::string field_name_ = std::string(field_name);
+        global_class_infos[class_name].class_name = class_name;
+        global_class_infos[class_name].field_infos.emplace_back(field_type_name_, field_name_, getter, setter);
+    }
+}
 
-private:
-    MetaField(FieldFunctionTuple* functions);
+inline void unregisterAll() {};
 
-private:
-    friend class MetaObject;
-
-    FieldFunctionTuple* m_functions;
-    std::string m_field_name;
-    std::string m_field_type_name;
+struct ClassInfo{
+    std::string class_name;
+    std::vector<FieldInfo> field_infos;
+    //std::vector<MethodInfo> method_infos;
+    //std::vector<BaseInfo> base_infos;
 };
+
+struct FieldInfo {
+    FieldInfo() = default;
+    FieldInfo(const std::string& type_name_, const std::string& name_, GetFunction getter_, SetFunction setter_)
+        : field_type_name(type_name_)
+        , field_name(name_)
+        , getter(getter_)
+        , setter(setter_)
+    {}
+
+    std::string field_type_name;
+    std::string field_name;
+    GetFunction getter;
+    SetFunction setter;
+};
+
+struct MethodInfo {};
+
+struct BaseInfo {};
+
+}
 
 
 namespace traits {
+
 // to get the class name info from the template T
 template<typename T>
 constexpr auto rawClassNameInfo() noexcept {
@@ -119,7 +117,6 @@ constexpr std::string className() noexcept {
         "enum ",
         "union ",
     };
-
     std::string_view name = rawClassName<T>();
 #if defined(_MSC_VER)
     for (const auto& class_key : class_keys) {
@@ -131,7 +128,77 @@ constexpr std::string className() noexcept {
 #endif
     return std::string(name);
 }
+
 }
+
+
+class MetaObject {
+public:
+    template<class T>
+    static MetaObject MetaObjectOf()
+    {
+        MetaObject meta_obj;
+        std::string class_name = traits::className<T>();
+        auto it = Register::global_class_infos.find(class_name);
+        auto test = Register::global_class_infos[class_name];
+        if (it != Register::global_class_infos.end())
+        {
+            meta_obj.m_class_info = it->second;
+        }
+        return meta_obj;
+    }
+
+public:
+    MetaObject(const MetaObject& rhs);
+    MetaObject& operator=(const MetaObject& rhs);
+
+    const std::string& className() const;
+
+    int fieldCount() const;
+    Register::FieldInfo field(int index) const;
+    Register::FieldInfo field(const std::string& name) const;
+
+private:
+    MetaObject() = default;
+
+    Register::ClassInfo m_class_info;
+};
+
+template<class T>
+class ReflectionInstance {
+public:
+    ReflectionInstance(T* obj) : m_meta(MetaObject::MetaObjectOf<T>()), m_instance(obj) {}
+
+    const MetaObject& getMetaObject() { return m_meta; }
+    T* getInstance() { return m_instance; }
+
+    const std::string& className() const {
+        return m_meta.className();
+    }
+
+    int fieldCount() const {
+        return m_meta.fieldCount();
+    }
+
+    void* getField(int index) {
+        // todo: should check validation
+        return static_cast<void*>(m_meta.field(index).getter(m_instance));
+    }
+
+    void* getField(const std::string& name) {
+        // todo: should check validation
+        return static_cast<void*>(m_meta.field(name).getter(m_instance));
+    }
+
+    void setField(const std::string& name, void* value) {
+        // todo: should check validation
+        m_meta.field(name).setter(m_instance, value);
+    }
+
+private:
+    T* m_instance;
+    MetaObject m_meta;
+};
 
 }
 

@@ -21,7 +21,9 @@ public:
 template<class T>
 inline Serializer::Serializer(T* obj)
 {
-	MetaObject meta_obj = MetaObject::MetaObjectOf(obj);
+	ReflectionInstance refl_obj = ReflectionInstance(obj);
+	MetaObject meta_obj_ = MetaObject::MetaObjectOf<T>();
+	MetaObject meta_obj = refl_obj.getMetaObject();
 	std::cout << "\n==================================\n";
 	std::cout << "{\n";
 	std::cout << "    \"className\":\"" << meta_obj.className() << "\",\n";
@@ -29,11 +31,15 @@ inline Serializer::Serializer(T* obj)
 	std::cout << "    \"fields\":{\n";
 	for (int i = 0; i < meta_obj.fieldCount(); i++) {
 		auto& field = meta_obj.field(i);
-		std::string_view type_name = field.typeName();
-		std::string_view field_name = field.name();
-		Vec3 field_value = *(Vec3*)(field.get((void*)obj));
-		std::cout << "        \"" << field_name << "\":";
-		std::cout << "\"" << field_value.x << " " << field_value.y << " " << field_value.z << "\"";
+		std::string_view field_type_name = field.field_type_name;
+		std::string_view field_name = field.field_name;
+		void* field_value = refl_obj.getField(i);
+		std::cout << "        \"" << field_name << "\":" << "<" << field_type_name << ">";
+			//Vec3 field_value_vec3 = *(Vec3*)field_value;
+			//std::cout << "\"" << field_value_vec3.x << " " << field_value_vec3.y << " " << field_value_vec3.z << "\"";
+
+			//std::string field_value_str = *(std::string*)field_value;
+			//std::cout << "\"" << field_value_str << "\"";
 		std::cout << ",\n";
 	}
 	std::cout << "    },\n";

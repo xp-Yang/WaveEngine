@@ -5,15 +5,19 @@
 #include "GamePlay/Framework/ECS/Components.hpp"
 
 #include "_generated/reflection/Transform.reflection.gen.h"
+#include "_generated/reflection/Name.reflection.gen.h"
 
 namespace MetaType {
+namespace Register{
 
 inline void allMetaRegister()
 {
-	ReflectionRegister::TransformReflectionRegister();
+	NameReflectionRegister();
+	TransformReflectionRegister();
 
 }
 
+}
 }
 
 #endif
