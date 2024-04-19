@@ -117,8 +117,8 @@ MetaField::MetaField(FieldFunctionTuple* functions)
     if (m_functions == nullptr)
         return;
 
-    m_field_type_name = (std::get<4>(*m_functions))();
-    m_field_name = (std::get<3>(*m_functions))();
+    m_field_type_name = (std::get<3>(*m_functions))();
+    m_field_name = (std::get<2>(*m_functions))();
 }
 
 }
