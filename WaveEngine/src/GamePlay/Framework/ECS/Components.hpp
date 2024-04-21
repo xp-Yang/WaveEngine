@@ -21,7 +21,7 @@ struct TransformComponent {
 	Vec3 rotation = { 0.0f, 0.0f, 0.0f }; //角度制 // TODO 搞清楚绕3个轴旋转的顺序
 	Vec3 scale = { 1.0f, 1.0f, 1.0f };
 
-	Mat4 transform() const
+	Mat4 transform() const 
 	{
 		glm::qua<float> rotation_qua = glm::qua<float>(Vec3(deg2rad(rotation.x), deg2rad(rotation.y), deg2rad(rotation.z)));
 		Mat4 rotation = glm::mat4_cast(rotation_qua);

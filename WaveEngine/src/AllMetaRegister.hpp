@@ -1,20 +1,24 @@
 #ifndef AllMetaRegister_hpp
 #define AllMetaRegister_hpp
 
-#include "Core/Meta/MetaType.hpp"
+#include "Core/Meta/Meta.hpp"
 #include "GamePlay/Framework/ECS/Components.hpp"
 
-#include "_generated/reflection/Transform.reflection.gen.h"
-#include "_generated/reflection/Name.reflection.gen.h"
-
-namespace MetaType {
+namespace Meta {
 namespace Register{
 
 inline void allMetaRegister()
 {
-	NameReflectionRegister();
-	TransformReflectionRegister();
+	// Name
+	registerClass<ecs::NameComponent>();
+	registerField(&ecs::NameComponent::name, "name");
 
+	// Transform
+	registerClass<ecs::TransformComponent>();
+	registerField(&ecs::TransformComponent::translation, "translation");
+	registerField(&ecs::TransformComponent::rotation, "rotation");
+	registerField(&ecs::TransformComponent::scale, "scale");
+	registerMethod(&ecs::TransformComponent::transform, "transform");
 }
 
 }

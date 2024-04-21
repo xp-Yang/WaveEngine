@@ -155,8 +155,8 @@ public:
         int id = entity.getId();
 
         // Unpack the template parameters into an initializer list
-        int poolIds[] = { 0, getComponentPoolId<ComponentTypes>() ... };
-        for (int i = 1; i < (sizeof...(ComponentTypes) + 1); i++) {
+        int poolIds[] = { getComponentPoolId<ComponentTypes>() ... };
+        for (int i = 0; i < sizeof...(ComponentTypes); i++) {
             m_entities[id].getMask().reset(poolIds[i]);
 
             // 池中都没这个component

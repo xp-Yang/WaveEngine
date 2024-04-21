@@ -13,17 +13,23 @@ inline std::string trim(const std::string& str, const std::string& spaces = " \t
     return str.substr(a, b - a);
 }
 
-inline std::string mat4ToStr(const Mat4 mat)
+inline std::string mat4ToStr(const Mat4& mat, int indentation = 0)
 {
+    std::string tab_str = "";
+    for (int i = 0; i < indentation; i++) {
+        tab_str += std::string("    ");
+    }
+    std::string formatter = tab_str + std::string("%.3f %.3f %.3f %.3f \n");
+
     std::string result;
     char buf[1024];
-    sprintf_s(buf, "%.3f %.3f %.3f %.3f \n", mat[0].x, mat[1].x, mat[2].x, mat[3].x);
+    sprintf_s(buf, formatter.c_str(), mat[0].x, mat[1].x, mat[2].x, mat[3].x);
     result += buf;
-    sprintf_s(buf, "%.3f %.3f %.3f %.3f \n", mat[0].y, mat[1].y, mat[2].y, mat[3].y);
+    sprintf_s(buf, formatter.c_str(), mat[0].y, mat[1].y, mat[2].y, mat[3].y);
     result += buf;
-    sprintf_s(buf, "%.3f %.3f %.3f %.3f \n", mat[0].z, mat[1].z, mat[2].z, mat[3].z);
+    sprintf_s(buf, formatter.c_str(), mat[0].z, mat[1].z, mat[2].z, mat[3].z);
     result += buf;
-    sprintf_s(buf, "%.3f %.3f %.3f %.3f \n", mat[0].w, mat[1].w, mat[2].w, mat[3].w);
+    sprintf_s(buf, formatter.c_str(), mat[0].w, mat[1].w, mat[2].w, mat[3].w);
     result += buf;
     //printf("%.3f %.3f %.3f %.3f \n", mat[0][0], mat[1][0], mat[2][0], mat[3][0]);
     //printf("%.3f %.3f %.3f %.3f \n", mat[0][1], mat[1][1], mat[2][1], mat[3][1]);
@@ -34,7 +40,7 @@ inline std::string mat4ToStr(const Mat4 mat)
     return result;
 }
 
-inline std::string vec3ToStr(const Vec3 vec) {
+inline std::string vec3ToStr(const Vec3& vec) {
     std::string result;
     char buf[1024];
     sprintf_s(buf, "%.3f %.3f %.3f \n", vec.x, vec.y, vec.z);

@@ -192,8 +192,8 @@ void SceneHierarchy::addSphere()
 
 	updateSpheresPosition();
 
-	MetaType::Serializer(world.getComponent<ecs::NameComponent>(sphere_entity));
-	MetaType::Serializer(world.getComponent<ecs::TransformComponent>(sphere_entity));
+	Meta::Serializer(world.getComponent<ecs::NameComponent>(sphere_entity));
+	Meta::Serializer(world.getComponent<ecs::TransformComponent>(sphere_entity));
 }
 
 void SceneHierarchy::removeSphere(size_t index)
