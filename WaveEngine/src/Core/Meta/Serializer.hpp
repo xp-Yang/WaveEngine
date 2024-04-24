@@ -2,32 +2,69 @@
 #define Serializer_hpp
 
 #include "Meta.hpp"
-#include "Core/Math.hpp"
-#include "Core/Utils.hpp"
+#include <json11/json11.hpp>
 #include <iostream>
+#include <fstream>
 
 namespace Meta {
+namespace Serialization {
 
 class Serializer {
 public:
 	template<class T>
-	Serializer(T* obj) { 
+	static T& read(const Json& json, T& obj)
+	{
 		ReflectionInstance refl_obj = obj;
-		test_output(refl_obj);
+		T* ret = refl_obj.read(json);
+		return *ret;
 	}
 
 	template<class T>
-	static T read(const std::string& str);
+	static Json write(const T& obj) {
+		ReflectionInstance refl_obj = obj;
+		Json ret = refl_obj.write();
+		return ret;
+	}
 
 	template<class T>
-	static std::string write(const T& obj);
+	static void loadFromJsonFile(const std::string& filename, T& obj) {
+		std::ifstream fin(filename);
+		if (!fin) {
+			assert(false);
+			return;
+		}
+		std::stringstream buffer;
+		buffer << fin.rdbuf();
+		std::string json_text(buffer.str());
+
+		std::string error;
+		auto&& json = Json::parse(json_text, error);
+		if (!error.empty())
+		{
+			assert(false);
+			return;
+		}
+		Serializer::read(json, obj);
+	}
 
 	template<class T>
-	void test_output(ReflectionInstance<T>& refl_obj);
+	static void saveToJsonFile(const std::string& filename, const T& obj) {
+		std::ofstream fout(filename);
+		if (!fout) {
+			assert(false);
+			return;
+		}
+		Json j = write(obj);
+		fout << j.dump();
+		fout.flush();
+	}
+
+private:
+	Serializer();
 };
 
 template<class T>
-inline void Serializer::test_output(ReflectionInstance<T>& refl_obj)
+inline void test_output(ReflectionInstance<T>& refl_obj)
 {
 	static std::string tab_str = "    ";
 	static std::string crlf_str = "\n";
@@ -46,10 +83,10 @@ inline void Serializer::test_output(ReflectionInstance<T>& refl_obj)
 				std::string_view field_type_name = field.field_type_name;
 				std::string_view field_name = field.field_name;
 				std::cout << tab_str << tab_str << "\"" << "<" << field_type_name << ">" << " " << field_name << "\"" << colon << " ";
-				if (refl_obj.getFieldValue<Vec3>(i)) {
-					Vec3 field_value_vec3 = *refl_obj.getFieldValue<Vec3>(i);
-					std::cout << "\"" << field_value_vec3.x << " " << field_value_vec3.y << " " << field_value_vec3.z << "\"";
-				}
+				//if (refl_obj.getFieldValue<Vec3>(i)) {
+				//	Vec3 field_value_vec3 = *refl_obj.getFieldValue<Vec3>(i);
+				//	std::cout << "\"" << field_value_vec3.x << " " << field_value_vec3.y << " " << field_value_vec3.z << "\"";
+				//}
 				if (refl_obj.getFieldValue<std::string>(i)) {
 					std::string field_value_str = *refl_obj.getFieldValue<std::string>(i);
 					std::cout << "\"" << field_value_str << "\"";
@@ -65,16 +102,18 @@ inline void Serializer::test_output(ReflectionInstance<T>& refl_obj)
 			}
 		std::cout << tab_str << close_brace_str;
 
-		if (refl_obj.method("transform").signature != "") {
-			std::cout << tab_str << "\"invokeMethods\"" << colon << refl_obj.method("transform").signature << " = ";
-			Mat4 transform_mat = refl_obj.invokeMethod<Mat4>("transform");
-			std::cout << crlf_str << Utils::mat4ToStr(transform_mat, 2);
-		}
+		//if (refl_obj.method("transform").signature != "") {
+		//	std::cout << tab_str << "\"invokeMethods\"" << colon << refl_obj.method("transform").signature << " = ";
+		//	Mat4 transform_mat = refl_obj.invokeMethod<Mat4>("transform");
+		//	std::cout << crlf_str << Utils::mat4ToStr(transform_mat, 2);
+		//}
 
 	std::cout << close_brace_str;
 	std::cout << "====================================================================\n\n";
 }
 
-}
+}}
+
+#include "Serializer.inl"
 
 #endif

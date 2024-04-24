@@ -15,6 +15,7 @@ public:
 	~Application();
 	static Application& GetApp();
 	static std::string resourceDirectory();
+	static std::string assetDirectory();
 	void run();
 	void init();
 	void shutdown();

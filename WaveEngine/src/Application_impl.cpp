@@ -37,6 +37,11 @@ std::string Application::resourceDirectory()
 	return RESOURCE_DIR;
 }
 
+std::string Application::assetDirectory()
+{
+	return ASSET_DIR;
+}
+
 void Application::run() {
 	while (!m_window->shouldClose()) {
 #if PERFORMANCE_TEST

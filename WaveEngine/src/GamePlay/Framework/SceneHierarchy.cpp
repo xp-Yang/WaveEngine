@@ -8,6 +8,7 @@
 #include "Core/Meta/Serializer.hpp"
 
 static const std::string resource_dir = Application::resourceDirectory();
+static const std::string asset_dir = Application::assetDirectory();
 
 SceneHierarchy::SceneHierarchy()
 	: world(ecs::World::get())
@@ -192,8 +193,7 @@ void SceneHierarchy::addSphere()
 
 	updateSpheresPosition();
 
-	Meta::Serializer(world.getComponent<ecs::NameComponent>(sphere_entity));
-	Meta::Serializer(world.getComponent<ecs::TransformComponent>(sphere_entity));
+	Meta::Serialization::Serializer::saveToJsonFile(asset_dir + "/sphere.json", world.getComponent<ecs::TransformComponent>(sphere_entity));
 }
 
 void SceneHierarchy::removeSphere(size_t index)

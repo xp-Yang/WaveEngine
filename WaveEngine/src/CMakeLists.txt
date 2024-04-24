@@ -35,6 +35,7 @@ target_link_libraries(${WAVE_LIB_NAME}
 	PUBLIC imgui
 	PUBLIC stb
 	PUBLIC spdlog
+	PUBLIC json11
 	PUBLIC glm
 	PUBLIC glfw
 	PUBLIC assimp)
