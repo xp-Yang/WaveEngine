@@ -11,6 +11,7 @@ set(THIRD_PARTY_DIR ${PROJECT_SOURCE_DIR}/thirdparty)
 set(TEST_DIR ${PROJECT_SOURCE_DIR}/test)
 set(ENGINE_SRC_DIR ${ENGINE_DIR}/src)
 set(ENGINE_RESOURCE_DIR ${ENGINE_DIR}/resource)
+set(ENGINE_ASSET_DIR ${ENGINE_DIR}/asset)
 
 set(ENGINE_INCLUDE_DIR ${ENGINE_DIR}/include)
 set(IMGUI_INCLUDE_DIR ${THIRD_PARTY_DIR})
@@ -32,6 +33,7 @@ add_subdirectory(test)
 
 #通过宏定义告诉程序resource目录
 target_compile_definitions(WaveRuntime PUBLIC RESOURCE_DIR="${ENGINE_RESOURCE_DIR}")
+target_compile_definitions(WaveRuntime PUBLIC ASSET_DIR="${ENGINE_ASSET_DIR}")
 
 file(COPY ${PROJECT_SOURCE_DIR}/imgui.ini DESTINATION ${CMAKE_BINARY_DIR}/test)
 #TODO 自定义输出binary的路径

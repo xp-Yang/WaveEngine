@@ -22,6 +22,11 @@ add_library(stb ${STB_HEAD_FILES} ${STB_SRC_FILES})
 set_target_properties(stb PROPERTIES FOLDER ${third_party_folder}/stb)
 target_include_directories(stb PRIVATE ${THIRD_PARTY_DIR}/stb)
 
+#json11
+add_library(json11 ${THIRD_PARTY_DIR}/json11/json11.hpp ${THIRD_PARTY_DIR}/json11/json11.cpp)
+set_target_properties(json11 PROPERTIES FOLDER ${third_party_folder}/json11)
+target_include_directories(json11 PRIVATE ${THIRD_PARTY_DIR}/json11)
+
 #spdlog
 if(NOT TARGET spdlog)
     option(SPDLOG_BUILD_EXAMPLE "" OFF)
