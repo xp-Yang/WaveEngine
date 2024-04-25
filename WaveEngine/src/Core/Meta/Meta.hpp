@@ -17,9 +17,6 @@ template <class ClassType> struct ClassInfo;
 template <class ClassType> struct FieldInfo;
 template <class ClassType> struct MethodInfo;
 
-typedef std::function<void* (const Json&)>                  ReadFunc;
-typedef std::function<Json(void*)>                          WriteFunc;
-
 template <class ClassType>
 inline void registerClass()
 {
@@ -39,7 +36,7 @@ inline void registerMethod(MethodReturnType (ClassType::* method_ptr)(MethodArgs
 }
 
 template <class ClassType>
-inline void registerSerializer(ReadFunc read_func, WriteFunc write_func)
+inline void registerSerializer(ClassType& (*read_func)(const Json&, ClassType&), Json (*write_func)(const ClassType&))
 {
     MetaObject<ClassType>::registerSerializer(read_func, write_func);
 }
@@ -51,8 +48,6 @@ struct ClassInfo{
     std::string class_name;
     std::vector<FieldInfo<ClassType>> field_infos;
     std::vector<MethodInfo<ClassType>> method_infos;
-    ReadFunc serializer_read_func;
-    WriteFunc serializer_write_func;
     //std::vector<BaseInfo> base_infos;
 };
 
@@ -113,7 +108,7 @@ constexpr auto rawClassName() noexcept {
 
 template<typename T>
 constexpr std::string className() noexcept {
-    static std::vector<std::string> class_keys = {
+    const std::vector<std::string> class_keys = {
         "struct ",
         "class ",
         "enum ",
@@ -194,19 +189,19 @@ public:
         return {};
     }
 
-    Register::ReadFunc read_method() {
-        return m_class_info.serializer_read_func;
+    auto read_method() {
+        return serializer_read_func;
     }
 
-    Register::WriteFunc write_method() {
-        return m_class_info.serializer_write_func;
+    auto write_method() {
+        return serializer_write_func;
     }
 
 private:
     template<class T> friend void Register::registerClass();
     template<class T, class I> friend void Register::registerField(I T::* var_ptr, std::string_view field_name);
     template<class T, class I, typename ... Args> friend void Register::registerMethod(I(T::* method_ptr)(Args...) const, std::string_view method_name);
-    template<class T> friend void Register::registerSerializer(Register::ReadFunc read_func, Register::WriteFunc write_func);
+    template<class T> friend void Register::registerSerializer(T& (*read_func)(const Json&, T&), Json(*write_func)(const T&));
 
     static void registerClass() {
         m_class_info.class_name = traits::className<ClassType>();
@@ -247,14 +242,18 @@ private:
         m_class_info.method_infos.emplace_back(method_info);
     }
 
-    static void registerSerializer(Register::ReadFunc read_func, Register::WriteFunc write_func)
+    static void registerSerializer(ClassType& (*read_func)(const Json&, ClassType&), Json(*write_func)(const ClassType&))
     {
-        m_class_info.serializer_read_func = read_func;
-        m_class_info.serializer_write_func = write_func;
+        //reinterpret_cast<void(*)(const Json&)>(read_func);
+        //reinterpret_cast<Json(*)(void*)>(write_fun);
+        serializer_read_func = read_func;
+        serializer_write_func = write_func;
     }
 
 private:
     static inline Register::ClassInfo<ClassType> m_class_info;
+    static inline ClassType& (*serializer_read_func)(const Json&, ClassType&);
+    static inline Json (*serializer_write_func)(const ClassType&);
 };
 
 template<class ClassType>
@@ -325,11 +324,13 @@ public:
     }
 
     ClassType* read(const Json& json) {
-        m_instance = static_cast<ClassType*>(m_meta.read_method()(json));
+        ClassType* instance = new ClassType;
+        m_meta.read_method()(json, *instance);
+        m_instance = instance;
         return m_instance;
     }
     Json write() {
-        return m_meta.write_method()(static_cast<void*>(m_instance));
+        return m_meta.write_method()(*m_instance);
     }
 
 private:

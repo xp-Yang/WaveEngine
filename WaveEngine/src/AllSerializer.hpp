@@ -51,14 +51,6 @@ Vec3& Serializer::read(const Json& json, Vec3& instance) {
     Serializer::read(json["z"], instance.z);
     return instance;
 }
-static void* readFromJson_Vec3(const Json& json) {
-    Vec3* instance = new Vec3;
-    Serializer::read(json, *instance);
-    return instance;
-}
-static Json writeToJson_Vec3(void* instance) {
-    return Serializer::write(*(Vec3*)instance);
-}
 
 // Name
 template<>
@@ -72,14 +64,6 @@ NameComponent& Serializer::read(const Json& json, NameComponent& instance) {
     assert(json.is_object());
     Serializer::read(json["name"], instance.name);
     return instance;
-}
-static void* readFromJson_NameComponent(const Json& json) {
-    NameComponent* instance = new NameComponent;
-    Serializer::read(json, *instance);
-    return instance;
-}
-static Json writeToJson_NameComponent(void* instance) {
-    return Serializer::write(*(NameComponent*)instance);
 }
 
 // Transform
@@ -99,14 +83,7 @@ TransformComponent& Serializer::read(const Json& json, TransformComponent& insta
     Serializer::read(json["scale"], instance.scale);
     return instance;
 }
-static void* readFromJson_TransformComponent(const Json& json) {
-    TransformComponent* instance = new TransformComponent;
-    Serializer::read(json, *instance);
-    return instance;
-}
-static Json writeToJson_TransformComponent(void* instance) {
-    return Serializer::write(*(TransformComponent*)instance);
-}
+
 
 }
 

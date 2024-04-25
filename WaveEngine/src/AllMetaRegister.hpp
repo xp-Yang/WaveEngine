@@ -17,19 +17,19 @@ inline void allMetaRegister()
 	registerClass<Vec2>();
 	registerField(&Vec2::x, "x");
 	registerField(&Vec2::y, "y");
-	registerSerializer<Vec2>(Serialization::readFromJson_Vec2, Serialization::writeToJson_Vec2);
+	registerSerializer<Vec2>(Serialization::Serializer::read, Serialization::Serializer::write);
 
 	// Vec3
 	registerClass<Vec3>();
 	registerField(&Vec3::x, "x");
 	registerField(&Vec3::y, "y");
 	registerField(&Vec3::z, "z");
-	registerSerializer<Vec3>(Serialization::readFromJson_Vec3, Serialization::writeToJson_Vec3);
+	registerSerializer<Vec3>(Serialization::Serializer::read, Serialization::Serializer::write);
 
 	// Name
 	registerClass<NameComponent>();
 	registerField(&NameComponent::name, "name");
-	registerSerializer<NameComponent>(Serialization::readFromJson_NameComponent, Serialization::writeToJson_NameComponent);
+	registerSerializer<NameComponent>(Serialization::Serializer::read, Serialization::Serializer::write);
 
 	// Transform
 	registerClass<TransformComponent>();
@@ -37,7 +37,7 @@ inline void allMetaRegister()
 	registerField(&TransformComponent::rotation, "rotation");
 	registerField(&TransformComponent::scale, "scale");
 	registerMethod(&TransformComponent::transform, "transform");
-	registerSerializer<TransformComponent>(Serialization::readFromJson_TransformComponent, Serialization::writeToJson_TransformComponent);
+	registerSerializer<TransformComponent>(Serialization::Serializer::read, Serialization::Serializer::write);
 }
 
 }
