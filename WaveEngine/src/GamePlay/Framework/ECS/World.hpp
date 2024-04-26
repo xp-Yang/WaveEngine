@@ -6,6 +6,12 @@
 
 #include <assert.h>
 
+namespace Meta {
+namespace Register {
+    void allMetaRegister();
+}
+}
+
 namespace ecs{
 
 const int MAX_ENTITIES = 512;
@@ -28,6 +34,8 @@ public:
     const ComponentMask& getMask() const { return m_mask; }
 
 private:
+    friend void Meta::Register::allMetaRegister();
+
     int m_id;
     ComponentMask m_mask;
 };
@@ -193,6 +201,8 @@ private:
     std::vector<ComponentPool*> m_component_pools;
 
 private:
+    friend void Meta::Register::allMetaRegister();
+
     World();
     World(const World&) = delete;
     ~World();

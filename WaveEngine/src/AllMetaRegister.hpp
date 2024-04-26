@@ -3,6 +3,7 @@
 
 #include "Core/Meta/Meta.hpp"
 #include "GamePlay/Framework/ECS/Components.hpp"
+#include "GamePlay/Framework/SceneHierarchy.hpp"
 #include "AllSerializer.hpp"
 
 namespace Meta {
@@ -38,6 +39,22 @@ inline void allMetaRegister()
 	registerField(&TransformComponent::scale, "scale");
 	registerMethod(&TransformComponent::transform, "transform");
 	registerSerializer<TransformComponent>(Serialization::Serializer::read, Serialization::Serializer::write);
+
+	// Entity
+	registerClass<Entity>();
+	registerField(&Entity::m_id, "m_id");
+	registerField(&Entity::m_mask, "m_mask");
+
+	// ComponentPool
+	registerClass<ComponentPool>();
+	registerField(&ComponentPool::m_data, "m_data");
+	registerField(&ComponentPool::m_componentTypeSize, "m_componentTypeSize");
+
+	// World
+	registerClass<World>();
+	registerField(&World::m_entities, "m_entities");
+	registerField(&World::m_component_pools, "m_component_pools");
+
 }
 
 }

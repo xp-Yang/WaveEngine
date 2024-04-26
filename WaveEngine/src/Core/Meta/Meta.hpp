@@ -157,6 +157,10 @@ public:
         return *this;
     }
 
+    ClassType* newInstance() {
+        // TODO need register a constructor
+    }
+
     const std::string& className() const { return m_class_info.class_name; }
 
     int fieldCount() const { return m_class_info.field_infos.size(); }
