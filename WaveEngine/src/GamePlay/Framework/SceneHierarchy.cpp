@@ -194,7 +194,9 @@ void SceneHierarchy::addSphere()
 	updateSpheresPosition();
 
 	Meta::Serialization::Serializer::saveToJsonFile(asset_dir + "/sphere.json", world.getComponent<ecs::TransformComponent>(sphere_entity));
-	Meta::Serialization::Serializer::output_test(&world);
+	//ecs::TransformComponent trans;
+	//Meta::Serialization::Serializer::loadFromJsonFile(asset_dir + "/sphere.json", &trans);
+	Meta::Serialization::Serializer::write(world.getComponent<ecs::TransformComponent>(sphere_entity));
 }
 
 void SceneHierarchy::removeSphere(size_t index)

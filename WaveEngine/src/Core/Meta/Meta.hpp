@@ -7,228 +7,62 @@
 #include <vector>
 #include <string>
 #include <memory>
-#include <json11/json11.hpp>
+#include <assert.h>
+
+#include "traits.hpp"
 
 namespace Meta {
 
 namespace Register {
 
-template <class ClassType> struct ClassInfo;
-template <class ClassType> struct FieldInfo;
-template <class ClassType> struct MethodInfo;
+struct ClassInfo;
+struct FieldInfo;
+struct MethodInfo;
+
+inline std::unordered_map<std::string, ClassInfo> global_class_info;
 
 template <class ClassType>
 inline void registerClass()
 {
-    MetaObject<ClassType>::registerClass();
+    std::string class_name = traits::className<ClassType>();
+    if (global_class_info.find(class_name) != global_class_info.end()) {
+        assert(false);
+    }
+    global_class_info.insert({ class_name, ClassInfo{class_name, {}, {}} });
 }
 
 template <class ClassType, class FieldType>
 inline void registerField(FieldType ClassType::*var_ptr, std::string_view field_name)
 {
-    MetaObject<ClassType>::registerField<FieldType>(var_ptr, field_name);
+    std::string class_name = traits::className<ClassType>();
+    if (global_class_info.find(class_name) != global_class_info.end())
+    {
+        std::string field_type_name_ = traits::className<FieldType>();
+        std::string field_name_ = std::string(field_name);
+        size_t var_offset = reinterpret_cast<size_t>(&(reinterpret_cast<ClassType const volatile*>(nullptr)->*var_ptr));
+        Register::FieldInfo filed_info = { var_offset, field_type_name_, field_name_ };
+        global_class_info[class_name].field_infos.emplace_back(filed_info);
+    }
+}
+
+template <typename Arg>
+inline std::string getArgTypeName() {
+    return traits::className<Arg>();
+}
+
+template <class ClassType, typename ... Args>
+inline void registerConstructor()
+{
+    ClassType* (*constructor)(Args... args) = [](Args... args) {
+        return new ClassType(args);
+    };
 }
 
 template <class ClassType, class MethodReturnType, typename ... MethodArgs>
 inline void registerMethod(MethodReturnType (ClassType::* method_ptr)(MethodArgs...) const, std::string_view method_name)
 {
-    MetaObject<ClassType>::registerMethod<MethodReturnType, MethodArgs...>(method_ptr, method_name);
-}
-
-template <class ClassType>
-inline void registerSerializer(ClassType& (*read_func)(const Json&, ClassType&), Json (*write_func)(const ClassType&))
-{
-    MetaObject<ClassType>::registerSerializer(read_func, write_func);
-}
-
-inline void unregisterAll() {};
-
-template <class ClassType>
-struct ClassInfo{
-    std::string class_name;
-    std::vector<FieldInfo<ClassType>> field_infos;
-    std::vector<MethodInfo<ClassType>> method_infos;
-    //std::vector<BaseInfo> base_infos;
-};
-
-template <class ClassType>
-struct FieldInfo {
-    void* ClassType::* var;
-    std::string field_type_name;
-    std::string field_name;
-};
-
-template <class ClassType>
-struct MethodInfo {
-    void (ClassType::* func)();
-    std::string return_type_name;
-    std::string method_name;
-    std::vector<std::string> arg_types;
-    std::string signature;
-};
-
-//struct BaseInfo {};
-
-}
-
-
-namespace traits {
-
-// to get the class name info from the template T
-template<typename T>
-constexpr auto rawSignature() noexcept {
-#  if defined(__clang__)
-    return std::string_view{ __PRETTY_FUNCTION__ };
-#  elif defined(__GNUC__)
-    return std::string_view{ __PRETTY_FUNCTION__ };
-#  elif defined(_MSC_VER)
-    return std::string_view{ __FUNCSIG__ };
-#  endif
-}
-
-template<typename T>
-constexpr auto rawClassName() noexcept {
-    constexpr std::string_view mark_str = "rawSignature";
-    constexpr std::string_view sig = rawSignature<T>();
-#if defined(__clang__)
-    std::string_view prefix_removed = sig.substr(37);
-    std::string_view suffix_removed = sig.substr(0, prefix_removed.size() - 1);
-    return suffix_removed;
-#elif defined(__GNUC__)
-    std::string_view prefix_removed = sig.substr(52);
-    std::string_view suffix_removed = sig.substr(0, prefix_removed.size() - 1);
-    return suffix_removed;
-#elif defined(_MSC_VER)
-    int start_index = sig.find(mark_str) + mark_str.size() + 1;
-    std::string_view prefix_removed = sig.substr(start_index);
-    std::string_view suffix_removed = prefix_removed.substr(0, prefix_removed.size() - 16);
-    return suffix_removed;
-#endif
-}
-
-template<typename T>
-constexpr std::string className() noexcept {
-    const std::vector<std::string> class_keys = {
-        "struct ",
-        "class ",
-        "enum ",
-        "union ",
-    };
-    std::string_view name = rawClassName<T>();
-#if defined(_MSC_VER)
-    for (const auto& class_key : class_keys) {
-        auto pos = name.find(class_key);
-        if (pos != std::string::npos) {
-            name = name.substr(pos + class_key.size());
-        }
-    }
-#endif
-    return std::string(name);
-}
-
-inline bool type_is_fundamental(const std::string& name) noexcept {
-    if (name == className<bool>() ||
-        name == className<int8_t>() ||
-        name == className<int16_t>() ||
-        name == className<int32_t>() ||
-        name == className<int64_t>() ||
-        name == className<uint8_t>() ||
-        name == className<uint16_t>() ||
-        name == className<uint32_t>() ||
-        name == className<uint64_t>() ||
-        name == className<float>() ||
-        name == className<double>() ||
-        name == className<std::string>())
-        return true;
-    return false;
-}
-
-}
-
-template<class ClassType>
-class MetaObject {
-public:
-    MetaObject() = default;
-    MetaObject(const MetaObject& rhs) { m_class_info = rhs.m_class_info; }
-    MetaObject& operator=(const MetaObject& rhs) {
-        if (this == &rhs)
-            return *this;
-        m_class_info = rhs.m_class_info;
-        return *this;
-    }
-
-    ClassType* newInstance() {
-        // TODO need register a constructor
-    }
-
-    const std::string& className() const { return m_class_info.class_name; }
-
-    int fieldCount() const { return m_class_info.field_infos.size(); }
-    Register::FieldInfo<ClassType> field(int index) const {
-        if (0 <= index && index < m_class_info.field_infos.size())
-            return m_class_info.field_infos[index];
-        return {};
-    }
-    Register::FieldInfo<ClassType> field(const std::string& name) const {
-        const auto it = std::find_if(m_class_info.field_infos.begin(), m_class_info.field_infos.end(), [&name](const auto& field_info) {
-            return field_info.field_name == name;
-            });
-        if (it != m_class_info.field_infos.end())
-            return *it;
-        return {};
-    }
-
-    int methodCount() const { return m_class_info.method_infos.size(); }
-    Register::MethodInfo<ClassType> method(int index) const {
-        if (0 <= index && index < m_class_info.method_infos.size())
-            return m_class_info.method_infos[index];
-        return {};
-    }
-    Register::MethodInfo<ClassType> method(const std::string& name) const {
-        const auto it = std::find_if(m_class_info.method_infos.begin(), m_class_info.method_infos.end(), [&name](const auto& method_info) {
-            return method_info.method_name == name;
-            });
-        if (it != m_class_info.method_infos.end())
-            return *it;
-        return {};
-    }
-
-    auto read_method() {
-        return serializer_read_func;
-    }
-
-    auto write_method() {
-        return serializer_write_func;
-    }
-
-private:
-    template<class T> friend void Register::registerClass();
-    template<class T, class I> friend void Register::registerField(I T::* var_ptr, std::string_view field_name);
-    template<class T, class I, typename ... Args> friend void Register::registerMethod(I(T::* method_ptr)(Args...) const, std::string_view method_name);
-    template<class T> friend void Register::registerSerializer(T& (*read_func)(const Json&, T&), Json(*write_func)(const T&));
-
-    static void registerClass() {
-        m_class_info.class_name = traits::className<ClassType>();
-    }
-
-    template<class FieldType>
-    static void registerField(FieldType ClassType::* var_ptr, std::string_view field_name) {
-        if (!m_class_info.class_name.empty())
-        {
-            std::string field_type_name_ = traits::className<FieldType>();
-            std::string field_name_ = std::string(field_name);
-            Register::FieldInfo<ClassType> filed_info = { reinterpret_cast<void* ClassType::*>(var_ptr), field_type_name_, field_name_ };
-            m_class_info.field_infos.emplace_back(filed_info);
-        }
-    }
-
-    template <typename Arg>
-    static std::string getArgTypeName() {
-        return traits::className<Arg>();
-    }
-
-    template <class MethodReturnType, typename ... MethodArgs>
-    static void registerMethod(MethodReturnType(ClassType::* method_ptr)(MethodArgs...) const, std::string_view method_name)
+    std::string class_name = traits::className<ClassType>();
+    if (global_class_info.find(class_name) != global_class_info.end())
     {
         std::string return_type_name = traits::className<MethodReturnType>();
         std::string method_name_ = std::string(method_name);
@@ -242,32 +76,100 @@ private:
                 method_signature += ((it + 1) == arg_types.end()) ? std::string(")") : std::string(", ");
             }
         }
-        Register::MethodInfo<ClassType> method_info = { reinterpret_cast<void (ClassType::*)()>(method_ptr), return_type_name, method_name_, arg_types, method_signature };
-        m_class_info.method_infos.emplace_back(method_info);
+        Register::MethodInfo method_info = { reinterpret_cast<void (Register::Dumb::*)()>(method_ptr), return_type_name, method_name_, arg_types, method_signature };
+        global_class_info[class_name].method_infos.emplace_back(method_info);
+    }
+}
+
+inline void unregisterAll() {};
+
+struct ClassInfo{
+    std::string class_name;
+    std::vector<FieldInfo> field_infos;
+    std::vector<MethodInfo> method_infos;
+    //std::vector<BaseInfo> base_infos;
+};
+
+struct FieldInfo {
+    size_t var_offset;
+    std::string field_type_name;
+    std::string field_name;
+    // TODO bool is_array;
+};
+
+struct Dumb {};
+struct MethodInfo {
+    void (Dumb::* func)();
+    std::string return_type_name;
+    std::string method_name;
+    std::vector<std::string> arg_types;
+    std::string signature;
+};
+
+//struct BaseInfo {};
+
+}
+
+class MetaObject {
+public:
+    MetaObject(std::string_view class_name) {
+        std::string className = std::string(class_name);
+        if (Register::global_class_info.find(className) != Register::global_class_info.end()) {
+            m_class_info = Register::global_class_info.at(className);
+        }
+        else
+            assert(false);
+    }
+    MetaObject(const MetaObject& rhs) = default;
+
+    const std::string& className() const { return m_class_info.class_name; }
+
+    int fieldCount() const { return m_class_info.field_infos.size(); }
+    Register::FieldInfo field(int index) const {
+        if (0 <= index && index < m_class_info.field_infos.size())
+            return m_class_info.field_infos[index];
+        return {};
+    }
+    Register::FieldInfo field(const std::string& name) const {
+        const auto it = std::find_if(m_class_info.field_infos.begin(), m_class_info.field_infos.end(), [&name](const auto& field_info) {
+            return field_info.field_name == name;
+            });
+        if (it != m_class_info.field_infos.end())
+            return *it;
+        return {};
     }
 
-    static void registerSerializer(ClassType& (*read_func)(const Json&, ClassType&), Json(*write_func)(const ClassType&))
-    {
-        //reinterpret_cast<void(*)(const Json&)>(read_func);
-        //reinterpret_cast<Json(*)(void*)>(write_fun);
-        serializer_read_func = read_func;
-        serializer_write_func = write_func;
+    int methodCount() const { return m_class_info.method_infos.size(); }
+    Register::MethodInfo method(int index) const {
+        if (0 <= index && index < m_class_info.method_infos.size())
+            return m_class_info.method_infos[index];
+        return {};
+    }
+    Register::MethodInfo method(const std::string& name) const {
+        const auto it = std::find_if(m_class_info.method_infos.begin(), m_class_info.method_infos.end(), [&name](const auto& method_info) {
+            return method_info.method_name == name;
+            });
+        if (it != m_class_info.method_infos.end())
+            return *it;
+        return {};
     }
 
 private:
-    static inline Register::ClassInfo<ClassType> m_class_info;
-    static inline ClassType& (*serializer_read_func)(const Json&, ClassType&);
-    static inline Json (*serializer_write_func)(const ClassType&);
+    MetaObject() = delete;
+
+    Register::ClassInfo m_class_info;
 };
 
-template<class ClassType>
-class ReflectionInstance {
+template <class T>
+inline MetaObject MetaObjectOf() { return MetaObject(traits::className<T>()); }
+
+template <class T>
+inline MetaObject MetaObjectOf(T* obj) { return MetaObject(traits::className<T>()); }
+
+
+class WeakReflectionInstance {
 public:
-    ReflectionInstance(ClassType* obj) : m_meta(MetaObject<ClassType>()), m_instance(obj) {}
-
-    const MetaObject<ClassType>& getMetaObject() const { return m_meta; }
-
-    ClassType* getInstance() { return m_instance; }
+    const MetaObject& getMetaObject() const { return m_meta; }
 
     const std::string& className() const {
         return m_meta.className();
@@ -276,42 +178,70 @@ public:
     int fieldCount() const {
         return m_meta.fieldCount();
     }
-    Register::FieldInfo<ClassType> field(int index) const {
+    Register::FieldInfo field(int index) const {
         return m_meta.field(index);
     }
-    Register::FieldInfo<ClassType> field(const std::string& name) const {
+    Register::FieldInfo field(const std::string& name) const {
         return m_meta.field(name);
     }
-    void* getFieldValue(int index) {
+    void* getFieldValue(int index) const {
         auto& field = m_meta.field(index);
-        return &(m_instance->*(field.var));
+        return (void*)((char*)m_instance + field.var_offset);
     }
     template<class FieldType>
-    FieldType* getFieldValue(int index) {
+    FieldType* getFieldValue(int index) const {
         auto& field = m_meta.field(index);
         return getFieldValue<FieldType>(field.field_name);
     }
     template<class FieldType>
-    FieldType* getFieldValue(const std::string& name) {
+    FieldType* getFieldValue(const std::string& name) const {
         auto& field = m_meta.field(name);
         if (field.field_type_name != traits::className<FieldType>())
             return nullptr;
-        return &(m_instance->*reinterpret_cast<FieldType ClassType::*>(field.var));
+        return (FieldType*)((char*)m_instance + field.var_offset);
     }
     template<class FieldType>
-    void setFieldValue(const std::string& name, FieldType* value) {
+    void setFieldValue(const std::string& name, FieldType* value) const {
         *getFieldValue<FieldType>(name) = *value;
     }
 
     int methodCount() const {
         return m_meta.methodCount();
     }
-    Register::MethodInfo<ClassType> method(int index) const {
+    Register::MethodInfo method(int index) const {
         return m_meta.method(index);
     }
-    Register::MethodInfo<ClassType> method(const std::string& name) const {
+    Register::MethodInfo method(const std::string& name) const {
         return m_meta.method(name);
     }
+
+protected:
+    WeakReflectionInstance() = delete;
+    WeakReflectionInstance(const WeakReflectionInstance& rhs) = default;
+    WeakReflectionInstance(const MetaObject& meta, void* instance) : m_meta(meta), m_instance(instance) {}
+
+    void* m_instance;
+    MetaObject m_meta;
+};
+
+class DynamicReflectionInstance : public WeakReflectionInstance {
+public:
+    template <class T>
+    DynamicReflectionInstance(const T* obj) : WeakReflectionInstance(MetaObjectOf<T>(), (void*)obj) {}
+    DynamicReflectionInstance(std::string_view type_name, void* instance) : WeakReflectionInstance(MetaObject(type_name), instance) {}
+    DynamicReflectionInstance(const DynamicReflectionInstance& rhs) : WeakReflectionInstance(rhs) {}
+
+    void* getInstance() { return m_instance; }
+};
+
+template<class T>
+class ReflectionInstance : public WeakReflectionInstance {
+public:
+    ReflectionInstance(T* obj) : WeakReflectionInstance(MetaObjectOf<T>(), (void*)obj) {}
+    ReflectionInstance(const ReflectionInstance& rhs) : WeakReflectionInstance(rhs) {}
+
+    T* getInstance() { return static_cast<T*>(m_instance); }
+
     template<class ReturnType, typename ... Args>
     ReturnType invokeMethod(int index, Args&&... args) {
         auto& method = m_meta.method(index);
@@ -324,22 +254,8 @@ public:
             assert(false);
             return {};
         }
-        return (m_instance->*reinterpret_cast<ReturnType (ClassType::*)(Args ...)>(method.func))(std::forward<Args>(args)...);
+        return (static_cast<T*>(m_instance)->*reinterpret_cast<ReturnType(T::*)(Args ...)>(method.func))(std::forward<Args>(args)...);
     }
-
-    ClassType* read(const Json& json) {
-        ClassType* instance = new ClassType;
-        m_meta.read_method()(json, *instance);
-        m_instance = instance;
-        return m_instance;
-    }
-    Json write() {
-        return m_meta.write_method()(*m_instance);
-    }
-
-private:
-    ClassType* m_instance;
-    MetaObject<ClassType> m_meta;
 };
 
 }

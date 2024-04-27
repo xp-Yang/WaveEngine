@@ -4,7 +4,6 @@
 #include "Core/Meta/Meta.hpp"
 #include "GamePlay/Framework/ECS/Components.hpp"
 #include "GamePlay/Framework/SceneHierarchy.hpp"
-#include "AllSerializer.hpp"
 
 namespace Meta {
 
@@ -18,19 +17,16 @@ inline void allMetaRegister()
 	registerClass<Vec2>();
 	registerField(&Vec2::x, "x");
 	registerField(&Vec2::y, "y");
-	registerSerializer<Vec2>(Serialization::Serializer::read, Serialization::Serializer::write);
 
 	// Vec3
 	registerClass<Vec3>();
 	registerField(&Vec3::x, "x");
 	registerField(&Vec3::y, "y");
 	registerField(&Vec3::z, "z");
-	registerSerializer<Vec3>(Serialization::Serializer::read, Serialization::Serializer::write);
 
 	// Name
 	registerClass<NameComponent>();
 	registerField(&NameComponent::name, "name");
-	registerSerializer<NameComponent>(Serialization::Serializer::read, Serialization::Serializer::write);
 
 	// Transform
 	registerClass<TransformComponent>();
@@ -38,7 +34,6 @@ inline void allMetaRegister()
 	registerField(&TransformComponent::rotation, "rotation");
 	registerField(&TransformComponent::scale, "scale");
 	registerMethod(&TransformComponent::transform, "transform");
-	registerSerializer<TransformComponent>(Serialization::Serializer::read, Serialization::Serializer::write);
 
 	// Entity
 	registerClass<Entity>();
