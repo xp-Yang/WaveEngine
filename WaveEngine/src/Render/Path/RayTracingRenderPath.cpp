@@ -14,10 +14,14 @@ void RayTracingRenderPath::init()
 
 void RayTracingRenderPath::prepareScreenQuadData(const std::shared_ptr<RenderSubMeshData>& screen_quad_data)
 {
+    m_ray_tracing_pass->prepareScreenQuadData(screen_quad_data);
+    m_screen_pass->prepareScreenQuadData(screen_quad_data);
 }
 
 void RayTracingRenderPath::prepareRenderSourceData(const std::shared_ptr<RenderSourceData>& render_source_data)
 {
+    m_ray_tracing_pass->prepareRenderSourceData(render_source_data);
+    m_screen_pass->prepareRenderSourceData(render_source_data);
 }
 
 void RayTracingRenderPath::render()

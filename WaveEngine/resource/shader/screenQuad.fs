@@ -16,14 +16,15 @@ out vec4 FragColor;
 
 void main()
 {
-    const float gamma = 2.2;
     vec3 hdrColor = texture(Texture, fragUV).rgb;      
-    vec3 bloomColor = texture(bloomBlurMap, fragUV).rgb;
-    vec3 borderColor = texture(borderMap, fragUV).rgb;
-    if(bloom)
+    if(bloom) {
+	    vec3 bloomColor = texture(bloomBlurMap, fragUV).rgb;
         hdrColor += bloomColor; // additive blending
-    if(border)
+	}
+    if(border) {
+	    vec3 borderColor = texture(borderMap, fragUV).rgb;
         hdrColor += borderColor;
+	}
     // tone mapping
     vec3 result = ToneMapping(hdrColor, 1.0);
     // gamma correct

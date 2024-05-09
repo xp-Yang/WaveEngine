@@ -4,6 +4,7 @@
 #include <vector>
 #include <memory>
 #include "Platform/RHI/rhi.hpp"
+#include "Application_impl.hpp"
 #include "../RenderSourceData.hpp"
 
 // Interface class

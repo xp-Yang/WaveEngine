@@ -23,6 +23,7 @@ public:
         , m_material(rhs.m_material)
         , m_local_transform(rhs.m_local_transform)
     {}
+    ~RenderSubMeshData() { reset(); }
 
     void reset() { if (m_VAO) glDeleteVertexArrays(1, &m_VAO); }
     unsigned int getVAO() const { return m_VAO; }
@@ -117,6 +118,10 @@ struct RenderSkyboxData {
     RenderMeshData render_mesh_data;
 };
 
+struct RenderCameraData {
+
+};
+
 struct RenderSourceData {
     std::vector<RenderMeshData> render_mesh_data_list;
 
@@ -125,8 +130,10 @@ struct RenderSourceData {
 
     RenderSkyboxData render_skybox_data;
 
+    Vec3 camera_position;
     Mat4 view_matrix;
     Mat4 proj_matrix;
+    // RenderCameraData
 };
 
 #endif // !RenderSourceData_hpp

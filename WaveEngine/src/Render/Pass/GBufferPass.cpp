@@ -1,6 +1,4 @@
 #include "GBufferPass.hpp"
-#include "Logical/Framework/ECS/Components.hpp"
-#include "Platform/RHI/rhi.hpp"
 
 void GBufferPass::init()
 {
@@ -30,16 +28,17 @@ void GBufferPass::draw()
         g_shader->setMatrix("model", 1, render_mesh_data.model_matrix);
         for (const auto& render_sub_mesh_data : render_mesh_data.render_sub_mesh_data_list) {
             auto& material = *render_sub_mesh_data.material();
+            material.update_shader_binding();
+            g_shader->start_using();
             g_shader->setTexture("diffuse_map", 0, material.diffuse_map);
             g_shader->setTexture("specular_map", 1, material.specular_map);
             g_shader->setFloat3("albedo", material.albedo);
             g_shader->setFloat("metallic", material.metallic);
             g_shader->setFloat("roughness", material.roughness);
             g_shader->setFloat("ao", material.ao);
-
             Renderer::drawIndex(*g_shader, render_sub_mesh_data.getVAO(), render_sub_mesh_data.indicesCount());
         }
-        }
+    }
     g_shader->stop_using();
 }
 

@@ -82,8 +82,8 @@ void DeferredRenderPath::render()
     }
     m_lighting_pass->draw();
 
-    static_cast<BlurPass*>(m_blur_pass.get())->setBrightMap(lighting_pass->getBrightMap());
-    m_blur_pass->draw();
+    //static_cast<BlurPass*>(m_blur_pass.get())->setBrightMap(lighting_pass->getBrightMap());
+    //m_blur_pass->draw();
 
     m_edge_detection_pass->prepare(nullptr);
     m_edge_detection_pass->draw();

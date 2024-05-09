@@ -9,6 +9,8 @@
 namespace Asset {
 
 struct Material {
+    Material();
+
     // 引用一个共有的shader程序资源
     Shader* shader{ nullptr };
 

@@ -30,9 +30,6 @@ void main()
     vec3 Diffuse = texture(gDiffuse, fragUV).rgb;
     vec3 Specular = texture(gSpecular, fragUV).rgb;
 
-	FragColor = vec4(Normal, 1.0);
-	return;
-
     if(Normal.xyz == vec3(1.0)){
         // return if sample the blank area in GBuffer
         FragColor = vec4(0.6, 0.6, 0.6, 1.0);

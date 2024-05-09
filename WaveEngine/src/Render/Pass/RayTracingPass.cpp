@@ -1,8 +1,6 @@
 #include "RayTracingPass.hpp"
 #include "Logical/Framework/ECS/Components.hpp"
-#include "Platform/RHI/rhi.hpp"
 #include "Core/Math.hpp"
-#include "Application_impl.hpp"
 
 void RayTracingPass::init()
 {
@@ -21,7 +19,7 @@ void RayTracingPass::draw()
 
 	Shader* rt_shader = Shader::getShader(ShaderType::RayTracingShader);
 	auto& world = ecs::World::get();
-	ecs::CameraComponent* camera = world.getMainCameraComponent();
+	auto camera = world.getMainCameraComponent();
 
 	Viewport rt_viewport = Application::GetApp().getWindow()->getViewport(ViewportType::RayTracing).value_or(Viewport());
 

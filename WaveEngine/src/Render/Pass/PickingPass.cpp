@@ -1,8 +1,4 @@
 #include "PickingPass.hpp"
-#include "Logical/Framework/ECS/Components.hpp"
-#include "Platform/RHI/rhi.hpp"
-#include <imgui/imgui.h>
-#include "Application_impl.hpp"
 
 void PickingPass::init()
 {
@@ -25,30 +21,23 @@ void PickingPass::draw()
     Shader* picking_shader = Shader::getShader(ShaderType::PickingShader);
     picking_shader->start_using();
 
-    auto& world = ecs::World::get();
-    ecs::CameraComponent& camera = *world.getMainCameraComponent();
-    picking_shader->setMatrix("view", 1, camera.view);
-    picking_shader->setMatrix("projection", 1, camera.projection);
+    picking_shader->setMatrix("view", 1, m_render_source_data->view_matrix);
+    picking_shader->setMatrix("projection", 1, m_render_source_data->proj_matrix);
 
-    //for (auto entity : world.entityView<ecs::RenderableComponent>()) {
-    //    if (world.hasComponent<ecs::UnpickableComponent>(entity))
-    //        continue;
-    //    auto& renderable = *world.getComponent<ecs::RenderableComponent>(entity);
-    //    auto& model_matrix = *world.getComponent<ecs::TransformComponent>(entity);
-
-    //    picking_shader->setMatrix("model", 1, model_matrix.transform());
-    //    for (int i = 0; i < renderable.sub_meshes.size(); i++) {
-    //        auto& mesh = renderable.sub_meshes[i].mesh;
-    //        int id = entity.getId() * 50000;// for debugging
-    //        int r = (id & 0x000000FF) >> 0;
-    //        int g = (id & 0x0000FF00) >> 8;
-    //        int b = (id & 0x00FF0000) >> 16;
-    //        Color4 color(r / 255.0f, g / 255.0f, b / 255.0f, 1.0f);
-    //        picking_shader->setFloat4("picking_color", color);
-
-    //        Renderer::drawIndex(*picking_shader, mesh.get_VAO(), mesh.get_indices_count());
-    //    }
-    //}
+    // TODO Unpickable
+    int i = 0;
+    for (const auto& render_mesh_data : m_render_source_data->render_mesh_data_list) {
+        picking_shader->setMatrix("model", 1, render_mesh_data.model_matrix);
+        for (const auto& render_sub_mesh_data : render_mesh_data.render_sub_mesh_data_list) {
+            int id = i++ * 50000;// for debugging
+            int r = (id & 0x000000FF) >> 0;
+            int g = (id & 0x0000FF00) >> 8;
+            int b = (id & 0x00FF0000) >> 16;
+            Color4 color(r / 255.0f, g / 255.0f, b / 255.0f, 1.0f);
+            picking_shader->setFloat4("picking_color", color);
+            Renderer::drawIndex(*picking_shader, render_sub_mesh_data.getVAO(), render_sub_mesh_data.indicesCount());
+        }
+    }
 }
 
 FrameBuffer* PickingPass::getFrameBuffer()

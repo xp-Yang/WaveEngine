@@ -67,26 +67,16 @@ void ShadowPass::drawDirectionalLightShadowMap()
     m_framebuffer->clear();
 
     glEnable(GL_DEPTH_TEST);
-    auto& world = ecs::World::get();
 
     Shader* depth_shader = Shader::getShader(ShaderType::DepthShader);
-
-    Mat4 light_ref_matrix = world.getMainDirectionalLightComponent()->lightReferenceMatrix();
-
     depth_shader->start_using();
-
-    //for (auto entity : world.entityView<ecs::RenderableComponent>()) {
-    //    if (world.hasComponent<ecs::SkyboxComponent>(entity) || world.hasComponent<ecs::PointLightComponent>(entity))
-    //        continue;
-    //    auto& renderable = *world.getComponent<ecs::RenderableComponent>(entity);
-    //    auto& model_matrix = *world.getComponent<ecs::TransformComponent>(entity);
-
-    //    depth_shader->setMatrix("mvp", 1, light_ref_matrix * model_matrix.transform());
-    //    for (int i = 0; i < renderable.sub_meshes.size(); i++) {
-    //        auto& mesh = renderable.sub_meshes[i].mesh;
-    //        Renderer::drawIndex(*depth_shader, mesh.get_VAO(), mesh.get_indices_count());
-    //    }
-    //}
+    Mat4 light_ref_matrix = m_render_source_data->render_directional_light_data_list.front().lightReferenceMatrix;
+    for (const auto& render_mesh_data : m_render_source_data->render_mesh_data_list) {
+        depth_shader->setMatrix("mvp", 1, light_ref_matrix * render_mesh_data.model_matrix);
+        for (const auto& render_sub_mesh_data : render_mesh_data.render_sub_mesh_data_list) {
+            Renderer::drawIndex(*depth_shader, render_sub_mesh_data.getVAO(), render_sub_mesh_data.indicesCount());
+        }
+    }
 }
 
 void ShadowPass::drawPointLightShadowMap()
@@ -116,51 +106,23 @@ void ShadowPass::drawPointLightShadowMap()
         reinit_cube_maps(point_light_count);
     }
 
-    //for (int cube_map_id = 0; cube_map_id < point_light_count; cube_map_id++) {
-    //    for (int i = 0; i < 6; i++) {
-    //        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, m_cube_maps[cube_map_id], 0);
-    //        glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
-    //        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+    for (int cube_map_id = 0; cube_map_id < point_light_count; cube_map_id++) {
+        for (int i = 0; i < 6; i++) {
+            glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, m_cube_maps[cube_map_id], 0);
+            glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
-    //        for (auto entity : world.entityView<ecs::RenderableComponent>()) {
-    //            if (world.hasComponent<ecs::SkyboxComponent>(entity) || world.hasComponent<ecs::PointLightComponent>(entity))
-    //                continue;
-    //            auto& renderable = *world.getComponent<ecs::RenderableComponent>(entity);
-    //            auto& model_matrix = *world.getComponent<ecs::TransformComponent>(entity);
-
-    //            depth_shader->setMatrix("model", 1, model_matrix.transform());
-    //            depth_shader->setMatrix("lightSpaceMatrix", 1, light_ref_matrix[cube_map_id][i]);
-    //            depth_shader->setFloat3("lightPos", light_pos[cube_map_id]);
-    //            depth_shader->setFloat("far_plane", light_radius[cube_map_id]);
-    //            for (int i = 0; i < renderable.sub_meshes.size(); i++) {
-    //                auto& mesh = renderable.sub_meshes[i].mesh;
-    //                Renderer::drawIndex(*depth_shader, mesh.get_VAO(), mesh.get_indices_count());
-    //            }
-    //        }
-    //    }
-    //}
-
-    //glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, m_cube_map, 0);
-    //glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
-    //glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-
-    //for (auto entity : world.entityView<ecs::RenderableComponent>()) {
-    //    if (world.hasComponent<ecs::SkyboxComponent>(entity) || world.hasComponent<ecs::PointLightComponent>(entity))
-    //        continue;
-    //    auto& renderable = *world.getComponent<ecs::RenderableComponent>(entity);
-    //    auto& model_matrix = *world.getComponent<ecs::TransformComponent>(entity);
-
-    //    depth_shader->setMatrix("model", 1, model_matrix.transform());
-    //    for (int i = 0; i < 6; i++) {
-    //        depth_shader->setMatrix("lightSpaceMatrix[" + std::to_string(i) + "]", 1, light_ref_matrix[i]);
-    //    }
-    //    depth_shader->setFloat3("lightPos", light_pos);
-    //    depth_shader->setFloat("far_plane", light_radius);
-    //    for (int i = 0; i < renderable.primitives.size(); i++) {
-    //        auto& mesh = renderable.primitives[i].mesh;
-    //        Renderer::drawIndex(*depth_shader, mesh.get_VAO(), mesh.get_indices_count());
-    //    }
-    //}
+            for (const auto& render_mesh_data : m_render_source_data->render_mesh_data_list) {
+                depth_shader->setMatrix("model", 1, render_mesh_data.model_matrix);
+                depth_shader->setMatrix("lightSpaceMatrix", 1, light_ref_matrix[cube_map_id][i]);
+                depth_shader->setFloat3("lightPos", light_pos[cube_map_id]);
+                depth_shader->setFloat("far_plane", light_radius[cube_map_id]);
+                for (const auto& render_sub_mesh_data : render_mesh_data.render_sub_mesh_data_list) {
+                    Renderer::drawIndex(*depth_shader, render_sub_mesh_data.getVAO(), render_sub_mesh_data.indicesCount());
+                }
+            }
+        }
+    }
 }
 
 void ShadowPass::reinit_cube_maps(size_t count)

@@ -1,7 +1,4 @@
 #include "MainCameraPass.hpp"
-#include "Logical/Framework/ECS/Components.hpp"
-#include "Platform/RHI/rhi.hpp"
-#include <iostream>
 
 void MainCameraPass::init()
 {
@@ -41,15 +38,10 @@ void MainCameraPass::draw()
     //glEnable(GL_BLEND);
     //glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glEnable(GL_DEPTH_TEST);
-    auto& world = ecs::World::get();
 
-    Mat4 camera_view = Mat4(1.0f);
-    Mat4 camera_projection;
-    Vec3 camera_pos;
-    ecs::CameraComponent& camera = *world.getMainCameraComponent();
-    camera_view = camera.view;
-    camera_projection = camera.projection;
-    camera_pos = camera.pos;
+    Mat4 light_ref_matrix = m_render_source_data->render_directional_light_data_list.front().lightReferenceMatrix;
+    Vec3 light_direction = m_render_source_data->render_directional_light_data_list.front().direction;
+    Vec4 light_color = m_render_source_data->render_directional_light_data_list.front().color;
 
     for (const auto& render_mesh_data : m_render_source_data->render_mesh_data_list) {
         for (const auto& render_sub_mesh_data : render_mesh_data.render_sub_mesh_data_list) {
@@ -60,31 +52,23 @@ void MainCameraPass::draw()
             shader->setMatrix("model", 1, render_mesh_data.model_matrix);
             shader->setMatrix("view", 1, m_render_source_data->view_matrix);
             shader->setMatrix("projection", 1, m_render_source_data->proj_matrix);
-            shader->setFloat3("cameraPos", camera_pos);
+            shader->setFloat3("cameraPos", m_render_source_data->camera_position);
 
-            auto dir_light_component = world.getMainDirectionalLightComponent();
-            Mat4 light_ref_matrix = dir_light_component->lightReferenceMatrix();
-            Vec3 light_direction = dir_light_component->direction;
-            Vec4 light_color = dir_light_component->luminousColor;
             shader->setFloat3("directionalLight.direction", light_direction);
             shader->setFloat4("directionalLight.color", light_color);
 
             // 点光源这里的循环造成了卡顿，需要deferred rendering解决
             int k = 0;
-            for (auto entity : world.entityView<ecs::PointLightComponent>()) {
-                auto& transform = *world.getComponent<ecs::TransformComponent>(entity);
-                Vec3 light_pos = transform.transform()[3];
-                Vec4 light_color = world.getComponent<ecs::PointLightComponent>(entity)->luminousColor;
-                float light_radius = world.getComponent<ecs::PointLightComponent>(entity)->radius;
+            for (const auto& render_point_light_data : m_render_source_data->render_point_light_data_list) {
                 std::string light_id = std::string("pointLights[") + std::to_string(k) + "]";
-                shader->setFloat3(light_id + ".position", light_pos);
-                shader->setFloat4(light_id + ".color", light_color);
-                shader->setFloat(light_id + ".radius", light_radius);
+                shader->setFloat3(light_id + ".position", render_point_light_data.position);
+                shader->setFloat4(light_id + ".color", render_point_light_data.color);
+                shader->setFloat(light_id + ".radius", render_point_light_data.radius);
                 k++;
             }
             shader->setInt("point_lights_size", k);
 
-            shader->setCubeTexture("skybox", 4, world.getSkyboxComponent()->texture);
+            shader->setCubeTexture("skybox", 4, m_render_source_data->render_skybox_data.skybox_cube_map);
             shader->setBool("enable_skybox_sample", m_reflection);
             if (m_shadow_map != 0) {
                 shader->setMatrix("lightSpaceMatrix", 1, light_ref_matrix);
@@ -107,8 +91,8 @@ void MainCameraPass::draw()
             Shader* shader = material->shader;
             shader->start_using();
             shader->setMatrix("model", 1, m_render_source_data->render_skybox_data.render_mesh_data.model_matrix);
-            shader->setMatrix("view", 1, Mat4(Mat3(camera.view)));
-            shader->setMatrix("projection", 1, camera.projection);
+            shader->setMatrix("view", 1, Mat4(Mat3(m_render_source_data->view_matrix)));
+            shader->setMatrix("projection", 1, m_render_source_data->proj_matrix);
             shader->setCubeTexture("skybox", 4, m_render_source_data->render_skybox_data.skybox_cube_map);
             Renderer::drawIndex(*shader, render_skybox_sub_mesh_data.getVAO(), render_skybox_sub_mesh_data.indicesCount());
             shader->stop_using();

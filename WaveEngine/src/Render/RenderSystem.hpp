@@ -23,6 +23,7 @@ private:
 
     std::shared_ptr<RenderPath> m_curr_path;
 
+    Asset::SubMesh m_screen_quad_sub_mesh;
     std::shared_ptr<RenderSubMeshData> m_screen_quad;
     std::shared_ptr<RenderSourceData> m_render_source_data;
     bool m_need_process_source_data{ true };

@@ -1,6 +1,4 @@
 #include "BlurPass.hpp"
-#include "Logical/Framework/ECS/Components.hpp"
-#include "Platform/RHI/rhi.hpp"
 
 BlurPass::BlurPass()
 {
