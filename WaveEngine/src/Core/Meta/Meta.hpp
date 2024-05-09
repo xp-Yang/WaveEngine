@@ -8,6 +8,7 @@
 #include <string>
 #include <memory>
 #include <assert.h>
+#include <json11/json11.hpp>
 
 #include "traits.hpp"
 
@@ -50,14 +51,6 @@ inline std::string getArgTypeName() {
     return traits::className<Arg>();
 }
 
-template <class ClassType, typename ... Args>
-inline void registerConstructor()
-{
-    ClassType* (*constructor)(Args... args) = [](Args... args) {
-        return new ClassType(args);
-    };
-}
-
 template <class ClassType, class MethodReturnType, typename ... MethodArgs>
 inline void registerMethod(MethodReturnType (ClassType::* method_ptr)(MethodArgs...) const, std::string_view method_name)
 {
@@ -80,6 +73,10 @@ inline void registerMethod(MethodReturnType (ClassType::* method_ptr)(MethodArgs
         global_class_info[class_name].method_infos.emplace_back(method_info);
     }
 }
+
+template <class ClassType>
+inline void registerSerializer(ClassType& (*read_func)(const Json&, ClassType*), Json(*write_func)(const ClassType*))
+{}
 
 inline void unregisterAll() {};
 

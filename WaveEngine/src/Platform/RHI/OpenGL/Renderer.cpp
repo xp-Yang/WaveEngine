@@ -9,20 +9,10 @@ void Renderer::drawIndex(const Shader& shader, unsigned int vao_id, size_t indic
     glBindVertexArray(0);
 }
 
-void Renderer::drawIndex(const Shader& shader, const Mesh& mesh)
-{
-    drawIndex(shader, mesh.get_VAO(), mesh.get_indices_count());
-}
-
 void Renderer::drawTriangle(const Shader& shader, unsigned int vao_id, size_t array_count)
 {
     shader.start_using();
     glBindVertexArray(vao_id);
     glDrawArrays(GL_TRIANGLES, 0, (int)array_count);
     glBindVertexArray(0);
-}
-
-void Renderer::drawTriangle(const Shader& shader, const Mesh& mesh)
-{
-    drawTriangle(shader, mesh.get_VAO(), mesh.get_vertices_count());
 }

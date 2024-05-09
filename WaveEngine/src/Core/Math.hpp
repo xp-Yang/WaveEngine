@@ -7,15 +7,15 @@
 #include "Vector.hpp"
 #include "Matrix.hpp"
 
-namespace Core{
+namespace Math{
 
-namespace MathConstant {
+namespace Constant {
     inline constexpr double PI = 3.1415926535897932385;
     inline constexpr double epsilon = 1e-6;
 }
 
-inline float deg2rad(float deg) { return deg * MathConstant::PI / 180.0f; }
-inline float rad2deg(float rad) { return rad * 180.0f / MathConstant::PI; }
+inline float deg2rad(float deg) { return deg * Constant::PI / 180.0f; }
+inline float rad2deg(float rad) { return rad * 180.0f / Constant::PI; }
 inline float randomUnit() {
     static std::uniform_real_distribution<double> distribution(0.0, 1.0);
     std::mt19937 generator(std::random_device{}());
@@ -60,7 +60,7 @@ inline Point3 getPointOnUnitSphere(const Point3& plane_point, const Vec3& normal
 // 单位圆内的点按极轴均匀分布(非均匀分布)
 inline Vec2 randomInUnitCircleByPolar() {
     float r = randomUnit();
-    float theta = random(0, 2 * MathConstant::PI);
+    float theta = random(0, 2 * Constant::PI);
     return Vec2(r * cos(theta), r * sin(theta));
 }
 inline Vec3 randomLambertianDistribution(const Vec3& normal) {
@@ -83,7 +83,7 @@ inline Vec3 randomLambertianDistribution(const Vec3& normal) {
 }
 
 template<typename T> 
-bool isApproxTo(const T& val, const T& to_val, double tolerance = MathConstant::epsilon) {
+bool isApproxTo(const T& val, const T& to_val, double tolerance = Constant::epsilon) {
     return std::fabs((double)val - (double)to_val) < tolerance;
 }
 
@@ -131,7 +131,5 @@ struct Interval {
 };
 
 }
-
-using namespace Core;
 
 #endif // !MathHpp

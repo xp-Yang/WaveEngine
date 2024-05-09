@@ -2,9 +2,9 @@
 #define ImGuiEditor_hpp
 
 #include "ImGuiViewRect.hpp"
-#include "GamePlay/Render/RenderSystem.hpp"
-#include "GamePlay/Framework/ECS/Components.hpp"
-#include "GamePlay/FrameWork/SceneHierarchy.hpp"
+#include "Logical/Framework/ECS/Components.hpp"
+#include "Logical/FrameWork/SceneHierarchy.hpp"
+#include "Render/RenderSystem.hpp"
 
 #include <string>
 #include <imgui/imgui.h>
@@ -29,7 +29,7 @@ protected:
 	void renderEmptyMainDockerSpaceWindow();
 	void renderGlobalConsole();
 	void renderCameraController();
-	void renderSceneHierarchyNode(GObject* node);
+	void renderSceneHierarchyNode(ecs::Object* node);
 	void renderSceneHierarchy();
 	void renderPickedEntityController(const ImVec2& pos, const std::vector<ecs::Entity>& picked_entities);
 

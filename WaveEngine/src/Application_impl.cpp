@@ -6,11 +6,11 @@
 #include <imgui/imgui_impl_opengl3.h>
 #include <imgui/ImGuizmo.h>
 
-#include "GamePlay/Framework/SceneHierarchy.hpp"
-#include "GamePlay/Render/RenderSystem.hpp"
-#include "GamePlay/Framework/ECS/Components.hpp"
-#include "GamePlay/Framework/ECS/MotionSystem.hpp"
-#include "GamePlay/Input/InputSystem.hpp"
+#include "Logical/Framework/SceneHierarchy.hpp"
+#include "Logical/Framework/ECS/Components.hpp"
+#include "Logical/Framework/ECS/MotionSystem.hpp"
+#include "Logical/Input/InputSystem.hpp"
+#include "Render/RenderSystem.hpp"
 #include "Editor/ImGuiEditor.hpp"
 
 #include "AllMetaRegister.hpp"

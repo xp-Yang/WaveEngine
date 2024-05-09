@@ -1,8 +1,8 @@
 #ifndef ImGuiViewRect_hpp
 #define ImGuiViewRect_hpp
 
-#include "GamePlay/FrameWork/ECS/World.hpp"
-#include "GamePlay/FrameWork/ECS/Components.hpp"
+#include "Logical/FrameWork/ECS/World.hpp"
+#include "Logical/FrameWork/ECS/Components.hpp"
 
 #include <imgui/imgui.h>
 #include <imgui/imgui_internal.h>

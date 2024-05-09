@@ -1,7 +1,7 @@
 #include "ImGuiEditor.hpp"
 
-#include "Core/Utils.hpp"
-#include "Core/Logger.hpp"
+#include "Core/Utils/Utils.hpp"
+#include "Core/Logger/Logger.hpp"
 #include "Platform/OS/FileDialog.hpp"
 
 ImGuiEditor::ImGuiEditor()
@@ -231,7 +231,7 @@ void ImGuiEditor::renderEmptyMainDockerSpaceWindow()
     ImGui::PopStyleVar(3);
 }
 
-void ImGuiEditor::renderSceneHierarchyNode(GObject* node)
+void ImGuiEditor::renderSceneHierarchyNode(ecs::Object* node)
 {
     for (int i = 0; i < node->children().size(); i++)
     {
@@ -376,21 +376,20 @@ void ImGuiEditor::renderPickedEntityController(const ImVec2& pos, const std::vec
         auto renderable = world.getComponent<ecs::RenderableComponent>(entity);
         // 编辑对象材质属性
         //ecs::MaterialSystem::onUpdate();
-        for (int i = 0; i < renderable->primitives.size(); i++) {
-            auto& material = renderable->primitives[i].material;
-            ImGui::SliderFloat((std::string("shininess") + "##" + obj_name).c_str(), &material.shininess, 64.0f, 256.0f);
+        for (int i = 0; i < renderable->sub_meshes.size(); i++) {
+            auto& material = renderable->sub_meshes[i].material;
 
             ImGui::PushItemWidth(80.0f);
-            ImGui::SliderFloat((std::string("##albedo.x") + "##" + obj_name).c_str(), &material.albedo.x, 0.0f, 1.0f);
+            ImGui::SliderFloat((std::string("##albedo.x") + "##" + obj_name).c_str(), &material->albedo.x, 0.0f, 1.0f);
             ImGui::SameLine();
-            ImGui::SliderFloat((std::string("##albedo.y") + "##" + obj_name).c_str(), &material.albedo.y, 0.0f, 1.0f);
+            ImGui::SliderFloat((std::string("##albedo.y") + "##" + obj_name).c_str(), &material->albedo.y, 0.0f, 1.0f);
             ImGui::SameLine();
-            ImGui::SliderFloat((std::string("albedo") + "##" + obj_name).c_str(), &material.albedo.z, 0.0f, 1.0f);
+            ImGui::SliderFloat((std::string("albedo") + "##" + obj_name).c_str(), &material->albedo.z, 0.0f, 1.0f);
             ImGui::PopItemWidth();
 
-            ImGui::SliderFloat((std::string("metallic") + "##" + obj_name).c_str(), &material.metallic, 0.0f, 1.0f);
-            ImGui::SliderFloat((std::string("roughness") + "##" + obj_name).c_str(), &material.roughness, 0.01f, 1.0f);
-            ImGui::SliderFloat((std::string("ao") + "##" + obj_name).c_str(), &material.ao, 0.0f, 1.0f);
+            ImGui::SliderFloat((std::string("metallic") + "##" + obj_name).c_str(), &material->metallic, 0.0f, 1.0f);
+            ImGui::SliderFloat((std::string("roughness") + "##" + obj_name).c_str(), &material->roughness, 0.01f, 1.0f);
+            ImGui::SliderFloat((std::string("ao") + "##" + obj_name).c_str(), &material->ao, 0.0f, 1.0f);
         }
     }
     if (world.hasComponent<ecs::ExplosionComponent>(entity)) {

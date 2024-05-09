@@ -2,8 +2,9 @@
 #define AllMetaRegister_hpp
 
 #include "Core/Meta/Meta.hpp"
-#include "GamePlay/Framework/ECS/Components.hpp"
-#include "GamePlay/Framework/SceneHierarchy.hpp"
+#include "Logical/Framework/ECS/Components.hpp"
+#include "Logical/Framework/SceneHierarchy.hpp"
+#include "AllSerializer.hpp"
 
 namespace Meta {
 

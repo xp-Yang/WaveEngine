@@ -2,66 +2,23 @@
 #include <windows.h>
 #include <iostream>
 #include "Platform/RHI/rhi.hpp"
-#include "Core/Logger.hpp"
+#include "Core/Logger/Logger.hpp"
 
-Mesh::Mesh(const std::vector<Vertex>& vertices, const std::vector<unsigned int>& indices)
+namespace Asset {
+
+MeshData::MeshData(const std::vector<Vertex>& vertices, const std::vector<unsigned int>& indices)
     : m_vertices(vertices)
     , m_indices(indices)
 {
-    build();
 }
 
-void Mesh::build() {
-    create_vbo();
-    create_vao();
-}
-
-void Mesh::reset()
+void MeshData::reset()
 {
-    // TODO这个类应该是opengl mesh封装类，真正的mesh类应该只调用rhi
-    if (m_VAO)
-        glDeleteVertexArrays(1, &m_VAO);
     m_vertices.clear();
     m_indices.clear();
 }
 
-void Mesh::create_vbo()
-{
-    glGenBuffers(1, &m_VBO);
-    glBindBuffer(GL_ARRAY_BUFFER, m_VBO);
-    glBufferData(GL_ARRAY_BUFFER, m_vertices.size() * sizeof(Vertex), &m_vertices[0], GL_STATIC_DRAW);
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-}
-
-void Mesh::create_vao()
-{
-    glGenVertexArrays(1, &m_VAO);
-    glBindVertexArray(m_VAO);
-
-    // 顶点位置数据
-    glBindBuffer(GL_ARRAY_BUFFER, m_VBO);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)0);
-    glEnableVertexAttribArray(0);
-    // 顶点法向量数据
-    glBindBuffer(GL_ARRAY_BUFFER, m_VBO);
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, normal));
-    glEnableVertexAttribArray(1);
-    // 纹理 uv 坐标数据
-    glBindBuffer(GL_ARRAY_BUFFER, m_VBO);
-    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, texture_uv));
-    glEnableVertexAttribArray(2);
-
-    // 索引数据
-    if (!m_indices.empty()) {
-        glGenBuffers(1, &m_IBO);
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_IBO);
-        glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_indices.size() * sizeof(unsigned int), &m_indices[0], GL_STATIC_DRAW);
-    }
-}
-
-
-
-Mesh Mesh::create_cube_mesh() {
+std::shared_ptr<MeshData> MeshData::create_cube_mesh() {
     std::vector<Vertex> vertices;
     std::vector<unsigned int> indices;
 
@@ -123,7 +80,7 @@ Mesh Mesh::create_cube_mesh() {
         vertices.push_back(vertex);
     }
 
-    GLuint cubeIndices[] =
+    unsigned int cubeIndices[] =
     {
         1 , 2 , 3 , 1 , 3 , 0 , //后面
         5 , 6 , 7 , 5 , 7 , 4 , //前面
@@ -137,7 +94,7 @@ Mesh Mesh::create_cube_mesh() {
         indices.push_back(cubeIndices[i]);
     }
 
-    return Mesh(vertices, indices);
+    return std::make_shared<MeshData>(vertices, indices);
 
 
     // 不使用ibo的方式
@@ -278,7 +235,7 @@ static std::vector<Triangle> recursive_subdivide(const Triangle& triangle, int r
     return ret;
 }
 
-Mesh Mesh::create_icosphere_mesh(int regression_depth) {
+std::shared_ptr<MeshData> MeshData::create_icosphere_mesh(int regression_depth) {
     LARGE_INTEGER t1, t2, tc;
     QueryPerformanceFrequency(&tc);
     QueryPerformanceCounter(&t1);
@@ -335,12 +292,12 @@ Mesh Mesh::create_icosphere_mesh(int regression_depth) {
     QueryPerformanceCounter(&t2);
     auto time = (double)(t2.QuadPart - t1.QuadPart) / (double)tc.QuadPart;
 
-    Logger::get().info("Mesh::create_icosphere_mesh({}), time:{}", regression_depth, time);
+    Logger::Logger::get().info("MeshData::create_icosphere_mesh({}), time:{}", regression_depth, time);
 
-    return Mesh(all_vertices, indices);
+    return std::make_shared<MeshData>(all_vertices, indices);
 }
 
-Mesh Mesh::create_quad_mesh(const Point3& origin, const Vec3& positive_dir_u, const Vec3& positive_dir_v)
+std::shared_ptr<MeshData> MeshData::create_quad_mesh(const Point3& origin, const Vec3& positive_dir_u, const Vec3& positive_dir_v)
 {
     std::vector<Vertex> vertices;
     std::vector<unsigned int> indices;
@@ -373,10 +330,10 @@ Mesh Mesh::create_quad_mesh(const Point3& origin, const Vec3& positive_dir_u, co
         indices.push_back(cubeIndices[i]);
     }
 
-    return Mesh(vertices, indices);
+    return std::make_shared<MeshData>(vertices, indices);
 }
 
-Mesh Mesh::create_ground_mesh(const Vec2& size)
+std::shared_ptr<MeshData> MeshData::create_ground_mesh(const Vec2& size)
 {
     std::vector<Vertex> vertices;
     std::vector<unsigned int> indices;
@@ -395,20 +352,22 @@ Mesh Mesh::create_ground_mesh(const Vec2& size)
         {
             Point3 sub_start_point = start_point + (float)j * sub_u + (float)i * sub_v;
             Point3 sub_end_point = sub_start_point + sub_u + sub_v;
-            Mesh& submesh = create_quad_mesh(sub_start_point, sub_u, sub_v);
-            vertices.insert(vertices.end(), submesh.m_vertices.begin(), submesh.m_vertices.end());
-            for (auto& index : submesh.m_indices) {
+            std::shared_ptr<MeshData> sub_mesh_data = create_quad_mesh(sub_start_point, sub_u, sub_v);
+            vertices.insert(vertices.end(), sub_mesh_data->m_vertices.begin(), sub_mesh_data->m_vertices.end());
+            for (auto& index : sub_mesh_data->m_indices) {
                 index += 4 * (j + i * sub_quad_num_u);
             }
-            indices.insert(indices.end(), submesh.m_indices.begin(), submesh.m_indices.end());
-            submesh.reset();
+            indices.insert(indices.end(), sub_mesh_data->m_indices.begin(), sub_mesh_data->m_indices.end());
+            sub_mesh_data.reset();
         }
     }
 
-    return Mesh(vertices, indices);
+    return std::make_shared<MeshData>(vertices, indices);
 }
 
-Mesh Mesh::create_screen_mesh()
+std::shared_ptr<MeshData> MeshData::create_screen_mesh()
 {
     return create_quad_mesh(Point3(-1.0f, -1.0f, 0.0f), Vec3(2.0f, 0.0f, 0.0f), Vec3(0.0f, 2.0f, 0.0f));
+}
+
 }

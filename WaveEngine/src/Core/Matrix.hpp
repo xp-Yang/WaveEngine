@@ -3,7 +3,7 @@
 
 #include "Vector.hpp"
 
-namespace Core {
+namespace Math {
 
 using Mat3 = glm::mat3;
 using Mat4 = glm::mat4;
@@ -48,7 +48,5 @@ void SVDDecomposition();
 void Decomposition();
 
 }
-
-using namespace Core;
 
 #endif

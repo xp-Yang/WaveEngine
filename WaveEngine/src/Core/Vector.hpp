@@ -6,7 +6,7 @@
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/quaternion.hpp>
 
-namespace Core {
+namespace Math {
 
 using Vec2 = glm::vec2;
 using Vec3 = glm::vec3;
@@ -42,7 +42,7 @@ Vec Reflect(Vec v, Vec n) {
 
 }
 
-using namespace Core;
+using namespace Math;
 
 #endif // !Vector_hpp
 

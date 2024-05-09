@@ -1,6 +1,6 @@
 #include "Window_impl.hpp"
 #include "Application_impl.hpp"
-#include "GamePlay/Framework/SceneHierarchy.hpp"
+#include "Logical/Framework/SceneHierarchy.hpp"
 #include <assert.h>
 #include <utility>
 
