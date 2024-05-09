@@ -113,6 +113,8 @@ struct RenderPointLightData {
 
 struct RenderSkyboxData {
     unsigned int skybox_cube_map;
+
+    RenderMeshData render_mesh_data;
 };
 
 struct RenderSourceData {

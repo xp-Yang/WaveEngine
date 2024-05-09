@@ -15,14 +15,17 @@ RenderSystem::RenderSystem()
 
     m_forward_path = std::make_shared<ForwardRenderPath>();
     m_forward_path->init();
+    m_forward_path->prepareScreenQuadData(m_screen_quad);
     m_forward_path->prepareRenderSourceData(m_render_source_data);
 
     m_deferred_path = std::make_shared<DeferredRenderPath>();
     m_deferred_path->init();
+    m_deferred_path->prepareScreenQuadData(m_screen_quad);
     m_deferred_path->prepareRenderSourceData(m_render_source_data);
 
     m_ray_tracing_path = std::make_shared<RayTracingRenderPath>();
     m_ray_tracing_path->init();
+    m_ray_tracing_path->prepareScreenQuadData(m_screen_quad);
     m_ray_tracing_path->prepareRenderSourceData(m_render_source_data);
 
     setRenderPathType(RenderPath::Type::Deferred);
@@ -77,19 +80,28 @@ void RenderSystem::updateRenderSourceData()
         // 相对静态的数据
         for (auto entity : world.entityView<ecs::RenderableComponent>()) {
             if (world.hasComponent<ecs::PointLightComponent>(entity) ||
-                world.hasComponent<ecs::SkyboxComponent>(entity) /*||
-                world.getComponent<ecs::NameComponent>(entity)->name == "Grid"*/)
+                world.hasComponent<ecs::SkyboxComponent>(entity))
                 continue;
 
             auto& sub_meshes = world.getComponent<ecs::RenderableComponent>(entity)->sub_meshes;
             auto& model_matrix = world.getComponent<ecs::TransformComponent>(entity)->transform();
-            m_render_source_data->render_mesh_data_list.emplace_back(sub_meshes, model_matrix);
+            m_render_source_data->render_mesh_data_list.emplace_back(RenderMeshData(sub_meshes, model_matrix));
         }
+        // 相对静态的数据
         m_render_source_data->render_skybox_data.skybox_cube_map = world.getSkyboxComponent()->texture;
+        for (auto entity : world.entityView<ecs::SkyboxComponent>()) {
+            auto& sub_meshes = world.getComponent<ecs::RenderableComponent>(entity)->sub_meshes;
+            auto& model_matrix = world.getComponent<ecs::TransformComponent>(entity)->transform();
+            m_render_source_data->render_skybox_data.render_mesh_data = RenderMeshData(sub_meshes, model_matrix);
+            break;
+        }
     }
 
     int i = 0;
     for (auto entity : world.entityView<ecs::RenderableComponent>()) {
+        if (world.hasComponent<ecs::PointLightComponent>(entity) ||
+            world.hasComponent<ecs::SkyboxComponent>(entity))
+            continue;
         auto& model_matrix = world.getComponent<ecs::TransformComponent>(entity)->transform();
         m_render_source_data->render_mesh_data_list[i].model_matrix = model_matrix;
         i++; // TODO 之后使用GObjectID来索引
@@ -99,11 +111,11 @@ void RenderSystem::updateRenderSourceData()
         auto& sub_meshes = world.getComponent<ecs::RenderableComponent>(entity)->sub_meshes;
         auto& model_matrix = world.getComponent<ecs::TransformComponent>(entity)->transform();
         m_render_source_data->render_point_light_data_list.emplace_back(
-            point_light.luminousColor, point_light.position(), point_light.radius, point_light.lightReferenceMatrix(), RenderMeshData(sub_meshes, model_matrix));
+            RenderPointLightData{ point_light.luminousColor, point_light.position(), point_light.radius, point_light.lightReferenceMatrix(), RenderMeshData(sub_meshes, model_matrix) });
     }
     auto& dir_light_component = *world.getMainDirectionalLightComponent();
     m_render_source_data->render_directional_light_data_list.emplace_back(
-        dir_light_component.luminousColor, dir_light_component.direction, dir_light_component.lightReferenceMatrix());
+        RenderDirectionalLightData{ dir_light_component.luminousColor, dir_light_component.direction, dir_light_component.lightReferenceMatrix() });
 
     m_need_process_source_data = false;
 }

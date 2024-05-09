@@ -30,25 +30,25 @@ void PickingPass::draw()
     picking_shader->setMatrix("view", 1, camera.view);
     picking_shader->setMatrix("projection", 1, camera.projection);
 
-    for (auto entity : world.entityView<ecs::RenderableComponent>()) {
-        if (world.hasComponent<ecs::UnpickableComponent>(entity))
-            continue;
-        auto& renderable = *world.getComponent<ecs::RenderableComponent>(entity);
-        auto& model_matrix = *world.getComponent<ecs::TransformComponent>(entity);
+    //for (auto entity : world.entityView<ecs::RenderableComponent>()) {
+    //    if (world.hasComponent<ecs::UnpickableComponent>(entity))
+    //        continue;
+    //    auto& renderable = *world.getComponent<ecs::RenderableComponent>(entity);
+    //    auto& model_matrix = *world.getComponent<ecs::TransformComponent>(entity);
 
-        picking_shader->setMatrix("model", 1, model_matrix.transform());
-        for (int i = 0; i < renderable.sub_meshes.size(); i++) {
-            auto& mesh = renderable.sub_meshes[i].mesh;
-            int id = entity.getId() * 50000;// for debugging
-            int r = (id & 0x000000FF) >> 0;
-            int g = (id & 0x0000FF00) >> 8;
-            int b = (id & 0x00FF0000) >> 16;
-            Color4 color(r / 255.0f, g / 255.0f, b / 255.0f, 1.0f);
-            picking_shader->setFloat4("picking_color", color);
+    //    picking_shader->setMatrix("model", 1, model_matrix.transform());
+    //    for (int i = 0; i < renderable.sub_meshes.size(); i++) {
+    //        auto& mesh = renderable.sub_meshes[i].mesh;
+    //        int id = entity.getId() * 50000;// for debugging
+    //        int r = (id & 0x000000FF) >> 0;
+    //        int g = (id & 0x0000FF00) >> 8;
+    //        int b = (id & 0x00FF0000) >> 16;
+    //        Color4 color(r / 255.0f, g / 255.0f, b / 255.0f, 1.0f);
+    //        picking_shader->setFloat4("picking_color", color);
 
-            Renderer::drawIndex(*picking_shader, mesh.get_VAO(), mesh.get_indices_count());
-        }
-    }
+    //        Renderer::drawIndex(*picking_shader, mesh.get_VAO(), mesh.get_indices_count());
+    //    }
+    //}
 }
 
 FrameBuffer* PickingPass::getFrameBuffer()

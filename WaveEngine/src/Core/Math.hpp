@@ -4,6 +4,9 @@
 #include <cmath>
 #include <random>
 #include <array>
+#include <memory>
+#include <map>
+#include <unordered_map>
 #include "Vector.hpp"
 #include "Matrix.hpp"
 

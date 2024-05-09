@@ -102,7 +102,7 @@ void SceneHierarchy::addCube()
 	auto& cube_renderable = world.addComponent<ecs::RenderableComponent>(cube_entity);
 	Asset::SubMesh sub_mesh;
 	sub_mesh.sub_mesh_data = Asset::MeshData::create_cube_mesh();
-	std::shared_ptr<Asset::Material> cube_material = std::shared_ptr<Asset::Material>();
+	std::shared_ptr<Asset::Material> cube_material = std::make_shared<Asset::Material>();
 	cube_material->shader = Shader::getShader(ShaderType::PBRShader);
 	cube_material->albedo = Vec3(1.0f);
 	cube_material->metallic = 1.0;

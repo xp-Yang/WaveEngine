@@ -36,8 +36,6 @@ void LightingPass::draw()
 
 	auto& world = ecs::World::get();
 	ecs::CameraComponent& camera = *world.getMainCameraComponent();
-	auto dir_light_component = world.getMainDirectionalLightComponent();
-	Mat4 light_ref_matrix = dir_light_component->lightReferenceMatrix();
 
 	// wireframe
 	if (m_wireframe) {
@@ -75,45 +73,39 @@ void LightingPass::draw()
 
 	lighting_shader->setFloat3("cameraPos", camera.pos);
 
-	Vec3 light_direction = dir_light_component->direction;
-	Vec4 light_color = dir_light_component->luminousColor;
-	lighting_shader->setFloat3("directionalLight.direction", light_direction);
-	lighting_shader->setFloat4("directionalLight.color", light_color);
-
-	if (m_shadow_map != 0) {
-		lighting_shader->setMatrix("lightSpaceMatrix", 1, light_ref_matrix);
-		lighting_shader->setTexture("shadow_map", 8, m_shadow_map);
-
-		for (int i = 0; i < m_cube_maps.size(); i++) {
-			std::string cube_map_id = std::string("cube_shadow_maps[") + std::to_string(i) + "]";
-			lighting_shader->setCubeTexture(cube_map_id, 9 + i, m_cube_maps[i]);
+	for (const auto& render_directional_light_data : m_render_source_data->render_directional_light_data_list) {
+		lighting_shader->setFloat3("directionalLight.direction", render_directional_light_data.direction);
+		lighting_shader->setFloat4("directionalLight.color", render_directional_light_data.color);
+		if (m_shadow_map != 0) {
+			lighting_shader->setMatrix("lightSpaceMatrix", 1, render_directional_light_data.lightReferenceMatrix);
+			lighting_shader->setTexture("shadow_map", 8, m_shadow_map);
 		}
 	}
 
-	int k = 0;
-	for (auto entity : world.entityView<ecs::PointLightComponent>()) {
-		auto& transform = *world.getComponent<ecs::TransformComponent>(entity);
-		Vec3 light_pos = transform.transform()[3];
-		Vec4 light_color = world.getComponent<ecs::PointLightComponent>(entity)->luminousColor;
-		float light_radius = world.getComponent<ecs::PointLightComponent>(entity)->radius;
-		std::string light_id = std::string("pointLights[") + std::to_string(k) + "]";
-		lighting_shader->setFloat3(light_id + ".position", light_pos);
-		lighting_shader->setFloat4(light_id + ".color", light_color);
-		lighting_shader->setFloat(light_id + ".radius", light_radius);
-		k++;
+	//for (const auto& render_point_light_data : m_render_source_data->render_point_light_data_list) {
+		if (m_shadow_map != 0) {
+			for (int i = 0; i < m_cube_maps.size(); i++) {
+				std::string cube_map_id = std::string("cube_shadow_maps[") + std::to_string(i) + "]";
+				lighting_shader->setCubeTexture(cube_map_id, 9 + i, m_cube_maps[i]);
+			}
+		}
+	//}
 
-		// 模拟正向渲染的嵌套for循环，性能明显下降
-		//for (int i = 0; i < 45 /*sub_meshes count*/; i++) {
-		//	std::string light_id = std::string("lights[") + std::to_string(i) + "]";
-		//}
-		// 正向vs延迟渲染：
-		// drawcall调用：  renderable.sub_meshes.size()次  vs  gbufferPass：renderable.sub_meshes.size()次 + LightingPass 1次。
-		// for循环设置shader光源属性：  renderable.sub_meshes.size() * Lights.size()次  vs  Lights.size()次。
-		// shader计算：  每次drawcall，每个VAO绘制时，shader对光栅化后的片段并行计算，每个shader内部循环Lights.size()次
-		//  vs  LightingPass的一次drawcall中，shader对整个屏幕所有像素并行计算，每个shader内部循环Lights.size()次。
+	// 模拟正向渲染的嵌套for循环，性能明显下降
+	// 正向vs延迟渲染：
+	// drawcall调用：  renderable.sub_meshes.size()次  vs  gbufferPass：renderable.sub_meshes.size()次 + LightingPass 1次。
+	// for循环设置shader光源属性：  renderable.sub_meshes.size() * Lights.size()次  vs  Lights.size()次。
+	// shader计算：  每次drawcall，每个VAO绘制时，shader对光栅化后的片段并行计算，每个shader内部循环Lights.size()次
+	//  vs  LightingPass的一次drawcall中，shader对整个屏幕所有像素并行计算，每个shader内部循环Lights.size()次。
+	int point_light_idx = 0;
+	for (const auto& render_point_light_data : m_render_source_data->render_point_light_data_list) {
+		std::string light_id = std::string("pointLights[") + std::to_string(point_light_idx) + "]";
+		lighting_shader->setFloat3(light_id + ".position", render_point_light_data.position);
+		lighting_shader->setFloat4(light_id + ".color", render_point_light_data.color);
+		lighting_shader->setFloat(light_id + ".radius", render_point_light_data.radius);
+		point_light_idx++;
 	}
-	lighting_shader->setInt("point_lights_size", k);
-
+	lighting_shader->setInt("point_lights_size", m_render_source_data->render_point_light_data_list.size());
 	Renderer::drawIndex(*lighting_shader, m_screen_quad->getVAO(), m_screen_quad->indicesCount());
 	lighting_shader->stop_using();
 
@@ -123,38 +115,34 @@ void LightingPass::draw()
 	// TODO 拷贝深度图后才能画法线
 	m_gbuffer_framebuffer->blitDepthMapTo(m_framebuffer.get());
 	// grid
-	for (auto entity : world.entityView<ecs::RenderableComponent>()) {
-		if (world.getComponent<ecs::NameComponent>(entity)->name == "Grid") {
-			Shader* wireframe_shader = Shader::getShader(ShaderType::WireframeShader);
-			auto& renderable = *world.getComponent<ecs::RenderableComponent>(entity);
-			auto& model_matrix = *world.getComponent<ecs::TransformComponent>(entity);
-			wireframe_shader->start_using();
-			wireframe_shader->setMatrix("view", 1, camera.view);
-			wireframe_shader->setMatrix("projection", 1, camera.projection);
-			wireframe_shader->setMatrix("model", 1, model_matrix.transform());
-			for (int i = 0; i < renderable.sub_meshes.size(); i++) {
-				auto& mesh = renderable.sub_meshes[i].mesh;
-				Renderer::drawIndex(*wireframe_shader, mesh.get_VAO(), mesh.get_indices_count());
-			}
-		}
-	}
+	//for (auto entity : world.entityView<ecs::RenderableComponent>()) {
+	//	if (world.getComponent<ecs::NameComponent>(entity)->name == "Grid") {
+	//		Shader* wireframe_shader = Shader::getShader(ShaderType::WireframeShader);
+	//		auto& renderable = *world.getComponent<ecs::RenderableComponent>(entity);
+	//		auto& model_matrix = *world.getComponent<ecs::TransformComponent>(entity);
+	//		wireframe_shader->start_using();
+	//		wireframe_shader->setMatrix("view", 1, camera.view);
+	//		wireframe_shader->setMatrix("projection", 1, camera.projection);
+	//		wireframe_shader->setMatrix("model", 1, model_matrix.transform());
+	//		for (int i = 0; i < renderable.sub_meshes.size(); i++) {
+	//			auto& mesh = renderable.sub_meshes[i].mesh;
+	//			Renderer::drawIndex(*wireframe_shader, mesh.get_VAO(), mesh.get_indices_count());
+	//		}
+	//	}
+	//}
+	
 	// lights
-	for (auto entity : world.entityView<ecs::PointLightComponent>()) {
-		auto& point_light = *world.getComponent<ecs::PointLightComponent>(entity);
-		auto& renderable = *world.getComponent<ecs::RenderableComponent>(entity);
-		auto& model_matrix = *world.getComponent<ecs::TransformComponent>(entity);
-
-		for (int i = 0; i < renderable.sub_meshes.size(); i++) {
-			auto& mesh = renderable.sub_meshes[i].mesh;
-			auto& material = renderable.sub_meshes[i].material;
-			Shader* shader = material.shader;
-			material.update_shader_binding();
+	for (const auto& render_point_light_data : m_render_source_data->render_point_light_data_list) {
+		for (const auto& render_point_light_sub_mesh_data : render_point_light_data.render_mesh_data.render_sub_mesh_data_list) {
+			auto& material = render_point_light_sub_mesh_data.material();
+			Shader* shader = material->shader;
+			material->update_shader_binding();
 			shader->start_using();
-			shader->setFloat4("color", point_light.luminousColor);
-			shader->setMatrix("model", 1, model_matrix.transform());
+			shader->setFloat4("color", render_point_light_data.color);
+			shader->setMatrix("model", 1, render_point_light_data.render_mesh_data.model_matrix);
 			shader->setMatrix("view", 1, camera.view);
 			shader->setMatrix("projection", 1, camera.projection);
-			Renderer::drawIndex(*shader, mesh.get_VAO(), mesh.get_indices_count());
+			Renderer::drawIndex(*shader, render_point_light_sub_mesh_data.getVAO(), render_point_light_sub_mesh_data.indicesCount());
 			shader->stop_using();
 		}
 	}
@@ -166,66 +154,34 @@ void LightingPass::draw()
 
 	// skybox
 	if (m_skybox) {
-		for (auto entity : world.entityView<ecs::SkyboxComponent>()) {
-			auto& renderable = *world.getComponent<ecs::RenderableComponent>(entity);
-			auto& model_matrix = *world.getComponent<ecs::TransformComponent>(entity);
-			if (world.getPickedEntities().empty())
-				break;
-			auto point_light_entity = world.getPickedEntities()[0];
-			if (!world.hasComponent<ecs::PointLightComponent>(point_light_entity))
-				break;
-			int debug_index = Application::GetApp().getSceneHierarchy()->rootObject()->find(point_light_entity)->index();
-			auto skybox_texture_id = m_cube_maps[debug_index];// world.getComponent<ecs::SkyboxComponent>(entity)->texture;
-			for (int i = 0; i < renderable.sub_meshes.size(); i++) {
-				auto& mesh = renderable.sub_meshes[i].mesh;
-				auto& material = renderable.sub_meshes[i].material;
-				Shader* shader = material.shader;
-				material.update_shader_binding();
-				shader->start_using();
-				shader->setMatrix("model", 1, model_matrix.transform());
-				shader->setMatrix("view", 1, Mat4(Mat3(camera.view)));
-				shader->setMatrix("projection", 1, camera.projection);
-				shader->setCubeTexture("skybox", 4, skybox_texture_id);
-				Renderer::drawIndex(*shader, mesh.get_VAO(), mesh.get_indices_count());
-				shader->stop_using();
-			}
-		}
-	}
-
-	m_gbuffer_framebuffer->blitDepthMapTo(m_lights_framebuffer.get());
-	Shader* light_shader = nullptr;
-	for (auto entity : world.entityView<ecs::PointLightComponent>()) {
-		auto& point_light = *world.getComponent<ecs::PointLightComponent>(entity);
-		auto& renderable = *world.getComponent<ecs::RenderableComponent>(entity);
-		auto& model_matrix = *world.getComponent<ecs::TransformComponent>(entity);
-
-		for (int i = 0; i < renderable.sub_meshes.size(); i++) {
-			auto& mesh = renderable.sub_meshes[i].mesh;
-			auto& material = renderable.sub_meshes[i].material;
-			Shader* shader = material.shader;
-			light_shader = material.shader;
-			material.update_shader_binding();
+		for (const auto& render_skybox_sub_mesh_data : m_render_source_data->render_skybox_data.render_mesh_data.render_sub_mesh_data_list) {
+			auto& material = render_skybox_sub_mesh_data.material();
+			material->update_shader_binding();
+			Shader* shader = material->shader;
 			shader->start_using();
-			shader->setFloat4("color", point_light.luminousColor);
-			shader->setMatrix("model", 1, model_matrix.transform());
-			shader->setMatrix("view", 1, camera.view);
+			shader->setMatrix("model", 1, m_render_source_data->render_skybox_data.render_mesh_data.model_matrix);
+			shader->setMatrix("view", 1, Mat4(Mat3(camera.view)));
 			shader->setMatrix("projection", 1, camera.projection);
-			Renderer::drawIndex(*shader, mesh.get_VAO(), mesh.get_indices_count());
+			shader->setCubeTexture("skybox", 4, m_render_source_data->render_skybox_data.skybox_cube_map);
+			Renderer::drawIndex(*shader, render_skybox_sub_mesh_data.getVAO(), render_skybox_sub_mesh_data.indicesCount());
 			shader->stop_using();
 		}
 	}
-	//// border
-	//for (auto entity : world.getPickedEntities()) {
+
+	// draw bright map to do bloom effect
+	//m_gbuffer_framebuffer->blitDepthMapTo(m_lights_framebuffer.get());
+	//for (auto entity : world.entityView<ecs::PointLightComponent>()) {
+	//	auto& point_light = *world.getComponent<ecs::PointLightComponent>(entity);
 	//	auto& renderable = *world.getComponent<ecs::RenderableComponent>(entity);
 	//	auto& model_matrix = *world.getComponent<ecs::TransformComponent>(entity);
+
 	//	for (int i = 0; i < renderable.sub_meshes.size(); i++) {
 	//		auto& mesh = renderable.sub_meshes[i].mesh;
 	//		auto& material = renderable.sub_meshes[i].material;
-	//		Shader* shader = material.shader;
-	//		light_shader = material.shader;
-	//		material.update_shader_binding();
+	//		Shader* shader = material->shader;
+	//		material->update_shader_binding();
 	//		shader->start_using();
-	//		shader->setFloat4("color", Color4(1.0f));
+	//		shader->setFloat4("color", point_light.luminousColor);
 	//		shader->setMatrix("model", 1, model_matrix.transform());
 	//		shader->setMatrix("view", 1, camera.view);
 	//		shader->setMatrix("projection", 1, camera.projection);
@@ -277,66 +233,66 @@ void LightingPass::enablePBR(bool enable)
 
 void LightingPass::drawNormalMode()
 {
-	auto& world = ecs::World::get();
-	ecs::CameraComponent& camera = *world.getMainCameraComponent();
+	//auto& world = ecs::World::get();
+	//ecs::CameraComponent& camera = *world.getMainCameraComponent();
 
-	Shader* normal_shader = Shader::getShader(ShaderType::NormalShader);
-	normal_shader->start_using();
-	normal_shader->setMatrix("view", 1, camera.view);
-	normal_shader->setMatrix("projection", 1, camera.projection);
-	normal_shader->setMatrix("projectionView", 1, camera.projection * camera.view);
-	for (auto entity : world.entityView<ecs::RenderableComponent>()) {
-		auto& renderable = *world.getComponent<ecs::RenderableComponent>(entity);
-		auto& model_matrix = *world.getComponent<ecs::TransformComponent>(entity);
-		normal_shader->setMatrix("model", 1, model_matrix.transform());
-		for (int i = 0; i < renderable.sub_meshes.size(); i++) {
-			auto& mesh = renderable.sub_meshes[i].mesh;
-			Renderer::drawIndex(*normal_shader, mesh.get_VAO(), mesh.get_indices_count());
-		}
-	}
+	//Shader* normal_shader = Shader::getShader(ShaderType::NormalShader);
+	//normal_shader->start_using();
+	//normal_shader->setMatrix("view", 1, camera.view);
+	//normal_shader->setMatrix("projection", 1, camera.projection);
+	//normal_shader->setMatrix("projectionView", 1, camera.projection * camera.view);
+	//for (auto entity : world.entityView<ecs::RenderableComponent>()) {
+	//	auto& renderable = *world.getComponent<ecs::RenderableComponent>(entity);
+	//	auto& model_matrix = *world.getComponent<ecs::TransformComponent>(entity);
+	//	normal_shader->setMatrix("model", 1, model_matrix.transform());
+	//	for (int i = 0; i < renderable.sub_meshes.size(); i++) {
+	//		auto& mesh = renderable.sub_meshes[i].mesh;
+	//		Renderer::drawIndex(*normal_shader, mesh.get_VAO(), mesh.get_indices_count());
+	//	}
+	//}
 }
 
 void LightingPass::drawWireframeMode()
 {
-	auto& world = ecs::World::get();
-	ecs::CameraComponent& camera = *world.getMainCameraComponent();
+	//auto& world = ecs::World::get();
+	//ecs::CameraComponent& camera = *world.getMainCameraComponent();
 
-	Shader* wireframe_shader = Shader::getShader(ShaderType::WireframeShader);
-	wireframe_shader->start_using();
-	wireframe_shader->setMatrix("view", 1, camera.view);
-	wireframe_shader->setMatrix("projection", 1, camera.projection);
-	for (auto entity : world.entityView<ecs::RenderableComponent>()) {
-		auto& renderable = *world.getComponent<ecs::RenderableComponent>(entity);
-		auto& model_matrix = *world.getComponent<ecs::TransformComponent>(entity);
-		wireframe_shader->setMatrix("model", 1, model_matrix.transform());
-		for (int i = 0; i < renderable.sub_meshes.size(); i++) {
-			auto& mesh = renderable.sub_meshes[i].mesh;
-			Renderer::drawIndex(*wireframe_shader, mesh.get_VAO(), mesh.get_indices_count());
-		}
-	}
+	//Shader* wireframe_shader = Shader::getShader(ShaderType::WireframeShader);
+	//wireframe_shader->start_using();
+	//wireframe_shader->setMatrix("view", 1, camera.view);
+	//wireframe_shader->setMatrix("projection", 1, camera.projection);
+	//for (auto entity : world.entityView<ecs::RenderableComponent>()) {
+	//	auto& renderable = *world.getComponent<ecs::RenderableComponent>(entity);
+	//	auto& model_matrix = *world.getComponent<ecs::TransformComponent>(entity);
+	//	wireframe_shader->setMatrix("model", 1, model_matrix.transform());
+	//	for (int i = 0; i < renderable.sub_meshes.size(); i++) {
+	//		auto& mesh = renderable.sub_meshes[i].mesh;
+	//		Renderer::drawIndex(*wireframe_shader, mesh.get_VAO(), mesh.get_indices_count());
+	//	}
+	//}
 }
 
 void LightingPass::drawCheckerboardMode()
 {
-	auto& world = ecs::World::get();
-	ecs::CameraComponent& camera = *world.getMainCameraComponent();
-	auto dir_light_component = world.getMainDirectionalLightComponent();
+	//auto& world = ecs::World::get();
+	//ecs::CameraComponent& camera = *world.getMainCameraComponent();
+	//auto dir_light_component = world.getMainDirectionalLightComponent();
 
-	Mat4 light_ref_matrix = dir_light_component->lightReferenceMatrix();
-	Shader* shader = Shader::getShader(ShaderType::CheckerboardShader);
-	shader->start_using();
-	for (auto entity : world.entityView<ecs::RenderableComponent>()) {
-		auto& renderable = *world.getComponent<ecs::RenderableComponent>(entity);
-		auto& model_matrix = *world.getComponent<ecs::TransformComponent>(entity);
+	//Mat4 light_ref_matrix = dir_light_component->lightReferenceMatrix();
+	//Shader* shader = Shader::getShader(ShaderType::CheckerboardShader);
+	//shader->start_using();
+	//for (auto entity : world.entityView<ecs::RenderableComponent>()) {
+	//	auto& renderable = *world.getComponent<ecs::RenderableComponent>(entity);
+	//	auto& model_matrix = *world.getComponent<ecs::TransformComponent>(entity);
 
-		for (int i = 0; i < renderable.sub_meshes.size(); i++) {
-			auto& mesh = renderable.sub_meshes[i].mesh;
-			shader->setMatrix("modelScale", 1, Scale(model_matrix.scale));
-			shader->setMatrix("model", 1, model_matrix.transform());
-			shader->setMatrix("view", 1, camera.view);
-			shader->setMatrix("projection", 1, camera.projection);
-			Renderer::drawIndex(*shader, mesh.get_VAO(), mesh.get_indices_count());
-			shader->stop_using();
-		}
-	}
+	//	for (int i = 0; i < renderable.sub_meshes.size(); i++) {
+	//		auto& mesh = renderable.sub_meshes[i].mesh;
+	//		shader->setMatrix("modelScale", 1, Scale(model_matrix.scale));
+	//		shader->setMatrix("model", 1, model_matrix.transform());
+	//		shader->setMatrix("view", 1, camera.view);
+	//		shader->setMatrix("projection", 1, camera.projection);
+	//		Renderer::drawIndex(*shader, mesh.get_VAO(), mesh.get_indices_count());
+	//		shader->stop_using();
+	//	}
+	//}
 }

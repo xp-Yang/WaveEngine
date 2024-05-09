@@ -9,6 +9,7 @@ namespace Asset{
 std::shared_ptr<Asset::Mesh> ObjImporter::load(const std::string& file_path)
 {
     m_data.reset();
+    m_data = std::make_shared<Asset::Mesh>();
 
 	Assimp::Importer importer;
 	const aiScene* scene = importer.ReadFile(file_path, aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_GenNormals);
@@ -36,7 +37,7 @@ void ObjImporter::processNode(aiNode* node, const aiScene* scene)
         aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
         std::shared_ptr<Asset::Material> sub_mesh_material = load_material(material);
 
-        m_data->sub_meshes.emplace_back(sub_mesh_data, sub_mesh_material, Mat4(1.0f));
+        m_data->sub_meshes.emplace_back(Asset::SubMesh{ sub_mesh_data, sub_mesh_material, Mat4(1.0f) });
     }
     for (unsigned int i = 0; i < node->mNumChildren; i++)
     {
@@ -93,6 +94,7 @@ std::shared_ptr<Asset::MeshData> ObjImporter::load_sub_mesh_data(aiMesh* mesh, c
 
 std::shared_ptr<Asset::Material> ObjImporter::load_material(aiMaterial* material) {
     std::shared_ptr<Asset::Material> res = std::make_shared<Asset::Material>();
+    res->shader = Shader::getShader(ShaderType::PBRShader);
 
     aiString str;
     if (material->GetTextureCount(aiTextureType_DIFFUSE)) {
