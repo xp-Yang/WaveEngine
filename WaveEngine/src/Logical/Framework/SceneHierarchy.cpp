@@ -1,7 +1,6 @@
 #include "SceneHierarchy.hpp"
 #include "Logical/Framework/ECS/Components.hpp"
 #include "ResourceManager/ObjImporter.hpp"
-#include "ResourceManager/Texture.hpp"
 #include "Platform/RHI/rhi.hpp"
 #include "Core/Logger/Logger.hpp"
 #include "Application_impl.hpp"
@@ -210,7 +209,7 @@ void SceneHierarchy::createSkybox()
 	auto& skybox_renderable = world.addComponent<ecs::RenderableComponent>(skybox_entity);
 	Asset::SubMesh sub_mesh;
 	sub_mesh.sub_mesh_data = Asset::MeshData::create_cube_mesh();
-	std::vector<std::string> faces
+	std::array<std::string, 6> faces
 	{
 		resource_dir + "/images/skybox/right.jpg",
 		resource_dir + "/images/skybox/left.jpg",
@@ -220,7 +219,7 @@ void SceneHierarchy::createSkybox()
 		resource_dir + "/images/skybox/back.jpg"
 	};
 	// TODO 是否可以放到material中
-	world.addComponent<ecs::SkyboxComponent>(skybox_entity).texture = Asset::Texture::generate_cube_map(faces);
+	world.addComponent<ecs::SkyboxComponent>(skybox_entity).cube_texture_filepath = faces;
 	sub_mesh.material = std::make_shared<Asset::Material>();
 	skybox_renderable.sub_meshes.push_back(sub_mesh);
 }

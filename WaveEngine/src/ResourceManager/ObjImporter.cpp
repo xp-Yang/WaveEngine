@@ -2,7 +2,6 @@
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
 #include "ObjImporter.hpp"
-#include "Texture.hpp"
 
 namespace Asset{
 

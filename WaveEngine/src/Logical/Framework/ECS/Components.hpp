@@ -105,7 +105,7 @@ struct RenderableComponent {
 };
 
 struct SkyboxComponent {
-	unsigned int texture;
+	std::array<std::string, 6> cube_texture_filepath;
 };
 
 struct PointLightComponent {

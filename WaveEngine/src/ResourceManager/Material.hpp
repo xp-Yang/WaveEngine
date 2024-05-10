@@ -1,10 +1,7 @@
 #ifndef Material_hpp
 #define Material_hpp
 
-#include <string>
-#include <vector>
 #include "Core/Math.hpp"
-#include "Shader.hpp"
 
 namespace Asset {
 

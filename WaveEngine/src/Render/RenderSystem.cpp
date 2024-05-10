@@ -87,7 +87,7 @@ void RenderSystem::updateRenderSourceData()
             }
         }
         // 2. skybox
-        m_render_source_data->render_skybox_data.skybox_cube_map = world.getSkyboxComponent()->texture;
+        m_render_source_data->render_skybox_data.skybox_cube_map = RenderTextureData(world.getSkyboxComponent()->cube_texture_filepath).map;
         for (auto entity : world.entityView<ecs::SkyboxComponent>()) {
             auto& sub_meshes = world.getComponent<ecs::RenderableComponent>(entity)->sub_meshes;
             auto& model_matrix = world.getComponent<ecs::TransformComponent>(entity)->transform();

@@ -5,6 +5,13 @@
 #include "ResourceManager/AssetManager.hpp"
 #include <Logical/Framework/Object/GObject.hpp>
 
+struct RenderTextureData {
+    RenderTextureData(const std::string& texture_filepath, bool gamma = false);
+    RenderTextureData(std::array<std::string, 6> cube_texture_filepath);
+
+    unsigned int map;
+};
+
 struct RenderMaterialData {
     unsigned int albedo_map{ 0 };
     unsigned int metallic_map{ 0 };
@@ -66,11 +73,10 @@ private:
     Mat4 m_transform;
 };
 
-struct RenderShaderObject {
-    Asset::ShaderType shader_asset_type;
-    std::shared_ptr<Asset::Shader> shader_asset;
-    void update_uniforms();
-};
+//struct RenderShaderObject {
+//    Asset::ShaderType shader_asset_type;
+//    std::shared_ptr<Asset::Shader> shader_asset;
+//};
 
 
 struct RenderDirectionalLightData {

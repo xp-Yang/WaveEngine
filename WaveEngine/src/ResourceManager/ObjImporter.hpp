@@ -1,7 +1,6 @@
 #ifndef ObjImporter_hpp
 #define ObjImporter_hpp
-#include <string>
-#include <vector>
+
 #include "Mesh.hpp"
 #include "Material.hpp"
 
