@@ -26,7 +26,7 @@ void EdgeDetectionPass::prepare(FrameBuffer* framebuffer)
         // TODO 需要先把实际的深度贴图拷贝到当前深度缓冲中
         glEnable(GL_DEPTH_TEST);
 
-        Shader* picking_shader = Shader::getShader(ShaderType::PickingShader);
+        Asset::Shader* picking_shader = Asset::Shader::getShader(Asset::ShaderType::PickingShader);
         picking_shader->start_using();
         picking_shader->setMatrix("view", 1, m_render_source_data->view_matrix);
         picking_shader->setMatrix("projection", 1, m_render_source_data->proj_matrix);
@@ -41,7 +41,7 @@ void EdgeDetectionPass::prepare(FrameBuffer* framebuffer)
             int b = (id & 0x00FF0000) >> 16;
             Color4 color(r / 255.0f, g / 255.0f, b / 255.0f, 1.0f);
             picking_shader->setFloat4("picking_color", color);
-            Renderer::drawIndex(*picking_shader, render_sub_mesh_data->getVAO(), render_sub_mesh_data->indicesCount());
+            Renderer::drawIndex(render_sub_mesh_data->getVAO(), render_sub_mesh_data->indicesCount());
         }
     //}
     m_source_map = m_source_framebuffer->getFirstAttachmentOf(AttachmentType::RGB16F).getMap();
@@ -52,10 +52,10 @@ void EdgeDetectionPass::draw()
     m_framebuffer->bind();
     m_framebuffer->clear();
 
-    Shader* edge_shader = Shader::getShader(ShaderType::EdgeDetection);
+    static Asset::Shader* edge_shader = Asset::Shader::getShader(Asset::ShaderType::EdgeDetection);
     edge_shader->start_using();
     edge_shader->setTexture("Texture", 0, m_source_map);
-    Renderer::drawIndex(*edge_shader, m_screen_quad->getVAO(), m_screen_quad->indicesCount());
+    Renderer::drawIndex(m_screen_quad->getVAO(), m_screen_quad->indicesCount());
 }
 
 FrameBuffer* EdgeDetectionPass::getFrameBuffer()

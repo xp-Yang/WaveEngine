@@ -26,14 +26,14 @@ void ScreenPass::draw()
 
 	auto main_viewport = Application::GetApp().getWindow()->getMainViewport().value_or(Viewport());
 	Application::GetApp().getWindow()->setMainViewport(main_viewport);
-	Shader* frame_shader = Shader::getShader(ShaderType::QuadShader);
+	Asset::Shader* frame_shader = Asset::Shader::getShader(Asset::ShaderType::QuadShader);
 	frame_shader->start_using();
 	frame_shader->setTexture("Texture", 0, m_scene_map);
 	frame_shader->setTexture("bloomBlurMap", 1, m_blurred_bright_map);
 	frame_shader->setTexture("borderMap", 2, m_border_map);
 	frame_shader->setBool("bloom", true);
 	frame_shader->setBool("border", true);
-	Renderer::drawIndex(*frame_shader, m_screen_quad->getVAO(), m_screen_quad->indicesCount());
+	Renderer::drawIndex(m_screen_quad->getVAO(), m_screen_quad->indicesCount());
 
 
 	frame_shader->setBool("bloom", false);
@@ -44,7 +44,7 @@ void ScreenPass::draw()
 		Application::GetApp().getWindow()->setViewport(ViewportType::Pick, picking_viewport);
 		frame_shader->start_using();
 		frame_shader->setTexture("Texture", 0, m_pick_view_ref->getFirstAttachmentOf(AttachmentType::RGB16F).getMap());
-		Renderer::drawIndex(*frame_shader, m_screen_quad->getVAO(), m_screen_quad->indicesCount());
+		Renderer::drawIndex(m_screen_quad->getVAO(), m_screen_quad->indicesCount());
 	}
 
 	if (m_shadow_view_ref) {
@@ -52,7 +52,7 @@ void ScreenPass::draw()
 		Application::GetApp().getWindow()->setViewport(ViewportType::Shadow, shadow_viewport);
 		frame_shader->start_using();
 		frame_shader->setTexture("Texture", 0, m_shadow_view_ref->getFirstAttachmentOf(AttachmentType::DEPTH).getMap());
-		Renderer::drawIndex(*frame_shader, m_screen_quad->getVAO(), m_screen_quad->indicesCount());
+		Renderer::drawIndex(m_screen_quad->getVAO(), m_screen_quad->indicesCount());
 	}
 }
 

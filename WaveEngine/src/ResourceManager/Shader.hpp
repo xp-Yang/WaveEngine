@@ -1,8 +1,9 @@
 #ifndef Shader_hpp
 #define Shader_hpp
-#include "Core/Vector.hpp"
-#include "Core/Matrix.hpp"
-#include <string>
+
+#include "Core/Math.hpp"
+
+namespace Asset {
 
 enum class ShaderType {
 	GBufferShader,
@@ -48,6 +49,8 @@ private:
 	std::string m_fragmentCode;
 	std::string m_geometryCode;
 };
+
+}
 
 #endif
 

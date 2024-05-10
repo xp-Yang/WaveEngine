@@ -3,6 +3,8 @@
 #include "stb/stb_image.h"
 #include <assert.h>
 
+namespace Asset {
+
 unsigned int Texture::generate_texture_from_file(const std::string& full_path, bool gamma) {
     std::string filename = full_path;
     int width, height, nrComponents;
@@ -91,4 +93,6 @@ unsigned int Texture::generate_cube_map(std::vector<std::string> faces) {
     glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
 
     return textureID;
+}
+
 }

@@ -4,6 +4,8 @@
 #include <string>
 #include <vector>
 
+namespace Asset {
+
 class Texture {
 public:
     static unsigned int generate_texture_from_file(const char* path, const std::string& directory, bool gamma);
@@ -15,5 +17,7 @@ private:
 //    aiTextureType type;
 //    //aiString path;
 };
+
+}
 
 #endif

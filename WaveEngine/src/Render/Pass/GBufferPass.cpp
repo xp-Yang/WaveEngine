@@ -19,7 +19,7 @@ void GBufferPass::draw()
 
     glEnable(GL_DEPTH_TEST);
 
-    Shader* g_shader = Shader::getShader(ShaderType::GBufferShader);
+    Asset::Shader* g_shader = Asset::Shader::getShader(Asset::ShaderType::GBufferShader);
 
     g_shader->start_using();
     g_shader->setMatrix("view", 1, m_render_source_data->view_matrix);
@@ -34,7 +34,7 @@ void GBufferPass::draw()
         g_shader->setFloat("metallic", material.metallic);
         g_shader->setFloat("roughness", material.roughness);
         g_shader->setFloat("ao", material.ao);
-        Renderer::drawIndex(*g_shader, render_sub_mesh_data->getVAO(), render_sub_mesh_data->indicesCount());
+        Renderer::drawIndex(render_sub_mesh_data->getVAO(), render_sub_mesh_data->indicesCount());
     }
     g_shader->stop_using();
 }

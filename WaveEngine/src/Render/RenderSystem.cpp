@@ -82,14 +82,18 @@ void RenderSystem::updateRenderSourceData()
 
             auto& sub_meshes = world.getComponent<ecs::RenderableComponent>(entity)->sub_meshes;
             auto& model_matrix = world.getComponent<ecs::TransformComponent>(entity)->transform();
-            m_render_source_data->render_object_sub_mesh_data_list.emplace_back(std::make_shared<RenderSubMeshData>(sub_meshes.front(), model_matrix));
+            for (const auto& sub_mesh : sub_meshes) {
+                m_render_source_data->render_object_sub_mesh_data_list.emplace_back(std::make_shared<RenderSubMeshData>(sub_mesh, model_matrix));
+            }
         }
         // 2. skybox
         m_render_source_data->render_skybox_data.skybox_cube_map = world.getSkyboxComponent()->texture;
         for (auto entity : world.entityView<ecs::SkyboxComponent>()) {
             auto& sub_meshes = world.getComponent<ecs::RenderableComponent>(entity)->sub_meshes;
             auto& model_matrix = world.getComponent<ecs::TransformComponent>(entity)->transform();
-            m_render_source_data->render_skybox_data.render_sub_mesh_data = std::make_shared<RenderSubMeshData>(sub_meshes.front(), model_matrix);
+            for (const auto& sub_mesh : sub_meshes) {
+                m_render_source_data->render_skybox_data.render_sub_mesh_data = std::make_shared<RenderSubMeshData>(sub_mesh, model_matrix);
+            }
             break;
         }
         // 3. light mesh
@@ -97,9 +101,9 @@ void RenderSystem::updateRenderSourceData()
             auto& point_light = *world.getComponent<ecs::PointLightComponent>(entity);
             auto& sub_meshes = world.getComponent<ecs::RenderableComponent>(entity)->sub_meshes;
             auto& model_matrix = world.getComponent<ecs::TransformComponent>(entity)->transform();
-            std::shared_ptr render_point_light_sub_mesh_data = std::make_shared<RenderSubMeshData>(sub_meshes.front(), model_matrix); // TODO emplace construct
             m_render_source_data->render_point_light_data_list.emplace_back(
-                RenderPointLightData{ point_light.luminousColor, point_light.position(), point_light.radius, point_light.lightReferenceMatrix(), render_point_light_sub_mesh_data });
+                RenderPointLightData{ point_light.luminousColor, point_light.position(), point_light.radius, point_light.lightReferenceMatrix(),
+                std::make_shared<RenderSubMeshData>(sub_meshes.front(), model_matrix) });
         }
         auto& dir_light_component = *world.getMainDirectionalLightComponent();
         m_render_source_data->render_directional_light_data_list.emplace_back(
@@ -115,9 +119,12 @@ void RenderSystem::updateRenderSourceData()
             continue;
         auto& sub_meshes = world.getComponent<ecs::RenderableComponent>(entity)->sub_meshes;
         auto& model_matrix = world.getComponent<ecs::TransformComponent>(entity)->transform();
-        m_render_source_data->render_object_sub_mesh_data_list[i]->updateTransform(model_matrix * sub_meshes.front().local_transform);
+        for (const auto& sub_mesh : sub_meshes) {
+            m_render_source_data->render_object_sub_mesh_data_list[i]->updateTransform(model_matrix * sub_mesh.local_transform);
+            i++; // TODO 之后使用GObjectID来索引
+        }
+        // TODO need updateRenderMaterialData if changed
         //m_render_source_data->render_object_sub_mesh_data_list[i].updateRenderMaterialData(sub_meshes[i].material);
-        i++; // TODO 之后使用GObjectID来索引
     }
     // 2. light model matrix
     i = 0;
@@ -132,10 +139,14 @@ void RenderSystem::updateRenderSourceData()
         m_render_source_data->render_point_light_data_list[i].render_sub_mesh_data->updateTransform(model_matrix * sub_meshes.front().local_transform);
         i++;
     }
-    auto& dir_light_component = *world.getMainDirectionalLightComponent();
-    m_render_source_data->render_directional_light_data_list.front().color = dir_light_component.luminousColor;
-    m_render_source_data->render_directional_light_data_list.front().direction = dir_light_component.direction;
-    m_render_source_data->render_directional_light_data_list.front().lightReferenceMatrix = dir_light_component.lightReferenceMatrix();
+    i = 0;
+    for (auto entity : world.entityView<ecs::DirectionalLightComponent>()) {
+        auto& dir_light_component = *world.getComponent<ecs::DirectionalLightComponent>(entity);
+        m_render_source_data->render_directional_light_data_list[i].color = dir_light_component.luminousColor;
+        m_render_source_data->render_directional_light_data_list[i].direction = dir_light_component.direction;
+        m_render_source_data->render_directional_light_data_list[i].lightReferenceMatrix = dir_light_component.lightReferenceMatrix();
+        i++;
+    }
     // 3. camera
     auto& camera = *world.getMainCameraComponent();
     m_render_source_data->camera_position = camera.pos;

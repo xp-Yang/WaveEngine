@@ -17,7 +17,7 @@ void RayTracingPass::draw()
 	m_framebuffer->bind();
 	m_framebuffer->clear();
 
-	Shader* rt_shader = Shader::getShader(ShaderType::RayTracingShader);
+	Asset::Shader* rt_shader = Asset::Shader::getShader(Asset::ShaderType::RayTracingShader);
 	auto& world = ecs::World::get();
 	auto camera = world.getMainCameraComponent();
 
@@ -44,7 +44,7 @@ void RayTracingPass::draw()
 		// random
 		rt_shader->setFloat("randOrigin", 674764.0f * (Math::randomUnit() + 1.0f));
 		// render to m_framebuffer
-		Renderer::drawIndex(*rt_shader, m_screen_quad->getVAO(), m_screen_quad->indicesCount());
+		Renderer::drawIndex(m_screen_quad->getVAO(), m_screen_quad->indicesCount());
 	}
 }
 

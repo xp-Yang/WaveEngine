@@ -18,7 +18,7 @@ void PickingPass::draw()
 
     glEnable(GL_DEPTH_TEST);
 
-    Shader* picking_shader = Shader::getShader(ShaderType::PickingShader);
+    Asset::Shader* picking_shader = Asset::Shader::getShader(Asset::ShaderType::PickingShader);
     picking_shader->start_using();
 
     picking_shader->setMatrix("view", 1, m_render_source_data->view_matrix);
@@ -34,7 +34,7 @@ void PickingPass::draw()
         int b = (id & 0x00FF0000) >> 16;
         Color4 color(r / 255.0f, g / 255.0f, b / 255.0f, 1.0f);
         picking_shader->setFloat4("picking_color", color);
-        Renderer::drawIndex(*picking_shader, render_sub_mesh_data->getVAO(), render_sub_mesh_data->indicesCount());
+        Renderer::drawIndex(render_sub_mesh_data->getVAO(), render_sub_mesh_data->indicesCount());
     }
 }
 

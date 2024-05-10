@@ -65,8 +65,6 @@ void SceneHierarchy::addPointLight()
 
 	Logger::Logger::get().info("SceneHierarchy::addPointLight(), count:{}", m_point_light_count + 1);
 
-	static Shader* point_light_shader = new Shader(resource_dir + "/shader/light.vs", resource_dir + "/shader/light.fs");
-
 	auto point_light_entity = world.create_entity();
 	auto point_light_node = new ecs::Object(m_root_point_light_object, point_light_entity);
 	world.addComponent<ecs::NameComponent>(point_light_entity).name = std::string("Point Light ") + std::to_string(m_point_light_count);
@@ -222,7 +220,7 @@ void SceneHierarchy::createSkybox()
 		resource_dir + "/images/skybox/back.jpg"
 	};
 	// TODO 是否可以放到material中
-	world.addComponent<ecs::SkyboxComponent>(skybox_entity).texture = Texture::generate_cube_map(faces);
+	world.addComponent<ecs::SkyboxComponent>(skybox_entity).texture = Asset::Texture::generate_cube_map(faces);
 	sub_mesh.material = std::make_shared<Asset::Material>();
 	skybox_renderable.sub_meshes.push_back(sub_mesh);
 }
@@ -320,7 +318,7 @@ void SceneHierarchy::init() {
 
 	createPlaneGround();
 
-	//SceneHierarchy::loadModel(resource_dir + "/model/nanosuit/nanosuit.obj");
+	SceneHierarchy::loadModel(resource_dir + "/model/nanosuit/nanosuit.obj");
 
 	ecs::Object* bunny_obj = SceneHierarchy::loadModel(resource_dir + "/model/bunny.obj");
 	auto bunny_transform = world.getComponent<ecs::TransformComponent>(bunny_obj->entity());

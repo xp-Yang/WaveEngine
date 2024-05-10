@@ -9,7 +9,12 @@
 namespace Asset {
 
 struct Material {
-    Material();
+    Material()
+        : diffuse_map_filename(std::string(RESOURCE_DIR) + "/images/pure_white_map.png")
+        , specular_map_filename(std::string(RESOURCE_DIR) + "/images/pure_white_map.png")
+        , normal_map_filename(std::string(RESOURCE_DIR) + "/images/pure_white_map.png")
+        , height_map_filename(std::string(RESOURCE_DIR) + "/images/pure_white_map.png")
+    {}
 
     // pbr
     std::string albedo_map_filename = "";

@@ -8,6 +8,8 @@
 #include "Core/Utils/Utils.hpp"
 #include "Core/Logger/Logger.hpp"
 
+namespace Asset {
+
 class ShaderParser {
 public:
     struct GlslLine {
@@ -311,4 +313,6 @@ Shader* Shader::getShader(const ShaderType& type)
     default:
         return nullptr;
     }
+}
+
 }

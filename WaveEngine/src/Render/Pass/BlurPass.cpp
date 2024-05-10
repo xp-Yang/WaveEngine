@@ -27,7 +27,7 @@ void BlurPass::draw()
     unsigned int map1 = m_framebuffer->getFirstAttachmentOf(AttachmentType::RGB16F).getMap();
     unsigned int map2 = m_pingpong_framebuffer->getFirstAttachmentOf(AttachmentType::RGB16F).getMap();
 
-    Shader* blur_shader = Shader::getShader(ShaderType::GaussianBlur);
+    Asset::Shader* blur_shader = Asset::Shader::getShader(Asset::ShaderType::GaussianBlur);
     bool horizontal = true;
     unsigned int amount = 32;
     blur_shader->start_using();
@@ -42,7 +42,7 @@ void BlurPass::draw()
             blur_shader->setTexture("image", 0, (i == 0) ? m_bright_map : map1);
         }
         blur_shader->setInt("horizontal", horizontal);
-        Renderer::drawIndex(*blur_shader, m_screen_quad->getVAO(), m_screen_quad->indicesCount());
+        Renderer::drawIndex(m_screen_quad->getVAO(), m_screen_quad->indicesCount());
         horizontal = !horizontal;
     }
     blur_shader->stop_using();

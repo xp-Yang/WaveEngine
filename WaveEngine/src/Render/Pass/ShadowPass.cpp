@@ -1,9 +1,6 @@
 #include "ShadowPass.hpp"
 
-#include "WaveEngine/Application.hpp"
-#include "Logical/Framework/ECS/Components.hpp"
 #include "Logical/Framework/SceneHierarchy.hpp"
-#include "Platform/RHI/rhi.hpp"
 
 void ShadowPass::init()
 {
@@ -68,12 +65,12 @@ void ShadowPass::drawDirectionalLightShadowMap()
 
     glEnable(GL_DEPTH_TEST);
 
-    Shader* depth_shader = Shader::getShader(ShaderType::DepthShader);
+    Asset::Shader* depth_shader = Asset::Shader::getShader(Asset::ShaderType::DepthShader);
     depth_shader->start_using();
     Mat4 light_ref_matrix = m_render_source_data->render_directional_light_data_list.front().lightReferenceMatrix;
     for (const auto& render_sub_mesh_data : m_render_source_data->render_object_sub_mesh_data_list) {
         depth_shader->setMatrix("mvp", 1, light_ref_matrix * render_sub_mesh_data->transform());
-        Renderer::drawIndex(*depth_shader, render_sub_mesh_data->getVAO(), render_sub_mesh_data->indicesCount());
+        Renderer::drawIndex(render_sub_mesh_data->getVAO(), render_sub_mesh_data->indicesCount());
     }
 }
 
@@ -83,28 +80,24 @@ void ShadowPass::drawPointLightShadowMap()
     glViewport(0, 0, WINDOW_HEIGHT, WINDOW_HEIGHT);
     glEnable(GL_DEPTH_TEST);
 
-    auto& world = ecs::World::get();
-    Shader* depth_shader = Shader::getShader(ShaderType::CubeMapShader);
+    Asset::Shader* depth_shader = Asset::Shader::getShader(Asset::ShaderType::CubeMapShader);
 
     depth_shader->start_using();
 
     std::vector<std::array<Mat4, 6>> light_ref_matrix;
     std::vector<Vec3> light_pos;
     std::vector<float> light_radius;
-    int point_light_count = 0;
-    for (auto entity : world.entityView<ecs::PointLightComponent>()) {
-        auto point_light = world.getComponent<ecs::PointLightComponent>(entity);
-        light_ref_matrix.push_back(point_light->lightReferenceMatrix());
-        light_pos.push_back(point_light->position());
-        light_radius.push_back(point_light->radius);
-        point_light_count++;
+    for (const auto& render_point_light_data : m_render_source_data->render_point_light_data_list) {
+        light_ref_matrix.push_back(render_point_light_data.lightReferenceMatrix);
+        light_pos.push_back(render_point_light_data.position);
+        light_radius.push_back(render_point_light_data.radius);
     }
 
-    if (point_light_count > m_cube_maps.size()) {
-        reinit_cube_maps(point_light_count);
+    if (m_render_source_data->render_point_light_data_list.size() > m_cube_maps.size()) {
+        reinit_cube_maps(m_render_source_data->render_point_light_data_list.size());
     }
 
-    for (int cube_map_id = 0; cube_map_id < point_light_count; cube_map_id++) {
+    for (int cube_map_id = 0; cube_map_id < m_render_source_data->render_point_light_data_list.size(); cube_map_id++) {
         for (int i = 0; i < 6; i++) {
             glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, m_cube_maps[cube_map_id], 0);
             glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
@@ -115,7 +108,7 @@ void ShadowPass::drawPointLightShadowMap()
                 depth_shader->setMatrix("lightSpaceMatrix", 1, light_ref_matrix[cube_map_id][i]);
                 depth_shader->setFloat3("lightPos", light_pos[cube_map_id]);
                 depth_shader->setFloat("far_plane", light_radius[cube_map_id]);
-                Renderer::drawIndex(*depth_shader, render_sub_mesh_data->getVAO(), render_sub_mesh_data->indicesCount());
+                Renderer::drawIndex(render_sub_mesh_data->getVAO(), render_sub_mesh_data->indicesCount());
             }
         }
     }

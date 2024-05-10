@@ -375,7 +375,6 @@ void ImGuiEditor::renderPickedEntityController(const ImVec2& pos, const std::vec
     if (world.hasComponent<ecs::RenderableComponent>(entity)) {
         auto renderable = world.getComponent<ecs::RenderableComponent>(entity);
         // 编辑对象材质属性
-        //ecs::MaterialSystem::onUpdate();
         for (int i = 0; i < renderable->sub_meshes.size(); i++) {
             auto& material = renderable->sub_meshes[i].material;
 
