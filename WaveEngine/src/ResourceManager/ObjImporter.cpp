@@ -94,30 +94,25 @@ std::shared_ptr<Asset::MeshData> ObjImporter::load_sub_mesh_data(aiMesh* mesh, c
 
 std::shared_ptr<Asset::Material> ObjImporter::load_material(aiMaterial* material) {
     std::shared_ptr<Asset::Material> res = std::make_shared<Asset::Material>();
-    res->shader = Shader::getShader(ShaderType::PBRShader);
 
     aiString str;
     if (material->GetTextureCount(aiTextureType_DIFFUSE)) {
         material->GetTexture(aiTextureType_DIFFUSE, 0, &str);
-        res->diffuse_map = Texture::generate_texture_from_file(str.C_Str(), m_directory, false);
         res->diffuse_map_filename = m_directory + '/' + std::string(str.C_Str());
     }
 
     if (material->GetTextureCount(aiTextureType_SPECULAR)) {
         material->GetTexture(aiTextureType_SPECULAR, 0, &str);
-        res->specular_map = Texture::generate_texture_from_file(str.C_Str(), m_directory, false);
         res->specular_map_filename = m_directory + '/' + std::string(str.C_Str());
     }
 
     if (material->GetTextureCount(aiTextureType_NORMALS)) {
         material->GetTexture(aiTextureType_NORMALS, 0, &str);
-        res->normal_map = Texture::generate_texture_from_file(str.C_Str(), m_directory, false);
         res->normal_map_filename = m_directory + '/' + std::string(str.C_Str());
     }
 
     if (material->GetTextureCount(aiTextureType_HEIGHT)) {
         material->GetTexture(aiTextureType_HEIGHT, 0, &str);
-        res->height_map = Texture::generate_texture_from_file(str.C_Str(), m_directory, false);
         res->height_map_filename = m_directory + '/' + std::string(str.C_Str());
     }
 

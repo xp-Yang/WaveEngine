@@ -82,14 +82,14 @@ void RenderSystem::updateRenderSourceData()
 
             auto& sub_meshes = world.getComponent<ecs::RenderableComponent>(entity)->sub_meshes;
             auto& model_matrix = world.getComponent<ecs::TransformComponent>(entity)->transform();
-            m_render_source_data->render_mesh_data_list.emplace_back(RenderMeshData(sub_meshes, model_matrix));
+            m_render_source_data->render_object_sub_mesh_data_list.emplace_back(std::make_shared<RenderSubMeshData>(sub_meshes.front(), model_matrix));
         }
         // 2. skybox
         m_render_source_data->render_skybox_data.skybox_cube_map = world.getSkyboxComponent()->texture;
         for (auto entity : world.entityView<ecs::SkyboxComponent>()) {
             auto& sub_meshes = world.getComponent<ecs::RenderableComponent>(entity)->sub_meshes;
             auto& model_matrix = world.getComponent<ecs::TransformComponent>(entity)->transform();
-            m_render_source_data->render_skybox_data.render_mesh_data = RenderMeshData(sub_meshes, model_matrix);
+            m_render_source_data->render_skybox_data.render_sub_mesh_data = std::make_shared<RenderSubMeshData>(sub_meshes.front(), model_matrix);
             break;
         }
         // 3. light mesh
@@ -97,8 +97,9 @@ void RenderSystem::updateRenderSourceData()
             auto& point_light = *world.getComponent<ecs::PointLightComponent>(entity);
             auto& sub_meshes = world.getComponent<ecs::RenderableComponent>(entity)->sub_meshes;
             auto& model_matrix = world.getComponent<ecs::TransformComponent>(entity)->transform();
+            std::shared_ptr render_point_light_sub_mesh_data = std::make_shared<RenderSubMeshData>(sub_meshes.front(), model_matrix); // TODO emplace construct
             m_render_source_data->render_point_light_data_list.emplace_back(
-                RenderPointLightData{ point_light.luminousColor, point_light.position(), point_light.radius, point_light.lightReferenceMatrix(), RenderMeshData(sub_meshes, model_matrix) });
+                RenderPointLightData{ point_light.luminousColor, point_light.position(), point_light.radius, point_light.lightReferenceMatrix(), render_point_light_sub_mesh_data });
         }
         auto& dir_light_component = *world.getMainDirectionalLightComponent();
         m_render_source_data->render_directional_light_data_list.emplace_back(
@@ -112,8 +113,10 @@ void RenderSystem::updateRenderSourceData()
         if (world.hasComponent<ecs::PointLightComponent>(entity) ||
             world.hasComponent<ecs::SkyboxComponent>(entity))
             continue;
+        auto& sub_meshes = world.getComponent<ecs::RenderableComponent>(entity)->sub_meshes;
         auto& model_matrix = world.getComponent<ecs::TransformComponent>(entity)->transform();
-        m_render_source_data->render_mesh_data_list[i].model_matrix = model_matrix;
+        m_render_source_data->render_object_sub_mesh_data_list[i]->updateTransform(model_matrix * sub_meshes.front().local_transform);
+        //m_render_source_data->render_object_sub_mesh_data_list[i].updateRenderMaterialData(sub_meshes[i].material);
         i++; // TODO 之后使用GObjectID来索引
     }
     // 2. light model matrix
@@ -126,6 +129,7 @@ void RenderSystem::updateRenderSourceData()
         m_render_source_data->render_point_light_data_list[i].position = point_light.position();
         m_render_source_data->render_point_light_data_list[i].radius = point_light.radius;
         m_render_source_data->render_point_light_data_list[i].lightReferenceMatrix = point_light.lightReferenceMatrix();
+        m_render_source_data->render_point_light_data_list[i].render_sub_mesh_data->updateTransform(model_matrix * sub_meshes.front().local_transform);
         i++;
     }
     auto& dir_light_component = *world.getMainDirectionalLightComponent();

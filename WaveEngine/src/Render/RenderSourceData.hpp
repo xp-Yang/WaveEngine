@@ -5,15 +5,34 @@
 #include "ResourceManager/AssetManager.hpp"
 #include <Logical/Framework/Object/GObject.hpp>
 
+struct RenderMaterialData {
+    unsigned int albedo_map{ 0 };
+    unsigned int metallic_map{ 0 };
+    unsigned int roughness_map{ 0 };
+    unsigned int ao_map{ 0 };
+    // temp
+    Vec3 albedo{ Vec3(1.0f) };
+    float metallic{ 1.0f };
+    float roughness{ 0.5f };
+    float ao{ 0.01f };
+
+    unsigned int diffuse_map{ 0 };
+    unsigned int specular_map{ 0 };
+    unsigned int normal_map{ 0 };
+    unsigned int height_map{ 0 };
+    // temp
+    float shininess{ 128.0f };
+};
+
 struct RenderSubMeshData {
 public:
-    RenderSubMeshData() = default;
-    RenderSubMeshData(const Asset::SubMesh& sub_mesh_asset) 
+    RenderSubMeshData(const Asset::SubMesh& sub_mesh_asset, const Mat4& model_transform = Mat4(1.0f)) 
         : m_vertices(sub_mesh_asset.sub_mesh_data->vertices())
         , m_indices(sub_mesh_asset.sub_mesh_data->indices()) 
-        , m_material(sub_mesh_asset.material)
-        , m_local_transform(sub_mesh_asset.transform)
+        , m_transform(model_transform * sub_mesh_asset.local_transform)
     {
+        updateRenderMaterialData(sub_mesh_asset.material);
+
         create_vbo();
         create_vao();
     }
@@ -21,7 +40,7 @@ public:
         : m_vertices(rhs.m_vertices)
         , m_indices(rhs.m_indices)
         , m_material(rhs.m_material)
-        , m_local_transform(rhs.m_local_transform)
+        , m_transform(rhs.m_transform)
     {}
     ~RenderSubMeshData() { reset(); }
 
@@ -29,8 +48,29 @@ public:
     unsigned int getVAO() const { return m_VAO; }
     size_t indicesCount() const { return m_indices.size(); }
     size_t verticesCount() const { return m_vertices.size(); }
-    const std::shared_ptr<Asset::Material>& material() const { return m_material; }
-    const Mat4& localTransform() const { return m_local_transform; }
+    const RenderMaterialData& renderMaterialData() const { return m_material; }
+    const Mat4& transform() const { return m_transform; }
+    void updateTransform(const Mat4& transform) { m_transform = transform; }
+    void updateRenderMaterialData(const std::shared_ptr<Asset::Material>& material_asset) {
+        if (material_asset) {
+            // temp
+            m_material.albedo = material_asset->albedo;
+            m_material.metallic = material_asset->metallic;
+            m_material.roughness = material_asset->roughness;
+            m_material.ao = material_asset->ao;
+
+            // TODO 贴图更新了，texture数据的释放和加载
+            unsigned int diffuse_map = Texture::generate_texture_from_file(material_asset->diffuse_map_filename, false);
+            m_material.diffuse_map = diffuse_map;
+            unsigned int specular_map = Texture::generate_texture_from_file(material_asset->specular_map_filename, false);
+            m_material.specular_map = specular_map;
+            unsigned int normal_map = Texture::generate_texture_from_file(material_asset->normal_map_filename, false);
+            m_material.normal_map = normal_map;
+            unsigned int height_map = Texture::generate_texture_from_file(material_asset->height_map_filename, false);
+            m_material.height_map = height_map;
+            m_material.shininess = material_asset->shininess;
+        }
+    }
 
 protected:
     void create_vbo() {
@@ -71,30 +111,8 @@ protected:
     unsigned int m_IBO = 0;
     const std::vector<Vertex>& m_vertices;
     const std::vector<unsigned int>& m_indices;
-    std::shared_ptr<Asset::Material> m_material;
-    Mat4 m_local_transform;
-};
-
-struct RenderMeshData {
-public:
-    RenderMeshData() = default;
-    RenderMeshData(const GObject& gobject)
-    {
-    }
-    RenderMeshData(const Asset::Mesh& mesh_asset, const Mat4& transform) 
-        : RenderMeshData(mesh_asset.sub_meshes, transform)
-    {
-    }
-    RenderMeshData(const std::vector<Asset::SubMesh>& sub_mesh_asset_list, const Mat4& transform)
-    {
-        for (const auto& sub_mesh_asset : sub_mesh_asset_list) {
-            render_sub_mesh_data_list.emplace_back(sub_mesh_asset);
-        }
-        model_matrix = transform;
-    }
-
-    std::vector<RenderSubMeshData> render_sub_mesh_data_list;
-    Mat4 model_matrix;
+    RenderMaterialData m_material;
+    Mat4 m_transform;
 };
 
 struct RenderDirectionalLightData {
@@ -109,13 +127,13 @@ struct RenderPointLightData {
     float radius;
     std::array<Mat4, 6> lightReferenceMatrix;
 
-    RenderMeshData render_mesh_data;
+    std::shared_ptr<RenderSubMeshData> render_sub_mesh_data;
 };
 
 struct RenderSkyboxData {
     unsigned int skybox_cube_map;
 
-    RenderMeshData render_mesh_data;
+    std::shared_ptr<RenderSubMeshData> render_sub_mesh_data;
 };
 
 struct RenderCameraData {
@@ -123,11 +141,9 @@ struct RenderCameraData {
 };
 
 struct RenderSourceData {
-    std::vector<RenderMeshData> render_mesh_data_list;
-
+    std::vector<std::shared_ptr<RenderSubMeshData>> render_object_sub_mesh_data_list;
     std::vector<RenderDirectionalLightData> render_directional_light_data_list;
     std::vector<RenderPointLightData> render_point_light_data_list;
-
     RenderSkyboxData render_skybox_data;
 
     Vec3 camera_position;

@@ -24,20 +24,17 @@ void GBufferPass::draw()
     g_shader->start_using();
     g_shader->setMatrix("view", 1, m_render_source_data->view_matrix);
     g_shader->setMatrix("projection", 1, m_render_source_data->proj_matrix);
-    for (const auto& render_mesh_data : m_render_source_data->render_mesh_data_list) {
-        g_shader->setMatrix("model", 1, render_mesh_data.model_matrix);
-        for (const auto& render_sub_mesh_data : render_mesh_data.render_sub_mesh_data_list) {
-            auto& material = *render_sub_mesh_data.material();
-            material.update_shader_binding();
-            g_shader->start_using();
-            g_shader->setTexture("diffuse_map", 0, material.diffuse_map);
-            g_shader->setTexture("specular_map", 1, material.specular_map);
-            g_shader->setFloat3("albedo", material.albedo);
-            g_shader->setFloat("metallic", material.metallic);
-            g_shader->setFloat("roughness", material.roughness);
-            g_shader->setFloat("ao", material.ao);
-            Renderer::drawIndex(*g_shader, render_sub_mesh_data.getVAO(), render_sub_mesh_data.indicesCount());
-        }
+    for (const auto& render_sub_mesh_data : m_render_source_data->render_object_sub_mesh_data_list) {
+        g_shader->setMatrix("model", 1, render_sub_mesh_data->transform());
+        auto& material = render_sub_mesh_data->renderMaterialData();
+        g_shader->start_using();
+        g_shader->setTexture("diffuse_map", 0, material.diffuse_map);
+        g_shader->setTexture("specular_map", 1, material.specular_map);
+        g_shader->setFloat3("albedo", material.albedo);
+        g_shader->setFloat("metallic", material.metallic);
+        g_shader->setFloat("roughness", material.roughness);
+        g_shader->setFloat("ao", material.ao);
+        Renderer::drawIndex(*g_shader, render_sub_mesh_data->getVAO(), render_sub_mesh_data->indicesCount());
     }
     g_shader->stop_using();
 }

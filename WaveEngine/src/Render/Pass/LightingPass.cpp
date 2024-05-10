@@ -120,19 +120,17 @@ void LightingPass::draw()
 	//}
 	
 	// lights
+	static Shader* point_light_shader = new Shader(std::string(RESOURCE_DIR) + "/shader/light.vs", std::string(RESOURCE_DIR) + "/shader/light.fs");
 	for (const auto& render_point_light_data : m_render_source_data->render_point_light_data_list) {
-		for (const auto& render_point_light_sub_mesh_data : render_point_light_data.render_mesh_data.render_sub_mesh_data_list) {
-			auto& material = render_point_light_sub_mesh_data.material();
-			Shader* shader = material->shader;
-			material->update_shader_binding();
-			shader->start_using();
-			shader->setFloat4("color", render_point_light_data.color);
-			shader->setMatrix("model", 1, render_point_light_data.render_mesh_data.model_matrix);
-			shader->setMatrix("view", 1, m_render_source_data->view_matrix);
-			shader->setMatrix("projection", 1, m_render_source_data->proj_matrix);
-			Renderer::drawIndex(*shader, render_point_light_sub_mesh_data.getVAO(), render_point_light_sub_mesh_data.indicesCount());
-			shader->stop_using();
-		}
+		const auto& render_point_light_sub_mesh_data = render_point_light_data.render_sub_mesh_data;
+		auto& material = render_point_light_sub_mesh_data->renderMaterialData();
+		point_light_shader->start_using();
+		point_light_shader->setFloat4("color", render_point_light_data.color);
+		point_light_shader->setMatrix("model", 1, render_point_light_sub_mesh_data->transform());
+		point_light_shader->setMatrix("view", 1, m_render_source_data->view_matrix);
+		point_light_shader->setMatrix("projection", 1, m_render_source_data->proj_matrix);
+		Renderer::drawIndex(*point_light_shader, render_point_light_sub_mesh_data->getVAO(), render_point_light_sub_mesh_data->indicesCount());
+		point_light_shader->stop_using();
 	}
 
 	// normal
@@ -141,19 +139,17 @@ void LightingPass::draw()
 	}
 
 	// skybox
+	static Shader* skybox_shader = new Shader(std::string(RESOURCE_DIR) + "/shader/skybox.vs", std::string(RESOURCE_DIR) + "/shader/skybox.fs");
 	if (m_skybox) {
-		for (const auto& render_skybox_sub_mesh_data : m_render_source_data->render_skybox_data.render_mesh_data.render_sub_mesh_data_list) {
-			auto& material = render_skybox_sub_mesh_data.material();
-			material->update_shader_binding();
-			Shader* shader = material->shader;
-			shader->start_using();
-			shader->setMatrix("model", 1, m_render_source_data->render_skybox_data.render_mesh_data.model_matrix);
-			shader->setMatrix("view", 1, Mat4(Mat3(m_render_source_data->view_matrix)));
-			shader->setMatrix("projection", 1, m_render_source_data->proj_matrix);
-			shader->setCubeTexture("skybox", 4, m_render_source_data->render_skybox_data.skybox_cube_map);
-			Renderer::drawIndex(*shader, render_skybox_sub_mesh_data.getVAO(), render_skybox_sub_mesh_data.indicesCount());
-			shader->stop_using();
-		}
+		const auto& render_skybox_sub_mesh_data = m_render_source_data->render_skybox_data.render_sub_mesh_data;
+		auto& material = render_skybox_sub_mesh_data->renderMaterialData();
+		skybox_shader->start_using();
+		skybox_shader->setMatrix("model", 1, render_skybox_sub_mesh_data->transform());
+		skybox_shader->setMatrix("view", 1, Mat4(Mat3(m_render_source_data->view_matrix)));
+		skybox_shader->setMatrix("projection", 1, m_render_source_data->proj_matrix);
+		skybox_shader->setCubeTexture("skybox", 4, m_render_source_data->render_skybox_data.skybox_cube_map);
+		Renderer::drawIndex(*skybox_shader, render_skybox_sub_mesh_data->getVAO(), render_skybox_sub_mesh_data->indicesCount());
+		skybox_shader->stop_using();
 	}
 
 	// draw bright map to do bloom effect
@@ -161,18 +157,15 @@ void LightingPass::draw()
 	m_lights_framebuffer->clear();
 	m_gbuffer_framebuffer->blitDepthMapTo(m_lights_framebuffer.get());
 	for (const auto& render_point_light_data : m_render_source_data->render_point_light_data_list) {
-		for (const auto& render_point_light_sub_mesh_data : render_point_light_data.render_mesh_data.render_sub_mesh_data_list) {
-			auto& material = render_point_light_sub_mesh_data.material();
-			Shader* shader = material->shader;
-			material->update_shader_binding();
-			shader->start_using();
-			shader->setFloat4("color", render_point_light_data.color);
-			shader->setMatrix("model", 1, render_point_light_data.render_mesh_data.model_matrix);
-			shader->setMatrix("view", 1, m_render_source_data->view_matrix);
-			shader->setMatrix("projection", 1, m_render_source_data->proj_matrix);
-			Renderer::drawIndex(*shader, render_point_light_sub_mesh_data.getVAO(), render_point_light_sub_mesh_data.indicesCount());
-			shader->stop_using();
-		}
+		const auto& render_point_light_sub_mesh_data = render_point_light_data.render_sub_mesh_data;
+		auto& material = render_point_light_sub_mesh_data->renderMaterialData();
+		point_light_shader->start_using();
+		point_light_shader->setFloat4("color", render_point_light_data.color);
+		point_light_shader->setMatrix("model", 1, render_point_light_sub_mesh_data->transform());
+		point_light_shader->setMatrix("view", 1, m_render_source_data->view_matrix);
+		point_light_shader->setMatrix("projection", 1, m_render_source_data->proj_matrix);
+		Renderer::drawIndex(*point_light_shader, render_point_light_sub_mesh_data->getVAO(), render_point_light_sub_mesh_data->indicesCount());
+		point_light_shader->stop_using();
 	}
 }
 
@@ -223,11 +216,9 @@ void LightingPass::drawNormalMode()
 	normal_shader->setMatrix("view", 1, m_render_source_data->view_matrix);
 	normal_shader->setMatrix("projection", 1, m_render_source_data->proj_matrix);
 	normal_shader->setMatrix("projectionView", 1, m_render_source_data->proj_matrix * m_render_source_data->view_matrix);
-	for (const auto& render_mesh_data : m_render_source_data->render_mesh_data_list) {
-		normal_shader->setMatrix("model", 1, render_mesh_data.model_matrix);
-		for (const auto& render_sub_mesh_data : render_mesh_data.render_sub_mesh_data_list) {
-			Renderer::drawIndex(*normal_shader, render_sub_mesh_data.getVAO(), render_sub_mesh_data.indicesCount());
-		}
+	for (const auto& render_sub_mesh_data : m_render_source_data->render_object_sub_mesh_data_list) {
+		normal_shader->setMatrix("model", 1, render_sub_mesh_data->transform());
+		Renderer::drawIndex(*normal_shader, render_sub_mesh_data->getVAO(), render_sub_mesh_data->indicesCount());
 	}
 }
 
@@ -237,11 +228,9 @@ void LightingPass::drawWireframeMode()
 	wireframe_shader->start_using();
 	wireframe_shader->setMatrix("view", 1, m_render_source_data->view_matrix);
 	wireframe_shader->setMatrix("projection", 1, m_render_source_data->proj_matrix);
-	for (const auto& render_mesh_data : m_render_source_data->render_mesh_data_list) {
-		wireframe_shader->setMatrix("model", 1, render_mesh_data.model_matrix);
-		for (const auto& render_sub_mesh_data : render_mesh_data.render_sub_mesh_data_list) {
-			Renderer::drawIndex(*wireframe_shader, render_sub_mesh_data.getVAO(), render_sub_mesh_data.indicesCount());
-		}
+	for (const auto& render_sub_mesh_data : m_render_source_data->render_object_sub_mesh_data_list) {
+		wireframe_shader->setMatrix("model", 1, render_sub_mesh_data->transform());
+		Renderer::drawIndex(*wireframe_shader, render_sub_mesh_data->getVAO(), render_sub_mesh_data->indicesCount());
 	}
 }
 
@@ -251,12 +240,10 @@ void LightingPass::drawCheckerboardMode()
 	shader->start_using();
 	shader->setMatrix("view", 1, m_render_source_data->view_matrix);
 	shader->setMatrix("projection", 1, m_render_source_data->proj_matrix);
-	for (const auto& render_mesh_data : m_render_source_data->render_mesh_data_list) {
+	for (const auto& render_sub_mesh_data : m_render_source_data->render_object_sub_mesh_data_list) {
 		shader->setMatrix("modelScale", 1, Math::Scale(Vec3(1.0f))); // TODO get scale of model_matrix
-		shader->setMatrix("model", 1, render_mesh_data.model_matrix);
-		for (const auto& render_sub_mesh_data : render_mesh_data.render_sub_mesh_data_list) {
-			Renderer::drawIndex(*shader, render_sub_mesh_data.getVAO(), render_sub_mesh_data.indicesCount());
-		}
+		shader->setMatrix("model", 1, render_sub_mesh_data->transform());
+		Renderer::drawIndex(*shader, render_sub_mesh_data->getVAO(), render_sub_mesh_data->indicesCount());
 	}
 	shader->stop_using();
 }

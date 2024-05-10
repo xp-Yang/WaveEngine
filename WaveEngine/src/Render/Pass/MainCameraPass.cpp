@@ -43,60 +43,62 @@ void MainCameraPass::draw()
     Vec3 light_direction = m_render_source_data->render_directional_light_data_list.front().direction;
     Vec4 light_color = m_render_source_data->render_directional_light_data_list.front().color;
 
-    for (const auto& render_mesh_data : m_render_source_data->render_mesh_data_list) {
-        for (const auto& render_sub_mesh_data : render_mesh_data.render_sub_mesh_data_list) {
-            auto& material = *render_sub_mesh_data.material();
-            Shader* shader = material.shader;
-            material.update_shader_binding();
-            shader->start_using();
-            shader->setMatrix("model", 1, render_mesh_data.model_matrix);
-            shader->setMatrix("view", 1, m_render_source_data->view_matrix);
-            shader->setMatrix("projection", 1, m_render_source_data->proj_matrix);
-            shader->setFloat3("cameraPos", m_render_source_data->camera_position);
+    auto shader = Shader::getShader(ShaderType::PBRShader);
+    for (const auto& render_sub_mesh_data : m_render_source_data->render_object_sub_mesh_data_list) {
+        auto& material = render_sub_mesh_data->renderMaterialData();
+        shader->start_using();
+        // temp
+        shader->setFloat("material.shininess", material.shininess);
+        shader->setFloat3("albedo", material.albedo);
+        shader->setFloat("metallic", material.metallic);
+        shader->setFloat("roughness", material.roughness);
+        shader->setFloat("ao", material.ao);
 
-            shader->setFloat3("directionalLight.direction", light_direction);
-            shader->setFloat4("directionalLight.color", light_color);
+        shader->setMatrix("model", 1, render_sub_mesh_data->transform());
+        shader->setMatrix("view", 1, m_render_source_data->view_matrix);
+        shader->setMatrix("projection", 1, m_render_source_data->proj_matrix);
+        shader->setFloat3("cameraPos", m_render_source_data->camera_position);
 
-            // 点光源这里的循环造成了卡顿，需要deferred rendering解决
-            int k = 0;
-            for (const auto& render_point_light_data : m_render_source_data->render_point_light_data_list) {
-                std::string light_id = std::string("pointLights[") + std::to_string(k) + "]";
-                shader->setFloat3(light_id + ".position", render_point_light_data.position);
-                shader->setFloat4(light_id + ".color", render_point_light_data.color);
-                shader->setFloat(light_id + ".radius", render_point_light_data.radius);
-                k++;
-            }
-            shader->setInt("point_lights_size", k);
+        shader->setFloat3("directionalLight.direction", light_direction);
+        shader->setFloat4("directionalLight.color", light_color);
 
-            shader->setCubeTexture("skybox", 4, m_render_source_data->render_skybox_data.skybox_cube_map);
-            shader->setBool("enable_skybox_sample", m_reflection);
-            if (m_shadow_map != 0) {
-                shader->setMatrix("lightSpaceMatrix", 1, light_ref_matrix);
-                shader->setTexture("shadow_map", 5, m_shadow_map);
-
-                for (int i = 0; i < m_cube_maps.size(); i++) {
-                    std::string cube_map_id = std::string("cube_shadow_maps[") + std::to_string(i) + "]";
-                    shader->setCubeTexture(cube_map_id, 6 + i, m_cube_maps[i]);
-                }
-            }
-            Renderer::drawIndex(*shader, render_sub_mesh_data.getVAO(), render_sub_mesh_data.indicesCount());
-            shader->stop_using();
+        // 点光源这里的循环造成了卡顿，需要deferred rendering解决
+        int k = 0;
+        for (const auto& render_point_light_data : m_render_source_data->render_point_light_data_list) {
+            std::string light_id = std::string("pointLights[") + std::to_string(k) + "]";
+            shader->setFloat3(light_id + ".position", render_point_light_data.position);
+            shader->setFloat4(light_id + ".color", render_point_light_data.color);
+            shader->setFloat(light_id + ".radius", render_point_light_data.radius);
+            k++;
         }
+        shader->setInt("point_lights_size", k);
+
+        shader->setCubeTexture("skybox", 4, m_render_source_data->render_skybox_data.skybox_cube_map);
+        shader->setBool("enable_skybox_sample", m_reflection);
+        if (m_shadow_map != 0) {
+            shader->setMatrix("lightSpaceMatrix", 1, light_ref_matrix);
+            shader->setTexture("shadow_map", 5, m_shadow_map);
+
+            for (int i = 0; i < m_cube_maps.size(); i++) {
+                std::string cube_map_id = std::string("cube_shadow_maps[") + std::to_string(i) + "]";
+                shader->setCubeTexture(cube_map_id, 6 + i, m_cube_maps[i]);
+            }
+        }
+        Renderer::drawIndex(*shader, render_sub_mesh_data->getVAO(), render_sub_mesh_data->indicesCount());
+        shader->stop_using();
     }
     
+    static Shader* skybox_shader = new Shader(std::string(RESOURCE_DIR) + "/shader/skybox.vs", std::string(RESOURCE_DIR) + "/shader/skybox.fs");
     if (m_skybox) {
-        for (const auto& render_skybox_sub_mesh_data : m_render_source_data->render_skybox_data.render_mesh_data.render_sub_mesh_data_list) {
-            auto& material = render_skybox_sub_mesh_data.material();
-            material->update_shader_binding();
-            Shader* shader = material->shader;
-            shader->start_using();
-            shader->setMatrix("model", 1, m_render_source_data->render_skybox_data.render_mesh_data.model_matrix);
-            shader->setMatrix("view", 1, Mat4(Mat3(m_render_source_data->view_matrix)));
-            shader->setMatrix("projection", 1, m_render_source_data->proj_matrix);
-            shader->setCubeTexture("skybox", 4, m_render_source_data->render_skybox_data.skybox_cube_map);
-            Renderer::drawIndex(*shader, render_skybox_sub_mesh_data.getVAO(), render_skybox_sub_mesh_data.indicesCount());
-            shader->stop_using();
-        }
+        const auto& render_skybox_sub_mesh_data = m_render_source_data->render_skybox_data.render_sub_mesh_data;
+        auto& material = render_skybox_sub_mesh_data->renderMaterialData();
+        skybox_shader->start_using();
+        skybox_shader->setMatrix("model", 1, render_skybox_sub_mesh_data->transform());
+        skybox_shader->setMatrix("view", 1, Mat4(Mat3(m_render_source_data->view_matrix)));
+        skybox_shader->setMatrix("projection", 1, m_render_source_data->proj_matrix);
+        skybox_shader->setCubeTexture("skybox", 4, m_render_source_data->render_skybox_data.skybox_cube_map);
+        Renderer::drawIndex(*skybox_shader, render_skybox_sub_mesh_data->getVAO(), render_skybox_sub_mesh_data->indicesCount());
+        skybox_shader->stop_using();
     }
 
     // render border,

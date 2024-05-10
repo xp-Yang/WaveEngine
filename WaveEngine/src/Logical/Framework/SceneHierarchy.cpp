@@ -82,9 +82,7 @@ void SceneHierarchy::addPointLight()
 	point_light_properties.luminousColor = m_point_light_count == 0 ? Color4(2.0f, 2.0f, 2.0f, 1.0f) : Color4{ randomUnit(), randomUnit(), randomUnit(), 1.0f };
 	Asset::SubMesh sub_mesh;
 	sub_mesh.sub_mesh_data = Asset::MeshData::create_icosphere_mesh(4);
-	std::shared_ptr<Asset::Material> point_light_material = std::make_shared<Asset::Material>();
-	point_light_material->shader = point_light_shader;
-	sub_mesh.material = point_light_material;
+	sub_mesh.material = std::make_shared<Asset::Material>();
 	point_light_renderable.sub_meshes.push_back(sub_mesh);
 
 	m_point_light_count++;
@@ -103,7 +101,6 @@ void SceneHierarchy::addCube()
 	Asset::SubMesh sub_mesh;
 	sub_mesh.sub_mesh_data = Asset::MeshData::create_cube_mesh();
 	std::shared_ptr<Asset::Material> cube_material = std::make_shared<Asset::Material>();
-	cube_material->shader = Shader::getShader(ShaderType::PBRShader);
 	cube_material->albedo = Vec3(1.0f);
 	cube_material->metallic = 1.0;
 	cube_material->roughness = 0.5;
@@ -160,7 +157,6 @@ void SceneHierarchy::addSphere()
 	Asset::SubMesh sub_mesh;
 	sub_mesh.sub_mesh_data = Asset::MeshData::create_icosphere_mesh(4);
 	std::shared_ptr<Asset::Material> sphere_material = std::make_shared<Asset::Material>();
-	sphere_material->shader = Shader::getShader(ShaderType::PBRShader);
 	sphere_material->albedo = Vec3(1.0f, 1.0f, 1.0f);
 	sphere_material->metallic = 1.0;
 	sphere_material->roughness = (1.0f / 64) * (m_test_sphere_count + 1);
@@ -227,9 +223,7 @@ void SceneHierarchy::createSkybox()
 	};
 	// TODO 是否可以放到material中
 	world.addComponent<ecs::SkyboxComponent>(skybox_entity).texture = Texture::generate_cube_map(faces);
-	std::shared_ptr<Asset::Material> skybox_material = std::make_shared<Asset::Material>();
-	skybox_material->shader = new Shader(resource_dir + "/shader/skybox.vs", resource_dir + "/shader/skybox.fs");
-	sub_mesh.material = skybox_material;
+	sub_mesh.material = std::make_shared<Asset::Material>();
 	skybox_renderable.sub_meshes.push_back(sub_mesh);
 }
 
@@ -247,7 +241,6 @@ void SceneHierarchy::createPlaneGround()
 	Asset::SubMesh sub_mesh;
 	sub_mesh.sub_mesh_data = Asset::MeshData::create_ground_mesh(Vec2(60.0f));
 	std::shared_ptr<Asset::Material> ground_material = std::make_shared<Asset::Material>();
-	ground_material->shader = Shader::getShader(ShaderType::PBRShader);
 	ground_material->albedo = Vec3(1.0f, 1.0f, 1.0f);
 	ground_material->metallic = 0.0f;
 	ground_material->roughness = 1.0f;
@@ -268,9 +261,7 @@ void SceneHierarchy::createGridGround()
 	auto& ground_renderable = world.addComponent<ecs::RenderableComponent>(ground_entity);
 	Asset::SubMesh sub_mesh;
 	sub_mesh.sub_mesh_data = Asset::MeshData::create_ground_mesh(Vec2(1000.0f));
-	std::shared_ptr<Asset::Material> ground_material = std::make_shared<Asset::Material>();
-	ground_material->shader = Shader::getShader(ShaderType::WireframeShader);
-	sub_mesh.material = ground_material;
+	sub_mesh.material = std::make_shared<Asset::Material>();;
 	ground_renderable.sub_meshes.push_back(sub_mesh);
 }
 

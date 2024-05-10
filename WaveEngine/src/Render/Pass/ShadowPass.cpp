@@ -71,11 +71,9 @@ void ShadowPass::drawDirectionalLightShadowMap()
     Shader* depth_shader = Shader::getShader(ShaderType::DepthShader);
     depth_shader->start_using();
     Mat4 light_ref_matrix = m_render_source_data->render_directional_light_data_list.front().lightReferenceMatrix;
-    for (const auto& render_mesh_data : m_render_source_data->render_mesh_data_list) {
-        depth_shader->setMatrix("mvp", 1, light_ref_matrix * render_mesh_data.model_matrix);
-        for (const auto& render_sub_mesh_data : render_mesh_data.render_sub_mesh_data_list) {
-            Renderer::drawIndex(*depth_shader, render_sub_mesh_data.getVAO(), render_sub_mesh_data.indicesCount());
-        }
+    for (const auto& render_sub_mesh_data : m_render_source_data->render_object_sub_mesh_data_list) {
+        depth_shader->setMatrix("mvp", 1, light_ref_matrix * render_sub_mesh_data->transform());
+        Renderer::drawIndex(*depth_shader, render_sub_mesh_data->getVAO(), render_sub_mesh_data->indicesCount());
     }
 }
 
@@ -112,14 +110,12 @@ void ShadowPass::drawPointLightShadowMap()
             glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
-            for (const auto& render_mesh_data : m_render_source_data->render_mesh_data_list) {
-                depth_shader->setMatrix("model", 1, render_mesh_data.model_matrix);
+            for (const auto& render_sub_mesh_data : m_render_source_data->render_object_sub_mesh_data_list) {
+                depth_shader->setMatrix("model", 1, render_sub_mesh_data->transform());
                 depth_shader->setMatrix("lightSpaceMatrix", 1, light_ref_matrix[cube_map_id][i]);
                 depth_shader->setFloat3("lightPos", light_pos[cube_map_id]);
                 depth_shader->setFloat("far_plane", light_radius[cube_map_id]);
-                for (const auto& render_sub_mesh_data : render_mesh_data.render_sub_mesh_data_list) {
-                    Renderer::drawIndex(*depth_shader, render_sub_mesh_data.getVAO(), render_sub_mesh_data.indicesCount());
-                }
+                Renderer::drawIndex(*depth_shader, render_sub_mesh_data->getVAO(), render_sub_mesh_data->indicesCount());
             }
         }
     }

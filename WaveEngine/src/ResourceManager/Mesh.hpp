@@ -33,7 +33,7 @@ protected:
 struct SubMesh {
 	std::shared_ptr<MeshData> sub_mesh_data;
 	std::shared_ptr<Material> material;
-	Mat4 transform = Mat4(1.0f);
+	Mat4 local_transform = Mat4(1.0f);
 };
 
 struct Mesh {
