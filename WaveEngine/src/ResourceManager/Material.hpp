@@ -2,22 +2,23 @@
 #define Material_hpp
 
 #include "Core/Math.hpp"
+#include "Texture.hpp"
 
 namespace Asset {
 
 struct Material {
     Material()
-        : diffuse_map_filename(std::string(RESOURCE_DIR) + "/images/pure_white_map.png")
-        , specular_map_filename(std::string(RESOURCE_DIR) + "/images/pure_white_map.png")
-        , normal_map_filename(std::string(RESOURCE_DIR) + "/images/pure_white_map.png")
-        , height_map_filename(std::string(RESOURCE_DIR) + "/images/pure_white_map.png")
+        : diffuse_texture(TextureType::Diffuse, std::string(RESOURCE_DIR) + "/images/pure_white_map.png", false)
+        , specular_texture(TextureType::Specular, std::string(RESOURCE_DIR) + "/images/pure_white_map.png", false)
+        , normal_texture(TextureType::Normal, std::string(RESOURCE_DIR) + "/images/pure_white_map.png", false)
+        , height_texture(TextureType::Height, std::string(RESOURCE_DIR) + "/images/pure_white_map.png", false)
     {}
 
     // pbr
-    std::string albedo_map_filename = "";
-    std::string metallic_map_filename = "";
-    std::string roughness_map_filename = "";
-    std::string ao_map_filename = "";
+    Texture albedo_texture;
+    Texture metallic_texture;
+    Texture roughness_texture;
+    Texture ao_texture;
     // temp
     Vec3 albedo{ Vec3(1.0f) };
     float metallic{ 1.0f };
@@ -25,10 +26,10 @@ struct Material {
     float ao{ 0.01f };
 
     // blinn phong
-    std::string diffuse_map_filename = "";
-    std::string specular_map_filename = "";
-    std::string normal_map_filename = "";
-    std::string height_map_filename = "";
+    Texture diffuse_texture;
+    Texture specular_texture;
+    Texture normal_texture;
+    Texture height_texture;
     float shininess{ 128.0f };
 };
 

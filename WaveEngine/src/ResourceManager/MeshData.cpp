@@ -1,4 +1,4 @@
-#include "Mesh.hpp"
+#include "MeshData.hpp"
 #include <windows.h>
 #include <iostream>
 #include "Platform/RHI/rhi.hpp"
@@ -6,7 +6,7 @@
 
 namespace Asset {
 
-MeshData::MeshData(const std::vector<Vertex>& vertices, const std::vector<unsigned int>& indices)
+MeshData::MeshData(const std::vector<Vertex>& vertices, const std::vector<int>& indices)
     : m_vertices(vertices)
     , m_indices(indices)
 {
@@ -20,7 +20,7 @@ void MeshData::reset()
 
 std::shared_ptr<MeshData> MeshData::create_cube_mesh() {
     std::vector<Vertex> vertices;
-    std::vector<unsigned int> indices;
+    std::vector<int> indices;
 
     GLfloat cubeVertices[] =
     {
@@ -80,7 +80,7 @@ std::shared_ptr<MeshData> MeshData::create_cube_mesh() {
         vertices.push_back(vertex);
     }
 
-    unsigned int cubeIndices[] =
+    int cubeIndices[] =
     {
         1 , 2 , 3 , 1 , 3 , 0 , //后面
         5 , 6 , 7 , 5 , 7 , 4 , //前面
@@ -283,7 +283,7 @@ std::shared_ptr<MeshData> MeshData::create_icosphere_mesh(int regression_depth) 
     }
 
     // TODO 优化索引算法
-    std::vector<unsigned int> indices;
+    std::vector<int> indices;
     indices.reserve(all_vertices.size() + 1);
     for (int i = 0; i < all_vertices.size(); i++) {
         indices.push_back(i);
@@ -300,7 +300,7 @@ std::shared_ptr<MeshData> MeshData::create_icosphere_mesh(int regression_depth) 
 std::shared_ptr<MeshData> MeshData::create_quad_mesh(const Point3& origin, const Vec3& positive_dir_u, const Vec3& positive_dir_v)
 {
     std::vector<Vertex> vertices;
-    std::vector<unsigned int> indices;
+    std::vector<int> indices;
 
     Vec3 normal = Normalize(Cross(positive_dir_u, positive_dir_v));
     Point3 origin_p = origin;
@@ -321,7 +321,7 @@ std::shared_ptr<MeshData> MeshData::create_quad_mesh(const Point3& origin, const
         vertices.push_back(vertex);
     }
 
-    unsigned int cubeIndices[] =
+    int cubeIndices[] =
     {
         0, 1, 2,
         0, 2, 3,
@@ -336,7 +336,7 @@ std::shared_ptr<MeshData> MeshData::create_quad_mesh(const Point3& origin, const
 std::shared_ptr<MeshData> MeshData::create_ground_mesh(const Vec2& size)
 {
     std::vector<Vertex> vertices;
-    std::vector<unsigned int> indices;
+    std::vector<int> indices;
 
     Point3 start_point = Point3(-size.x / 2, 0.0f, size.y / 2);
     Vec3 u = Vec3(-2 * start_point.x, 0, 0);

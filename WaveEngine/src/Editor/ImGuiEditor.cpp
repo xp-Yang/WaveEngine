@@ -17,7 +17,7 @@ void ImGuiEditor::init(RenderSystem* render_system)
     m_ref_render_system = render_system;
 }
 
-void ImGuiEditor::render()
+void ImGuiEditor::onUpdate()
 {
     m_ref_render_system->onUpdate();
 
@@ -379,16 +379,16 @@ void ImGuiEditor::renderPickedEntityController(const ImVec2& pos, const std::vec
             auto& material = renderable->sub_meshes[i].material;
 
             ImGui::PushItemWidth(80.0f);
-            ImGui::SliderFloat((std::string("##albedo.x") + "##" + obj_name).c_str(), &material->albedo.x, 0.0f, 1.0f);
+            ImGui::SliderFloat((std::string("##albedo.x") + "##" + obj_name).c_str(), &material.albedo.x, 0.0f, 1.0f);
             ImGui::SameLine();
-            ImGui::SliderFloat((std::string("##albedo.y") + "##" + obj_name).c_str(), &material->albedo.y, 0.0f, 1.0f);
+            ImGui::SliderFloat((std::string("##albedo.y") + "##" + obj_name).c_str(), &material.albedo.y, 0.0f, 1.0f);
             ImGui::SameLine();
-            ImGui::SliderFloat((std::string("albedo") + "##" + obj_name).c_str(), &material->albedo.z, 0.0f, 1.0f);
+            ImGui::SliderFloat((std::string("albedo") + "##" + obj_name).c_str(), &material.albedo.z, 0.0f, 1.0f);
             ImGui::PopItemWidth();
 
-            ImGui::SliderFloat((std::string("metallic") + "##" + obj_name).c_str(), &material->metallic, 0.0f, 1.0f);
-            ImGui::SliderFloat((std::string("roughness") + "##" + obj_name).c_str(), &material->roughness, 0.01f, 1.0f);
-            ImGui::SliderFloat((std::string("ao") + "##" + obj_name).c_str(), &material->ao, 0.0f, 1.0f);
+            ImGui::SliderFloat((std::string("metallic") + "##" + obj_name).c_str(), &material.metallic, 0.0f, 1.0f);
+            ImGui::SliderFloat((std::string("roughness") + "##" + obj_name).c_str(), &material.roughness, 0.01f, 1.0f);
+            ImGui::SliderFloat((std::string("ao") + "##" + obj_name).c_str(), &material.ao, 0.0f, 1.0f);
         }
     }
     if (world.hasComponent<ecs::ExplosionComponent>(entity)) {

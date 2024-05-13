@@ -7,7 +7,7 @@
 
 RenderSystem::RenderSystem()
 {
-    m_screen_quad_sub_mesh.sub_mesh_data = Asset::MeshData::create_screen_mesh();
+    m_screen_quad_sub_mesh.mesh_file_ref = { Asset::MeshFileType::CustomScreen, "" };
     m_screen_quad = std::make_shared<RenderSubMeshData>(m_screen_quad_sub_mesh);
 
     m_render_source_data = std::make_shared<RenderSourceData>();
@@ -87,7 +87,7 @@ void RenderSystem::updateRenderSourceData()
             }
         }
         // 2. skybox
-        m_render_source_data->render_skybox_data.skybox_cube_map = RenderTextureData(world.getSkyboxComponent()->cube_texture_filepath).map;
+        m_render_source_data->render_skybox_data.skybox_cube_map = RenderTextureData(world.getSkyboxComponent()->cube_texture).map;
         for (auto entity : world.entityView<ecs::SkyboxComponent>()) {
             auto& sub_meshes = world.getComponent<ecs::RenderableComponent>(entity)->sub_meshes;
             auto& model_matrix = world.getComponent<ecs::TransformComponent>(entity)->transform();

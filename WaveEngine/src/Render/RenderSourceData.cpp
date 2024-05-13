@@ -2,6 +2,44 @@
 #include "Platform/RHI/rhi.hpp"
 #include "stb/stb_image.h"
 
+RenderSubMeshData::RenderSubMeshData(const Asset::SubMesh& sub_mesh_asset, const Mat4& model_transform)
+    : m_transform(model_transform* sub_mesh_asset.local_transform)
+{
+    switch (sub_mesh_asset.mesh_file_ref.mesh_file_type) {
+    case Asset::MeshFileType::OBJ: {
+        Asset::ObjImporter obj_importer;
+        obj_importer.load(sub_mesh_asset.mesh_file_ref.mesh_filepath);
+        m_mesh_data = obj_importer.meshDataOfNode(sub_mesh_asset.sub_mesh_idx);
+        break;
+    }
+    case Asset::MeshFileType::CustomCube: {
+        m_mesh_data = Asset::MeshData::create_cube_mesh();
+        break;
+    }
+    case Asset::MeshFileType::CustomSphere: {
+        m_mesh_data = Asset::MeshData::create_icosphere_mesh(4);
+        break;
+    }
+    case Asset::MeshFileType::CustomGround: {
+        m_mesh_data = Asset::MeshData::create_ground_mesh(Vec2(60.0f));
+        break;
+    }
+    case Asset::MeshFileType::CustomGrid: {
+        m_mesh_data = Asset::MeshData::create_ground_mesh(Vec2(1000.0f));
+        break;
+    }
+    case Asset::MeshFileType::CustomScreen: {
+        m_mesh_data = Asset::MeshData::create_screen_mesh();
+        break;
+    }
+    default:
+        break;
+    }
+    updateRenderMaterialData(sub_mesh_asset.material);
+    create_vbo();
+    create_vao();
+}
+
 void RenderSubMeshData::reset()
 {
     if (m_VAO) glDeleteVertexArrays(1, &m_VAO);
@@ -12,33 +50,31 @@ void RenderSubMeshData::updateTransform(const Mat4& transform)
     m_transform = transform;
 }
 
-void RenderSubMeshData::updateRenderMaterialData(const std::shared_ptr<Asset::Material>& material_asset)
+void RenderSubMeshData::updateRenderMaterialData(const Asset::Material& material_asset)
 {
-    if (material_asset) {
-        // temp
-        m_material.albedo = material_asset->albedo;
-        m_material.metallic = material_asset->metallic;
-        m_material.roughness = material_asset->roughness;
-        m_material.ao = material_asset->ao;
+    // temp
+    m_material.albedo = material_asset.albedo;
+    m_material.metallic = material_asset.metallic;
+    m_material.roughness = material_asset.roughness;
+    m_material.ao = material_asset.ao;
 
-        // TODO 贴图更新了，texture数据的释放和加载
-        unsigned int diffuse_map = RenderTextureData(material_asset->diffuse_map_filename, false).map;
-        m_material.diffuse_map = diffuse_map;
-        unsigned int specular_map = RenderTextureData(material_asset->specular_map_filename, false).map;
-        m_material.specular_map = specular_map;
-        unsigned int normal_map = RenderTextureData(material_asset->normal_map_filename, false).map;
-        m_material.normal_map = normal_map;
-        unsigned int height_map = RenderTextureData(material_asset->height_map_filename, false).map;
-        m_material.height_map = height_map;
-        m_material.shininess = material_asset->shininess;
-    }
+    // TODO 贴图更新了，texture数据的释放和加载
+    unsigned int diffuse_map = RenderTextureData(material_asset.diffuse_texture).map;
+    m_material.diffuse_map = diffuse_map;
+    unsigned int specular_map = RenderTextureData(material_asset.specular_texture).map;
+    m_material.specular_map = specular_map;
+    unsigned int normal_map = RenderTextureData(material_asset.normal_texture).map;
+    m_material.normal_map = normal_map;
+    unsigned int height_map = RenderTextureData(material_asset.height_texture).map;
+    m_material.height_map = height_map;
+    m_material.shininess = material_asset.shininess;
 }
 
 void RenderSubMeshData::create_vbo()
 {
     glGenBuffers(1, &m_VBO);
     glBindBuffer(GL_ARRAY_BUFFER, m_VBO);
-    glBufferData(GL_ARRAY_BUFFER, m_vertices.size() * sizeof(Vertex), &m_vertices[0], GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, m_mesh_data->vertices().size() * sizeof(Vertex), &(m_mesh_data->vertices()[0]), GL_STATIC_DRAW);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 
@@ -61,18 +97,18 @@ void RenderSubMeshData::create_vao()
     glEnableVertexAttribArray(2);
 
     // 索引数据
-    if (!m_indices.empty()) {
+    if (!m_mesh_data->indices().empty()) {
         glGenBuffers(1, &m_IBO);
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_IBO);
-        glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_indices.size() * sizeof(unsigned int), &m_indices[0], GL_STATIC_DRAW);
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_mesh_data->indices().size() * sizeof(unsigned int), &(m_mesh_data->indices()[0]), GL_STATIC_DRAW);
     }
 }
 
-RenderTextureData::RenderTextureData(const std::string& texture_filepath, bool gamma)
+RenderTextureData::RenderTextureData(const Asset::Texture& texture_asset)
 {
-    std::string filename = texture_filepath;
+    std::string filepath = texture_asset.texture_filepath;
     int width, height, nrComponents;
-    unsigned char* data = stbi_load(filename.c_str(), &width, &height, &nrComponents, 0);
+    unsigned char* data = stbi_load(filepath.c_str(), &width, &height, &nrComponents, 0);
 
     //unsigned int pbo;
     //glGenBuffers(1, &pbo);
@@ -123,16 +159,16 @@ RenderTextureData::RenderTextureData(const std::string& texture_filepath, bool g
     map = textureID;
 }
 
-RenderTextureData::RenderTextureData(std::array<std::string, 6> cube_texture_filepath)
+RenderTextureData::RenderTextureData(const Asset::CubeTexture& cube_texture_asset)
 {
     unsigned int textureID;
     glGenTextures(1, &textureID);
     glBindTexture(GL_TEXTURE_CUBE_MAP, textureID);
 
     int width, height, nrChannels;
-    for (unsigned int i = 0; i < cube_texture_filepath.size(); i++)
+    for (unsigned int i = 0; i < cube_texture_asset.cube_texture_filepath.size(); i++)
     {
-        unsigned char* data = stbi_load(cube_texture_filepath[i].c_str(), &width, &height, &nrChannels, 0);
+        unsigned char* data = stbi_load(cube_texture_asset.cube_texture_filepath[i].c_str(), &width, &height, &nrChannels, 0);
         if (data)
         {
             glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);

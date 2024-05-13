@@ -5,8 +5,7 @@
 #include <vector>
 #include "Core/Math.hpp"
 #include "World.hpp"
-#include "ResourceManager/Mesh.hpp"
-#include "ResourceManager/Material.hpp"
+#include "ResourceManager/AssetManager.hpp"
 #include "Window_impl.hpp"
 
 namespace ecs {
@@ -105,7 +104,7 @@ struct RenderableComponent {
 };
 
 struct SkyboxComponent {
-	std::array<std::string, 6> cube_texture_filepath;
+	Asset::CubeTexture cube_texture;
 };
 
 struct PointLightComponent {

@@ -17,7 +17,7 @@ void RayTracingPass::draw()
 	m_framebuffer->bind();
 	m_framebuffer->clear();
 
-	Asset::Shader* rt_shader = Asset::Shader::getShader(Asset::ShaderType::RayTracingShader);
+	static RenderShaderObject* rt_shader = RenderShaderObject::getShaderObject(Asset::ShaderType::RayTracingShader);
 	auto& world = ecs::World::get();
 	auto camera = world.getMainCameraComponent();
 

@@ -45,12 +45,12 @@ void InputSystem::refreshState()
 	m_mouse_y = (float)io.MousePos.y;
 }
 
-void InputSystem::onUpdate()
+bool InputSystem::onUpdate()
 {
 	ImGuiIO& io = ImGui::GetIO();
 	if (!io.WantPassThroughMouse) {
 		// ImGui级别的鼠标输入，移动窗口等。
-		return;
+		return false;
 	}
 
 	refreshState();
@@ -93,6 +93,8 @@ void InputSystem::onUpdate()
 		m_last_mouse_y = m_mouse_y;
 		m_last_mouse_state = m_mouse_state;
 	}
+
+	return true;
 }
 
 void InputSystem::pick()

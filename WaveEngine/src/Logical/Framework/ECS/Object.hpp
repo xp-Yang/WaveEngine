@@ -69,8 +69,8 @@ public:
 		std::vector<Object*> nodes;
 		nodes.push_back(this);
 		while (!nodes.empty()) {
-			auto node = nodes.back();
-			nodes.pop_back();
+			auto node = nodes.front();
+			nodes.erase(nodes.begin());
 			for (auto child : node->children()) {
 				if (!child->children().empty()) {
 					nodes.push_back(child);

@@ -26,7 +26,7 @@ void EdgeDetectionPass::prepare(FrameBuffer* framebuffer)
         // TODO 需要先把实际的深度贴图拷贝到当前深度缓冲中
         glEnable(GL_DEPTH_TEST);
 
-        Asset::Shader* picking_shader = Asset::Shader::getShader(Asset::ShaderType::PickingShader);
+        static RenderShaderObject* picking_shader = RenderShaderObject::getShaderObject(Asset::ShaderType::PickingShader);
         picking_shader->start_using();
         picking_shader->setMatrix("view", 1, m_render_source_data->view_matrix);
         picking_shader->setMatrix("projection", 1, m_render_source_data->proj_matrix);
@@ -52,7 +52,7 @@ void EdgeDetectionPass::draw()
     m_framebuffer->bind();
     m_framebuffer->clear();
 
-    static Asset::Shader* edge_shader = Asset::Shader::getShader(Asset::ShaderType::EdgeDetection);
+    static RenderShaderObject* edge_shader = RenderShaderObject::getShaderObject(Asset::ShaderType::EdgeDetection);
     edge_shader->start_using();
     edge_shader->setTexture("Texture", 0, m_source_map);
     Renderer::drawIndex(m_screen_quad->getVAO(), m_screen_quad->indicesCount());

@@ -43,7 +43,7 @@ void MainCameraPass::draw()
     Vec3 light_direction = m_render_source_data->render_directional_light_data_list.front().direction;
     Vec4 light_color = m_render_source_data->render_directional_light_data_list.front().color;
 
-    auto shader = Asset::Shader::getShader(Asset::ShaderType::PBRShader);
+    static RenderShaderObject* shader = RenderShaderObject::getShaderObject(Asset::ShaderType::PBRShader);
     for (const auto& render_sub_mesh_data : m_render_source_data->render_object_sub_mesh_data_list) {
         auto& material = render_sub_mesh_data->renderMaterialData();
         shader->start_using();
@@ -88,7 +88,7 @@ void MainCameraPass::draw()
         shader->stop_using();
     }
     
-    static Asset::Shader* skybox_shader = new Asset::Shader(std::string(RESOURCE_DIR) + "/shader/skybox.vs", std::string(RESOURCE_DIR) + "/shader/skybox.fs");
+    static RenderShaderObject* skybox_shader = RenderShaderObject::getShaderObject(Asset::ShaderType::SkyboxShader);
     if (m_skybox) {
         const auto& render_skybox_sub_mesh_data = m_render_source_data->render_skybox_data.render_sub_mesh_data;
         auto& material = render_skybox_sub_mesh_data->renderMaterialData();

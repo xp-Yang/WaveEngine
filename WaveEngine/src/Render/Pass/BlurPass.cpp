@@ -27,7 +27,7 @@ void BlurPass::draw()
     unsigned int map1 = m_framebuffer->getFirstAttachmentOf(AttachmentType::RGB16F).getMap();
     unsigned int map2 = m_pingpong_framebuffer->getFirstAttachmentOf(AttachmentType::RGB16F).getMap();
 
-    Asset::Shader* blur_shader = Asset::Shader::getShader(Asset::ShaderType::GaussianBlur);
+    static RenderShaderObject* blur_shader = RenderShaderObject::getShaderObject(Asset::ShaderType::GaussianBlur);
     bool horizontal = true;
     unsigned int amount = 32;
     blur_shader->start_using();

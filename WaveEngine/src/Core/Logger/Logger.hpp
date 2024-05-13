@@ -55,11 +55,11 @@ public:
 protected:
 	virtual void create() = 0;
 
-	void init_filename();
+	void init_filepath();
 
 	std::shared_ptr<spdlog::logger> m_logger;
 	std::string m_directory;
-	std::string m_full_filename;
+	std::string m_full_filepath;
 	OutputMode m_output_mode;
 };
 

@@ -22,8 +22,10 @@ SceneHierarchy::~SceneHierarchy()
 ecs::Object* SceneHierarchy::loadModel(const std::string& filepath)
 {
 	Logger::Logger::get().info("SceneHierarchy::loadModel({})", filepath);
-	std::shared_ptr<Asset::Mesh> obj_mesh = Asset::ObjImporter::get().load(filepath);
-	if (obj_mesh->sub_meshes.empty()) {
+	Asset::ObjImporter obj_importer;
+	obj_importer.load(filepath);
+	std::vector<int> obj_sub_meshes_idx = obj_importer.getSubMeshesIds();
+	if (obj_sub_meshes_idx.empty()) {
 		Logger::Logger::get().error("Model datas is empty. File loading fails. Please check if the filepath is all English.");
 		return nullptr;
 	}
@@ -33,7 +35,9 @@ ecs::Object* SceneHierarchy::loadModel(const std::string& filepath)
 	world.addComponent<ecs::TransformComponent>(entity);
 	//world.addComponent<ecs::ExplosionComponent>(entity);
 	auto& renderable = world.addComponent<ecs::RenderableComponent>(entity);
-	renderable.sub_meshes = std::move(obj_mesh->sub_meshes);
+	for (int idx : obj_sub_meshes_idx) {
+		renderable.sub_meshes.push_back(Asset::SubMesh{ idx, Asset::MeshFileRef{ Asset::MeshFileType::OBJ, filepath}, {}, Mat4(1.0f) });
+	}
 
 	auto res = new ecs::Object(m_root_object, entity);
 	return res;
@@ -78,8 +82,7 @@ void SceneHierarchy::addPointLight()
 	point_light_properties.radius = (point_light_transform.scale[0]) * 100.0f;
 	point_light_properties.luminousColor = m_point_light_count == 0 ? Color4(2.0f, 2.0f, 2.0f, 1.0f) : Color4{ randomUnit(), randomUnit(), randomUnit(), 1.0f };
 	Asset::SubMesh sub_mesh;
-	sub_mesh.sub_mesh_data = Asset::MeshData::create_icosphere_mesh(4);
-	sub_mesh.material = std::make_shared<Asset::Material>();
+	sub_mesh.mesh_file_ref = { Asset::MeshFileType::CustomSphere, "" };
 	point_light_renderable.sub_meshes.push_back(sub_mesh);
 
 	m_point_light_count++;
@@ -96,13 +99,11 @@ void SceneHierarchy::addCube()
 	cube_transform.translation = { 1.5f * (m_test_cube_count % 6), 0.5f + 1.5f * (m_test_cube_count / 6), -10.0f };
 	auto& cube_renderable = world.addComponent<ecs::RenderableComponent>(cube_entity);
 	Asset::SubMesh sub_mesh;
-	sub_mesh.sub_mesh_data = Asset::MeshData::create_cube_mesh();
-	std::shared_ptr<Asset::Material> cube_material = std::make_shared<Asset::Material>();
-	cube_material->albedo = Vec3(1.0f);
-	cube_material->metallic = 1.0;
-	cube_material->roughness = 0.5;
-	cube_material->ao = 0.01;
-	sub_mesh.material = cube_material;
+	sub_mesh.mesh_file_ref = { Asset::MeshFileType::CustomCube, "" };
+	sub_mesh.material.albedo = Vec3(1.0f);
+	sub_mesh.material.metallic = 1.0;
+	sub_mesh.material.roughness = 0.5;
+	sub_mesh.material.ao = 0.01;
 	cube_renderable.sub_meshes.push_back(sub_mesh);
 	//world.addComponent<ecs::ExplosionComponent>(cube_entity);
 
@@ -152,13 +153,11 @@ void SceneHierarchy::addSphere()
 
 	auto& sphere_renderable = world.addComponent<ecs::RenderableComponent>(sphere_entity);
 	Asset::SubMesh sub_mesh;
-	sub_mesh.sub_mesh_data = Asset::MeshData::create_icosphere_mesh(4);
-	std::shared_ptr<Asset::Material> sphere_material = std::make_shared<Asset::Material>();
-	sphere_material->albedo = Vec3(1.0f, 1.0f, 1.0f);
-	sphere_material->metallic = 1.0;
-	sphere_material->roughness = (1.0f / 64) * (m_test_sphere_count + 1);
-	sphere_material->ao = 0.01;
-	sub_mesh.material = sphere_material;
+	sub_mesh.mesh_file_ref = { Asset::MeshFileType::CustomSphere, "" };
+	sub_mesh.material.albedo = Vec3(1.0f, 1.0f, 1.0f);
+	sub_mesh.material.metallic = 1.0;
+	sub_mesh.material.roughness = (1.0f / 64) * (m_test_sphere_count + 1);
+	sub_mesh.material.ao = 0.01;
 	sphere_renderable.sub_meshes.push_back(sub_mesh);
 	//world.addComponent<ecs::ExplosionComponent>(sphere_entity);
 
@@ -208,19 +207,15 @@ void SceneHierarchy::createSkybox()
 	world.addComponent<ecs::UnpickableComponent>(skybox_entity);
 	auto& skybox_renderable = world.addComponent<ecs::RenderableComponent>(skybox_entity);
 	Asset::SubMesh sub_mesh;
-	sub_mesh.sub_mesh_data = Asset::MeshData::create_cube_mesh();
-	std::array<std::string, 6> faces
-	{
+	sub_mesh.mesh_file_ref = { Asset::MeshFileType::CustomCube, "" };
+	world.addComponent<ecs::SkyboxComponent>(skybox_entity).cube_texture = Asset::CubeTexture(
 		resource_dir + "/images/skybox/right.jpg",
 		resource_dir + "/images/skybox/left.jpg",
 		resource_dir + "/images/skybox/top.jpg",
 		resource_dir + "/images/skybox/bottom.jpg",
 		resource_dir + "/images/skybox/front.jpg",
-		resource_dir + "/images/skybox/back.jpg"
-	};
-	// TODO 是否可以放到material中
-	world.addComponent<ecs::SkyboxComponent>(skybox_entity).cube_texture_filepath = faces;
-	sub_mesh.material = std::make_shared<Asset::Material>();
+		resource_dir + "/images/skybox/back.jpg");
+
 	skybox_renderable.sub_meshes.push_back(sub_mesh);
 }
 
@@ -236,13 +231,12 @@ void SceneHierarchy::createPlaneGround()
 	ground_transform.scale = Vec3(1.0f);
 	auto& ground_renderable = world.addComponent<ecs::RenderableComponent>(ground_entity);
 	Asset::SubMesh sub_mesh;
-	sub_mesh.sub_mesh_data = Asset::MeshData::create_ground_mesh(Vec2(60.0f));
+	sub_mesh.mesh_file_ref = { Asset::MeshFileType::CustomGround, "" };
 	std::shared_ptr<Asset::Material> ground_material = std::make_shared<Asset::Material>();
-	ground_material->albedo = Vec3(1.0f, 1.0f, 1.0f);
-	ground_material->metallic = 0.0f;
-	ground_material->roughness = 1.0f;
-	ground_material->ao = 0.01;
-	sub_mesh.material = ground_material;
+	sub_mesh.material.albedo = Vec3(1.0f, 1.0f, 1.0f);
+	sub_mesh.material.metallic = 0.0f;
+	sub_mesh.material.roughness = 1.0f;
+	sub_mesh.material.ao = 0.01;
 	ground_renderable.sub_meshes.push_back(sub_mesh);
 }
 
@@ -257,8 +251,7 @@ void SceneHierarchy::createGridGround()
 	world.addComponent<ecs::UnpickableComponent>(ground_entity);
 	auto& ground_renderable = world.addComponent<ecs::RenderableComponent>(ground_entity);
 	Asset::SubMesh sub_mesh;
-	sub_mesh.sub_mesh_data = Asset::MeshData::create_ground_mesh(Vec2(1000.0f));
-	sub_mesh.material = std::make_shared<Asset::Material>();;
+	sub_mesh.mesh_file_ref = { Asset::MeshFileType::CustomGrid, "" };
 	ground_renderable.sub_meshes.push_back(sub_mesh);
 }
 

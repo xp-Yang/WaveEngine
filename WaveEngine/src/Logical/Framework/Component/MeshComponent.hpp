@@ -8,7 +8,7 @@
 struct MeshComponent : public Component {
 	MeshComponent(GObject* parent) : Component(parent) {}
 
-	std::shared_ptr<Asset::Mesh> mesh;
+	std::vector<Asset::SubMesh> sub_meshes;
 };
 
 #endif // !MeshComponent_hpp

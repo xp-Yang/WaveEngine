@@ -19,7 +19,7 @@ void GBufferPass::draw()
 
     glEnable(GL_DEPTH_TEST);
 
-    Asset::Shader* g_shader = Asset::Shader::getShader(Asset::ShaderType::GBufferShader);
+    static RenderShaderObject* g_shader = RenderShaderObject::getShaderObject(Asset::ShaderType::GBufferShader);
 
     g_shader->start_using();
     g_shader->setMatrix("view", 1, m_render_source_data->view_matrix);

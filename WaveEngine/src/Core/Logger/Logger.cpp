@@ -21,7 +21,7 @@ Logger& Logger::createLogger(int output)
     }
 }
 
-void Logger::init_filename()
+void Logger::init_filepath()
 {
     struct tm* cur_time;
     time_t local_time;
@@ -29,14 +29,14 @@ void Logger::init_filename()
     cur_time = localtime(&local_time);
 
     /* 通过时间命名日志文件 */
-    char filename[256];
-    strftime(filename, 100, "%Y-%m-%d_%H-%M-%S.log", cur_time);
+    char filepath[256];
+    strftime(filepath, 100, "%Y-%m-%d_%H-%M-%S.log", cur_time);
 
     /* log file name, does not contain file path */
-    std::string log_file_name = std::string(filename);
+    std::string log_filepath = std::string(filepath);
 
     /* 日志文件全路径 */
-    m_full_filename = m_directory + log_file_name;
+    m_full_filepath = m_directory + log_filepath;
 
     /* 记录日志创建时间，在通过时间长度控制日志文件大小时，该成员变量会被使用 */
     //logger_create_time = local_time;
@@ -55,13 +55,13 @@ void Logger::setLevel(spdlog::level::level_enum level)
 
 FileLogger::FileLogger()
 {
-    init_filename();
+    init_filepath();
     create();
 }
 
 void FileLogger::create()
 {
-    m_logger = spdlog::basic_logger_mt("basic_logger", m_full_filename.c_str());
+    m_logger = spdlog::basic_logger_mt("basic_logger", m_full_filepath.c_str());
     spdlog::set_pattern("[%Y-%m-%d %T]%^[%l]%$ %v");
     m_logger->set_level(spdlog::level::trace);
 }
@@ -82,7 +82,7 @@ void ConsoleLogger::create()
 
 MultiLogger::MultiLogger()
 {
-    init_filename();
+    init_filepath();
     create();
 }
 
@@ -90,7 +90,7 @@ void MultiLogger::create()
 {
     /* 通过multi-sink的方式创建复合logger，实现方式为：先分别创建文件sink和控制台sink，并将两者放入sink 向量中，组成一个复合logger */
     /* file sink */
-    auto file_sink = std::make_shared<spdlog::sinks::basic_file_sink_mt>(m_full_filename.c_str(), true);
+    auto file_sink = std::make_shared<spdlog::sinks::basic_file_sink_mt>(m_full_filepath.c_str(), true);
     file_sink->set_level(spdlog::level::trace);
     file_sink->set_pattern("[%Y-%m-%d %T]%^%^[%l]%$%$ %v");
 

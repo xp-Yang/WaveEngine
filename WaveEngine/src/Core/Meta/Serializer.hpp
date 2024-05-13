@@ -28,8 +28,8 @@ public:
 	}
 
 	template<class T>
-	static void loadFromJsonFile(const std::string& filename, T* obj) {
-		std::ifstream fin(filename);
+	static void loadFromJsonFile(const std::string& filepath, T* obj) {
+		std::ifstream fin(filepath);
 		if (!fin) {
 			assert(false);
 			return;
@@ -49,8 +49,8 @@ public:
 	}
 
 	template<class T>
-	static void saveToJsonFile(const std::string& filename, const T& obj) {
-		std::ofstream fout(filename);
+	static void saveToJsonFile(const std::string& filepath, const T& obj) {
+		std::ofstream fout(filepath);
 		if (!fout) {
 			assert(false);
 			return;

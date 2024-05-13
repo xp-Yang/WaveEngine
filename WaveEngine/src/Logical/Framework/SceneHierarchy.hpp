@@ -23,7 +23,6 @@ public:
 	size_t sphereCount() const { return m_test_sphere_count; }
 
 	ecs::Object* loadModel(const std::string& filepath);
-	void loadScene();
 
 public:
 	static size_t maxPointLightCount() { return 8; }

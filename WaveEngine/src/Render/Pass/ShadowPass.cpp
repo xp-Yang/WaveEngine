@@ -65,7 +65,7 @@ void ShadowPass::drawDirectionalLightShadowMap()
 
     glEnable(GL_DEPTH_TEST);
 
-    Asset::Shader* depth_shader = Asset::Shader::getShader(Asset::ShaderType::DepthShader);
+    static RenderShaderObject* depth_shader = RenderShaderObject::getShaderObject(Asset::ShaderType::DepthShader);
     depth_shader->start_using();
     Mat4 light_ref_matrix = m_render_source_data->render_directional_light_data_list.front().lightReferenceMatrix;
     for (const auto& render_sub_mesh_data : m_render_source_data->render_object_sub_mesh_data_list) {
@@ -80,7 +80,7 @@ void ShadowPass::drawPointLightShadowMap()
     glViewport(0, 0, WINDOW_HEIGHT, WINDOW_HEIGHT);
     glEnable(GL_DEPTH_TEST);
 
-    Asset::Shader* depth_shader = Asset::Shader::getShader(Asset::ShaderType::CubeMapShader);
+    static RenderShaderObject* depth_shader = RenderShaderObject::getShaderObject(Asset::ShaderType::CubeMapShader);
 
     depth_shader->start_using();
 

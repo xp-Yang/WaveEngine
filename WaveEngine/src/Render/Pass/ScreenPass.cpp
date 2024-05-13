@@ -26,7 +26,7 @@ void ScreenPass::draw()
 
 	auto main_viewport = Application::GetApp().getWindow()->getMainViewport().value_or(Viewport());
 	Application::GetApp().getWindow()->setMainViewport(main_viewport);
-	Asset::Shader* frame_shader = Asset::Shader::getShader(Asset::ShaderType::QuadShader);
+	static RenderShaderObject* frame_shader = RenderShaderObject::getShaderObject(Asset::ShaderType::QuadShader);
 	frame_shader->start_using();
 	frame_shader->setTexture("Texture", 0, m_scene_map);
 	frame_shader->setTexture("bloomBlurMap", 1, m_blurred_bright_map);

@@ -45,7 +45,7 @@ void LightingPass::draw()
 	}
 
 	// deferred lighting
-	Asset::Shader* lighting_shader = Asset::Shader::getShader(Asset::ShaderType::DeferredLightingShader);
+	static RenderShaderObject* lighting_shader = RenderShaderObject::getShaderObject(Asset::ShaderType::DeferredLightingShader);
 	auto g_position_map = m_gbuffer_framebuffer->getFirstAttachmentOf(AttachmentType::RGB16F).getMap();
 	lighting_shader->start_using();
 	lighting_shader->setTexture("gPosition", 0, g_position_map);
@@ -120,7 +120,8 @@ void LightingPass::draw()
 	//}
 	
 	// lights
-	static Asset::Shader* point_light_shader = new Asset::Shader(std::string(RESOURCE_DIR) + "/shader/light.vs", std::string(RESOURCE_DIR) + "/shader/light.fs");
+	static Asset::Shader point_light_shader_asset { Asset::ShaderType::CustomShader, std::string(RESOURCE_DIR) + "/shader/light.vs", std::string(RESOURCE_DIR) + "/shader/light.fs" };
+	static RenderShaderObject* point_light_shader = new RenderShaderObject(point_light_shader_asset);
 	for (const auto& render_point_light_data : m_render_source_data->render_point_light_data_list) {
 		const auto& render_point_light_sub_mesh_data = render_point_light_data.render_sub_mesh_data;
 		auto& material = render_point_light_sub_mesh_data->renderMaterialData();
@@ -139,7 +140,7 @@ void LightingPass::draw()
 	}
 
 	// skybox
-	static Asset::Shader* skybox_shader = new Asset::Shader(std::string(RESOURCE_DIR) + "/shader/skybox.vs", std::string(RESOURCE_DIR) + "/shader/skybox.fs");
+	static RenderShaderObject* skybox_shader = RenderShaderObject::getShaderObject(Asset::ShaderType::SkyboxShader);
 	if (m_skybox) {
 		const auto& render_skybox_sub_mesh_data = m_render_source_data->render_skybox_data.render_sub_mesh_data;
 		auto& material = render_skybox_sub_mesh_data->renderMaterialData();
@@ -211,7 +212,7 @@ void LightingPass::enablePBR(bool enable)
 
 void LightingPass::drawNormalMode()
 {
-	Asset::Shader* normal_shader = Asset::Shader::getShader(Asset::ShaderType::NormalShader);
+	static RenderShaderObject* normal_shader = RenderShaderObject::getShaderObject(Asset::ShaderType::NormalShader);
 	normal_shader->start_using();
 	normal_shader->setMatrix("view", 1, m_render_source_data->view_matrix);
 	normal_shader->setMatrix("projection", 1, m_render_source_data->proj_matrix);
@@ -224,7 +225,7 @@ void LightingPass::drawNormalMode()
 
 void LightingPass::drawWireframeMode()
 {
-	Asset::Shader* wireframe_shader = Asset::Shader::getShader(Asset::ShaderType::WireframeShader);
+	static RenderShaderObject* wireframe_shader = RenderShaderObject::getShaderObject(Asset::ShaderType::WireframeShader);
 	wireframe_shader->start_using();
 	wireframe_shader->setMatrix("view", 1, m_render_source_data->view_matrix);
 	wireframe_shader->setMatrix("projection", 1, m_render_source_data->proj_matrix);
@@ -236,7 +237,7 @@ void LightingPass::drawWireframeMode()
 
 void LightingPass::drawCheckerboardMode()
 {
-	Asset::Shader* shader = Asset::Shader::getShader(Asset::ShaderType::CheckerboardShader);
+	static RenderShaderObject* shader = RenderShaderObject::getShaderObject(Asset::ShaderType::CheckerboardShader);
 	shader->start_using();
 	shader->setMatrix("view", 1, m_render_source_data->view_matrix);
 	shader->setMatrix("projection", 1, m_render_source_data->proj_matrix);

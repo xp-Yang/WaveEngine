@@ -18,7 +18,7 @@ void PickingPass::draw()
 
     glEnable(GL_DEPTH_TEST);
 
-    Asset::Shader* picking_shader = Asset::Shader::getShader(Asset::ShaderType::PickingShader);
+    static RenderShaderObject* picking_shader = RenderShaderObject::getShaderObject(Asset::ShaderType::PickingShader);
     picking_shader->start_using();
 
     picking_shader->setMatrix("view", 1, m_render_source_data->view_matrix);

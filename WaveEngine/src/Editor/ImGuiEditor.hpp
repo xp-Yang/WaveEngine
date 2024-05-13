@@ -21,7 +21,7 @@ class ImGuiEditor {
 public:
 	ImGuiEditor();
 	void init(RenderSystem* render_system);
-	void render();
+	void onUpdate();
 	bool motion() { return m_motion; }
 
 protected:

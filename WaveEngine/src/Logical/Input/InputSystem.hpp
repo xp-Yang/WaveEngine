@@ -6,7 +6,7 @@
 
 class InputSystem {
 public:
-	void onUpdate();
+	bool onUpdate();
 
 protected:
 	void refreshState();

@@ -1,6 +1,4 @@
 #include "Application_impl.hpp"
-#include <windows.h>
-#include <iostream>
 
 #include <imgui/imgui_impl_glfw.h>
 #include <imgui/imgui_impl_opengl3.h>
@@ -14,8 +12,6 @@
 #include "Editor/ImGuiEditor.hpp"
 
 #include "AllMetaRegister.hpp"
-
-#define PERFORMANCE_TEST 0
 
 Application::Application()
 {
@@ -44,11 +40,6 @@ std::string Application::assetDirectory()
 
 void Application::run() {
 	while (!m_window->shouldClose()) {
-#if PERFORMANCE_TEST
-		LARGE_INTEGER t1, t2, tc;
-		QueryPerformanceFrequency(&tc);
-		QueryPerformanceCounter(&t1);
-#endif
 		newFrame(); // automatically handle imgui input
 
 		// input System
@@ -58,15 +49,12 @@ void Application::run() {
 		if (m_editor->motion())
 			m_motion_system->onUpdate();
 
+		// TODO logical tick
+
 		// render
-		m_editor->render();
+		m_editor->onUpdate();
 
 		endFrame();
-#if PERFORMANCE_TEST
-		QueryPerformanceCounter(&t2);
-		auto time = (double)(t2.QuadPart - t1.QuadPart) / (double)tc.QuadPart;
-		std::cout << "gameloop time: " << time << std::endl;
-#endif
 	}
 }
 
@@ -137,5 +125,5 @@ void Application::endFrame()
 		glfwMakeContextCurrent(backup_current_context);
 	}
 
-	m_window->update();
+	m_window->swapBuffer();
 }

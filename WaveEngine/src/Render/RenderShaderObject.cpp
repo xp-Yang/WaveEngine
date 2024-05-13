@@ -1,14 +1,14 @@
-#include "Shader.hpp"
+#include "RenderShaderObject.hpp"
+#include "Platform/RHI/rhi.hpp"
+
 #include <glad/glad.h>
 #include <glm/gtc/type_ptr.hpp>
+
 #include <fstream>
 #include <sstream>
-#include <iostream>
 
 #include "Core/Utils/Utils.hpp"
 #include "Core/Logger/Logger.hpp"
-
-namespace Asset {
 
 class ShaderParser {
 public:
@@ -22,10 +22,10 @@ public:
         GlslLine(Tag tag_, const std::string& line_) :tag(tag_), line(line_) {}
     };
 
-public: 
-    ShaderParser(const std::string& filename) {
-        Logger::Logger::get().info("parsing the shader file {}", filename);
-        load_file(filename);
+public:
+    ShaderParser(const std::string& filepath) {
+        Logger::Logger::get().info("parsing the shader file {}", filepath);
+        load_file(filepath);
     }
 
     std::string getProcessedSourceCode() {
@@ -39,14 +39,14 @@ public:
     }
 
 protected:
-    bool load_file(const std::string& filename) {
-        std::string directory = filename.substr(0, filename.find_last_of("/\\"));
+    bool load_file(const std::string& filepath) {
+        std::string directory = filepath.substr(0, filepath.find_last_of("/\\"));
 
         std::stringstream buffer;
         try
         {
             std::ifstream file_stream;
-            file_stream.open(filename);
+            file_stream.open(filepath);
             if (file_stream.is_open()) {
                 buffer << file_stream.rdbuf();
                 file_stream.close();
@@ -90,13 +90,13 @@ protected:
                 tag = Utils::trim(tag, " \t\r\n\"<>");
 
                 // ╪сть include нд╪Ч
-                std::string include_filename = directory + '/' + tag;
-                if (!this->load_file(include_filename)) {
+                std::string include_filepath = directory + '/' + tag;
+                if (!this->load_file(include_filepath)) {
                     assert(false);
                     return false;
                 }
 
-                m_lines.push_back(GlslLine(GlslLine::Include, std::string("// #include ") + include_filename));
+                m_lines.push_back(GlslLine(GlslLine::Include, std::string("// #include ") + include_filepath));
             }
             else {
                 m_lines.push_back(GlslLine(GlslLine::Code, line));
@@ -110,27 +110,86 @@ private:
     std::vector<GlslLine> m_lines;
 };
 
-Shader::Shader(const std::string vertexPath, const std::string geometryPath, const std::string fragmentPath)
+
+RenderShaderObject* RenderShaderObject::getShaderObject(const Asset::ShaderType& type)
 {
-    if (vertexPath.empty()) {
+    std::string resource_dir = RESOURCE_DIR;
+    Asset::Shader shader_asset;
+    switch (type)
+    {
+    case Asset::ShaderType::GBufferShader:
+        shader_asset = Asset::Shader{ type, resource_dir + "/shader/gBufferPass.vs", resource_dir + "/shader/gBufferPass.fs" };
+        break;
+    case Asset::ShaderType::DeferredLightingShader:
+        shader_asset = Asset::Shader{ type, resource_dir + "/shader/deferredLighting.vs", resource_dir + "/shader/deferredLighting.fs" };
+        break;
+    case Asset::ShaderType::PBRShader:
+        shader_asset = Asset::Shader{ type, resource_dir + "/shader/pbr.vs", resource_dir + "/shader/pbr.fs" };
+        break;
+    case Asset::ShaderType::SkyboxShader:
+        shader_asset = Asset::Shader{ type, std::string(RESOURCE_DIR) + "/shader/skybox.vs", std::string(RESOURCE_DIR) + "/shader/skybox.fs" };
+        break;
+    case Asset::ShaderType::BorderShader:
+        shader_asset = Asset::Shader{ type, resource_dir + "/shader/border.vs", resource_dir + "/shader/border.fs" };
+        break;
+    case Asset::ShaderType::NormalShader:
+        shader_asset = Asset::Shader{ type, resource_dir + "/shader/model.vs", resource_dir + "/shader/normal.fs", resource_dir + "/shader/normal.gs" };
+        break;
+    case Asset::ShaderType::WireframeShader:
+        shader_asset = Asset::Shader{ type, resource_dir + "/shader/model.vs", resource_dir + "/shader/wireframe.fs", resource_dir + "/shader/wireframe.gs" };
+        break;
+    case Asset::ShaderType::CheckerboardShader:
+        shader_asset = Asset::Shader{ type, resource_dir + "/shader/checkerboard.vs", resource_dir + "/shader/checkerboard.fs" };
+        break;
+    case Asset::ShaderType::PickingShader:
+        shader_asset = Asset::Shader{ type, resource_dir + "/shader/picking.vs", resource_dir + "/shader/picking.fs" };
+        break;
+    case Asset::ShaderType::RayTracingShader:
+        shader_asset = Asset::Shader{ type, resource_dir + "/shader/RayTracing.vs", resource_dir + "/shader/RayTracing.fs" };
+        break;
+    case Asset::ShaderType::QuadShader:
+        shader_asset = Asset::Shader{ type, resource_dir + "/shader/screenQuad.vs", resource_dir + "/shader/screenQuad.fs" };
+        break;
+    case Asset::ShaderType::DepthShader:
+        shader_asset = Asset::Shader{ type, resource_dir + "/shader/depth.vs", resource_dir + "/shader/depth.fs" };
+        break;
+    case Asset::ShaderType::CubeMapShader:
+        shader_asset = Asset::Shader{ type, resource_dir + "/shader/cubeMap.vs", resource_dir + "/shader/cubeMap.fs" };
+        //shader_asset = Asset::Shader{ type, resource_dir + "/shader/cubeMap2.vs", resource_dir + "/shader/cubeMap2.fs", resource_dir + "/shader/cubeMap2.gs" };
+        break;
+    case Asset::ShaderType::GaussianBlur:
+        shader_asset = Asset::Shader{ type, resource_dir + "/shader/gaussianBlur.vs", resource_dir + "/shader/gaussianBlur.fs" };
+        break;
+    case Asset::ShaderType::EdgeDetection:
+        shader_asset = Asset::Shader{ type, resource_dir + "/shader/edgeDetection.vs", resource_dir + "/shader/edgeDetection.fs" };
+        break;
+    default:
+        break;
+    }
+    return new RenderShaderObject(shader_asset);
+}
+
+RenderShaderObject::RenderShaderObject(const Asset::Shader& shader_asset)
+{
+    if (shader_asset.vshader_filepath.empty()) {
         Logger::Logger::get().error("a vertex shader is needed!");
         assert(false);
     }
-    if (fragmentPath.empty()) {
+    if (shader_asset.fshader_filepath.empty()) {
         Logger::Logger::get().error("a fragment shader is needed!");
         assert(false);
     }
-    bool has_geo_shader = !geometryPath.empty();
+    bool has_geo_shader = !shader_asset.gshader_filepath.empty();
 
     // 1. read the source code and process file include
-    ShaderParser v_parser(vertexPath);
+    ShaderParser v_parser(shader_asset.vshader_filepath);
     m_vertexCode = v_parser.getProcessedSourceCode();
 
-    ShaderParser f_parser(fragmentPath);
+    ShaderParser f_parser(shader_asset.fshader_filepath);
     m_fragmentCode = f_parser.getProcessedSourceCode();
 
     if (has_geo_shader) {
-        ShaderParser g_parser(geometryPath);
+        ShaderParser g_parser(shader_asset.gshader_filepath);
         m_geometryCode = g_parser.getProcessedSourceCode();
     }
 
@@ -201,52 +260,47 @@ Shader::Shader(const std::string vertexPath, const std::string geometryPath, con
         glDeleteShader(geometry);
 }
 
-Shader::Shader(const std::string vertexPath, const std::string fragmentPath)
-    :Shader(vertexPath, "", fragmentPath)
-{
-}
-
-void Shader::start_using() const {
+void RenderShaderObject::start_using() const {
     glUseProgram(m_id);
 }
 
-void Shader::stop_using() const {
+void RenderShaderObject::stop_using() const {
     glUseProgram(0);
 }
 
-void Shader::setBool(const std::string& name, bool value) const
+void RenderShaderObject::setBool(const std::string& name, bool value) const
 {
     glUniform1i(glGetUniformLocation(m_id, name.c_str()), (int)value);
 }
-void Shader::setInt(const std::string& name, int value) const
+void RenderShaderObject::setInt(const std::string& name, int value) const
 {
     glUniform1i(glGetUniformLocation(m_id, name.c_str()), value);
 }
-void Shader::setFloat(const std::string& name, float value) const
+void RenderShaderObject::setFloat(const std::string& name, float value) const
 {
     glUniform1f(glGetUniformLocation(m_id, name.c_str()), value);
 }
-void Shader::setFloat4(const std::string& name, float value1, float value2, float value3, float value4) const
+void RenderShaderObject::setFloat4(const std::string& name, float value1, float value2, float value3, float value4) const
 {
     GLint location = glGetUniformLocation(m_id, name.c_str());
     glUniform4f(location, value1, value2, value3, value4);
 }
-void Shader::setFloat4(const std::string& name, const Vec4& value) const
+void RenderShaderObject::setFloat4(const std::string& name, const Vec4& value) const
 {
     GLint location = glGetUniformLocation(m_id, name.c_str());
     glUniform4f(location, value.x, value.y, value.z, value.w);
 }
-void Shader::setFloat3(const std::string& name, const Vec3& value) const
+void RenderShaderObject::setFloat3(const std::string& name, const Vec3& value) const
 {
     GLint location = glGetUniformLocation(m_id, name.c_str());
     glUniform3f(location, value.x, value.y, value.z);
 }
-void Shader::setMatrix(const std::string& name, int count, const Mat4& mat_value) const
+void RenderShaderObject::setMatrix(const std::string& name, int count, const Mat4& mat_value) const
 {
     GLuint transformLoc = glGetUniformLocation(m_id, name.c_str());
     glUniformMatrix4fv(transformLoc, count, GL_FALSE, /*glm::value_ptr(mat_value)*/&(mat_value[0].x));
 }
-void Shader::setTexture(const std::string& name, int texture_unit, unsigned int texture_id) const
+void RenderShaderObject::setTexture(const std::string& name, int texture_unit, unsigned int texture_id) const
 {
     glActiveTexture(GL_TEXTURE0 + texture_unit);
     glBindTexture(GL_TEXTURE_2D, texture_id);
@@ -254,65 +308,10 @@ void Shader::setTexture(const std::string& name, int texture_unit, unsigned int 
     glActiveTexture(GL_TEXTURE0);
 }
 
-void Shader::setCubeTexture(const std::string& name, int texture_unit, unsigned int texture_id) const
+void RenderShaderObject::setCubeTexture(const std::string& name, int texture_unit, unsigned int texture_id) const
 {
     glActiveTexture(GL_TEXTURE0 + texture_unit);
     glBindTexture(GL_TEXTURE_CUBE_MAP, texture_id);
     setInt(name, texture_unit);
     glActiveTexture(GL_TEXTURE0);
-}
-
-Shader* Shader::getShader(const ShaderType& type)
-{
-    std::string resource_dir = RESOURCE_DIR;
-    switch (type)
-    {
-    case ShaderType::GBufferShader:
-        static Shader* g_shader = new Shader(resource_dir + "/shader/gBufferPass.vs", resource_dir + "/shader/gBufferPass.fs");
-        return g_shader;
-    case ShaderType::DeferredLightingShader:
-        static Shader* lighting_shader = new Shader(resource_dir + "/shader/deferredLighting.vs", resource_dir + "/shader/deferredLighting.fs");
-        return lighting_shader;
-    case ShaderType::PBRShader:
-        static Shader* pbr_shader = new Shader(resource_dir + "/shader/pbr.vs", resource_dir + "/shader/pbr.fs");
-        return pbr_shader;
-    case ShaderType::BorderShader:
-        static Shader* border_shader = new Shader(resource_dir + "/shader/border.vs", resource_dir + "/shader/border.fs");
-        return border_shader;
-    case ShaderType::NormalShader:
-        static Shader* normal_shader = new Shader(resource_dir + "/shader/model.vs", resource_dir + "/shader/normal.gs", resource_dir + "/shader/normal.fs");
-        return normal_shader;
-    case ShaderType::WireframeShader:
-        static Shader* wireframe_shader = new Shader(resource_dir + "/shader/model.vs", resource_dir + "/shader/wireframe.gs", resource_dir + "/shader/wireframe.fs");
-        return wireframe_shader;
-    case ShaderType::CheckerboardShader:
-        static Shader* checkerboard_shader = new Shader(resource_dir + "/shader/checkerboard.vs", resource_dir + "/shader/checkerboard.fs");
-        return checkerboard_shader;
-    case ShaderType::PickingShader:
-        static Shader* picking_shader = new Shader(resource_dir + "/shader/picking.vs", resource_dir + "/shader/picking.fs");
-        return picking_shader;
-    case ShaderType::RayTracingShader:
-        static Shader* rt_shader = new Shader(resource_dir + "/shader/RayTracing.vs", resource_dir + "/shader/RayTracing.fs");
-        return rt_shader;
-    case ShaderType::QuadShader:
-        static Shader* quad_shader = new Shader(resource_dir + "/shader/screenQuad.vs", resource_dir + "/shader/screenQuad.fs");
-        return quad_shader;
-    case ShaderType::DepthShader:
-        static Shader* depth_shader = new Shader(resource_dir + "/shader/depth.vs", resource_dir + "/shader/depth.fs");
-        return depth_shader;
-    case ShaderType::CubeMapShader:
-        static Shader* cube_map_shader = new Shader(resource_dir + "/shader/cubeMap.vs", resource_dir + "/shader/cubeMap.fs");
-        //static Shader* cube_map_shader = new Shader(resource_dir + "/shader/cubeMap2.vs", resource_dir + "/shader/cubeMap2.gs", resource_dir + "/shader/cubeMap2.fs");
-        return cube_map_shader;
-    case ShaderType::GaussianBlur:
-        static Shader* blur_shader = new Shader(resource_dir + "/shader/gaussianBlur.vs", resource_dir + "/shader/gaussianBlur.fs");
-        return blur_shader;
-    case ShaderType::EdgeDetection:
-        static Shader* edge_shader = new Shader(resource_dir + "/shader/edgeDetection.vs", resource_dir + "/shader/edgeDetection.fs");
-        return edge_shader;
-    default:
-        return nullptr;
-    }
-}
-
 }

@@ -5,52 +5,75 @@
 
 namespace Asset{
 
-std::shared_ptr<Asset::Mesh> ObjImporter::load(const std::string& file_path)
-{
-    m_data.reset();
-    m_data = std::make_shared<Asset::Mesh>();
+std::unordered_map<std::string, Assimp::Importer*> ObjImporter::m_importers;
 
-	Assimp::Importer importer;
-	const aiScene* scene = importer.ReadFile(file_path, aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_GenNormals);
-    if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
-    {
-        auto error_str = importer.GetErrorString();
-        return m_data;
-    }
+ObjImporter::~ObjImporter()
+{
+}
+
+bool ObjImporter::load(const std::string& file_path)
+{
+    m_obj_filepath = file_path;
     m_directory = file_path.substr(0, file_path.find_last_of("/\\"));
 
-    processNode(scene->mRootNode, scene);
+    if (ObjImporter::m_importers.find(file_path) != ObjImporter::m_importers.end()) {
+        m_scene = ObjImporter::m_importers.at(file_path)->GetScene();
+    }
+    else {
+        auto importer = new Assimp::Importer();
+        m_scene = importer->ReadFile(file_path, aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_GenNormals);
+        if (!m_scene || m_scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !m_scene->mRootNode)
+        {
+            auto error_str = importer->GetErrorString();
+            delete importer;
+            return false;
+        }
+        ObjImporter::m_importers.insert({file_path, importer });
+    }
 
-    return m_data;
+    collect_ai_meshes();
+
+    return true;
 }
 
-void ObjImporter::processNode(aiNode* node, const aiScene* scene)
+std::shared_ptr<Asset::MeshData> ObjImporter::meshDataOfNode(int ai_mesh_idx)
 {
-    for (unsigned int i = 0; i < node->mNumMeshes; i++)
-    {
-        aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];
-        std::shared_ptr<Asset::MeshData> sub_mesh_data = load_sub_mesh_data(mesh, scene);
-
-        // 处理材质
-        assert(mesh->mMaterialIndex >= 0);
-        aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
-        std::shared_ptr<Asset::Material> sub_mesh_material = load_material(material);
-
-        m_data->sub_meshes.emplace_back(Asset::SubMesh{ sub_mesh_data, sub_mesh_material, Mat4(1.0f) });
-    }
-    for (unsigned int i = 0; i < node->mNumChildren; i++)
-    {
-        processNode(node->mChildren[i], scene);
-    }
+    auto ai_mesh = m_ai_meshes[ai_mesh_idx];
+    return load_sub_mesh_data(ai_mesh);
 }
 
-std::shared_ptr<Asset::MeshData> ObjImporter::load_sub_mesh_data(aiMesh* mesh, const aiScene* scene)
+Asset::Material ObjImporter::materialOfNode(int ai_mesh_idx)
+{
+    auto ai_mesh = m_ai_meshes[ai_mesh_idx];
+    assert(ai_mesh->mMaterialIndex >= 0);
+    aiMaterial* material = m_scene->mMaterials[ai_mesh->mMaterialIndex];
+    return load_material(material);
+}
+
+std::vector<aiMesh*> ObjImporter::collect_ai_meshes()
+{
+    std::vector<aiNode*> nodes{ m_scene->mRootNode };
+    while (!nodes.empty()) {
+        aiNode* node = nodes.front();
+        nodes.erase(nodes.begin());
+        for (int i = 0; i < node->mNumMeshes; i++) {
+            m_ai_meshes_ids.push_back(node->mMeshes[i]);
+            m_ai_meshes.push_back(m_scene->mMeshes[node->mMeshes[i]]);
+        }
+        for (int i = 0; i < node->mNumChildren; i++) {
+            nodes.push_back(node->mChildren[i]);
+        }
+    }
+    return m_ai_meshes;
+}
+
+std::shared_ptr<Asset::MeshData> ObjImporter::load_sub_mesh_data(aiMesh* mesh)
 {
     std::vector<Vertex> vertices;
-    std::vector<unsigned int> indices;
+    std::vector<int> indices;
 
     // 处理顶点位置、法线和纹理坐标
-    for (unsigned int i = 0; i < mesh->mNumVertices; i++)
+    for (int i = 0; i < mesh->mNumVertices; i++)
     {
         Vertex vertex;
         Vec3 position;
@@ -81,38 +104,38 @@ std::shared_ptr<Asset::MeshData> ObjImporter::load_sub_mesh_data(aiMesh* mesh, c
     }
 
     // 处理索引
-    for (unsigned int i = 0; i < mesh->mNumFaces; i++)
+    for (int i = 0; i < mesh->mNumFaces; i++)
     {
         aiFace face = mesh->mFaces[i];
-        for (unsigned int j = 0; j < face.mNumIndices; j++)
+        for (int j = 0; j < face.mNumIndices; j++)
             indices.push_back(face.mIndices[j]);
     }
-
+    
     return std::make_shared<Asset::MeshData>(vertices, indices);
 }
 
-std::shared_ptr<Asset::Material> ObjImporter::load_material(aiMaterial* material) {
-    std::shared_ptr<Asset::Material> res = std::make_shared<Asset::Material>();
+Asset::Material ObjImporter::load_material(aiMaterial* material) {
+    Asset::Material res;
 
     aiString str;
     if (material->GetTextureCount(aiTextureType_DIFFUSE)) {
         material->GetTexture(aiTextureType_DIFFUSE, 0, &str);
-        res->diffuse_map_filename = m_directory + '/' + std::string(str.C_Str());
+        res.diffuse_texture = Asset::Texture(TextureType::Diffuse, m_directory + '/' + std::string(str.C_Str()), false);
     }
 
     if (material->GetTextureCount(aiTextureType_SPECULAR)) {
         material->GetTexture(aiTextureType_SPECULAR, 0, &str);
-        res->specular_map_filename = m_directory + '/' + std::string(str.C_Str());
+        res.specular_texture = Asset::Texture(TextureType::Specular, m_directory + '/' + std::string(str.C_Str()), false);
     }
 
     if (material->GetTextureCount(aiTextureType_NORMALS)) {
         material->GetTexture(aiTextureType_NORMALS, 0, &str);
-        res->normal_map_filename = m_directory + '/' + std::string(str.C_Str());
+        res.normal_texture = Asset::Texture(TextureType::Normal, m_directory + '/' + std::string(str.C_Str()), false);
     }
 
     if (material->GetTextureCount(aiTextureType_HEIGHT)) {
         material->GetTexture(aiTextureType_HEIGHT, 0, &str);
-        res->height_map_filename = m_directory + '/' + std::string(str.C_Str());
+        res.height_texture = Asset::Texture(TextureType::Height, m_directory + '/' + std::string(str.C_Str()), false);
     }
 
     return res;

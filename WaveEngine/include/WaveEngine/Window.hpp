@@ -72,7 +72,7 @@ public:
     Window(int width, int height);
     void shutdown();
     bool shouldClose() const;
-    void update() const;
+    void swapBuffer() const;
     void setMainViewport(const Viewport& viewport);
     void setViewport(ViewportType id, const Viewport& viewport);
     std::optional<Viewport> getViewport(ViewportType id) const;
