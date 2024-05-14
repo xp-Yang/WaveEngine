@@ -30,16 +30,15 @@ struct RenderMaterialData {
     GL_RESOURCE_HANLE specular_map{ 0 };
     GL_RESOURCE_HANLE normal_map{ 0 };
     GL_RESOURCE_HANLE height_map{ 0 };
-    // temp
-    float shininess{ 128.0f };
 };
 
-struct RenderSubMeshData {
+class RenderSubMeshData {
 public:
-    RenderSubMeshData(const Asset::SubMesh& sub_mesh_asset, const Mat4& model_transform = Mat4(1.0f));
+    RenderSubMeshData(int id, const Asset::SubMesh& sub_mesh_asset, const Mat4& model_transform = Mat4(1.0f));
     ~RenderSubMeshData() { reset(); }
 
     void reset();
+    int id() const { return m_id; }
     GL_RESOURCE_HANLE getVAO() const { return m_VAO; }
     size_t indicesCount() const { return m_mesh_data->indices().size(); }
     size_t verticesCount() const { return m_mesh_data->vertices().size(); }
@@ -59,6 +58,7 @@ private:
     std::shared_ptr<Asset::MeshData> m_mesh_data;
     RenderMaterialData m_material;
     Mat4 m_transform;
+    int m_id;
 };
 
 
@@ -97,6 +97,13 @@ struct RenderSourceData {
     Mat4 view_matrix;
     Mat4 proj_matrix;
     // RenderCameraData
+
+    void reset() {
+        render_object_sub_mesh_data_list.clear();
+        render_directional_light_data_list.clear();
+        render_point_light_data_list.clear();
+        render_skybox_data.render_sub_mesh_data.reset();
+    }
 };
 
 #endif // !RenderSourceData_hpp

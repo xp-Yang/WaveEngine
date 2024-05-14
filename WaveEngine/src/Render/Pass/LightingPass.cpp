@@ -102,22 +102,6 @@ void LightingPass::draw()
 	glDepthMask(GL_TRUE);
 	// TODO 拷贝深度图后才能画法线
 	m_gbuffer_framebuffer->blitDepthMapTo(m_framebuffer.get());
-	// grid
-	//for (auto entity : world.entityView<ecs::RenderableComponent>()) {
-	//	if (world.getComponent<ecs::NameComponent>(entity)->name == "Grid") {
-	//		Shader* wireframe_shader = Shader::getShader(ShaderType::WireframeShader);
-	//		auto& renderable = *world.getComponent<ecs::RenderableComponent>(entity);
-	//		auto& model_matrix = *world.getComponent<ecs::TransformComponent>(entity);
-	//		wireframe_shader->start_using();
-	//		wireframe_shader->setMatrix("view", 1, camera.view);
-	//		wireframe_shader->setMatrix("projection", 1, camera.projection);
-	//		wireframe_shader->setMatrix("model", 1, model_matrix.transform());
-	//		for (int i = 0; i < renderable.sub_meshes.size(); i++) {
-	//			auto& mesh = renderable.sub_meshes[i].mesh;
-	//			Renderer::drawIndex(*wireframe_shader, mesh.get_VAO(), mesh.get_indices_count());
-	//		}
-	//	}
-	//}
 	
 	// lights
 	static Asset::Shader point_light_shader_asset { Asset::ShaderType::CustomShader, std::string(RESOURCE_DIR) + "/shader/light.vs", std::string(RESOURCE_DIR) + "/shader/light.fs" };

@@ -2,8 +2,9 @@
 #include "Platform/RHI/rhi.hpp"
 #include "stb/stb_image.h"
 
-RenderSubMeshData::RenderSubMeshData(const Asset::SubMesh& sub_mesh_asset, const Mat4& model_transform)
-    : m_transform(model_transform* sub_mesh_asset.local_transform)
+RenderSubMeshData::RenderSubMeshData(int id, const Asset::SubMesh& sub_mesh_asset, const Mat4& model_transform)
+    : m_id(id)
+    , m_transform(model_transform* sub_mesh_asset.local_transform)
 {
     switch (sub_mesh_asset.mesh_file_ref.mesh_file_type) {
     case Asset::MeshFileType::OBJ: {
@@ -67,7 +68,6 @@ void RenderSubMeshData::updateRenderMaterialData(const Asset::Material& material
     m_material.normal_map = normal_map;
     unsigned int height_map = RenderTextureData(material_asset.height_texture).map;
     m_material.height_map = height_map;
-    m_material.shininess = material_asset.shininess;
 }
 
 void RenderSubMeshData::create_vbo()

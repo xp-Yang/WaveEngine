@@ -97,19 +97,17 @@ enum class PrimitiveType {
 
 struct RenderableComponent {
 	std::vector<Asset::SubMesh> sub_meshes;
-	//BoundingBox boundingBox;
-	//bool culling;
-	//int priority;
-	//骨骼
 };
 
 struct SkyboxComponent {
 	Asset::CubeTexture cube_texture;
+	Asset::SubMesh mesh;
 };
 
 struct PointLightComponent {
 	Color4 luminousColor = { 1.0f, 1.0f, 1.0f, 1.0f };
 	float radius;
+	Asset::SubMesh mesh;
 	Vec3 position() {
 		auto& world = ecs::World::get();
 		for (auto entity : world.entityView<ecs::PointLightComponent>()) {
@@ -157,38 +155,15 @@ struct DirectionalLightComponent {
 };
 
 
-// TODO 决定一个data是放在component的属性里还是单独作为一个component的关键判据是什么
-// 为什么Transform总是与Renderable分离
-
 // 不需要数据，仅用作标记选中的entity
 struct PickedComponent {};
-
-struct UnpickableComponent {};
-
-//struct ReceiveShadowComponent {};
-//
-//struct ReceiveReflectionComponent {};
-//
-//struct BoxCollider3DComponent {
-//
-//};
-//
-//struct BoxCollider2DComponent {
-//
-//};
 
 struct ExplosionComponent {
 	float explosionRatio = 0.0f;
 };
 
 
-// Singleton Component
-struct InputComponent {
-
-};
-
-
-#define AllComponents ecs::NameComponent, ecs::TransformComponent, ecs::CameraComponent, ecs::RenderableComponent, ecs::SkyboxComponent, ecs::PointLightComponent, ecs::DirectionalLightComponent, ecs::PickedComponent, ecs::UnpickableComponent, ecs::ExplosionComponent, ecs::InputComponent
+#define AllComponents ecs::NameComponent, ecs::TransformComponent, ecs::CameraComponent, ecs::RenderableComponent, ecs::SkyboxComponent, ecs::PointLightComponent, ecs::DirectionalLightComponent, ecs::PickedComponent, ecs::ExplosionComponent
 
 }
 

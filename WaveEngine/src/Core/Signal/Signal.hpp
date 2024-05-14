@@ -20,7 +20,8 @@ public:
         m_slots.push_back(std::make_shared<Slot<Args...>>(func));
     }
 
-    void operator()(Args&&... args)
+    //void operator()(Args&&... args) // TODO FIXME
+    void operator()(Args&... args)
     {
         for (auto& iter : m_slots)
         {
@@ -33,16 +34,16 @@ private:
 };
 
 template<class Sender, typename... Args>
-void connect(Sender* sender, Signal<Args...>& signal, std::function<void(Args...)> slot)
+void connect(Sender* sender, Signal<Args...>* signal, std::function<void(Args...)> slot)
 {
-    signal.bind(slot);
+    signal->bind(slot);
 }
 
 template<class Sender, class Receiver, typename... Args>
-void connect(Sender* sender, Signal<Args...>& signal, Receiver* receiver, void (Receiver::* slot)(Args...))
+void connect(Sender* sender, Signal<Args...>* signal, Receiver* receiver, void (Receiver::* slot)(Args...))
 {
     std::function<void(Args...)> func = [receiver, slot](Args... args) { (receiver->*slot)(std::forward<Args>(args)...); };
-    signal.bind(func);
+    signal->bind(func);
 }
 
 #endif

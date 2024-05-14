@@ -15,7 +15,6 @@ struct Material {
     sampler2D specular_map;
     sampler2D normal_map;
     sampler2D height_map;
-    float shininess;
 };
 
 uniform Material material;

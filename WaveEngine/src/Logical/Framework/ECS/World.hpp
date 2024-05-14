@@ -6,6 +6,8 @@
 
 #include <assert.h>
 
+#include "Core/Signal/Signal.hpp"
+
 namespace Meta {
 namespace Register {
     void allMetaRegister();
@@ -66,7 +68,7 @@ public:
 };
 
 // TODO 更改实现，有bug：get的不一定是已创建
-// 为每个Pool分配id。由于每个Pool保存的都是同一类型的Component，这里用了hack: template<class T> 和 static 变量，使得只有不同的Pool才会初始化一次id
+// 为每个Pool分配id。
 extern int g_componentCounter;
 template <class T>
 int getComponentPoolId()
@@ -81,7 +83,6 @@ class SkyboxComponent;
 template<typename... ComponentTypes> class EnttView;
 class World {
 public:
-    // 单例
     static World& get() {
         static World instance;
         return instance;
@@ -94,8 +95,6 @@ public:
         m_entities.emplace_back(entt_id++);
         return m_entities.back();
     }
-
-    void detroy_entity(const ecs::Entity& entity);
 
     template<typename T>
     bool hasComponent(ecs::Entity entity)
@@ -135,47 +134,23 @@ public:
 
         // Looks up the component in the pool, and initializes it with placement new
         T* component = new (m_component_pools[pool_id]->get(entt_id)) T();
+        emit componentInserted(entt_id, pool_id);
         return *component;
     }
-
-    //template<typename T>
-    //void removeComponent(ecs::Entity entity) 
-    //{
-    //    int id = entity.getId();
-
-    //    int pool_id = getComponentPoolId<T>();
-    //    m_entities[id].getMask().reset(pool_id);
-
-    //    // 池中都没这个component
-    //    if (pool_id >= m_component_pools.size()) {
-    //        return;
-    //    }
-    //    else {
-    //        // TODO 1.先要判断是否所有entity都不再使用这个component了
-    //        // 2.要正确释放里面内容
-    //        //m_component_pools.erase(m_component_pools.begin() + component_id);
-    //    }
-    //}
 
     template<typename... ComponentTypes>
     void removeComponent(ecs::Entity entity)
     {
-        int id = entity.getId();
-
-        // Unpack the template parameters into an initializer list
         int poolIds[] = { getComponentPoolId<ComponentTypes>() ... };
         for (int i = 0; i < sizeof...(ComponentTypes); i++) {
-            m_entities[id].getMask().reset(poolIds[i]);
-
             // 池中都没这个component
             if (poolIds[i] >= m_component_pools.size()) {
                 assert(false);
             }
-            else {
-                // free
-            }
         }
-
+        // free
+        int entt_id = entity.getId();
+        (void)std::initializer_list{ (destroyComponent<ComponentTypes>(entt_id), 0) ... };
     }
 
     template<typename... ComponentTypes>
@@ -195,6 +170,10 @@ public:
     const std::vector<Entity>& getAllEntities() const {
         return m_entities;
     }
+
+signals:
+    Signal<int, int> componentInserted;
+    Signal<int, int> componentRemoved;
 
 private:
     std::vector<Entity> m_entities;
@@ -219,6 +198,19 @@ private:
     void init()
     {
         (void)std::initializer_list{ (init_<ComponentTypes>(), 0) ... };
+    }
+
+    template<typename T>
+    void destroyComponent(int entt_id)
+    {
+        int pool_id = getComponentPoolId<T>();
+        T* component = reinterpret_cast<T*>(m_component_pools[pool_id]->get(entt_id));
+        if (m_entities[entt_id].getMask().test(pool_id)) {
+            // TODO
+            //delete component;
+            m_entities[entt_id].getMask().reset(pool_id);
+            emit componentRemoved(entt_id, pool_id);
+        }
     }
 };
 
@@ -299,7 +291,6 @@ public:
 
 private:
     World* world{ nullptr };
-    // 模板参数要查看的Component类型
     ComponentMask view_mask;
     bool view_all{ false };
 

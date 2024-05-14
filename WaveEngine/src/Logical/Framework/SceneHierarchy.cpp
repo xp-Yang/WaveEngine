@@ -77,13 +77,12 @@ void SceneHierarchy::addPointLight()
 	double r3 = random(-15.0f, 15.0f);
 	point_light_transform.translation = { r1, r2, r3 };
 	point_light_transform.scale = Vec3(random(0.1f, 0.3f));
-	auto& point_light_renderable = world.addComponent<ecs::RenderableComponent>(point_light_entity);
-	auto& point_light_properties = world.addComponent<ecs::PointLightComponent>(point_light_entity);
-	point_light_properties.radius = (point_light_transform.scale[0]) * 100.0f;
-	point_light_properties.luminousColor = m_point_light_count == 0 ? Color4(2.0f, 2.0f, 2.0f, 1.0f) : Color4{ randomUnit(), randomUnit(), randomUnit(), 1.0f };
+	auto& point_light_com = world.addComponent<ecs::PointLightComponent>(point_light_entity);
+	point_light_com.radius = (point_light_transform.scale[0]) * 100.0f;
+	point_light_com.luminousColor = m_point_light_count == 0 ? Color4(2.0f, 2.0f, 2.0f, 1.0f) : Color4{ randomUnit(), randomUnit(), randomUnit(), 1.0f };
 	Asset::SubMesh sub_mesh;
 	sub_mesh.mesh_file_ref = { Asset::MeshFileType::CustomSphere, "" };
-	point_light_renderable.sub_meshes.push_back(sub_mesh);
+	point_light_com.mesh = sub_mesh;
 
 	m_point_light_count++;
 }
@@ -204,19 +203,17 @@ void SceneHierarchy::createSkybox()
 	auto skybox_entity = world.create_entity();
 	world.addComponent<ecs::NameComponent>(skybox_entity).name = "Skybox";
 	world.addComponent<ecs::TransformComponent>(skybox_entity);
-	world.addComponent<ecs::UnpickableComponent>(skybox_entity);
-	auto& skybox_renderable = world.addComponent<ecs::RenderableComponent>(skybox_entity);
-	Asset::SubMesh sub_mesh;
-	sub_mesh.mesh_file_ref = { Asset::MeshFileType::CustomCube, "" };
-	world.addComponent<ecs::SkyboxComponent>(skybox_entity).cube_texture = Asset::CubeTexture(
+	auto& skybox_com = world.addComponent<ecs::SkyboxComponent>(skybox_entity);
+	skybox_com.cube_texture = Asset::CubeTexture(
 		resource_dir + "/images/skybox/right.jpg",
 		resource_dir + "/images/skybox/left.jpg",
 		resource_dir + "/images/skybox/top.jpg",
 		resource_dir + "/images/skybox/bottom.jpg",
 		resource_dir + "/images/skybox/front.jpg",
 		resource_dir + "/images/skybox/back.jpg");
-
-	skybox_renderable.sub_meshes.push_back(sub_mesh);
+	Asset::SubMesh sub_mesh;
+	sub_mesh.mesh_file_ref = { Asset::MeshFileType::CustomCube, "" };
+	skybox_com.mesh = sub_mesh;
 }
 
 void SceneHierarchy::createPlaneGround()
@@ -226,7 +223,6 @@ void SceneHierarchy::createPlaneGround()
 	auto ground_entity = world.create_entity();
 	auto ground_node = new ecs::Object(m_root_object, ground_entity);
 	world.addComponent<ecs::NameComponent>(ground_entity).name = "Gound";
-	world.addComponent<ecs::UnpickableComponent>(ground_entity);
 	auto& ground_transform = world.addComponent<ecs::TransformComponent>(ground_entity);
 	ground_transform.scale = Vec3(1.0f);
 	auto& ground_renderable = world.addComponent<ecs::RenderableComponent>(ground_entity);
@@ -248,7 +244,6 @@ void SceneHierarchy::createGridGround()
 	world.addComponent<ecs::NameComponent>(ground_entity).name = "Grid";
 	auto& ground_transform = world.addComponent<ecs::TransformComponent>(ground_entity);
 	ground_transform.translation = Vec3(0.0f, -0.05f, 0.0f);
-	world.addComponent<ecs::UnpickableComponent>(ground_entity);
 	auto& ground_renderable = world.addComponent<ecs::RenderableComponent>(ground_entity);
 	Asset::SubMesh sub_mesh;
 	sub_mesh.mesh_file_ref = { Asset::MeshFileType::CustomGrid, "" };

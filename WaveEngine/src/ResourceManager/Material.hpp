@@ -30,7 +30,6 @@ struct Material {
     Texture specular_texture;
     Texture normal_texture;
     Texture height_texture;
-    float shininess{ 128.0f };
 };
 
 }

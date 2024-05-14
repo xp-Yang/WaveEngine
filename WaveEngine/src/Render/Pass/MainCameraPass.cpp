@@ -48,7 +48,6 @@ void MainCameraPass::draw()
         auto& material = render_sub_mesh_data->renderMaterialData();
         shader->start_using();
         // temp
-        shader->setFloat("material.shininess", material.shininess);
         shader->setFloat3("albedo", material.albedo);
         shader->setFloat("metallic", material.metallic);
         shader->setFloat("roughness", material.roughness);
