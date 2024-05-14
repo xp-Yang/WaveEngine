@@ -7,8 +7,8 @@ namespace ecs {
 
 class Object {
 public:
-	Object(const ecs::Entity& entity) : Object(nullptr, entity) {}
-	Object(Object* parent, const ecs::Entity& entity) : m_parent(parent), m_entity(entity) { if (parent) parent->append(this); }
+	Object(const Entity& entity) : Object(nullptr, entity) {}
+	Object(Object* parent, const Entity& entity) : m_parent(parent), m_entity(entity) { if (parent) parent->append(this); }
 	void append(Object* node) { m_children.push_back(node); }
 	int index() const {
 		return m_parent ? m_parent->indexOf(this) : -1;
@@ -24,7 +24,7 @@ public:
 		return -1;
 	}
 	// TODO 这些方法如果自己是leaf就不对了
-	void remove(const ecs::Entity& entity) {
+	void remove(const Entity& entity) {
 		for (auto child : m_children) {
 			child->remove(entity);
 		}
@@ -32,12 +32,12 @@ public:
 			return (*child).entity().getId() == entity.getId();
 			});
 		if (it != m_children.end()) {
-			ecs::World::get().removeComponent<AllComponents>(entity);
+			World::get().removeComponent<AllComponents>(entity);
 			m_children.erase(it);
 		}
 	}
 	void remove(Object* node) { remove(node->entity()); }
-	Object* find(const ecs::Entity& entity) {
+	Object* find(const Entity& entity) {
 		for (auto child : m_children) {
 			auto res = child->find(entity);
 			if (res)
@@ -84,12 +84,12 @@ public:
 	}
 	bool isLeaf() const { return m_children.empty(); }
 	const std::vector<Object*>& children() const { return m_children; }
-	const ecs::Entity& entity() const { return m_entity; }
+	const Entity& entity() const { return m_entity; }
 
 private:
 	Object* m_parent;
 	std::vector<Object*> m_children;
-	const ecs::Entity m_entity;
+	const Entity m_entity;
 };
 
 }

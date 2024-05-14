@@ -18,12 +18,11 @@ void EdgeDetectionPass::prepare(FrameBuffer* framebuffer)
     m_source_framebuffer->bind();
     m_source_framebuffer->clear();
 
-    //auto& world = ecs::World::get();
-    //if (world.getPickedEntities().empty())
-    //    return;
-    //for (auto picked_entity : world.getPickedEntities()) {
+    if (m_render_source_data->picked_ids.empty())
+        return;
+    for (auto picked_id : m_render_source_data->picked_ids) {
         // render the picked one
-        // TODO 需要先把实际的深度贴图拷贝到当前深度缓冲中
+        // TODO to optimize 需要先把实际的深度贴图拷贝到当前深度缓冲中
         glEnable(GL_DEPTH_TEST);
 
         static RenderShaderObject* picking_shader = RenderShaderObject::getShaderObject(Asset::ShaderType::PickingShader);
@@ -32,18 +31,22 @@ void EdgeDetectionPass::prepare(FrameBuffer* framebuffer)
         picking_shader->setMatrix("projection", 1, m_render_source_data->proj_matrix);
 
         // TODO 从render_mesh_data_list中查找到picked
-        int i = 0;
-        for (const auto& render_sub_mesh_data : m_render_source_data->render_object_sub_mesh_data_list) {
-            picking_shader->setMatrix("model", 1, render_sub_mesh_data->transform());
-            int id = (i++) * 50000;// for debugging
+        auto it = std::find_if(m_render_source_data->render_object_sub_mesh_data_list.begin(), m_render_source_data->render_object_sub_mesh_data_list.end(),
+            [picked_id](auto& render_object_sub_mesh_data) {
+                return render_object_sub_mesh_data->id() == picked_id;
+            }
+            );
+        if (it != m_render_source_data->render_object_sub_mesh_data_list.end()) {
+            picking_shader->setMatrix("model", 1, (*it)->transform());
+            int id = (picked_id++) * 50000;// for debugging
             int r = (id & 0x000000FF) >> 0;
             int g = (id & 0x0000FF00) >> 8;
             int b = (id & 0x00FF0000) >> 16;
             Color4 color(r / 255.0f, g / 255.0f, b / 255.0f, 1.0f);
             picking_shader->setFloat4("picking_color", color);
-            Renderer::drawIndex(render_sub_mesh_data->getVAO(), render_sub_mesh_data->indicesCount());
+            Renderer::drawIndex((*it)->getVAO(), (*it)->indicesCount());
         }
-    //}
+    }
     m_source_map = m_source_framebuffer->getFirstAttachmentOf(AttachmentType::RGB16F).getMap();
 }
 

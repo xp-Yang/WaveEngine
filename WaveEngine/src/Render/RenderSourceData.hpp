@@ -93,6 +93,8 @@ struct RenderSourceData {
     std::vector<RenderPointLightData> render_point_light_data_list;
     RenderSkyboxData render_skybox_data;
 
+    std::vector<int> picked_ids;
+
     Vec3 camera_position;
     Mat4 view_matrix;
     Mat4 proj_matrix;
@@ -103,6 +105,7 @@ struct RenderSourceData {
         render_directional_light_data_list.clear();
         render_point_light_data_list.clear();
         render_skybox_data.render_sub_mesh_data.reset();
+        picked_ids.clear();
     }
 };
 

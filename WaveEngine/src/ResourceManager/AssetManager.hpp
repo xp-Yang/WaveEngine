@@ -14,6 +14,8 @@
 
 namespace Asset {
 
+inline constexpr int maxPointLightCount = 8;
+
 class AssetManager {
 
 };

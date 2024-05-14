@@ -162,59 +162,6 @@ void MainCameraPass::draw()
     //        glStencilMask(0xFF);
     //    }
     //}
-
-    //if (m_normal_debug)
-    //{
-    //    Shader* normal_shader = Shader::getShader(ShaderType::NormalShader);
-
-    //    auto& world = ecs::World::get();
-    //    Mat4 camera_view;
-    //    Mat4 camera_projection;
-    //    ecs::CameraComponent& camera = *world.getMainCameraComponent();
-    //    camera_view = camera.view;
-    //    camera_projection = camera.projection;
-
-    //    normal_shader->start_using();
-    //    normal_shader->setMatrix("view", 1, camera_view);
-    //    normal_shader->setMatrix("projection", 1, camera_projection);
-    //    for (auto entity : world.entityView<ecs::RenderableComponent>()) {
-    //        auto& renderable = *world.getComponent<ecs::RenderableComponent>(entity);
-    //        auto& model_matrix = *world.getComponent<ecs::TransformComponent>(entity);
-
-    //        normal_shader->start_using();
-    //        normal_shader->setMatrix("model", 1, model_matrix.transform());
-    //        for (int i = 0; i < renderable.sub_meshes.size(); i++) {
-    //            auto& mesh = renderable.sub_meshes[i].mesh;
-    //            Renderer::drawIndex(*normal_shader, mesh.get_VAO(), mesh.get_indices_count());
-    //        }
-    //    }
-    //}
-
-    //if (m_wireframe) {
-    //    Shader* wireframe_shader = Shader::getShader(ShaderType::WireframeShader);
-
-    //    auto& world = ecs::World::get();
-    //    Mat4 camera_view;
-    //    Mat4 camera_projection;
-    //    ecs::CameraComponent& camera = *world.getMainCameraComponent();
-    //    camera_view = camera.view;
-    //    camera_projection = camera.projection;
-
-    //    wireframe_shader->start_using();
-    //    wireframe_shader->setMatrix("view", 1, camera_view);
-    //    wireframe_shader->setMatrix("projection", 1, camera_projection);
-    //    for (auto entity : world.entityView<ecs::RenderableComponent>()) {
-    //        auto& renderable = *world.getComponent<ecs::RenderableComponent>(entity);
-    //        auto& model_matrix = *world.getComponent<ecs::TransformComponent>(entity);
-
-    //        wireframe_shader->start_using();
-    //        wireframe_shader->setMatrix("model", 1, model_matrix.transform());
-    //        for (int i = 0; i < renderable.sub_meshes.size(); i++) {
-    //            auto& mesh = renderable.sub_meshes[i].mesh;
-    //            Renderer::drawIndex(*wireframe_shader, mesh.get_VAO(), mesh.get_indices_count());
-    //        }
-    //    }
-    //}
 }
 
 FrameBuffer* MainCameraPass::getFrameBuffer()

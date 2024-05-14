@@ -176,19 +176,6 @@ private:
 //					std::string field_value_str = *refl_obj.getFieldValue<std::string>(i);
 //					std::cout << "\"" << field_value_str << "\"";
 //				}
-//				if (refl_obj.getFieldValue<std::vector<ecs::Entity>>(i)) {
-//					std::vector<ecs::Entity> field_value_vector_entity = *refl_obj.getFieldValue<std::vector<ecs::Entity>>(i);
-//					for (auto& entity : field_value_vector_entity) {
-//						std::cout << "\"" << entity.getId() << "\"";
-//					}
-//				}
-//				if (refl_obj.getFieldValue<std::vector<ecs::ComponentPool*>>(i)) {
-//					std::vector<ecs::ComponentPool*> field_value_vector_component_pool = *refl_obj.getFieldValue<std::vector<ecs::ComponentPool*>>(i);
-//					for (auto& component_pool : field_value_vector_component_pool) {
-//						std::cout << "\"" << component_pool->m_data << "\"";
-//						std::cout << "\"" << component_pool->m_componentTypeSize << "\"";
-//					}
-//				}
 //				std::cout << "," << crlf_str;
 //			}
 //		std::cout << tab_str << close_brace_str;

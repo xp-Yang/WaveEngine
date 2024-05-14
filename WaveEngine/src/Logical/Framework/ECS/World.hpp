@@ -89,15 +89,20 @@ public:
     }
 
     // 所有entity都从这里创建
-    ecs::Entity create_entity()
+    Entity create_entity()
     {
         static int entt_id = 0;
         m_entities.emplace_back(entt_id++);
         return m_entities.back();
     }
 
+    //void destroy_entity(const Entity& entity) 
+    //{
+    //    removeComponent<AllComponents>(entity);
+    //}
+
     template<typename T>
-    bool hasComponent(ecs::Entity entity)
+    bool hasComponent(const Entity& entity)
     {
         int entt_id = entity.getId();
         int pool_id = getComponentPoolId<T>();
@@ -107,7 +112,7 @@ public:
     }
 
     template<typename T>
-    T* getComponent(ecs::Entity entity) 
+    T* getComponent(const Entity& entity)
     {
         int entt_id = entity.getId();
 
@@ -120,7 +125,7 @@ public:
     }
 
     template<typename T>
-    T& addComponent(ecs::Entity entity) 
+    T& addComponent(const Entity& entity)
     {
         int entt_id = entity.getId();
 
@@ -139,7 +144,7 @@ public:
     }
 
     template<typename... ComponentTypes>
-    void removeComponent(ecs::Entity entity)
+    void removeComponent(const Entity& entity)
     {
         int poolIds[] = { getComponentPoolId<ComponentTypes>() ... };
         for (int i = 0; i < sizeof...(ComponentTypes); i++) {
@@ -154,7 +159,7 @@ public:
     }
 
     template<typename... ComponentTypes>
-    ecs::EnttView<ComponentTypes ...> entityView() {
+    EnttView<ComponentTypes ...> entityView() {
         return EnttView<ComponentTypes ...>();
     }
 

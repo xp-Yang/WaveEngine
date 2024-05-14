@@ -25,10 +25,9 @@ void PickingPass::draw()
     picking_shader->setMatrix("projection", 1, m_render_source_data->proj_matrix);
 
     // TODO Unpickable
-    int i = 0;
     for (const auto& render_sub_mesh_data : m_render_source_data->render_object_sub_mesh_data_list) {
         picking_shader->setMatrix("model", 1, render_sub_mesh_data->transform());
-        int id = i++ * 50000;// for debugging
+        int id = render_sub_mesh_data->id() * 50000;// for debugging
         int r = (id & 0x000000FF) >> 0;
         int g = (id & 0x0000FF00) >> 8;
         int b = (id & 0x00FF0000) >> 16;

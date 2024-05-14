@@ -9,8 +9,8 @@
 namespace ecs {
 
 CameraSystem::CameraSystem()
-    : world(ecs::World::get())
-    , main_camera(*ecs::World::get().getMainCameraComponent())
+    : world(World::get())
+    , main_camera(*World::get().getMainCameraComponent())
 {
 }
 
@@ -30,7 +30,7 @@ void CameraSystem::onUpdate()
 void CameraSystem::onKeyUpdate(int key, float frame_time)
 {
     // 每一帧持续时间越长，意味着上一帧的渲染花费了越多时间，所以这一帧的速度应该越大，来平衡渲染所花去的时间
-    float frame_speed = ecs::CameraComponent::CameraMovementSpeed * frame_time;
+    float frame_speed = CameraComponent::CameraMovementSpeed * frame_time;
 	auto camera_forward = main_camera.direction;
 	auto camera_right = main_camera.getRightDirection();
 	auto camera_up = main_camera.getUpDirection();
@@ -73,19 +73,19 @@ void CameraSystem::onMouseUpdate(double delta_x, double delta_y, MouseButton mou
 {
     // Viewing Style 转方向，并且相机位置也转动，聚焦于(0, 0, 0)点
 
-    if (main_camera.mode == ecs::CameraComponent::Mode::Orbit) {
+    if (main_camera.mode == CameraComponent::Mode::Orbit) {
         if (mouse_button == MouseButton::Left) {
             // TODO 框选
         }
         if (mouse_button == MouseButton::Right) {
-            auto rotate_Y = Rotate(-(float)(0.3f * delta_x * ecs::CameraComponent::Sensitivity), ecs::CameraComponent::global_up);
+            auto rotate_Y = Rotate(-(float)(0.3f * delta_x * CameraComponent::Sensitivity), CameraComponent::global_up);
             main_camera.pos = rotate_Y * Vec4(main_camera.pos, 1.0f);
             main_camera.direction = rotate_Y * Vec4(main_camera.direction, 1.0f);
             main_camera.direction = Normalize(main_camera.direction);
             main_camera.camera_up = Vec3(rotate_Y * Vec4(main_camera.camera_up, 1.0f));
 
             auto camera_right = main_camera.getRightDirection();
-            auto rotate_x = Rotate((float)(0.3f * delta_y * ecs::CameraComponent::Sensitivity), camera_right);
+            auto rotate_x = Rotate((float)(0.3f * delta_y * CameraComponent::Sensitivity), camera_right);
             main_camera.pos = rotate_x * Vec4(main_camera.pos, 1.0f);
             main_camera.direction = rotate_x * Vec4(main_camera.direction, 1.0f);
             main_camera.camera_up = Vec3(rotate_x * Vec4(main_camera.camera_up, 1.0f));
@@ -93,20 +93,20 @@ void CameraSystem::onMouseUpdate(double delta_x, double delta_y, MouseButton mou
             main_camera.view = LookAt(main_camera.pos, main_camera.pos + main_camera.direction, main_camera.camera_up);
         }
         else if (mouse_button == MouseButton::Middle) {
-            main_camera.pos += -(float)(delta_x * ecs::CameraComponent::Sensitivity) * main_camera.getRightDirection();
-            main_camera.pos += -(float)(delta_y * ecs::CameraComponent::Sensitivity) * main_camera.getUpDirection();
+            main_camera.pos += -(float)(delta_x * CameraComponent::Sensitivity) * main_camera.getRightDirection();
+            main_camera.pos += -(float)(delta_y * CameraComponent::Sensitivity) * main_camera.getUpDirection();
 
             main_camera.view = LookAt(main_camera.pos, main_camera.pos + main_camera.direction, main_camera.camera_up);
         }
     }
 
-    if (main_camera.mode == ecs::CameraComponent::Mode::FPS) {
+    if (main_camera.mode == CameraComponent::Mode::FPS) {
         // FPS style 自己不动，只转方向
         if (mouse_button == MouseButton::Left) {
             // get pitch
-            main_camera.fps_params.pitch += delta_y * ecs::CameraComponent::Sensitivity;
+            main_camera.fps_params.pitch += delta_y * CameraComponent::Sensitivity;
             // get yaw
-            main_camera.fps_params.yaw += delta_x * ecs::CameraComponent::Sensitivity;
+            main_camera.fps_params.yaw += delta_x * CameraComponent::Sensitivity;
 
             // make sure that when pitch is out of bounds, screen doesn't get flipped
             // 使用欧拉角导致的问题：在极点发生死锁，yaw和roll重合，失去了一个自由度
@@ -147,8 +147,8 @@ void CameraSystem::orbitRotate(Vec3 start, Vec3 end)
 
 void CameraSystem::onMouseWheelUpdate(double yoffset, double mouse_x, double mouse_y)
 {
-    if (main_camera.zoom_mode == ecs::CameraComponent::ZoomMode::ZoomToCenter) {
-        main_camera.zoom += ecs::CameraComponent::ZoomUnit * (float)yoffset;
+    if (main_camera.zoom_mode == CameraComponent::ZoomMode::ZoomToCenter) {
+        main_camera.zoom += CameraComponent::ZoomUnit * (float)yoffset;
         if (main_camera.zoom < 0.1f)
             main_camera.zoom = 0.1f;
 
@@ -160,7 +160,7 @@ void CameraSystem::onMouseWheelUpdate(double yoffset, double mouse_x, double mou
 
         m_need_update = true;
     }
-    if (main_camera.zoom_mode == ecs::CameraComponent::ZoomMode::ZoomToMouse) {
+    if (main_camera.zoom_mode == CameraComponent::ZoomMode::ZoomToMouse) {
         auto main_viewport = Application::GetApp().getWindow()->getMainViewport().value_or(Viewport());
         main_viewport.transToScreenCoordinates();
         mouse_x -= main_viewport.x;
@@ -184,7 +184,7 @@ void CameraSystem::onMouseWheelUpdate(double yoffset, double mouse_x, double mou
         float old_zoom = main_camera.zoom;
 
         // 2. set zoom
-        main_camera.zoom += ecs::CameraComponent::ZoomUnit * (float)yoffset;
+        main_camera.zoom += CameraComponent::ZoomUnit * (float)yoffset;
         if (main_camera.zoom < 0.1f)
             main_camera.zoom = 0.1f;
 

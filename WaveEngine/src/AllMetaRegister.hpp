@@ -3,7 +3,7 @@
 
 #include "Core/Meta/Meta.hpp"
 #include "Logical/Framework/ECS/Components.hpp"
-#include "Logical/Framework/SceneHierarchy.hpp"
+#include "Logical/Framework/ECS/SceneHierarchy.hpp"
 #include "AllSerializer.hpp"
 
 namespace Meta {

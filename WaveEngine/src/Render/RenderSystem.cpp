@@ -227,7 +227,12 @@ void RenderSystem::updateRenderSourceData()
         m_render_source_data->render_directional_light_data_list[i].lightReferenceMatrix = dir_light_component.lightReferenceMatrix();
         i++;
     }
-    // 3. camera
+    // 3. picked
+    m_render_source_data->picked_ids.clear();
+    for (const auto& entity : world.getPickedEntities()) {
+        m_render_source_data->picked_ids.push_back(entity.getId());
+    }
+    // 4. camera
     auto& camera = *world.getMainCameraComponent();
     m_render_source_data->camera_position = camera.pos;
     m_render_source_data->view_matrix = camera.view;

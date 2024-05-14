@@ -18,8 +18,8 @@ public:
 	Vec3 rayCastPlaneZero(double mouse_x, double mouse_y);
 
 protected:
-	ecs::World& world;
-	ecs::CameraComponent& main_camera;
+	World& world;
+	CameraComponent& main_camera;
 
 	float m_goal_fov;
 

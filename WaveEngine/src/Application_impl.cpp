@@ -4,7 +4,7 @@
 #include <imgui/imgui_impl_opengl3.h>
 #include <imgui/ImGuizmo.h>
 
-#include "Logical/Framework/SceneHierarchy.hpp"
+#include "Logical/Framework/ECS/SceneHierarchy.hpp"
 #include "Logical/Framework/ECS/Components.hpp"
 #include "Logical/Framework/ECS/MotionSystem.hpp"
 #include "Logical/Input/InputSystem.hpp"
@@ -75,9 +75,9 @@ void Application::init()
 	ImGui_ImplGlfw_InitForOpenGL(m_window->getNativeWindowHandle(), true);
 	ImGui_ImplOpenGL3_Init("#version 330");
 
-	m_scene_hierarchy = std::make_unique<SceneHierarchy>();
+	m_scene_hierarchy = std::make_unique<ecs::SceneHierarchy>();
 	m_render_system = std::make_unique<RenderSystem>();
-	m_motion_system = std::make_unique<MotionSystem>();
+	m_motion_system = std::make_unique<ecs::MotionSystem>();
 	m_input_system = std::make_unique<InputSystem>();
 	m_editor = std::make_unique<ImGuiEditor>();
 	m_editor->init(m_render_system.get());
@@ -96,7 +96,7 @@ Window* Application::getWindow()
 	return m_window.get();
 }
 
-SceneHierarchy* Application::getSceneHierarchy()
+ecs::SceneHierarchy* Application::getSceneHierarchy()
 {
 	return m_scene_hierarchy.get();
 }

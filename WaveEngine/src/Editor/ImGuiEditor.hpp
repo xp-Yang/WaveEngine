@@ -3,7 +3,7 @@
 
 #include "ImGuiViewRect.hpp"
 #include "Logical/Framework/ECS/Components.hpp"
-#include "Logical/FrameWork/SceneHierarchy.hpp"
+#include "Logical/FrameWork/ECS/SceneHierarchy.hpp"
 #include "Render/RenderSystem.hpp"
 
 #include <string>

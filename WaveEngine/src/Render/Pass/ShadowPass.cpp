@@ -1,13 +1,11 @@
 #include "ShadowPass.hpp"
 
-#include "Logical/Framework/SceneHierarchy.hpp"
-
 void ShadowPass::init()
 {
 	m_framebuffer = std::make_unique<FrameBuffer>(WINDOW_WIDTH, WINDOW_HEIGHT, 1);
 	m_framebuffer->create({ AttachmentType::DEPTH });
 
-    size_t max_point_light_count = SceneHierarchy::maxPointLightCount();
+    size_t max_point_light_count = Asset::maxPointLightCount;
     reinit_cube_maps(max_point_light_count);
 
     glGenFramebuffers(1, &m_cube_map_fbo);
