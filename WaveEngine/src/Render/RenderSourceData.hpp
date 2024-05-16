@@ -3,7 +3,6 @@
 
 #include "Core/Math.hpp"
 #include "ResourceManager/AssetManager.hpp"
-#include <Logical/Framework/Object/GObject.hpp>
 #include "RenderShaderObject.hpp"
 
 using GL_RESOURCE_HANLE = unsigned int;
@@ -84,7 +83,11 @@ struct RenderSkyboxData {
 };
 
 struct RenderCameraData {
-
+    float fov;
+    Vec3 pos;
+    Vec3 direction;
+    Vec3 rightDirection;
+    Vec3 upDirection;
 };
 
 struct RenderSourceData {
@@ -98,7 +101,8 @@ struct RenderSourceData {
     Vec3 camera_position;
     Mat4 view_matrix;
     Mat4 proj_matrix;
-    // RenderCameraData
+
+    std::shared_ptr<RenderCameraData> render_camera;
 
     void reset() {
         render_object_sub_mesh_data_list.clear();

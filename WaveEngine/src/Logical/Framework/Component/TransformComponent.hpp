@@ -6,6 +6,8 @@
 struct TransformComponent : public Component {
 	TransformComponent(GObject* parent) : Component(parent) {}
 
+	std::string typeName() override { return "TransformComponent"; }
+
 	Vec3 translation = { 0.0f, 0.0f, 0.0f };
 	Vec3 rotation = { 0.0f, 0.0f, 0.0f };
 	Vec3 scale = { 1.0f, 1.0f, 1.0f };

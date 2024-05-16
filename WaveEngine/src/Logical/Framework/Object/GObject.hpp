@@ -1,13 +1,25 @@
 #ifndef GObject_hpp
 #define GObject_hpp
 
-#include "Logical/Framework/Component/Component.hpp"
+#include "Logical/Framework/Component/CameraComponent.hpp"
+#include "Logical/Framework/Component/MeshComponent.hpp"
+#include "Logical/Framework/Component/AnimationComponent.hpp"
+#include "Logical/Framework/Component/TransformComponent.hpp"
+#include "Logical/Framework/Component/RigidComponent.hpp"
+
+namespace Meta {
+	namespace Register {
+		void allMetaRegister();
+	}
+}
 
 struct GObjectID {
 	GObjectID() : id(++global_id) {}
 	bool operator==(const GObjectID& rhs) {
 		return id == rhs.id;
 	}
+	operator int() { return id; }
+
 	int id;
 
 	static inline int global_id = 0;
@@ -30,7 +42,7 @@ public:
 	bool load();
 	void save();
 
-	GObjectID getID() const { return m_id; }
+	GObjectID ID() const { return m_id; }
 
 	template<typename T>
 	T& addComponent() {
@@ -40,13 +52,22 @@ public:
 	}
 
 	template<typename T>
-	bool hasComponent() const {}
+	bool hasComponent() const {
+		for (auto& component : m_components)
+		{
+			if (component->typeName() == Meta::traits::className<T>())
+				return true;
+		}
+		return false;
+	}
 
 	template<typename T>
-	T* tryGetComponent()
+	T* getComponent()
 	{
 		for (auto& component : m_components)
 		{
+			if (component->typeName() == Meta::traits::className<T>())
+				return static_cast<T*>(component.get());
 		}
 		return nullptr;
 	}
@@ -57,7 +78,9 @@ protected:
 	GObject* m_parent;
 	std::vector<GObject*> m_children;
 
-protected:
+private:
+	friend void Meta::Register::allMetaRegister();
+
 	GObjectID m_id;
 	std::vector<std::shared_ptr<Component>> m_components;
 };

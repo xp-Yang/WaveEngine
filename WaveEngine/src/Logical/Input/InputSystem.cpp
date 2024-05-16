@@ -1,7 +1,5 @@
 #include "InputSystem.hpp"
 #include <imgui/imgui.h>
-#include "Core/Math.hpp"
-#include "Logical/Framework/ECS/Components.hpp"
 #include <WaveEngine/Application.hpp>
 
 void InputSystem::refreshState()
@@ -59,33 +57,33 @@ bool InputSystem::onUpdate()
 		pick();
 	}
 
-	m_camera_system.onUpdate();
+	m_camera_manipulator.onUpdate();
 
 	if (m_mouse_state == MouseState::Dragging) {
 		float delta_x = m_mouse_x - m_last_mouse_x;
 		float delta_y = -(m_mouse_y - m_last_mouse_y);
 		m_last_mouse_x = m_mouse_x;
 		m_last_mouse_y = m_mouse_y;
-		m_camera_system.onMouseUpdate(delta_x, delta_y, m_mouse_button);
+		m_camera_manipulator.onMouseUpdate(delta_x, delta_y, m_mouse_button);
 	}
 
 	if (!isApproxZero(io.MouseWheel))
-		m_camera_system.onMouseWheelUpdate(io.MouseWheel, m_mouse_x, m_mouse_y);
+		m_camera_manipulator.onMouseWheelUpdate(io.MouseWheel, m_mouse_x, m_mouse_y);
 
 	float avrg_frame_time = 1.0f / io.Framerate;
 	if (io.KeyShift)
 		avrg_frame_time /= 10.0f;
 	if (io.KeysDown['W']) {
-		m_camera_system.onKeyUpdate('W', avrg_frame_time);
+		m_camera_manipulator.onKeyUpdate('W', avrg_frame_time);
 	}
 	if (io.KeysDown['A']) {
-		m_camera_system.onKeyUpdate('A', avrg_frame_time);
+		m_camera_manipulator.onKeyUpdate('A', avrg_frame_time);
 	}
 	if (io.KeysDown['S']) {
-		m_camera_system.onKeyUpdate('S', avrg_frame_time);
+		m_camera_manipulator.onKeyUpdate('S', avrg_frame_time);
 	}
 	if (io.KeysDown['D']) {
-		m_camera_system.onKeyUpdate('D', avrg_frame_time);
+		m_camera_manipulator.onKeyUpdate('D', avrg_frame_time);
 	}
 
 	if (m_last_mouse_state != m_mouse_state) {

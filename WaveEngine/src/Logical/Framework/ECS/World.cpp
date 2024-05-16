@@ -5,6 +5,11 @@ namespace ecs {
 
 int g_componentCounter = 0;
 
+void World::destroy_entity(const Entity& entity)
+{
+    removeComponent<AllComponents>(entity);
+}
+
 CameraComponent* World::getMainCameraComponent()
 {
     for (auto entity : entityView<CameraComponent>()) {
@@ -43,7 +48,7 @@ std::vector<Entity> World::getPickedEntities()
 
 World::World()
 {
-    init<AllComponents>();
+    init_component_pools<AllComponents>();
 }
 
 World::~World()

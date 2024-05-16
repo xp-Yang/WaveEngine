@@ -2,7 +2,7 @@
 #define InputSystem_hpp
 
 #include "InputEnums.hpp"
-#include "Logical/Framework/ECS/CameraSystem.hpp"
+#include "CameraManipulator.hpp"
 
 class InputSystem {
 public:
@@ -24,7 +24,7 @@ protected:
 	float m_mouse_x;
 	float m_mouse_y;
 
-	ecs::CameraSystem m_camera_system;
+	CameraManipulator m_camera_manipulator;
 };
 
 #endif // !InputSystem_hpp

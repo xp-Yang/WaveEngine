@@ -1,7 +1,4 @@
 #include "ScreenPass.hpp"
-#include "Logical/Framework/ECS/Components.hpp"
-#include "Platform/RHI/rhi.hpp"
-#include "Application_impl.hpp"
 
 void ScreenPass::init()
 {

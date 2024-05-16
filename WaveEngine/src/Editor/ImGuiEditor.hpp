@@ -3,7 +3,7 @@
 
 #include "ImGuiViewRect.hpp"
 #include "Logical/Framework/ECS/Components.hpp"
-#include "Logical/FrameWork/ECS/SceneHierarchy.hpp"
+#include "Logical/FrameWork/Scene.hpp"
 #include "Render/RenderSystem.hpp"
 
 #include <string>
@@ -22,7 +22,6 @@ public:
 	ImGuiEditor();
 	void init(RenderSystem* render_system);
 	void onUpdate();
-	bool motion() { return m_motion; }
 
 protected:
 	void renderGlobalMenu();
@@ -43,7 +42,6 @@ private:
 	// 无所有权的，不 out live 所指向的实际资源
 	RenderSystem* m_ref_render_system;
 	RenderParams m_render_params;
-	bool m_motion;
 
 	ToolbarType m_toolbar_type{ ToolbarType::Translate };
 

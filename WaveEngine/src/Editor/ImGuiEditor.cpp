@@ -6,7 +6,6 @@
 
 ImGuiEditor::ImGuiEditor()
     : world(ecs::World::get())
-    , m_motion(false)
 {
     configUIStyle();
     m_view_manager = std::make_unique<ViewRectManager>();
@@ -19,8 +18,6 @@ void ImGuiEditor::init(RenderSystem* render_system)
 
 void ImGuiEditor::onUpdate()
 {
-    m_ref_render_system->onUpdate();
-
     renderGlobalMenu();
     renderEmptyMainDockerSpaceWindow();
 
@@ -87,7 +84,6 @@ void ImGuiEditor::renderGlobalConsole() {
         ImGui::PopItemWidth();
     }
 
-    ImGui::Checkbox("motion", &m_motion);
     ImGui::Checkbox("skybox", &m_render_params.skybox);
     ImGui::Checkbox("shadow", &m_render_params.shadow);
     //ImGui::Checkbox("reflection", &m_render_params.reflection);
@@ -128,7 +124,7 @@ void ImGuiEditor::renderGlobalConsole() {
     ImGui::Dummy(dummy);
 
     ImGui::Text("Add/Delete point light:");
-    auto scene_hierarchy = Application::GetApp().getSceneHierarchy();
+    auto scene_hierarchy = Application::GetApp().getScene();
     int point_light_count = scene_hierarchy->pointLightCount();
     float spacing = ImGui::GetStyle().ItemInnerSpacing.x;
     ImGui::PushButtonRepeat(true);
@@ -187,7 +183,7 @@ void ImGuiEditor::renderGlobalMenu()
                 FileDialog* file_dlg = FileDialog::create();
                 auto filepath = file_dlg->OpenFile("");
                 if (!filepath.empty()) {
-                    Application::GetApp().getSceneHierarchy()->loadModel(filepath);
+                    Application::GetApp().getScene()->loadModel(filepath);
                 }
             }
             if (ImGui::MenuItem("Save As..", "Ctrl+S")) {
@@ -297,7 +293,7 @@ void ImGuiEditor::renderSceneHierarchy()
     ImGuiWindow* scene_hierarchy_window = ImGui::GetCurrentWindow();
     float scene_hierarchy_window_width = ImGui::GetWindowWidth();
 
-    auto scene_hierarchy = Application::GetApp().getSceneHierarchy();
+    auto scene_hierarchy = Application::GetApp().getScene();
     auto root_node = scene_hierarchy->rootObject();
 
     renderSceneHierarchyNode(root_node);
@@ -405,7 +401,7 @@ void ImGuiEditor::renderPickedEntityController(const ImVec2& pos, const std::vec
     }
     if (world.hasComponent<ecs::DirectionalLightComponent>(entity)) {
         auto dir_light_component = world.getComponent<ecs::DirectionalLightComponent>(entity);
-        dir_light_component->direction = -world.getComponent<ecs::TransformComponent>(entity)->translation;
+        // TODO dir_light_component->direction = ;
         Vec4& luminousColor = dir_light_component->luminousColor;
         ImGui::ColorEdit3((std::string("Luminous Color") + "##" + obj_name).c_str(), (float*)&luminousColor);
     }

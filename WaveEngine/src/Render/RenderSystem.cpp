@@ -3,7 +3,11 @@
 #include "Path/DeferredRenderPath.hpp"
 #include "Path/RayTracingRenderPath.hpp"
 
+#if ENABLE_ECS
 #include "Logical/Framework/ECS/Components.hpp"
+#endif
+
+#include <Logical/Framework/Scene.hpp>
 
 RenderSystem::RenderSystem()
 {
@@ -29,8 +33,10 @@ RenderSystem::RenderSystem()
 
     setRenderPathType(RenderPath::Type::Deferred);
 
+#if ENABLE_ECS
     connect(&(ecs::World::get()), &ecs::World::get().componentInserted, this, &RenderSystem::onComponentInserted);
     connect(&(ecs::World::get()), &ecs::World::get().componentRemoved, this, &RenderSystem::onComponentRemoved);
+#endif
 }
 
 RenderPath::Type RenderSystem::getRenderPathType()
@@ -70,6 +76,7 @@ void RenderSystem::onUpdate()
     m_curr_path->render();
 }
 
+#if ENABLE_ECS
 void RenderSystem::onComponentInserted(int entt_id, int pool_id)
 {
     auto& world = ecs::World::get();
@@ -107,7 +114,19 @@ void RenderSystem::onComponentRemoved(int entt_id, int pool_id)
     m_need_remove_source_data = true;
     m_need_remove_id = entt_id;
 }
+#else
+void RenderSystem::onComponentInserted(int entt_id, int pool_id)
+{
 
+}
+
+void RenderSystem::onComponentRemoved(int entt_id, int pool_id)
+{
+
+}
+#endif // ENABLE_ECS
+
+#if ENABLE_ECS
 void RenderSystem::updateRenderSourceData()
 {
     auto& world = ecs::World::get();
@@ -240,3 +259,48 @@ void RenderSystem::updateRenderSourceData()
 
     m_initialized = true;
 }
+#else
+void RenderSystem::updateRenderSourceData()
+{
+    auto& scene = *Application::GetApp().getScene();
+    if (!m_initialized) {
+        const auto& objects = scene.getObjects();
+        for (const auto& object : objects) {
+            auto& sub_meshes = object->getComponent<MeshComponent>()->sub_meshes;
+            auto& model_matrix = object->getComponent<TransformComponent>()->transform();
+            for (const auto& sub_mesh : sub_meshes) {
+                m_render_source_data->render_object_sub_mesh_data_list.emplace_back(std::make_shared<RenderSubMeshData>(object->ID(), sub_mesh, model_matrix));
+            }
+        }
+
+        const auto& dir_light = scene.getLightManager()->mainDirectionalLight();
+        m_render_source_data->render_directional_light_data_list.emplace_back(
+            RenderDirectionalLightData{ dir_light->luminousColor, dir_light->direction, dir_light->lightReferenceMatrix() });
+
+        const auto& point_lights = scene.getLightManager()->pointLights();
+        for (const auto& point_light : point_lights) {
+            Asset::SubMesh point_light_mesh;
+            point_light_mesh.mesh_file_ref = { Asset::MeshFileType::CustomSphere, "" };
+            Mat4 point_light_matrix = Math::Translate(point_light->position);
+            m_render_source_data->render_point_light_data_list.emplace_back(
+                RenderPointLightData{ point_light->luminousColor, point_light->position, point_light->radius, point_light->lightReferenceMatrix(),
+                std::make_shared<RenderSubMeshData>(-2, point_light_mesh, point_light_matrix) });
+        }
+
+        m_render_source_data->render_camera = std::make_shared<RenderCameraData>();
+    }
+
+    auto& camera = scene.getMainCamera();
+    m_render_source_data->camera_position = camera.pos;
+    m_render_source_data->view_matrix = camera.view;
+    m_render_source_data->proj_matrix = camera.projection;
+
+    m_render_source_data->render_camera->fov = camera.fov;
+    m_render_source_data->render_camera->pos = camera.pos;
+    m_render_source_data->render_camera->direction = camera.direction;
+    m_render_source_data->render_camera->upDirection = camera.upDirection;
+    m_render_source_data->render_camera->rightDirection = camera.getRightDirection();
+
+    m_initialized = true;
+}
+#endif // ENABLE_ECS

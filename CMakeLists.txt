@@ -34,6 +34,7 @@ add_subdirectory(test)
 #通过宏定义告诉程序resource目录
 target_compile_definitions(WaveRuntime PUBLIC RESOURCE_DIR="${ENGINE_RESOURCE_DIR}")
 target_compile_definitions(WaveRuntime PUBLIC ASSET_DIR="${ENGINE_ASSET_DIR}")
+target_compile_definitions(WaveRuntime PUBLIC ENABLE_ECS=false)
 
 file(COPY ${PROJECT_SOURCE_DIR}/imgui.ini DESTINATION ${CMAKE_BINARY_DIR}/test)
 #TODO 自定义输出binary的路径

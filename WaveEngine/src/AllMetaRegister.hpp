@@ -2,13 +2,17 @@
 #define AllMetaRegister_hpp
 
 #include "Core/Meta/Meta.hpp"
-#include "Logical/Framework/ECS/Components.hpp"
-#include "Logical/Framework/ECS/SceneHierarchy.hpp"
 #include "AllSerializer.hpp"
 
-namespace Meta {
+#include "ResourceManager/AssetManager.hpp"
 
-using namespace ecs;
+#if ENABLE_ECS
+#include "Logical/Framework/ECS/Components.hpp"
+#endif
+
+#include "Logical/Framework/Scene.hpp"
+
+namespace Meta {
 
 namespace Register{
 
@@ -25,31 +29,90 @@ inline void allMetaRegister()
 	registerField(&Vec3::y, "y");
 	registerField(&Vec3::z, "z");
 
+	// Vec4
+	registerClass<Vec4>();
+	registerField(&Vec4::x, "x");
+	registerField(&Vec4::y, "y");
+	registerField(&Vec4::z, "z");
+	registerField(&Vec4::w, "w");
+
+	// Mat3
+	registerClass<Mat3>();
+	// TODO
+
+	// Mat4
+	registerClass<Mat4>();
+
+	registerClass<Asset::MeshData>();
+	registerClass<Asset::MeshFileRef>();
+	registerClass<Asset::SubMesh>();
+	registerClass<Asset::Material>();
+	registerClass<Asset::Shader>();
+	registerClass<Asset::Texture>();
+	registerClass<Asset::CubeTexture>();
+
+#if ENABLE_ECS
 	// Name
-	registerClass<NameComponent>();
-	registerField(&NameComponent::name, "name");
+	registerClass<ecs::NameComponent>();
+	registerField(&ecs::NameComponent::name, "name");
 
 	// Transform
-	registerClass<TransformComponent>();
-	registerField(&TransformComponent::translation, "translation");
-	registerField(&TransformComponent::rotation, "rotation");
-	registerField(&TransformComponent::scale, "scale");
-	registerMethod(&TransformComponent::transform, "transform");
+	registerClass<ecs::TransformComponent>();
+	registerField(&ecs::TransformComponent::translation, "translation");
+	registerField(&ecs::TransformComponent::rotation, "rotation");
+	registerField(&ecs::TransformComponent::scale, "scale");
+	registerMethod(&ecs::TransformComponent::transform, "transform");
 
 	// Entity
-	registerClass<Entity>();
-	registerField(&Entity::m_id, "m_id");
-	registerField(&Entity::m_mask, "m_mask");
+	registerClass<ecs::Entity>();
+	registerField(&ecs::Entity::m_id, "m_id");
+	registerField(&ecs::Entity::m_mask, "m_mask");
 
 	// ComponentPool
-	registerClass<ComponentPool>();
-	registerField(&ComponentPool::m_data, "m_data");
-	registerField(&ComponentPool::m_componentTypeSize, "m_componentTypeSize");
+	registerClass<ecs::ComponentPool>();
+	registerField(&ecs::ComponentPool::m_data, "m_data");
+	registerField(&ecs::ComponentPool::m_componentTypeSize, "m_componentTypeSize");
 
 	// World
-	registerClass<World>();
-	registerField(&World::m_entities, "m_entities");
-	registerField(&World::m_component_pools, "m_component_pools");
+	registerClass<ecs::World>();
+	registerField(&ecs::World::m_entities, "m_entities");
+	registerField(&ecs::World::m_component_pools, "m_component_pools");
+#else
+	registerClass<::GObjectID>();
+	registerField(&::GObjectID::id, "id");
+
+	registerClass<::Component>();
+
+	registerClass<::GObject>();
+	registerField(&::GObject::m_id, "m_id");
+	registerField(&::GObject::m_components, "m_components");
+
+	registerClass<::MeshComponent>();
+	registerField(&::MeshComponent::sub_meshes, "sub_meshes");
+
+	registerClass<::TransformComponent>();
+	registerField(&::TransformComponent::translation, "translation");
+	registerField(&::TransformComponent::rotation, "rotation");
+	registerField(&::TransformComponent::scale, "scale");
+
+	registerClass<::CameraComponent>();
+	registerField(&::CameraComponent::mode, "mode");
+	registerField(&::CameraComponent::projection_mode, "projection_mode");
+	registerField(&::CameraComponent::zoom_mode, "zoom_mode");
+	registerField(&::CameraComponent::zoom, "zoom");
+	registerField(&::CameraComponent::originFov, "originFov");
+	registerField(&::CameraComponent::fov, "fov");
+	registerField(&::CameraComponent::nearPlane, "nearPlane");
+	registerField(&::CameraComponent::farPlane, "farPlane");
+	registerField(&::CameraComponent::direction, "direction");
+	registerField(&::CameraComponent::pos, "pos");
+	registerField(&::CameraComponent::upDirection, "upDirection");
+	registerField(&::CameraComponent::view, "view");
+	registerField(&::CameraComponent::projection, "projection");
+
+	registerClass<::AnimationComponent>();
+	registerClass<::RigidComponent>();
+#endif
 
 }
 

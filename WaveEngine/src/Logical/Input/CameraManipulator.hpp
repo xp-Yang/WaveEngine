@@ -1,15 +1,14 @@
-#ifndef CameraSystem_hpp
-#define CameraSystem_hpp
+#ifndef CameraManipulator_hpp
+#define CameraManipulator_hpp
 
 #include "Core/Math.hpp"
 #include "Logical/Input/InputEnums.hpp"
-#include "Components.hpp"
 
-namespace ecs {
+#include "Logical/Framework/ECS/Components.hpp"
 
-class CameraSystem{
+class CameraManipulator{
 public:
-	CameraSystem();
+	CameraManipulator();
 	void onUpdate();
 	void onKeyUpdate(int key, float frame_time);
 	void onMouseUpdate(double delta_x, double delta_y, MouseButton mouse_button);
@@ -17,15 +16,17 @@ public:
 	void onMouseWheelUpdate(double yoffset, double mouse_x, double mouse_y);
 	Vec3 rayCastPlaneZero(double mouse_x, double mouse_y);
 
+	inline static const float CameraMovementSpeed = 20.0f;
+	inline static const float Sensitivity = 0.01f;
+	inline static const float ZoomUnit = 0.1f;
+
 protected:
-	World& world;
-	CameraComponent& main_camera;
+	ecs::World& world;
+	ecs::CameraComponent& main_camera;
 
 	float m_goal_fov;
 
 	bool m_need_update{ false };
 };
-
-}
 
 #endif

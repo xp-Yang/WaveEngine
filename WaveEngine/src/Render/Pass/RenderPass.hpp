@@ -1,11 +1,9 @@
 #ifndef RenderPass_hpp
 #define RenderPass_hpp
 
-#include <vector>
-#include <memory>
+#include "Render/RenderSourceData.hpp"
 #include "Platform/RHI/rhi.hpp"
 #include "Application_impl.hpp"
-#include "../RenderSourceData.hpp"
 
 // Interface class
 // each RenderPass corresponds to a framebuffer

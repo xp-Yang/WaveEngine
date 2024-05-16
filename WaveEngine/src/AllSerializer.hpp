@@ -2,11 +2,8 @@
 #define AllSerializer_hpp
 
 #include "Core/Meta/Serializer.hpp"
-#include "Logical/Framework/ECS/Components.hpp"
 
 namespace Meta {
-
-using namespace ecs;
 
 namespace Serialization {
 

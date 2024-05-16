@@ -1,6 +1,4 @@
 #include "RayTracingPass.hpp"
-#include "Logical/Framework/ECS/Components.hpp"
-#include "Core/Math.hpp"
 
 void RayTracingPass::init()
 {
@@ -18,8 +16,7 @@ void RayTracingPass::draw()
 	m_framebuffer->clear();
 
 	static RenderShaderObject* rt_shader = RenderShaderObject::getShaderObject(Asset::ShaderType::RayTracingShader);
-	auto& world = ecs::World::get();
-	auto camera = world.getMainCameraComponent();
+	auto camera = m_render_source_data->render_camera;
 
 	Viewport rt_viewport = Application::GetApp().getWindow()->getViewport(ViewportType::RayTracing).value_or(Viewport());
 
@@ -32,14 +29,14 @@ void RayTracingPass::draw()
 		rt_shader->setFloat("camera.aspect_ratio", 16.0f / 9.0f); //TODO 需要一种方法viewport大小只调整纹理显示范围，不会拉伸纹理也不影响fov和宽高比
 
 		rt_shader->setFloat3("camera.front", camera->direction);
-		rt_shader->setFloat3("camera.right", camera->getRightDirection());
-		rt_shader->setFloat3("camera.up", camera->getUpDirection());
+		rt_shader->setFloat3("camera.right", camera->rightDirection);
+		rt_shader->setFloat3("camera.up", camera->upDirection);
 
 		// debug
 		//float width = tan(camera->fov / 2.0f) * camera->focal_length * 2.0;
 		//float height = width / (16.0f / 9.0f);
 		//Vec3 origin = camera->pos + camera->focal_length * camera->direction;
-		//Vec3 leftbottom = camera->pos + camera->focal_length * camera->direction - width / 2.0f * camera->getRightDirection() - height / 2.0f * camera->getUpDirection();
+		//Vec3 leftbottom = camera->pos + camera->focal_length * camera->direction - width / 2.0f * camera->getRightDirection() - height / 2.0f * camera->upDirection;
 
 		// random
 		rt_shader->setFloat("randOrigin", 674764.0f * (Math::randomUnit() + 1.0f));

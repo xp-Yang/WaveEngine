@@ -4,12 +4,10 @@
 #include <imgui/imgui_impl_opengl3.h>
 #include <imgui/ImGuizmo.h>
 
-#include "Logical/Framework/ECS/SceneHierarchy.hpp"
-#include "Logical/Framework/ECS/Components.hpp"
-#include "Logical/Framework/ECS/MotionSystem.hpp"
 #include "Logical/Input/InputSystem.hpp"
 #include "Render/RenderSystem.hpp"
 #include "Editor/ImGuiEditor.hpp"
+#include "Logical/FrameWork/Scene.hpp"
 
 #include "AllMetaRegister.hpp"
 
@@ -42,16 +40,14 @@ void Application::run() {
 	while (!m_window->shouldClose()) {
 		newFrame(); // automatically handle imgui input
 
+		// logical
 		// input System
 		m_input_system->onUpdate();
 
-		// motion System
-		if (m_editor->motion())
-			m_motion_system->onUpdate();
-
-		// TODO logical tick
-
 		// render
+		m_render_system->onUpdate();
+
+		// gui
 		m_editor->onUpdate();
 
 		endFrame();
@@ -75,12 +71,12 @@ void Application::init()
 	ImGui_ImplGlfw_InitForOpenGL(m_window->getNativeWindowHandle(), true);
 	ImGui_ImplOpenGL3_Init("#version 330");
 
-	m_scene_hierarchy = std::make_unique<ecs::SceneHierarchy>();
-	m_render_system = std::make_unique<RenderSystem>();
-	m_motion_system = std::make_unique<ecs::MotionSystem>();
 	m_input_system = std::make_unique<InputSystem>();
+	m_render_system = std::make_unique<RenderSystem>();
 	m_editor = std::make_unique<ImGuiEditor>();
 	m_editor->init(m_render_system.get());
+	m_scene = std::make_unique<Scene>();
+	m_scene->init();
 }
 
 void Application::shutdown()
@@ -96,9 +92,9 @@ Window* Application::getWindow()
 	return m_window.get();
 }
 
-ecs::SceneHierarchy* Application::getSceneHierarchy()
+Scene* Application::getScene()
 {
-	return m_scene_hierarchy.get();
+	return m_scene.get();
 }
 
 void Application::newFrame()

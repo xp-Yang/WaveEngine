@@ -96,10 +96,7 @@ public:
         return m_entities.back();
     }
 
-    //void destroy_entity(const Entity& entity) 
-    //{
-    //    removeComponent<AllComponents>(entity);
-    //}
+    void destroy_entity(const Entity& entity);
 
     template<typename T>
     bool hasComponent(const Entity& entity)
@@ -159,40 +156,24 @@ public:
     }
 
     template<typename... ComponentTypes>
-    EnttView<ComponentTypes ...> entityView() {
-        return EnttView<ComponentTypes ...>();
-    }
+    EnttView<ComponentTypes ...> entityView() { return EnttView<ComponentTypes ...>(); }
 
     CameraComponent* getMainCameraComponent();
-
     DirectionalLightComponent* getMainDirectionalLightComponent();
-
     SkyboxComponent* getSkyboxComponent();
-
     std::vector<Entity> getPickedEntities();
-
-    // TODO only for EnttView class, don't provide for public
-    const std::vector<Entity>& getAllEntities() const {
-        return m_entities;
-    }
 
 signals:
     Signal<int, int> componentInserted;
     Signal<int, int> componentRemoved;
 
-private:
-    std::vector<Entity> m_entities;
-    std::vector<ComponentPool*> m_component_pools;
-
-private:
-    friend void Meta::Register::allMetaRegister();
-
+protected:
     World();
     World(const World&) = delete;
     ~World();
 
     template<typename T>
-    void init_()
+    void init_component_pools_()
     {
         int pool_id = getComponentPoolId<T>();
         assert(pool_id == m_component_pools.size());
@@ -200,9 +181,9 @@ private:
     }
 
     template<typename... ComponentTypes>
-    void init()
+    void init_component_pools()
     {
-        (void)std::initializer_list{ (init_<ComponentTypes>(), 0) ... };
+        (void)std::initializer_list{ (init_component_pools_<ComponentTypes>(), 0) ... };
     }
 
     template<typename T>
@@ -217,6 +198,13 @@ private:
             emit componentRemoved(entt_id, pool_id);
         }
     }
+
+private:
+    friend void Meta::Register::allMetaRegister();
+    template<typename... ComponentTypes> friend class EnttView;
+
+    std::vector<Entity> m_entities;
+    std::vector<ComponentPool*> m_component_pools;
 };
 
 template<typename... ComponentTypes>
@@ -243,13 +231,13 @@ public:
             : entt_view_ref(entt_view), entity_idx(entity_idx) {}
 
         Entity operator*() {
-            return entt_view_ref->world->getAllEntities()[entity_idx];
+            return entt_view_ref->world->m_entities[entity_idx];
         }
 
         Iter& operator++() {
             entity_idx++;
-            for (; entity_idx < entt_view_ref->world->getAllEntities().size(); entity_idx++) {
-                if (entt_view_ref->view_all || (entt_view_ref->view_mask == (entt_view_ref->world->getAllEntities()[entity_idx].getMask() & entt_view_ref->view_mask)))
+            for (; entity_idx < entt_view_ref->world->m_entities.size(); entity_idx++) {
+                if (entt_view_ref->view_all || (entt_view_ref->view_mask == (entt_view_ref->world->m_entities[entity_idx].getMask() & entt_view_ref->view_mask)))
                     break;
             }
             return *this;
@@ -276,7 +264,7 @@ public:
     const Iter begin() const
     {
         int i = 0;
-        const auto& all_entities = world->getAllEntities();
+        const auto& all_entities = world->m_entities;
         for (i = 0; i < all_entities.size(); i++) {
             if (view_all || ((all_entities[i].getMask() & view_mask) == view_mask))
                 break;
@@ -291,7 +279,7 @@ public:
     const Iter end() const
     {
         // ÅäºÏoperator++()
-        return Iter(this, (int)world->getAllEntities().size());
+        return Iter(this, (int)world->m_entities.size());
     }
 
 private:

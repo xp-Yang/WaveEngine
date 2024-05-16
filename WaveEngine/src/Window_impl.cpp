@@ -1,6 +1,6 @@
 #include "Window_impl.hpp"
 #include "Application_impl.hpp"
-#include "Logical/Framework/ECS/SceneHierarchy.hpp"
+
 #include <assert.h>
 #include <utility>
 
@@ -12,7 +12,7 @@ static void drop_file_callback(GLFWwindow* window, int count, const char** paths
 {
 	for (int i = 0; i < count; i++) {
 		std::string filepath = paths[i];
-		Application::GetApp().getSceneHierarchy()->loadModel(filepath);
+		//Application::GetApp().getSceneHierarchy()->loadModel(filepath);
 	}
 }
 
