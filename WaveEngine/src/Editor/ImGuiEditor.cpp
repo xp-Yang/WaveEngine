@@ -74,7 +74,7 @@ ImGuiEditor::ImGuiEditor()
             DrawVecControl("Scale", trans_ptr->scale);
         }
     };
-    m_gui_creator["Vec3"] = [this](const std::string& name, void* value_ptr) -> void {
+    m_gui_creator[Meta::traits::className<Vec3>()] = [this](const std::string& name, void* value_ptr) -> void {
         Vec3* vec_ptr = static_cast<Vec3*>(value_ptr);
         float    val[3] = { vec_ptr->x, vec_ptr->y, vec_ptr->z };
 
@@ -334,7 +334,7 @@ void ImGuiEditor::renderSceneHierarchyNode(GObject* node)
     //    auto child_node = node->children()[i];
     //    const auto& childe_entity = child_node->entity();
 
-    //    static ImGuiTreeNodeFlags node_flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_SpanAvailWidth;
+    //    static ImGuiTreeNodeFlags node_flags = ImGuiTreeNodeFlags_SpanAvailWidth;
     //    for (const auto& picked_entity : world.getPickedEntities()) {
     //        if (picked_entity == childe_entity)
     //            node_flags |= ImGuiTreeNodeFlags_Selected;
@@ -393,7 +393,7 @@ void ImGuiEditor::renderSceneHierarchyNode(GObject* node)
         std::string child_name = child_node->name();
         std::string display_text = child_name + " (ID: " + std::to_string(child_id.id) + ")";
 
-        static ImGuiTreeNodeFlags node_flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_SpanAvailWidth;
+        static ImGuiTreeNodeFlags node_flags = ImGuiTreeNodeFlags_SpanAvailWidth;
         //for (const auto& picked_entity : world.getPickedEntities()) {
         //    if (picked_entity == childe_entity)
         //        node_flags |= ImGuiTreeNodeFlags_Selected;
@@ -409,15 +409,8 @@ void ImGuiEditor::renderSceneHierarchyNode(GObject* node)
         {
             if (child_node->children().empty()) {
                 for (auto& com : child_node->getComponents()) {
-                    // TODO display all components name_str belong to this gobject
-                    auto refl = Meta::ReflectionInstance(Meta::MetaObjectOf(com->typeName()), com.get());
-                    for (int i = 0; i < refl.fieldCount(); i++) {
-                        auto field = refl.field(i);
-                        std::string field_type_name = field.field_type_name;
-                        std::string field_name = field.field_name;
-                        if (m_gui_creator.find(field_type_name) != m_gui_creator.end())
-                            m_gui_creator[field_type_name](field_name, refl.getFieldValue(i));
-                    }
+                    auto refl = Meta::DynamicReflectionInstance(com->typeName(), com.get());
+                    renderLeafNode(refl);
                 }
             }
             else {
@@ -425,6 +418,33 @@ void ImGuiEditor::renderSceneHierarchyNode(GObject* node)
             }
             ImGui::TreePop();
         }
+    }
+}
+
+void ImGuiEditor::renderLeafNode(Meta::DynamicReflectionInstance& refl_instance)
+{
+    static ImGuiTableFlags flags = ImGuiTableFlags_Resizable | ImGuiTableFlags_NoSavedSettings;
+    bool                   node_open = false;
+    node_open = ImGui::TreeNodeEx(refl_instance.className().c_str(), ImGuiTreeNodeFlags_SpanFullWidth);
+    if (node_open)
+    {
+        for (int i = 0; i < refl_instance.fieldCount(); i++) {
+            auto field = refl_instance.field(i);
+            if (field.is_array) {
+                ImGui::TreePop();
+                return; // TODO
+            }
+            std::string field_type_name = field.field_type_name;
+            std::string field_name = field.field_name;
+            void* var = refl_instance.getFieldValue(i);
+            if (m_gui_creator.find(field_type_name) != m_gui_creator.end())
+                m_gui_creator[field_type_name](field_name, var);
+            else {
+                auto child_refl = Meta::DynamicReflectionInstance(field_type_name, var);
+                renderLeafNode(child_refl);
+            }
+        }
+        ImGui::TreePop();
     }
 }
 

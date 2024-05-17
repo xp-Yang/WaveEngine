@@ -33,7 +33,7 @@ inline void registerClass()
 }
 
 template <class ClassType, class FieldType>
-inline void registerField(FieldType ClassType::*var_ptr, std::string_view field_name)
+inline void registerField(FieldType ClassType::*var_ptr, std::string_view field_name, bool is_array = false)
 {
     std::string class_name = traits::className<ClassType>();
     if (global_class_info.find(class_name) != global_class_info.end())
@@ -41,7 +41,7 @@ inline void registerField(FieldType ClassType::*var_ptr, std::string_view field_
         std::string field_type_name_ = traits::className<FieldType>();
         std::string field_name_ = std::string(field_name);
         size_t var_offset = reinterpret_cast<size_t>(&(reinterpret_cast<ClassType const volatile*>(nullptr)->*var_ptr));
-        Register::FieldInfo filed_info = { var_offset, field_type_name_, field_name_ };
+        Register::FieldInfo filed_info = { var_offset, field_type_name_, field_name_, is_array };
         global_class_info[class_name].field_infos.emplace_back(filed_info);
     }
 }
@@ -91,7 +91,7 @@ struct FieldInfo {
     size_t var_offset;
     std::string field_type_name;
     std::string field_name;
-    // TODO bool is_array;
+    bool is_array; // TODO
 };
 
 struct Dumb {};
@@ -163,7 +163,6 @@ inline MetaObject MetaObjectOf() { return MetaObject(traits::className<T>()); }
 template <class T>
 inline MetaObject MetaObjectOf(T* obj) { return MetaObject(traits::className<T>()); }
 
-inline MetaObject MetaObjectOf(const std::string& className) { return MetaObject(className); }
 
 class WeakReflectionInstance {
 public:
@@ -235,7 +234,6 @@ public:
 template<class T>
 class ReflectionInstance : public WeakReflectionInstance {
 public:
-    ReflectionInstance(const MetaObject& meta, T* obj) : WeakReflectionInstance(meta, (void*)obj) {}
     ReflectionInstance(T* obj) : WeakReflectionInstance(MetaObjectOf<T>(), (void*)obj) {}
     ReflectionInstance(const ReflectionInstance& rhs) : WeakReflectionInstance(rhs) {}
 

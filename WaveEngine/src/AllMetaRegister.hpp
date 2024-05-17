@@ -66,17 +66,17 @@ inline void allMetaRegister()
 	// Entity
 	registerClass<ecs::Entity>();
 	registerField(&ecs::Entity::m_id, "m_id");
-	registerField(&ecs::Entity::m_mask, "m_mask");
+	//registerField(&ecs::Entity::m_mask, "m_mask");
 
 	// ComponentPool
 	registerClass<ecs::ComponentPool>();
 	registerField(&ecs::ComponentPool::m_data, "m_data");
-	registerField(&ecs::ComponentPool::m_componentTypeSize, "m_componentTypeSize");
+	registerField(&ecs::ComponentPool::m_componentTypeSize, "m_componentTypeSize", true);
 
 	// World
 	registerClass<ecs::World>();
-	registerField(&ecs::World::m_entities, "m_entities");
-	registerField(&ecs::World::m_component_pools, "m_component_pools");
+	registerField(&ecs::World::m_entities, "m_entities", true);
+	registerField(&ecs::World::m_component_pools, "m_component_pools", true);
 #else
 	registerClass<::GObjectID>();
 	registerField(&::GObjectID::id, "id");
@@ -85,10 +85,10 @@ inline void allMetaRegister()
 
 	registerClass<::GObject>();
 	registerField(&::GObject::m_id, "m_id");
-	registerField(&::GObject::m_components, "m_components");
+	registerField(&::GObject::m_components, "m_components", true);
 
 	registerClass<::MeshComponent>();
-	registerField(&::MeshComponent::sub_meshes, "sub_meshes");
+	registerField(&::MeshComponent::sub_meshes, "sub_meshes", true);
 
 	registerClass<::TransformComponent>();
 	registerField(&::TransformComponent::translation, "translation");

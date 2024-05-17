@@ -28,6 +28,7 @@ protected:
 	void renderGlobalConsole();
 	void renderCameraController();
 	void renderSceneHierarchyNode(GObject* node);
+	void renderLeafNode(Meta::DynamicReflectionInstance& refl_instance);
 	void renderSceneHierarchy();
 	void renderPickedEntityController(const ImVec2& pos, const std::vector<ecs::Entity>& picked_entities);
 
