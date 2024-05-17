@@ -1,5 +1,5 @@
 #include "Renderer.hpp"
-#include <glad/glad.h>
+#include "../rhi.hpp"
 
 void Renderer::drawIndex(unsigned int vao_id, size_t indices_count)
 {

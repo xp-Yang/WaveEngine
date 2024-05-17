@@ -2,27 +2,23 @@
 #define CameraComponent_hpp
 
 #include "Component.hpp"
-#include <WaveEngine/Window.hpp>
+#include "Logical/Input/CameraManipulator.hpp"
+
+// TODO
+extern float WINDOW_WIDTH;
+extern float WINDOW_HEIGHT;
+extern float ASPECT_RATIO;
 
 struct CameraComponent : public Component {
 	CameraComponent(GObject* parent) : Component(parent) {}
 
 	std::string typeName() override { return "CameraComponent"; }
 
-	enum Mode {
-		Orbit,
-		FPS,
-	} mode{ Orbit };
+	CameraManipulator::Mode mode{ CameraManipulator::Mode::Orbit };
 
-	enum Projection {
-		Perspective,
-		Ortho,
-	} projection_mode{ Perspective };
+	CameraManipulator::Projection projection_mode{ CameraManipulator::Projection::Perspective };
 
-	enum ZoomMode {
-		ZoomToCenter,
-		ZoomToMouse,
-	} zoom_mode{ ZoomToCenter };
+	CameraManipulator::ZoomMode zoom_mode{ CameraManipulator::ZoomMode::ZoomToCenter };
 
 	// FPS style
 	// 欧拉角表示：
@@ -32,8 +28,6 @@ struct CameraComponent : public Component {
 		float roll = 0.0f;
 	} fps_params;
 
-	inline static Vec3 CameraComponent::global_up = Vec3(0.0f, 1.0f, 0.0f); //vec3(0.0f, 1.0f, 0.0f) (y为上) or vec3(0.0f, 0.0f, 1.0f) (z为上)
-
 	float originFov = deg2rad(45.0f); //竖直fov
 
 	float zoom = 1.0f;
@@ -41,13 +35,13 @@ struct CameraComponent : public Component {
 	float nearPlane = 0.1f;
 	float farPlane = 1000.0f;
 	Vec3 direction = Normalize(Vec3(0.0f, -1.0f, -1.0f));
-	Vec3 upDirection = Normalize(global_up - Dot(global_up, direction) * direction); // camera 的 y 轴
+	Vec3 upDirection = Normalize(CameraManipulator::global_up - Dot(CameraManipulator::global_up, direction) * direction); // camera 的 y 轴
 	Vec3 getRightDirection() const { // camera 的 x 轴
 		return Cross(direction, upDirection);
 	}
 	Vec3 pos = Vec3(0.0f) - 40.0f * direction;
-	Mat4 view = lookAt(pos, pos + direction, global_up);
-	Mat4 projection = projection_mode == Perspective ?
+	Mat4 view = lookAt(pos, pos + direction, CameraManipulator::global_up);
+	Mat4 projection = projection_mode == CameraManipulator::Projection::Perspective ?
 		Math::Perspective(fov, ASPECT_RATIO, nearPlane, farPlane) :
 		Math::Ortho(-15.0f * ASPECT_RATIO, 15.0f * ASPECT_RATIO, -15.0f, 15.0f, nearPlane, farPlane);
 };

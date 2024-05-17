@@ -6,6 +6,7 @@
 
 class InputSystem {
 public:
+	void init();
 	bool onUpdate();
 
 protected:
@@ -24,7 +25,10 @@ protected:
 	float m_mouse_x;
 	float m_mouse_y;
 
-	CameraManipulator m_camera_manipulator;
+	float m_delta_mouse_x;
+	float m_delta_mouse_y;
+
+	std::shared_ptr<CameraManipulator> m_camera_manipulator;
 };
 
 #endif // !InputSystem_hpp

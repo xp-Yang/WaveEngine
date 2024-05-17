@@ -1,14 +1,23 @@
 #include "CameraManipulator.hpp"
 
-#include <GLFW/glfw3.h>
 #include <imgui/imgui.h>
 
-#include <Application_impl.hpp>
 #include <Core/Logger/Logger.hpp>
 
+#include <WaveEngine/Application.hpp>
+#include <WaveEngine/Window.hpp>
+#if ENABLE_ECS
+#include "Logical/Framework/ECS/Components.hpp"
+#else
+#include "Logical/Framework/Scene.hpp"
+#endif
+
 CameraManipulator::CameraManipulator()
-    : world(ecs::World::get())
-    , main_camera(*ecs::World::get().getMainCameraComponent())
+#if ENABLE_ECS
+    : main_camera(*ecs::World::get().getMainCameraComponent())
+#else
+    : main_camera(Application::GetApp().getScene()->getMainCamera())
+#endif
 {
 }
 
@@ -18,7 +27,7 @@ void CameraManipulator::onUpdate()
         return;
     
     main_camera.fov = lerp(main_camera.fov, m_goal_fov, 0.1f);
-    main_camera.projection = Perspective(main_camera.fov, WINDOW_WIDTH / WINDOW_HEIGHT, main_camera.nearPlane, main_camera.farPlane);
+    main_camera.projection = Math::Perspective(main_camera.fov, WINDOW_WIDTH / WINDOW_HEIGHT, main_camera.nearPlane, main_camera.farPlane);
 
     if (isApproxZero(main_camera.fov - m_goal_fov))
         m_need_update = false;
@@ -33,33 +42,23 @@ void CameraManipulator::onKeyUpdate(int key, float frame_time)
 	auto camera_right = main_camera.getRightDirection();
 	auto upDirection = main_camera.upDirection;
     switch (key) {
-    case GLFW_KEY_W:
+    case 'W':
         main_camera.pos += camera_forward * frame_speed;
         break;
-    case GLFW_KEY_A:
+    case 'A':
         main_camera.pos -= camera_right * frame_speed;
         break;
-    case GLFW_KEY_D:
+    case 'D':
         main_camera.pos += camera_right * frame_speed;
         break;
-    case GLFW_KEY_S:
+    case 'S':
         main_camera.pos -= camera_forward * frame_speed;
         break;
-    case GLFW_KEY_Z:
+    case 'Z':
         main_camera.pos += upDirection * frame_speed;
         break;
-    case GLFW_KEY_C:
+    case 'C':
         main_camera.pos -= upDirection * frame_speed;
-        break;
-    case GLFW_KEY_1:
-        break;
-    case GLFW_KEY_2:
-        break;
-    case GLFW_KEY_3:
-        break;
-    case GLFW_KEY_4:
-        break;
-    case GLFW_KEY_SPACE:
         break;
     default:
         break;
@@ -71,12 +70,12 @@ void CameraManipulator::onMouseUpdate(double delta_x, double delta_y, MouseButto
 {
     // Viewing Style 转方向，并且相机位置也转动，聚焦于(0, 0, 0)点
 
-    if (main_camera.mode == ecs::CameraComponent::Mode::Orbit) {
+    if (main_camera.mode == Mode::Orbit) {
         if (mouse_button == MouseButton::Left) {
             // TODO 框选
         }
         if (mouse_button == MouseButton::Right) {
-            auto rotate_Y = Rotate(-(float)(0.3f * delta_x * Sensitivity), ecs::CameraComponent::global_up);
+            auto rotate_Y = Rotate(-(float)(0.3f * delta_x * Sensitivity), global_up);
             main_camera.pos = rotate_Y * Vec4(main_camera.pos, 1.0f);
             main_camera.direction = rotate_Y * Vec4(main_camera.direction, 1.0f);
             main_camera.direction = Normalize(main_camera.direction);
@@ -98,7 +97,7 @@ void CameraManipulator::onMouseUpdate(double delta_x, double delta_y, MouseButto
         }
     }
 
-    if (main_camera.mode == ecs::CameraComponent::Mode::FPS) {
+    if (main_camera.mode == Mode::FPS) {
         // FPS style 自己不动，只转方向
         if (mouse_button == MouseButton::Left) {
             // get pitch
@@ -145,7 +144,7 @@ void CameraManipulator::orbitRotate(Vec3 start, Vec3 end)
 
 void CameraManipulator::onMouseWheelUpdate(double yoffset, double mouse_x, double mouse_y)
 {
-    if (main_camera.zoom_mode == ecs::CameraComponent::ZoomMode::ZoomToCenter) {
+    if (main_camera.zoom_mode == ZoomMode::ZoomToCenter) {
         main_camera.zoom += ZoomUnit * (float)yoffset;
         if (main_camera.zoom < 0.1f)
             main_camera.zoom = 0.1f;
@@ -158,7 +157,7 @@ void CameraManipulator::onMouseWheelUpdate(double yoffset, double mouse_x, doubl
 
         m_need_update = true;
     }
-    if (main_camera.zoom_mode == ecs::CameraComponent::ZoomMode::ZoomToMouse) {
+    if (main_camera.zoom_mode == ZoomMode::ZoomToMouse) {
         auto main_viewport = Application::GetApp().getWindow()->getMainViewport().value_or(Viewport());
         main_viewport.transToScreenCoordinates();
         mouse_x -= main_viewport.x;
@@ -197,7 +196,7 @@ void CameraManipulator::onMouseWheelUpdate(double yoffset, double mouse_x, doubl
 
         // 4. set view matrix, projection matrix
         main_camera.view = LookAt(main_camera.pos, main_camera.pos + main_camera.direction, main_camera.upDirection);
-        main_camera.projection = Perspective(main_camera.fov, WINDOW_WIDTH / WINDOW_HEIGHT, main_camera.nearPlane, main_camera.farPlane);
+        main_camera.projection = Math::Perspective(main_camera.fov, WINDOW_WIDTH / WINDOW_HEIGHT, main_camera.nearPlane, main_camera.farPlane);
     }
 }
 

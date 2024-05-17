@@ -2,7 +2,6 @@
 #define ForwardRenderPath_hpp
 
 #include "RenderPath.hpp"
-#include "../Pass/RenderPass.hpp"
 
 class ForwardRenderPath : public RenderPath {
 public:

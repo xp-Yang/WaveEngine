@@ -1,6 +1,6 @@
 #include "ImGuiViewRect.hpp"
-#include <WaveEngine/Window.hpp>
 #include <WaveEngine/Application.hpp>
+#include <WaveEngine/Window.hpp>
 
 class ViewRect {
 public:

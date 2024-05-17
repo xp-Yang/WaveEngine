@@ -4,10 +4,33 @@
 #include "Core/Math.hpp"
 #include "Logical/Input/InputEnums.hpp"
 
-#include "Logical/Framework/ECS/Components.hpp"
+#if ENABLE_ECS
+namespace ecs {
+	struct CameraComponent;
+}
+#else
+struct CameraComponent;
+#endif
 
 class CameraManipulator{
 public:
+	enum class Mode {
+		Orbit,
+		FPS,
+	};
+
+	enum class Projection {
+		Perspective,
+		Ortho,
+	};
+
+	enum class ZoomMode {
+		ZoomToCenter,
+		ZoomToMouse,
+	};
+
+	inline static Vec3 global_up = Vec3(0.0f, 1.0f, 0.0f); //vec3(0.0f, 1.0f, 0.0f) (y为上) or vec3(0.0f, 0.0f, 1.0f) (z为上)
+
 	CameraManipulator();
 	void onUpdate();
 	void onKeyUpdate(int key, float frame_time);
@@ -21,8 +44,11 @@ public:
 	inline static const float ZoomUnit = 0.1f;
 
 protected:
-	ecs::World& world;
+#if ENABLE_ECS
 	ecs::CameraComponent& main_camera;
+#else 
+	CameraComponent& main_camera;
+#endif
 
 	float m_goal_fov;
 

@@ -4,8 +4,6 @@
 #include <string>
 #include <optional>
 #include <unordered_map>
-#include <glad/glad.h>
-#include <GLFW/glfw3.h>
 
 extern float WINDOW_WIDTH;
 extern float WINDOW_HEIGHT;
@@ -66,6 +64,7 @@ enum ViewportType {
     Debug,
 };
 
+struct GLFWwindow;
 // TODO 考虑对非GLFWwindow的扩展
 class Window {
 public:

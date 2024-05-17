@@ -1,7 +1,7 @@
 #include "RenderShaderObject.hpp"
-#include "Platform/RHI/rhi.hpp"
 
-#include <glad/glad.h>
+#include <Platform/RHI/rhi.hpp>
+
 #include <glm/gtc/type_ptr.hpp>
 
 #include <fstream>

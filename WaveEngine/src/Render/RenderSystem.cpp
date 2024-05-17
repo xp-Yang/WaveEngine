@@ -1,4 +1,5 @@
 #include "RenderSystem.hpp"
+
 #include "Path/ForwardRenderPath.hpp"
 #include "Path/DeferredRenderPath.hpp"
 #include "Path/RayTracingRenderPath.hpp"

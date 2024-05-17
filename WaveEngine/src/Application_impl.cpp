@@ -9,19 +9,21 @@
 #include "Editor/ImGuiEditor.hpp"
 #include "Logical/FrameWork/Scene.hpp"
 
+#include "WaveEngine/Window.hpp"
+#include <GLFW/glfw3.h>
+
 #include "AllMetaRegister.hpp"
 
 Application::Application()
 {
-	Meta::Register::allMetaRegister();
-	init();
 }
 
 Application::~Application() {};
 
 Application& Application::GetApp()
 {
-	// TODO reenter problem
+	// reenter problem
+	// two steps initialization
 	static Application app;
 	return app;
 }
@@ -56,6 +58,8 @@ void Application::run() {
 
 void Application::init()
 {
+	Meta::Register::allMetaRegister();
+
 	m_window = std::make_unique<Window>((int)WINDOW_WIDTH, (int)WINDOW_HEIGHT);
 
 	//初始化GLAD，使其可以管理OpenGL函数指针
@@ -71,12 +75,13 @@ void Application::init()
 	ImGui_ImplGlfw_InitForOpenGL(m_window->getNativeWindowHandle(), true);
 	ImGui_ImplOpenGL3_Init("#version 330");
 
+	m_scene = std::make_unique<Scene>();
+	m_scene->init();
 	m_input_system = std::make_unique<InputSystem>();
+	m_input_system->init();
 	m_render_system = std::make_unique<RenderSystem>();
 	m_editor = std::make_unique<ImGuiEditor>();
 	m_editor->init(m_render_system.get());
-	m_scene = std::make_unique<Scene>();
-	m_scene->init();
 }
 
 void Application::shutdown()

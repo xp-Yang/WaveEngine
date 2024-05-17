@@ -60,6 +60,7 @@
 int main()
 {
     auto& app = Application::GetApp();
+    app.init();
     app.run();
     app.shutdown();
     return 0;

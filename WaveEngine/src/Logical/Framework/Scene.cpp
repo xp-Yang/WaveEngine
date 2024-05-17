@@ -17,7 +17,7 @@ void Scene::save()
 }
 
 #if ENABLE_ECS
-ecs::Object* Scene::loadModel(const std::string& filepath)
+GObject* Scene::loadModel(const std::string& filepath)
 {
 	Asset::ObjImporter obj_importer;
 	obj_importer.load(filepath);
@@ -37,7 +37,7 @@ ecs::Object* Scene::loadModel(const std::string& filepath)
 		renderable.sub_meshes.push_back(Asset::SubMesh{ idx, Asset::MeshFileRef{ Asset::MeshFileType::OBJ, filepath}, {}, Mat4(1.0f) });
 	}
 
-	auto res = new ecs::Object(m_root_object, entity);
+	auto res = new GObject(m_root_object, entity);
 	return res;
 }
 #endif
@@ -48,7 +48,7 @@ void Scene::init()
 	auto& world = ecs::World::get();
 	auto root_entity = world.create_entity();
 	world.addComponent<ecs::NameComponent>(root_entity).name = "Root";
-	m_root_object = new ecs::Object(nullptr, root_entity);
+	m_root_object = new GObject(nullptr, root_entity);
 
 	//initMainCamera
 	auto camera = world.create_entity();
@@ -73,7 +73,7 @@ void Scene::init()
 
 	//createDirectionalLight
 	auto dir_light_entity = world.create_entity();
-	auto directional_light_node = new ecs::Object(m_root_object, dir_light_entity);
+	auto directional_light_node = new GObject(m_root_object, dir_light_entity);
 	world.addComponent<ecs::NameComponent>(dir_light_entity).name = "Directional Light";
 	auto& dir_light_properties = world.addComponent<ecs::DirectionalLightComponent>(dir_light_entity);
 	dir_light_properties.luminousColor = Color4(2.0f);
@@ -82,10 +82,10 @@ void Scene::init()
 	size_t point_lights_count = 2;
 	auto root_point_lights_entity = world.create_entity();
 	world.addComponent<ecs::NameComponent>(root_point_lights_entity).name = "Point Lights";
-	auto m_root_point_light_object = new ecs::Object(m_root_object, root_point_lights_entity);
+	auto m_root_point_light_object = new GObject(m_root_object, root_point_lights_entity);
 	for (int i = 0; i < point_lights_count; i++) {
 		auto point_light_entity = world.create_entity();
-		auto point_light_node = new ecs::Object(m_root_point_light_object, point_light_entity);
+		auto point_light_node = new GObject(m_root_point_light_object, point_light_entity);
 		world.addComponent<ecs::NameComponent>(point_light_entity).name = std::string("Point Light ") + std::to_string(i);
 		auto& point_light_transform = world.addComponent<ecs::TransformComponent>(point_light_entity);
 		double r1 = random(-15.0f, 15.0f);
@@ -135,10 +135,10 @@ void Scene::init()
 	size_t spheres_count = 64;
 	auto root_sphere_entity = world.create_entity();
 	world.addComponent<ecs::NameComponent>(root_sphere_entity).name = "Spheres";
-	m_root_sphere_object = new ecs::Object(m_root_object, root_sphere_entity);
+	m_root_sphere_object = new GObject(m_root_object, root_sphere_entity);
 	for (int i = 0; i < spheres_count; i++) {
 		auto sphere_entity = world.create_entity();
-		auto sphere_node = new ecs::Object(m_root_sphere_object, sphere_entity);
+		auto sphere_node = new GObject(m_root_sphere_object, sphere_entity);
 		world.addComponent<ecs::NameComponent>(sphere_entity).name = std::string("Sphere") + std::to_string(i);
 		world.addComponent<TransformComponent>(sphere_entity);
 
@@ -174,7 +174,7 @@ void Scene::init()
 
 	//createPlaneGround
 	auto ground_entity = world.create_entity();
-	auto ground_node = new ecs::Object(m_root_object, ground_entity);
+	auto ground_node = new GObject(m_root_object, ground_entity);
 	world.addComponent<ecs::NameComponent>(ground_entity).name = "Gound";
 	auto& ground_transform = world.addComponent<ecs::TransformComponent>(ground_entity);
 	ground_transform.scale = Vec3(1.0f);
@@ -190,7 +190,7 @@ void Scene::init()
 
 	loadModel(resource_dir + "/model/nanosuit/nanosuit.obj");
 
-	ecs::Object* bunny_obj = loadModel(resource_dir + "/model/bunny.obj");
+	GObject* bunny_obj = loadModel(resource_dir + "/model/bunny.obj");
 	auto bunny_transform = world.getComponent<ecs::TransformComponent>(bunny_obj->entity());
 	bunny_transform->scale = Vec3(40.0f);
 	bunny_transform->translation = Vec3(-10.0f, 0.0f, 0.0f);
@@ -199,6 +199,8 @@ void Scene::init()
 
 #endif // ENABLE_ECS
 
+	m_root_object = new GObject(nullptr, "Root");
+
 	m_skybox = std::make_shared<Skybox>();
 
 	m_light_manager = std::make_shared<LightManager>();
@@ -206,7 +208,7 @@ void Scene::init()
 
 	size_t cubes_count = 36;
 	for (int i = 0; i < cubes_count; i++) {
-		GObject* cube_obj = new GObject();
+		GObject* cube_obj = new GObject(m_root_object, "Cube");
 		MeshComponent& mesh = cube_obj->addComponent<MeshComponent>();
 		Asset::SubMesh cube_sub_mesh;
 		cube_sub_mesh.mesh_file_ref = { Asset::MeshFileType::CustomCube, "" };
@@ -223,7 +225,7 @@ void Scene::init()
 	}
 
 	{
-		GObject* plane_obj = new GObject();
+		GObject* plane_obj = new GObject(m_root_object, "Ground");
 		MeshComponent& plane_mesh = plane_obj->addComponent<MeshComponent>();
 		Asset::SubMesh plane_sub_mesh;
 		plane_sub_mesh.mesh_file_ref = { Asset::MeshFileType::CustomGround, "" };

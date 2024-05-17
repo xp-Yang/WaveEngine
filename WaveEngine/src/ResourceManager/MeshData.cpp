@@ -1,7 +1,6 @@
 #include "MeshData.hpp"
 #include <windows.h>
 #include <iostream>
-#include "Platform/RHI/rhi.hpp"
 #include "Core/Logger/Logger.hpp"
 
 namespace Asset {
@@ -22,7 +21,7 @@ std::shared_ptr<MeshData> MeshData::create_cube_mesh() {
     std::vector<Vertex> vertices;
     std::vector<int> indices;
 
-    GLfloat cubeVertices[] =
+    float cubeVertices[] =
     {
         // 如果只有位置，只需要8个顶点就行，但是每个面的法向量不同，所以相同位置的顶点有三个不同的法向量属性，一共需要24个各不相同的顶点
         // pos                  // normal              // uv           

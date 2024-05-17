@@ -1,9 +1,10 @@
 #ifndef Application_hpp
 #define Application_hpp
 
-#include "Window.hpp"
 #include <memory>
+#include <string>
 
+class Window;
 class ImGuiEditor;
 class RenderSystem;
 class InputSystem;

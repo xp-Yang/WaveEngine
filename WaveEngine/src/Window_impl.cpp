@@ -1,5 +1,7 @@
 #include "Window_impl.hpp"
-#include "Application_impl.hpp"
+
+#include <glad/glad.h>
+#include <GLFW/glfw3.h>
 
 #include <assert.h>
 #include <utility>

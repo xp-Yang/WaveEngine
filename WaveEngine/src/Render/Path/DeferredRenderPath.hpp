@@ -2,7 +2,6 @@
 #define DeferredRenderPath_hpp
 
 #include "RenderPath.hpp"
-#include "../Pass/RenderPass.hpp"
 
 class DeferredRenderPath : public RenderPath {
 public:

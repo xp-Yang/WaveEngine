@@ -1,7 +1,9 @@
 #ifndef FileDialog_hpp
 #define FileDialog_hpp
 
-#include "Application_impl.hpp"
+#include <WaveEngine/Application.hpp>
+#include <WaveEngine/Window.hpp>
+#include <GLFW/glfw3.h>
 #include <string>
 // TODO 依赖GLFW的部分改为
 #define GLFW_EXPOSE_NATIVE_WIN32

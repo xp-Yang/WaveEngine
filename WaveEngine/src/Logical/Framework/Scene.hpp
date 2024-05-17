@@ -19,6 +19,7 @@ public:
 	void init();
 
 	void onUpdate(float delta_time);
+	GObject* rootObject() const { return m_root_object; }
 #if ENABLE_ECS
 	ecs::Object* rootObject() const { return m_root_object; }
 	ecs::Object* loadModel(const std::string& filepath);
@@ -34,11 +35,11 @@ public:
 }
 #endif
 private:
+	GObject* m_root_object{ nullptr };
 #if ENABLE_ECS
-	ecs::Object* m_root_object{ nullptr };
-	ecs::Object* m_root_point_light_object{ nullptr };
-	ecs::Object* m_root_cube_object{ nullptr };
-	ecs::Object* m_root_sphere_object{ nullptr };
+	GObject* m_root_point_light_object{ nullptr };
+	GObject* m_root_cube_object{ nullptr };
+	GObject* m_root_sphere_object{ nullptr };
 #else
 	std::vector<std::shared_ptr<GObject>> m_objects;
 	std::shared_ptr<LightManager> m_light_manager;

@@ -163,6 +163,7 @@ inline MetaObject MetaObjectOf() { return MetaObject(traits::className<T>()); }
 template <class T>
 inline MetaObject MetaObjectOf(T* obj) { return MetaObject(traits::className<T>()); }
 
+inline MetaObject MetaObjectOf(const std::string& className) { return MetaObject(className); }
 
 class WeakReflectionInstance {
 public:
@@ -234,6 +235,7 @@ public:
 template<class T>
 class ReflectionInstance : public WeakReflectionInstance {
 public:
+    ReflectionInstance(const MetaObject& meta, T* obj) : WeakReflectionInstance(meta, (void*)obj) {}
     ReflectionInstance(T* obj) : WeakReflectionInstance(MetaObjectOf<T>(), (void*)obj) {}
     ReflectionInstance(const ReflectionInstance& rhs) : WeakReflectionInstance(rhs) {}
 

@@ -2,7 +2,11 @@
 #define LightManager_hpp
 
 #include "Core/Math.hpp"
-#include <WaveEngine/Window.hpp>
+
+// TODO
+extern float WINDOW_WIDTH;
+extern float WINDOW_HEIGHT;
+extern float ASPECT_RATIO;
 
 struct Light {
 	Color4 luminousColor = { 1.0f, 1.0f, 1.0f, 1.0f };

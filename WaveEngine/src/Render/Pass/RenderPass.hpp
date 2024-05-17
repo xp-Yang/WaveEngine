@@ -1,9 +1,10 @@
 #ifndef RenderPass_hpp
 #define RenderPass_hpp
 
+#include "Platform/RHI/rhi.hpp" // TODO 解除外部暴露
 #include "Render/RenderSourceData.hpp"
-#include "Platform/RHI/rhi.hpp"
-#include "Application_impl.hpp"
+#include "WaveEngine/Application.hpp" // TODO 解除依赖
+#include "WaveEngine/Window.hpp"
 
 // Interface class
 // each RenderPass corresponds to a framebuffer
