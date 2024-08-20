@@ -1,9 +1,18 @@
 #include "ShadowPass.hpp"
-
+// TODO remove
+#include <glad/glad.h>
 void ShadowPass::init()
 {
-	m_framebuffer = std::make_unique<FrameBuffer>(WINDOW_WIDTH, WINDOW_HEIGHT, 1);
-	m_framebuffer->create({ AttachmentType::DEPTH });
+    RhiTexture* color_texture = m_rhi->newTexture(RhiTexture::Format::RGB16F, Vec2(DEFAULT_RENDER_RESOLUTION_X, DEFAULT_RENDER_RESOLUTION_Y));
+    RhiTexture* depth_texture = m_rhi->newTexture(RhiTexture::Format::DEPTH, Vec2(DEFAULT_RENDER_RESOLUTION_X, DEFAULT_RENDER_RESOLUTION_Y));
+    color_texture->create();
+    depth_texture->create();
+    RhiAttachment color_attachment = RhiAttachment(color_texture);
+    RhiAttachment depth_ttachment = RhiAttachment(depth_texture);
+    RhiFrameBuffer* fb = m_rhi->newFrameBuffer(color_attachment, Vec2(DEFAULT_RENDER_RESOLUTION_X, DEFAULT_RENDER_RESOLUTION_Y));
+    fb->setDepthAttachment(depth_ttachment);
+    fb->create();
+    m_framebuffer = std::unique_ptr<RhiFrameBuffer>(fb);
 
     size_t max_point_light_count = Asset::maxPointLightCount;
     reinit_cube_maps(max_point_light_count);
@@ -14,20 +23,16 @@ void ShadowPass::init()
     glReadBuffer(GL_NONE);
 }
 
-void ShadowPass::prepare(FrameBuffer* framebuffer)
-{
-}
-
 void ShadowPass::configSamples(int samples)
 {
     return;
     //TODO
     //config FrameBuffer
-    m_framebuffer->bind();
-    m_framebuffer->setSamples(samples);
+    //m_framebuffer->bind();
+    //m_framebuffer->setSamples(samples);
 
-    glBindTexture(GL_TEXTURE_2D, m_framebuffer->getFirstAttachmentOf(AttachmentType::DEPTH).getMap());
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, samples * m_framebuffer->getWidth(), samples * m_framebuffer->getHeight(), 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+    //glBindTexture(GL_TEXTURE_2D, m_framebuffer->getFirstAttachmentOf(AttachmentType::DEPTH).getMap());
+    //glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, samples * m_framebuffer->getWidth(), samples * m_framebuffer->getHeight(), 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
 }
 
 void ShadowPass::draw() {
@@ -51,11 +56,6 @@ void ShadowPass::clear()
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
-FrameBuffer* ShadowPass::getFrameBuffer()
-{
-	return m_framebuffer.get();
-}
-
 void ShadowPass::drawDirectionalLightShadowMap()
 {
     m_framebuffer->bind();
@@ -66,16 +66,17 @@ void ShadowPass::drawDirectionalLightShadowMap()
     static RenderShaderObject* depth_shader = RenderShaderObject::getShaderObject(Asset::ShaderType::DepthShader);
     depth_shader->start_using();
     Mat4 light_ref_matrix = m_render_source_data->render_directional_light_data_list.front().lightReferenceMatrix;
-    for (const auto& render_sub_mesh_data : m_render_source_data->render_object_sub_mesh_data_list) {
+    for (const auto& pair : m_render_source_data->render_mesh_data_hash) {
+        const auto& render_sub_mesh_data = pair.second;
         depth_shader->setMatrix("mvp", 1, light_ref_matrix * render_sub_mesh_data->transform());
-        Renderer::drawIndex(render_sub_mesh_data->getVAO(), render_sub_mesh_data->indicesCount());
+        m_rhi->drawIndexed(render_sub_mesh_data->getVAO(), render_sub_mesh_data->indicesCount());
     }
 }
 
 void ShadowPass::drawPointLightShadowMap()
 {
     glBindFramebuffer(GL_FRAMEBUFFER, m_cube_map_fbo);
-    glViewport(0, 0, WINDOW_HEIGHT, WINDOW_HEIGHT);
+    glViewport(0, 0, DEFAULT_RENDER_RESOLUTION_Y, DEFAULT_RENDER_RESOLUTION_Y); // TODO 显然窗口大小变化后不是default大小
     glEnable(GL_DEPTH_TEST);
 
     static RenderShaderObject* depth_shader = RenderShaderObject::getShaderObject(Asset::ShaderType::CubeMapShader);
@@ -101,12 +102,13 @@ void ShadowPass::drawPointLightShadowMap()
             glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
-            for (const auto& render_sub_mesh_data : m_render_source_data->render_object_sub_mesh_data_list) {
+            for (const auto& pair : m_render_source_data->render_mesh_data_hash) {
+                const auto& render_sub_mesh_data = pair.second;
                 depth_shader->setMatrix("model", 1, render_sub_mesh_data->transform());
                 depth_shader->setMatrix("lightSpaceMatrix", 1, light_ref_matrix[cube_map_id][i]);
                 depth_shader->setFloat3("lightPos", light_pos[cube_map_id]);
                 depth_shader->setFloat("far_plane", light_radius[cube_map_id]);
-                Renderer::drawIndex(render_sub_mesh_data->getVAO(), render_sub_mesh_data->indicesCount());
+                m_rhi->drawIndexed(render_sub_mesh_data->getVAO(), render_sub_mesh_data->indicesCount());
             }
         }
     }
@@ -121,7 +123,7 @@ void ShadowPass::reinit_cube_maps(size_t count)
         glGenTextures(1, &m_cube_maps[i]);
         glBindTexture(GL_TEXTURE_CUBE_MAP, m_cube_maps[i]);
         for (GLuint i = 0; i < 6; ++i)
-            glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_DEPTH_COMPONENT, WINDOW_HEIGHT, WINDOW_HEIGHT, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+            glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_DEPTH_COMPONENT, DEFAULT_RENDER_RESOLUTION_Y, DEFAULT_RENDER_RESOLUTION_Y, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
         glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
         glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
         glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);

@@ -1,6 +1,8 @@
 #ifndef World_hpp
 #define World_hpp
 
+#if ENABLE_ECS
+
 #include <bitset>
 #include <vector>
 
@@ -20,7 +22,6 @@ const int MAX_ENTITIES = 512;
 const int MAX_COMPONENTS = 32;
 typedef std::bitset<MAX_COMPONENTS> ComponentMask;
 
-// TODO 实现Entity UUID
 // 每个Entity保存一份bitset，大小是MAX_COMPONENTS。标记了该Entity有没有某种类型的Component数据
 // World保存Entities数组
 class Entity {
@@ -192,8 +193,7 @@ protected:
         int pool_id = getComponentPoolId<T>();
         T* component = reinterpret_cast<T*>(m_component_pools[pool_id]->get(entt_id));
         if (m_entities[entt_id].getMask().test(pool_id)) {
-            // TODO
-            //delete component;
+            // TODO delete component;
             m_entities[entt_id].getMask().reset(pool_id);
             emit componentRemoved(entt_id, pool_id);
         }
@@ -293,3 +293,5 @@ private:
 }
 
 #endif
+
+#endif // ENABLE_ECS

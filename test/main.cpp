@@ -1,4 +1,4 @@
-#include "WaveEngine/Application.hpp"
+#include "Engine.hpp"
 
 // TODO list:
 // done: nanosuit 放在cube前加载就有问题: 答: body是nanosuit的最后一个材质，可能被cube覆盖了？已经无法复现。
@@ -59,7 +59,7 @@
 // 56. 重心坐标为什么不是投影不变的
 int main()
 {
-    auto& app = Application::GetApp();
+    auto& app = GetApp();
     app.init();
     app.run();
     app.shutdown();

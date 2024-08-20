@@ -111,6 +111,8 @@ std::shared_ptr<Asset::MeshData> ObjImporter::load_sub_mesh_data(aiMesh* mesh)
             indices.push_back(face.mIndices[j]);
     }
     
+    extractBoneWeightForVertices(vertices, mesh);
+
     return std::make_shared<Asset::MeshData>(vertices, indices);
 }
 
@@ -139,6 +141,55 @@ Asset::Material ObjImporter::load_material(aiMaterial* material) {
     }
 
     return res;
+}
+
+void ObjImporter::extractBoneWeightForVertices(std::vector<Vertex>& vertices, aiMesh* mesh)
+{
+    for (int i = 0; i < mesh->mNumBones; ++i)
+    {
+        std::string boneName = mesh->mBones[i]->mName.C_Str();
+        if (m_BoneInfoMap.find(boneName) == m_BoneInfoMap.end())
+        {
+            BoneInfo newBoneInfo;
+            newBoneInfo.id = m_BoneCounter++;
+            newBoneInfo.offset[0][0] = mesh->mBones[i]->mOffsetMatrix.a1;
+            newBoneInfo.offset[1][0] = mesh->mBones[i]->mOffsetMatrix.a2;
+            newBoneInfo.offset[2][0] = mesh->mBones[i]->mOffsetMatrix.a3;
+            newBoneInfo.offset[3][0] = mesh->mBones[i]->mOffsetMatrix.a4;
+            newBoneInfo.offset[0][1] = mesh->mBones[i]->mOffsetMatrix.b1;
+            newBoneInfo.offset[1][1] = mesh->mBones[i]->mOffsetMatrix.b2;
+            newBoneInfo.offset[2][1] = mesh->mBones[i]->mOffsetMatrix.b3;
+            newBoneInfo.offset[3][1] = mesh->mBones[i]->mOffsetMatrix.b4;
+            newBoneInfo.offset[0][2] = mesh->mBones[i]->mOffsetMatrix.c1;
+            newBoneInfo.offset[1][2] = mesh->mBones[i]->mOffsetMatrix.c2;
+            newBoneInfo.offset[2][2] = mesh->mBones[i]->mOffsetMatrix.c3;
+            newBoneInfo.offset[3][2] = mesh->mBones[i]->mOffsetMatrix.c4;
+            newBoneInfo.offset[0][3] = mesh->mBones[i]->mOffsetMatrix.d1;
+            newBoneInfo.offset[1][3] = mesh->mBones[i]->mOffsetMatrix.d2;
+            newBoneInfo.offset[2][3] = mesh->mBones[i]->mOffsetMatrix.d3;
+            newBoneInfo.offset[3][3] = mesh->mBones[i]->mOffsetMatrix.d4;
+            m_BoneInfoMap[boneName] = newBoneInfo;
+        }
+
+        int boneID = m_BoneInfoMap[boneName].id;
+
+        for (int weightIndex = 0; weightIndex < mesh->mBones[i]->mNumWeights; ++weightIndex)
+        {
+            int vertexId = mesh->mBones[i]->mWeights[weightIndex].mVertexId;
+            float weight = mesh->mBones[i]->mWeights[weightIndex].mWeight;
+            assert(vertexId <= vertices.size());
+
+            for (int i = 0; i < MAX_BONE_INFLUENCE; ++i)
+            {
+                if (vertices[vertexId].m_BoneIDs[i] < 0)
+                {
+                    vertices[vertexId].m_Weights[i] = weight;
+                    vertices[vertexId].m_BoneIDs[i] = boneID;
+                    break;
+                }
+            }
+        }
+    }
 }
 
 }

@@ -6,10 +6,7 @@
 class LightingPass : public RenderPass {
 public:
     void init() override;
-    void prepare(FrameBuffer* framebuffer) override;
-    void prepare(FrameBuffer* g_fb, FrameBuffer* shadow_fb);
     void draw() override;
-    FrameBuffer* getFrameBuffer() override;
     unsigned int getSceneMap() const;
     unsigned int getBrightMap() const;
     void enableSkybox(bool enable);
@@ -25,9 +22,7 @@ protected:
     void drawCheckerboardMode();
 
 private:
-    std::unique_ptr<FrameBuffer> m_lights_framebuffer;
-    FrameBuffer* m_gbuffer_framebuffer{ nullptr };
-    unsigned int m_shadow_map = 0;
+    std::unique_ptr<RhiFrameBuffer> m_lights_framebuffer;
 
     bool m_skybox = false;
     bool m_normal_debug = false;
@@ -35,6 +30,7 @@ private:
     bool m_checkerboard = false;
     bool m_pbr = false;
 
+    unsigned int m_shadow_map = 0;
     std::vector<unsigned int> m_cube_maps;
 };
 

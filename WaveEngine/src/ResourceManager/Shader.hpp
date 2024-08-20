@@ -1,7 +1,7 @@
 #ifndef Shader_hpp
 #define Shader_hpp
 
-#include "Core/Math.hpp"
+#include "Core/Math/Math.hpp"
 
 namespace Asset {
 

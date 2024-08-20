@@ -6,9 +6,7 @@
 class RayTracingPass : public RenderPass {
 public:
     void init() override;
-    void prepare(FrameBuffer* framebuffer) override;
     void draw() override;
-    FrameBuffer* getFrameBuffer() override;
 };
 
 #endif

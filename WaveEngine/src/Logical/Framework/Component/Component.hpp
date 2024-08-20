@@ -1,7 +1,7 @@
 #ifndef Component_hpp
 #define Component_hpp
 
-#include <Core/Math.hpp>
+#include <Core/Math/Math.hpp>
 #include <Core/Meta/Meta.hpp>
 
 #include <memory>
@@ -20,7 +20,7 @@ struct Component {
     virtual std::string typeName() { return "Component"; }
 
 public:
-    std::shared_ptr<GObject> parent_object;
+    GObject* parent_object; // shared_ptr 导致循环引用
 };
 
 #endif // !Component_hpp

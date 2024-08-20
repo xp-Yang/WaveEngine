@@ -1,67 +1,76 @@
 #include "EdgeDetectionPass.hpp"
-
+// TODO remove
+#include <glad/glad.h>
 EdgeDetectionPass::EdgeDetectionPass()
 {
 }
 
 void EdgeDetectionPass::init()
 {
-    m_framebuffer = std::make_unique<FrameBuffer>(WINDOW_WIDTH, WINDOW_HEIGHT);
-    m_framebuffer->create({ AttachmentType::RGB16F });
+    RhiTexture* color_texture = m_rhi->newTexture(RhiTexture::Format::RGB16F, Vec2(DEFAULT_RENDER_RESOLUTION_X, DEFAULT_RENDER_RESOLUTION_Y));
+    color_texture->create();
+    RhiAttachment color_attachment = RhiAttachment(color_texture);
+    RhiFrameBuffer* fb = m_rhi->newFrameBuffer(color_attachment, Vec2(DEFAULT_RENDER_RESOLUTION_X, DEFAULT_RENDER_RESOLUTION_Y));
+    fb->create();
+    m_framebuffer = std::unique_ptr<RhiFrameBuffer>(fb);
 
-    m_source_framebuffer = std::make_unique<FrameBuffer>(WINDOW_WIDTH, WINDOW_HEIGHT);
-    m_source_framebuffer->create({ AttachmentType::RGB16F, AttachmentType::DEPTH });
-}
-
-void EdgeDetectionPass::prepare(FrameBuffer* framebuffer)
-{
-    m_source_framebuffer->bind();
-    m_source_framebuffer->clear();
-
-    if (m_render_source_data->picked_ids.empty())
-        return;
-    for (auto picked_id : m_render_source_data->picked_ids) {
-        // render the picked one
-        // TODO to optimize 需要先把实际的深度贴图拷贝到当前深度缓冲中
-        glEnable(GL_DEPTH_TEST);
-
-        static RenderShaderObject* picking_shader = RenderShaderObject::getShaderObject(Asset::ShaderType::PickingShader);
-        picking_shader->start_using();
-        picking_shader->setMatrix("view", 1, m_render_source_data->view_matrix);
-        picking_shader->setMatrix("projection", 1, m_render_source_data->proj_matrix);
-
-        // TODO 从render_mesh_data_list中查找到picked
-        auto it = std::find_if(m_render_source_data->render_object_sub_mesh_data_list.begin(), m_render_source_data->render_object_sub_mesh_data_list.end(),
-            [picked_id](auto& render_object_sub_mesh_data) {
-                return render_object_sub_mesh_data->id() == picked_id;
-            }
-            );
-        if (it != m_render_source_data->render_object_sub_mesh_data_list.end()) {
-            picking_shader->setMatrix("model", 1, (*it)->transform());
-            int id = (picked_id++) * 50000;// for debugging
-            int r = (id & 0x000000FF) >> 0;
-            int g = (id & 0x0000FF00) >> 8;
-            int b = (id & 0x00FF0000) >> 16;
-            Color4 color(r / 255.0f, g / 255.0f, b / 255.0f, 1.0f);
-            picking_shader->setFloat4("picking_color", color);
-            Renderer::drawIndex((*it)->getVAO(), (*it)->indicesCount());
-        }
+    {
+        RhiTexture* color_texture = m_rhi->newTexture(RhiTexture::Format::RGB16F, Vec2(DEFAULT_RENDER_RESOLUTION_X, DEFAULT_RENDER_RESOLUTION_Y));
+        RhiTexture* depth_texture = m_rhi->newTexture(RhiTexture::Format::DEPTH, Vec2(DEFAULT_RENDER_RESOLUTION_X, DEFAULT_RENDER_RESOLUTION_Y));
+        color_texture->create();
+        depth_texture->create();
+        RhiAttachment color_attachment = RhiAttachment(color_texture);
+        RhiAttachment depth_ttachment = RhiAttachment(depth_texture);
+        RhiFrameBuffer* fb = m_rhi->newFrameBuffer(color_attachment, Vec2(DEFAULT_RENDER_RESOLUTION_X, DEFAULT_RENDER_RESOLUTION_Y));
+        fb->setDepthAttachment(depth_ttachment);
+        fb->create();
+        m_source_framebuffer = std::unique_ptr<RhiFrameBuffer>(fb);
     }
-    m_source_map = m_source_framebuffer->getFirstAttachmentOf(AttachmentType::RGB16F).getMap();
 }
 
 void EdgeDetectionPass::draw()
 {
+    {
+        m_source_framebuffer->bind();
+        m_source_framebuffer->clear();
+
+        if (m_render_source_data->picked_ids.empty())
+            return;
+        for (auto picked_id : m_render_source_data->picked_ids) {
+            // render the picked one
+            // TODO to optimize 需要先把实际的深度贴图拷贝到当前深度缓冲中
+            glEnable(GL_DEPTH_TEST);
+
+            static RenderShaderObject* picking_shader = RenderShaderObject::getShaderObject(Asset::ShaderType::PickingShader);
+            picking_shader->start_using();
+            picking_shader->setMatrix("view", 1, m_render_source_data->view_matrix);
+            picking_shader->setMatrix("projection", 1, m_render_source_data->proj_matrix);
+
+            auto it = std::find_if(m_render_source_data->render_mesh_data_hash.begin(), m_render_source_data->render_mesh_data_hash.end(),
+                [picked_id](const std::pair<const RenderMeshDataID, std::shared_ptr<RenderMeshData>>& pair) {
+                    return pair.second->ID().object_id == picked_id;
+                }
+            );
+            if (it != m_render_source_data->render_mesh_data_hash.end()) {
+                const auto& render_sub_mesh_data = it->second;
+                picking_shader->setMatrix("model", 1, render_sub_mesh_data->transform());
+                int id = picked_id;
+                int r = (id & 0x000000FF) >> 0;
+                int g = (id & 0x0000FF00) >> 8;
+                int b = (id & 0x00FF0000) >> 16;
+                Color4 color(r / 255.0f, g / 255.0f, b / 255.0f, 1.0f);
+                picking_shader->setFloat4("picking_color", color);
+                m_rhi->drawIndexed(render_sub_mesh_data->getVAO(), render_sub_mesh_data->indicesCount());
+            }
+        }
+        m_source_map = m_source_framebuffer->colorAttachmentAt(0)->texture()->id();
+    }
+
     m_framebuffer->bind();
     m_framebuffer->clear();
 
     static RenderShaderObject* edge_shader = RenderShaderObject::getShaderObject(Asset::ShaderType::EdgeDetection);
     edge_shader->start_using();
     edge_shader->setTexture("Texture", 0, m_source_map);
-    Renderer::drawIndex(m_screen_quad->getVAO(), m_screen_quad->indicesCount());
-}
-
-FrameBuffer* EdgeDetectionPass::getFrameBuffer()
-{
-    return m_framebuffer.get();
+    m_rhi->drawIndexed(m_screen_quad->getVAO(), m_screen_quad->indicesCount());
 }

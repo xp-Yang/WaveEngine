@@ -1,15 +1,34 @@
 #include "GBufferPass.hpp"
-
+// TODO remove
+#include <glad/glad.h>
 void GBufferPass::init()
 {
-    m_framebuffer = std::make_unique<FrameBuffer>(WINDOW_WIDTH, WINDOW_HEIGHT);
-    m_framebuffer->create({ AttachmentType::RGB16F, AttachmentType::RGB16F, AttachmentType::RGB16F, AttachmentType::RGB16F,
-        AttachmentType::RGB16F, AttachmentType::RGB16F, AttachmentType::RGB16F, AttachmentType::RGB16F,
-        AttachmentType::DEPTH });
-}
-
-void GBufferPass::prepare(FrameBuffer* framebuffer)
-{
+    RhiTexture* color_texture0 = m_rhi->newTexture(RhiTexture::Format::RGB16F, Vec2(DEFAULT_RENDER_RESOLUTION_X, DEFAULT_RENDER_RESOLUTION_Y));
+    RhiTexture* color_texture1 = m_rhi->newTexture(RhiTexture::Format::RGB16F, Vec2(DEFAULT_RENDER_RESOLUTION_X, DEFAULT_RENDER_RESOLUTION_Y));
+    RhiTexture* color_texture2 = m_rhi->newTexture(RhiTexture::Format::RGB16F, Vec2(DEFAULT_RENDER_RESOLUTION_X, DEFAULT_RENDER_RESOLUTION_Y));
+    RhiTexture* color_texture3 = m_rhi->newTexture(RhiTexture::Format::RGB16F, Vec2(DEFAULT_RENDER_RESOLUTION_X, DEFAULT_RENDER_RESOLUTION_Y));
+    RhiTexture* color_texture4 = m_rhi->newTexture(RhiTexture::Format::RGB16F, Vec2(DEFAULT_RENDER_RESOLUTION_X, DEFAULT_RENDER_RESOLUTION_Y));
+    RhiTexture* color_texture5 = m_rhi->newTexture(RhiTexture::Format::RGB16F, Vec2(DEFAULT_RENDER_RESOLUTION_X, DEFAULT_RENDER_RESOLUTION_Y));
+    RhiTexture* color_texture6 = m_rhi->newTexture(RhiTexture::Format::RGB16F, Vec2(DEFAULT_RENDER_RESOLUTION_X, DEFAULT_RENDER_RESOLUTION_Y));
+    RhiTexture* color_texture7 = m_rhi->newTexture(RhiTexture::Format::RGB16F, Vec2(DEFAULT_RENDER_RESOLUTION_X, DEFAULT_RENDER_RESOLUTION_Y));
+    RhiTexture* depth_texture = m_rhi->newTexture(RhiTexture::Format::DEPTH, Vec2(DEFAULT_RENDER_RESOLUTION_X, DEFAULT_RENDER_RESOLUTION_Y));
+    color_texture0->create();
+    color_texture1->create();
+    color_texture2->create();
+    color_texture3->create();
+    color_texture4->create();
+    color_texture5->create();
+    color_texture6->create();
+    color_texture7->create();
+    depth_texture->create();
+    RhiAttachment color_attachment = RhiAttachment(color_texture0);
+    RhiAttachment depth_ttachment = RhiAttachment(depth_texture);
+    RhiFrameBuffer* fb = m_rhi->newFrameBuffer(color_attachment, Vec2(DEFAULT_RENDER_RESOLUTION_X, DEFAULT_RENDER_RESOLUTION_Y));
+    fb->setColorAttachments({ color_texture0 , color_texture1 , color_texture2 , color_texture3 , color_texture4 ,
+        color_texture5 , color_texture6 , color_texture7 });
+    fb->setDepthAttachment(depth_ttachment);
+    fb->create();
+    m_framebuffer = std::unique_ptr<RhiFrameBuffer>(fb);
 }
 
 void GBufferPass::draw()
@@ -24,7 +43,8 @@ void GBufferPass::draw()
     g_shader->start_using();
     g_shader->setMatrix("view", 1, m_render_source_data->view_matrix);
     g_shader->setMatrix("projection", 1, m_render_source_data->proj_matrix);
-    for (const auto& render_sub_mesh_data : m_render_source_data->render_object_sub_mesh_data_list) {
+    for (const auto& pair : m_render_source_data->render_mesh_data_hash) {
+        const auto& render_sub_mesh_data = pair.second;
         g_shader->setMatrix("model", 1, render_sub_mesh_data->transform());
         auto& material = render_sub_mesh_data->renderMaterialData();
         g_shader->start_using();
@@ -34,12 +54,9 @@ void GBufferPass::draw()
         g_shader->setFloat("metallic", material.metallic);
         g_shader->setFloat("roughness", material.roughness);
         g_shader->setFloat("ao", material.ao);
-        Renderer::drawIndex(render_sub_mesh_data->getVAO(), render_sub_mesh_data->indicesCount());
+        m_rhi->drawIndexed(render_sub_mesh_data->getVAO(), render_sub_mesh_data->indicesCount());
     }
     g_shader->stop_using();
-}
 
-FrameBuffer* GBufferPass::getFrameBuffer()
-{
-    return m_framebuffer.get();
+    m_framebuffer->unBind();
 }

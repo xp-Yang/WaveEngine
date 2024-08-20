@@ -1,3 +1,5 @@
+#if ENABLE_ECS
+
 #include "World.hpp"
 #include "Components.hpp"
 
@@ -58,3 +60,5 @@ World::~World()
 }
 
 }
+
+#endif

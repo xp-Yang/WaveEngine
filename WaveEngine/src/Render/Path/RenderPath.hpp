@@ -1,7 +1,11 @@
 #ifndef RenderPipeline_hpp
 #define RenderPipeline_hpp
 
-#include "../Pass/RenderPass.hpp"
+#include "Core/Common.hpp"
+
+class Rhi;
+class RenderMeshData;
+struct RenderSourceData;
 
 struct RenderParams {
     int     msaa_sample_count = 4;
@@ -27,9 +31,14 @@ public:
         RayTracing,
     };
     virtual void init() = 0;
-    virtual void prepareScreenQuadData(const std::shared_ptr<RenderSubMeshData>& screen_quad_data) = 0;
+    virtual void prepareRhi(const std::shared_ptr<Rhi>& rhi) = 0;
+    virtual void prepareScreenQuadData(const std::shared_ptr<RenderMeshData>& screen_quad_data) = 0;
     virtual void prepareRenderSourceData(const std::shared_ptr<RenderSourceData>& render_source_data) = 0;
     virtual void render() = 0;
+    virtual unsigned int getSceneTexture() { return 0; };
+    virtual unsigned int getPickingTexture() { return 0; };
+    virtual unsigned int getPickingFBO() { return 0; };
+    virtual unsigned int getShadowTexture() { return 0; };
     void setRenderParams(const RenderParams& params) {
         m_render_params = params;
     }

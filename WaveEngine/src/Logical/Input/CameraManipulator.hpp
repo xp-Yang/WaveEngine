@@ -1,7 +1,7 @@
 #ifndef CameraManipulator_hpp
 #define CameraManipulator_hpp
 
-#include "Core/Math.hpp"
+#include "Core/Math/Math.hpp"
 #include "Logical/Input/InputEnums.hpp"
 
 #if ENABLE_ECS

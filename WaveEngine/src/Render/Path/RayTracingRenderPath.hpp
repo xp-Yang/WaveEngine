@@ -2,11 +2,14 @@
 #define RayTracingRenderPath_hpp
 
 #include "RenderPath.hpp"
+#include "Render/Pass/RenderPass.hpp"
 
 class RayTracingRenderPath : public RenderPath {
 public:
+    RayTracingRenderPath();
     void init() override;
-    void prepareScreenQuadData(const std::shared_ptr<RenderSubMeshData>& screen_quad_data) override;
+    void prepareRhi(const std::shared_ptr<Rhi>& rhi) override;
+    void prepareScreenQuadData(const std::shared_ptr<RenderMeshData>& screen_quad_data) override;
     void prepareRenderSourceData(const std::shared_ptr<RenderSourceData>& render_source_data) override;
     void render() override;
 

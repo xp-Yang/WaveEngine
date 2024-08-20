@@ -5,27 +5,27 @@ file(GLOB_RECURSE GLAD_HEAD_FILES "${THIRD_PARTY_DIR}/glad/*.h" "${THIRD_PARTY_D
 file(GLOB_RECURSE GLAD_SRC_FILES "${THIRD_PARTY_DIR}/glad/*.c" "${THIRD_PARTY_DIR}/glad/*.cpp")
 add_library(glad ${GLAD_HEAD_FILES} ${GLAD_SRC_FILES})
 set_target_properties(glad PROPERTIES FOLDER ${third_party_folder}/glad)
-target_include_directories(glad PRIVATE ${GLAD_INCLUDE_DIR})
+target_include_directories(glad PUBLIC ${THIRD_PARTY_DIR}/glad/include)
 	
 #imgui
 file(GLOB_RECURSE IMGUI_HEAD_FILES "${THIRD_PARTY_DIR}/imgui/*.h" "${THIRD_PARTY_DIR}/imgui/*.hpp")
 file(GLOB_RECURSE IMGUI_SRC_FILES "${THIRD_PARTY_DIR}/imgui/*.c" "${THIRD_PARTY_DIR}/imgui/*.cpp")
 add_library(imgui ${IMGUI_HEAD_FILES} ${IMGUI_SRC_FILES})
 set_target_properties(imgui PROPERTIES FOLDER ${third_party_folder}/imgui)
-target_include_directories(imgui PRIVATE ${THIRD_PARTY_DIR}/imgui)
-target_include_directories(imgui PRIVATE ${GLFW_INCLUDE_DIR})
+target_include_directories(imgui PUBLIC ${THIRD_PARTY_DIR}/imgui)
+target_include_directories(imgui PRIVATE ${THIRD_PARTY_DIR}/glfw/include)
 
 #stb
 file(GLOB_RECURSE STB_HEAD_FILES "${THIRD_PARTY_DIR}/stb/*.h" "${THIRD_PARTY_DIR}/stb/*.hpp")
 file(GLOB_RECURSE STB_SRC_FILES "${THIRD_PARTY_DIR}/stb/*.c" "${THIRD_PARTY_DIR}/stb/*.cpp")
 add_library(stb ${STB_HEAD_FILES} ${STB_SRC_FILES})
 set_target_properties(stb PROPERTIES FOLDER ${third_party_folder}/stb)
-target_include_directories(stb PRIVATE ${THIRD_PARTY_DIR}/stb)
+target_include_directories(stb PUBLIC ${THIRD_PARTY_DIR}/stb)
 
 #json11
 add_library(json11 ${THIRD_PARTY_DIR}/json11/json11.hpp ${THIRD_PARTY_DIR}/json11/json11.cpp)
 set_target_properties(json11 PROPERTIES FOLDER ${third_party_folder}/json11)
-target_include_directories(json11 PRIVATE ${THIRD_PARTY_DIR}/json11)
+target_include_directories(json11 PUBLIC ${THIRD_PARTY_DIR}/json11)
 
 #spdlog
 if(NOT TARGET spdlog)
@@ -51,6 +51,7 @@ if(NOT TARGET glfw)
 	add_subdirectory(glfw)
 	set_target_properties(glfw PROPERTIES FOLDER ${third_party_folder}/glfw)
 	set_target_properties(update_mappings PROPERTIES FOLDER ${third_party_folder}/glfw)
+	target_include_directories(glfw PUBLIC ${THIRD_PARTY_DIR}/glfw/include)
 endif()
 
 #assimp
@@ -69,4 +70,5 @@ if(NOT TARGET assimp)
 	set_target_properties(uninstall PROPERTIES FOLDER ${third_party_folder}/assimp)
 	set_target_properties(UpdateAssimpLibsDebugSymbolsAndDLLs PROPERTIES FOLDER ${third_party_folder}/assimp)
 	#set_target_properties(zlibstatic PROPERTIES FOLDER ${third_party_folder}/assimp)
+	target_include_directories(assimp PUBLIC ${THIRD_PARTY_DIR}/assimp/include)
 endif()

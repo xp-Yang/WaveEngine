@@ -1,24 +1,32 @@
 #include "LightingPass.hpp"
-
+// TODO remove
+#include <glad/glad.h>
 void LightingPass::init()
 {
-    m_framebuffer = std::make_unique<FrameBuffer>(WINDOW_WIDTH, WINDOW_HEIGHT);
-    m_framebuffer->create({ AttachmentType::RGB16F, AttachmentType::DEPTH });
+	RhiTexture* color_texture = m_rhi->newTexture(RhiTexture::Format::RGB16F, Vec2(DEFAULT_RENDER_RESOLUTION_X, DEFAULT_RENDER_RESOLUTION_Y));
+	RhiTexture* depth_texture = m_rhi->newTexture(RhiTexture::Format::DEPTH, Vec2(DEFAULT_RENDER_RESOLUTION_X, DEFAULT_RENDER_RESOLUTION_Y));
+	color_texture->create();
+	depth_texture->create();
+	RhiAttachment color_attachment = RhiAttachment(color_texture);
+	RhiAttachment depth_ttachment = RhiAttachment(depth_texture);
+	RhiFrameBuffer* fb = m_rhi->newFrameBuffer(color_attachment, Vec2(DEFAULT_RENDER_RESOLUTION_X, DEFAULT_RENDER_RESOLUTION_Y));
+	fb->setDepthAttachment(depth_ttachment);
+	fb->create();
+	m_framebuffer = std::unique_ptr<RhiFrameBuffer>(fb);
 
-	m_lights_framebuffer = std::make_unique<FrameBuffer>(WINDOW_WIDTH, WINDOW_HEIGHT);
-	m_lights_framebuffer->create({ AttachmentType::RGB16F, AttachmentType::DEPTH });
-}
 
-void LightingPass::prepare(FrameBuffer* framebuffer)
-{
-	m_gbuffer_framebuffer = framebuffer;
-	m_shadow_map = 0;
-}
-
-void LightingPass::prepare(FrameBuffer* g_fb, FrameBuffer* shadow_fb)
-{
-	m_gbuffer_framebuffer = g_fb;
-	m_shadow_map = shadow_fb->getFirstAttachmentOf(AttachmentType::DEPTH).getMap();
+	{
+		RhiTexture* color_texture = m_rhi->newTexture(RhiTexture::Format::RGB16F, Vec2(DEFAULT_RENDER_RESOLUTION_X, DEFAULT_RENDER_RESOLUTION_Y));
+		RhiTexture* depth_texture = m_rhi->newTexture(RhiTexture::Format::DEPTH, Vec2(DEFAULT_RENDER_RESOLUTION_X, DEFAULT_RENDER_RESOLUTION_Y));
+		color_texture->create();
+		depth_texture->create();
+		RhiAttachment color_attachment = RhiAttachment(color_texture);
+		RhiAttachment depth_ttachment = RhiAttachment(depth_texture);
+		RhiFrameBuffer* fb = m_rhi->newFrameBuffer(color_attachment, Vec2(DEFAULT_RENDER_RESOLUTION_X, DEFAULT_RENDER_RESOLUTION_Y));
+		fb->setDepthAttachment(depth_ttachment);
+		fb->create();
+		m_lights_framebuffer = std::unique_ptr<RhiFrameBuffer>(fb);
+	}
 }
 
 void LightingPass::draw()
@@ -46,7 +54,8 @@ void LightingPass::draw()
 
 	// deferred lighting
 	static RenderShaderObject* lighting_shader = RenderShaderObject::getShaderObject(Asset::ShaderType::DeferredLightingShader);
-	auto g_position_map = m_gbuffer_framebuffer->getFirstAttachmentOf(AttachmentType::RGB16F).getMap();
+	RhiFrameBuffer* gbuffer_framebuffer = m_input_passes[0]->getFrameBuffer();
+	unsigned int g_position_map = gbuffer_framebuffer->colorAttachmentAt(0)->texture()->id();
 	lighting_shader->start_using();
 	lighting_shader->setTexture("gPosition", 0, g_position_map);
 	lighting_shader->setTexture("gNormal", 1, g_position_map + 1);
@@ -60,6 +69,9 @@ void LightingPass::draw()
 
 	lighting_shader->setBool("enablePBR", m_pbr);
 
+	RhiFrameBuffer* shadow_framebuffer = m_input_passes[1]->getFrameBuffer();
+	m_shadow_map = shadow_framebuffer->depthAttachment()->texture()->id();
+
 	lighting_shader->setFloat3("cameraPos", m_render_source_data->camera_position);
 	for (const auto& render_directional_light_data : m_render_source_data->render_directional_light_data_list) {
 		lighting_shader->setFloat3("directionalLight.direction", render_directional_light_data.direction);
@@ -71,11 +83,9 @@ void LightingPass::draw()
 	}
 
 	//for (const auto& render_point_light_data : m_render_source_data->render_point_light_data_list) {
-		if (m_shadow_map != 0) {
-			for (int i = 0; i < m_cube_maps.size(); i++) {
-				std::string cube_map_id = std::string("cube_shadow_maps[") + std::to_string(i) + "]";
-				lighting_shader->setCubeTexture(cube_map_id, 9 + i, m_cube_maps[i]);
-			}
+		for (int i = 0; i < m_cube_maps.size(); i++) {
+			std::string cube_map_id = std::string("cube_shadow_maps[") + std::to_string(i) + "]";
+			lighting_shader->setCubeTexture(cube_map_id, 9 + i, m_cube_maps[i]);
 		}
 	//}
 
@@ -94,14 +104,14 @@ void LightingPass::draw()
 		point_light_idx++;
 	}
 	lighting_shader->setInt("point_lights_size", m_render_source_data->render_point_light_data_list.size());
-	Renderer::drawIndex(m_screen_quad->getVAO(), m_screen_quad->indicesCount());
+	m_rhi->drawIndexed(m_screen_quad->getVAO(), m_screen_quad->indicesCount());
 	lighting_shader->stop_using();
 
 
 	glEnable(GL_DEPTH_TEST);
 	glDepthMask(GL_TRUE);
 	// TODO 拷贝深度图后才能画法线
-	m_gbuffer_framebuffer->blitDepthMapTo(m_framebuffer.get());
+	gbuffer_framebuffer->blitTo(m_framebuffer.get(), RhiTexture::Format::DEPTH);
 	
 	// lights
 	static Asset::Shader point_light_shader_asset { Asset::ShaderType::CustomShader, std::string(RESOURCE_DIR) + "/shader/light.vs", std::string(RESOURCE_DIR) + "/shader/light.fs" };
@@ -114,7 +124,7 @@ void LightingPass::draw()
 		point_light_shader->setMatrix("model", 1, render_point_light_sub_mesh_data->transform());
 		point_light_shader->setMatrix("view", 1, m_render_source_data->view_matrix);
 		point_light_shader->setMatrix("projection", 1, m_render_source_data->proj_matrix);
-		Renderer::drawIndex(render_point_light_sub_mesh_data->getVAO(), render_point_light_sub_mesh_data->indicesCount());
+		m_rhi->drawIndexed(render_point_light_sub_mesh_data->getVAO(), render_point_light_sub_mesh_data->indicesCount());
 		point_light_shader->stop_using();
 	}
 
@@ -133,40 +143,38 @@ void LightingPass::draw()
 		skybox_shader->setMatrix("view", 1, Mat4(Mat3(m_render_source_data->view_matrix)));
 		skybox_shader->setMatrix("projection", 1, m_render_source_data->proj_matrix);
 		skybox_shader->setCubeTexture("skybox", 4, m_render_source_data->render_skybox_data.skybox_cube_map);
-		Renderer::drawIndex(render_skybox_sub_mesh_data->getVAO(), render_skybox_sub_mesh_data->indicesCount());
+		m_rhi->drawIndexed(render_skybox_sub_mesh_data->getVAO(), render_skybox_sub_mesh_data->indicesCount());
 		skybox_shader->stop_using();
 	}
 
+	// TODO 可控制
 	// draw bright map to do bloom effect
-	m_lights_framebuffer->bind();
-	m_lights_framebuffer->clear();
-	m_gbuffer_framebuffer->blitDepthMapTo(m_lights_framebuffer.get());
-	for (const auto& render_point_light_data : m_render_source_data->render_point_light_data_list) {
-		const auto& render_point_light_sub_mesh_data = render_point_light_data.render_sub_mesh_data;
-		auto& material = render_point_light_sub_mesh_data->renderMaterialData();
-		point_light_shader->start_using();
-		point_light_shader->setFloat4("color", render_point_light_data.color);
-		point_light_shader->setMatrix("model", 1, render_point_light_sub_mesh_data->transform());
-		point_light_shader->setMatrix("view", 1, m_render_source_data->view_matrix);
-		point_light_shader->setMatrix("projection", 1, m_render_source_data->proj_matrix);
-		Renderer::drawIndex(render_point_light_sub_mesh_data->getVAO(), render_point_light_sub_mesh_data->indicesCount());
-		point_light_shader->stop_using();
-	}
-}
+	//m_lights_framebuffer->bind();
+	//m_lights_framebuffer->clear();
+	//m_gbuffer_framebuffer->blitDepthMapTo(m_lights_framebuffer.get());
+	//for (const auto& render_point_light_data : m_render_source_data->render_point_light_data_list) {
+	//	const auto& render_point_light_sub_mesh_data = render_point_light_data.render_sub_mesh_data;
+	//	auto& material = render_point_light_sub_mesh_data->renderMaterialData();
+	//	point_light_shader->start_using();
+	//	point_light_shader->setFloat4("color", render_point_light_data.color);
+	//	point_light_shader->setMatrix("model", 1, render_point_light_sub_mesh_data->transform());
+	//	point_light_shader->setMatrix("view", 1, m_render_source_data->view_matrix);
+	//	point_light_shader->setMatrix("projection", 1, m_render_source_data->proj_matrix);
+	//	m_rhi->drawIndexed(render_point_light_sub_mesh_data->getVAO(), render_point_light_sub_mesh_data->indicesCount());
+	//	point_light_shader->stop_using();
+	//}
 
-FrameBuffer* LightingPass::getFrameBuffer()
-{
-	return m_framebuffer.get();
+	m_framebuffer->unBind();
 }
 
 unsigned int LightingPass::getSceneMap() const
 {
-	return m_framebuffer->getAttachments()[0].getMap();
+	return m_framebuffer->colorAttachmentAt(0)->texture()->id();
 }
 
 unsigned int LightingPass::getBrightMap() const
 {
-	return m_lights_framebuffer->getAttachments()[0].getMap();
+	return m_lights_framebuffer->colorAttachmentAt(0)->texture()->id();
 }
 
 void LightingPass::enableSkybox(bool enable)
@@ -201,9 +209,10 @@ void LightingPass::drawNormalMode()
 	normal_shader->setMatrix("view", 1, m_render_source_data->view_matrix);
 	normal_shader->setMatrix("projection", 1, m_render_source_data->proj_matrix);
 	normal_shader->setMatrix("projectionView", 1, m_render_source_data->proj_matrix * m_render_source_data->view_matrix);
-	for (const auto& render_sub_mesh_data : m_render_source_data->render_object_sub_mesh_data_list) {
+	for (const auto& pair : m_render_source_data->render_mesh_data_hash) {
+		const auto& render_sub_mesh_data = pair.second;
 		normal_shader->setMatrix("model", 1, render_sub_mesh_data->transform());
-		Renderer::drawIndex(render_sub_mesh_data->getVAO(), render_sub_mesh_data->indicesCount());
+		m_rhi->drawIndexed(render_sub_mesh_data->getVAO(), render_sub_mesh_data->indicesCount());
 	}
 }
 
@@ -213,9 +222,10 @@ void LightingPass::drawWireframeMode()
 	wireframe_shader->start_using();
 	wireframe_shader->setMatrix("view", 1, m_render_source_data->view_matrix);
 	wireframe_shader->setMatrix("projection", 1, m_render_source_data->proj_matrix);
-	for (const auto& render_sub_mesh_data : m_render_source_data->render_object_sub_mesh_data_list) {
+	for (const auto& pair : m_render_source_data->render_mesh_data_hash) {
+		const auto& render_sub_mesh_data = pair.second;
 		wireframe_shader->setMatrix("model", 1, render_sub_mesh_data->transform());
-		Renderer::drawIndex(render_sub_mesh_data->getVAO(), render_sub_mesh_data->indicesCount());
+		m_rhi->drawIndexed(render_sub_mesh_data->getVAO(), render_sub_mesh_data->indicesCount());
 	}
 }
 
@@ -225,10 +235,11 @@ void LightingPass::drawCheckerboardMode()
 	shader->start_using();
 	shader->setMatrix("view", 1, m_render_source_data->view_matrix);
 	shader->setMatrix("projection", 1, m_render_source_data->proj_matrix);
-	for (const auto& render_sub_mesh_data : m_render_source_data->render_object_sub_mesh_data_list) {
+	for (const auto& pair : m_render_source_data->render_mesh_data_hash) {
+		const auto& render_sub_mesh_data = pair.second;
 		shader->setMatrix("modelScale", 1, Math::Scale(Vec3(1.0f))); // TODO get scale of model_matrix
 		shader->setMatrix("model", 1, render_sub_mesh_data->transform());
-		Renderer::drawIndex(render_sub_mesh_data->getVAO(), render_sub_mesh_data->indicesCount());
+		m_rhi->drawIndexed(render_sub_mesh_data->getVAO(), render_sub_mesh_data->indicesCount());
 	}
 	shader->stop_using();
 }

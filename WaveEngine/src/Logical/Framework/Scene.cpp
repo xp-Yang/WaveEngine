@@ -6,6 +6,8 @@
 
 #include "ResourceManager/AssetManager.hpp"
 
+#include "Core/Logger/Logger.hpp"
+
 static const std::string resource_dir = RESOURCE_DIR;
 
 void Scene::load()
@@ -16,31 +18,40 @@ void Scene::save()
 {
 }
 
-#if ENABLE_ECS
 GObject* Scene::loadModel(const std::string& filepath)
 {
 	Asset::ObjImporter obj_importer;
 	obj_importer.load(filepath);
 	std::vector<int> obj_sub_meshes_idx = obj_importer.getSubMeshesIds();
 	if (obj_sub_meshes_idx.empty()) {
-		//Logger::Logger::get().error("Model datas is empty. File loading fails. Please check if the filepath is all English.");
+		//Logger::error("Model datas is empty. File loading fails. Please check if the filepath is all English.");
 		return nullptr;
 	}
+	std::string name = filepath.substr(filepath.find_last_of("/\\") + 1, filepath.find_last_of('.') - filepath.find_last_of("/\\") - 1);
+
+#if ENABLE_ECS
 	auto& world = ecs::World::get();
 	auto entity = world.create_entity();
-	std::string name = filepath.substr(filepath.find_last_of("/\\") + 1, filepath.find_last_of('.') - filepath.find_last_of("/\\") - 1);
 	world.addComponent<ecs::NameComponent>(entity).name = name;
 	world.addComponent<TransformComponent>(entity);
-	//world.addComponent<ExplosionComponent>(entity);
+	world.addComponent<ExplosionComponent>(entity);
 	auto& renderable = world.addComponent<ecs::RenderableComponent>(entity);
 	for (int idx : obj_sub_meshes_idx) {
 		renderable.sub_meshes.push_back(Asset::SubMesh{ idx, Asset::MeshFileRef{ Asset::MeshFileType::OBJ, filepath}, {}, Mat4(1.0f) });
 	}
-
 	auto res = new GObject(m_root_object, entity);
+#else
+	auto res = new GObject(m_root_object, name);
+	res->addComponent<TransformComponent>();
+	MeshComponent& mesh = res->addComponent<MeshComponent>();
+	for (int idx : obj_sub_meshes_idx) {
+		mesh.sub_meshes.push_back(Asset::SubMesh{ idx, Asset::MeshFileRef{ Asset::MeshFileType::OBJ, filepath}, obj_importer.materialOfNode(idx), Mat4(1.0f) });
+	}
+	m_objects.push_back(std::shared_ptr<GObject>(res));
+#endif
+
 	return res;
 }
-#endif
 
 void Scene::init()
 {
@@ -239,11 +250,35 @@ void Scene::init()
 
 		m_objects.push_back(std::shared_ptr<GObject>(plane_obj));
 	}
+
+	{
+		loadModel(resource_dir + "/model/nanosuit/nanosuit.obj");
+
+		loadModel(resource_dir + "/model/vampire/dancing_vampire.dae");
+
+		GObject* bunny_obj = loadModel(resource_dir + "/model/bunny.obj");
+		auto bunny_transform = bunny_obj->getComponent<TransformComponent>();
+		bunny_transform->scale = Vec3(40.0f);
+		bunny_transform->translation = Vec3(-10.0f, 0.0f, 0.0f);
+	}
 }
 
 void Scene::onUpdate(float delta_time)
 {
 	for (const auto& obj : m_objects) {
 		obj->tick(delta_time);
+	}
+}
+
+void Scene::onPickedChanged(std::vector<GObjectID> added, std::vector<GObjectID> removed)
+{
+	m_picked_objects.erase(std::remove_if(m_picked_objects.begin(), m_picked_objects.end(), [removed](const std::shared_ptr<GObject>& obj) {
+		return std::find(removed.begin(), removed.end(), obj->ID()) != removed.end();
+		}), m_picked_objects.end());
+	for (const auto& obj : m_objects) {
+		if (std::find(added.begin(), added.end(), obj->ID()) != added.end()) {
+			m_picked_objects.push_back(obj);
+			Logger::debug("Scene::onPickedChanged(), added obj: {} {}", obj->ID().id, obj->name());
+		}
 	}
 }

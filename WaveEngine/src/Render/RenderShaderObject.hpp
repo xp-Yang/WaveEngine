@@ -1,7 +1,7 @@
 #ifndef RenderShaderObject_hpp
 #define RenderShaderObject_hpp
 
-#include "Core/Math.hpp"
+#include "Core/Math/Math.hpp"
 #include "ResourceManager/AssetManager.hpp"
 
 using GL_RESOURCE_HANLE = unsigned int;

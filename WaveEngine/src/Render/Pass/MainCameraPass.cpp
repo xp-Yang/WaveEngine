@@ -1,18 +1,27 @@
 #include "MainCameraPass.hpp"
-
+// TODO remove
+#include <glad/glad.h>
 void MainCameraPass::init()
 {
-    m_framebuffer = std::make_unique<FrameBuffer>(WINDOW_WIDTH, WINDOW_HEIGHT, 4);
-    m_framebuffer->create({ AttachmentType::RGBA, AttachmentType::DEPTH24STENCIL8 });
+    RhiTexture* color_texture = m_rhi->newTexture(RhiTexture::Format::RGB16F, Vec2(DEFAULT_RENDER_RESOLUTION_X, DEFAULT_RENDER_RESOLUTION_Y));
+    RhiTexture* depth_texture = m_rhi->newTexture(RhiTexture::Format::DEPTH24STENCIL8, Vec2(DEFAULT_RENDER_RESOLUTION_X, DEFAULT_RENDER_RESOLUTION_Y));
+    color_texture->create();
+    depth_texture->create();
+    RhiAttachment color_attachment = RhiAttachment(color_texture);
+    RhiAttachment depth_ttachment = RhiAttachment(depth_texture);
+    RhiFrameBuffer* fb = m_rhi->newFrameBuffer(color_attachment, Vec2(DEFAULT_RENDER_RESOLUTION_X, DEFAULT_RENDER_RESOLUTION_Y));
+    fb->setDepthAttachment(depth_ttachment);
+    fb->create();
+    m_framebuffer = std::unique_ptr<RhiFrameBuffer>(fb);
 }
 
-void MainCameraPass::prepare(FrameBuffer* framebuffer)
-{
-    if (framebuffer)
-        m_shadow_map = framebuffer->getFirstAttachmentOf(AttachmentType::DEPTH).getMap();
-    else
-        m_shadow_map = 0;
-}
+//void MainCameraPass::prepare(FrameBuffer* framebuffer)
+//{
+//    if (framebuffer)
+//        m_shadow_map = framebuffer->getFirstAttachmentOf(AttachmentType::DEPTH).getMap();
+//    else
+//        m_shadow_map = 0;
+//}
 
 void MainCameraPass::configShader(bool skybox, bool reflection, bool normal_debug, bool wireframe)
 {
@@ -27,7 +36,7 @@ void MainCameraPass::configSamples(int samples)
 {
     //config FrameBuffer
     m_framebuffer->bind();
-    m_framebuffer->setSamples(samples);
+    //m_framebuffer->setSamples(samples);
 }
 
 void MainCameraPass::draw()
@@ -44,7 +53,8 @@ void MainCameraPass::draw()
     Vec4 light_color = m_render_source_data->render_directional_light_data_list.front().color;
 
     static RenderShaderObject* shader = RenderShaderObject::getShaderObject(Asset::ShaderType::PBRShader);
-    for (const auto& render_sub_mesh_data : m_render_source_data->render_object_sub_mesh_data_list) {
+    for (const auto& pair : m_render_source_data->render_mesh_data_hash) {
+        const auto& render_sub_mesh_data = pair.second;
         auto& material = render_sub_mesh_data->renderMaterialData();
         shader->start_using();
         // temp
@@ -83,7 +93,7 @@ void MainCameraPass::draw()
                 shader->setCubeTexture(cube_map_id, 6 + i, m_cube_maps[i]);
             }
         }
-        Renderer::drawIndex(render_sub_mesh_data->getVAO(), render_sub_mesh_data->indicesCount());
+        m_rhi->drawIndexed(render_sub_mesh_data->getVAO(), render_sub_mesh_data->indicesCount());
         shader->stop_using();
     }
     
@@ -96,12 +106,7 @@ void MainCameraPass::draw()
         skybox_shader->setMatrix("view", 1, Mat4(Mat3(m_render_source_data->view_matrix)));
         skybox_shader->setMatrix("projection", 1, m_render_source_data->proj_matrix);
         skybox_shader->setCubeTexture("skybox", 4, m_render_source_data->render_skybox_data.skybox_cube_map);
-        Renderer::drawIndex(render_skybox_sub_mesh_data->getVAO(), render_skybox_sub_mesh_data->indicesCount());
+        m_rhi->drawIndexed(render_skybox_sub_mesh_data->getVAO(), render_skybox_sub_mesh_data->indicesCount());
         skybox_shader->stop_using();
     }
-}
-
-FrameBuffer* MainCameraPass::getFrameBuffer()
-{
-    return m_framebuffer.get();
 }

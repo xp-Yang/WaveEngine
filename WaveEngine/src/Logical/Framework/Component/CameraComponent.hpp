@@ -4,13 +4,10 @@
 #include "Component.hpp"
 #include "Logical/Input/CameraManipulator.hpp"
 
-// TODO
-extern float WINDOW_WIDTH;
-extern float WINDOW_HEIGHT;
-extern float ASPECT_RATIO;
-
 struct CameraComponent : public Component {
 	CameraComponent(GObject* parent) : Component(parent) {}
+	CameraComponent(const CameraComponent&) = delete;
+	CameraComponent& operator=(const CameraComponent&) = delete;
 
 	std::string typeName() override { return "CameraComponent"; }
 
@@ -41,9 +38,10 @@ struct CameraComponent : public Component {
 	}
 	Vec3 pos = Vec3(0.0f) - 40.0f * direction;
 	Mat4 view = lookAt(pos, pos + direction, CameraManipulator::global_up);
+	float aspectRatio{ 16.0f / 9.0f }; // TODO should on window size change
 	Mat4 projection = projection_mode == CameraManipulator::Projection::Perspective ?
-		Math::Perspective(fov, ASPECT_RATIO, nearPlane, farPlane) :
-		Math::Ortho(-15.0f * ASPECT_RATIO, 15.0f * ASPECT_RATIO, -15.0f, 15.0f, nearPlane, farPlane);
+		Math::Perspective(fov, aspectRatio, nearPlane, farPlane) :
+		Math::Ortho(-15.0f * aspectRatio, 15.0f * aspectRatio, -15.0f, 15.0f, nearPlane, farPlane);
 };
 
 #endif // !CameraComponent_hpp

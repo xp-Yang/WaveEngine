@@ -19,6 +19,11 @@ public:
         m_func(std::forward<Args>(args)...);
     }
 
+    void exec(const Args&... args)
+    {
+        m_func(args...);
+    }
+
 private:
     onFunc m_func = nullptr;
 };

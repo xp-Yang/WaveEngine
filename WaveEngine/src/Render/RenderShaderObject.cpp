@@ -1,6 +1,7 @@
 #include "RenderShaderObject.hpp"
 
-#include <Platform/RHI/rhi.hpp>
+#include <Render/RHI/rhi.hpp>
+#include <glad/glad.h>
 
 #include <glm/gtc/type_ptr.hpp>
 
@@ -24,7 +25,7 @@ public:
 
 public:
     ShaderParser(const std::string& filepath) {
-        Logger::Logger::get().info("parsing the shader file {}", filepath);
+        Logger::info("parsing the shader file {}", filepath);
         load_file(filepath);
     }
 
@@ -59,7 +60,7 @@ protected:
         }
         catch (...)
         {
-            Logger::Logger::get().error("SHADER FILE NOT SUCCESFULLY READ");
+            Logger::error("SHADER FILE NOT SUCCESFULLY READ");
             assert(false);
             return false;
         }
@@ -172,11 +173,11 @@ RenderShaderObject* RenderShaderObject::getShaderObject(const Asset::ShaderType&
 RenderShaderObject::RenderShaderObject(const Asset::Shader& shader_asset)
 {
     if (shader_asset.vshader_filepath.empty()) {
-        Logger::Logger::get().error("a vertex shader is needed!");
+        Logger::error("a vertex shader is needed!");
         assert(false);
     }
     if (shader_asset.fshader_filepath.empty()) {
-        Logger::Logger::get().error("a fragment shader is needed!");
+        Logger::error("a fragment shader is needed!");
         assert(false);
     }
     bool has_geo_shader = !shader_asset.gshader_filepath.empty();
@@ -211,7 +212,7 @@ RenderShaderObject::RenderShaderObject(const Asset::Shader& shader_asset)
     if (!success)
     {
         glGetShaderInfoLog(vertex, 512, NULL, infoLog);
-        Logger::Logger::get().error("SHADER::VERTEX::COMPILATION_FAILED\n{}\n", infoLog);
+        Logger::error("SHADER::VERTEX::COMPILATION_FAILED\n{}\n", infoLog);
         assert(false);
     };
 
@@ -223,7 +224,7 @@ RenderShaderObject::RenderShaderObject(const Asset::Shader& shader_asset)
         if (!success)
         {
             glGetShaderInfoLog(geometry, 512, NULL, infoLog);
-            Logger::Logger::get().error("SHADER::GEOMETRY::COMPILATION_FAILED\n{}\n", infoLog);
+            Logger::error("SHADER::GEOMETRY::COMPILATION_FAILED\n{}\n", infoLog);
             assert(false);
         };
     }
@@ -235,7 +236,7 @@ RenderShaderObject::RenderShaderObject(const Asset::Shader& shader_asset)
     if (!success)
     {
         glGetShaderInfoLog(fragment, 512, NULL, infoLog);
-        Logger::Logger::get().error("SHADER::FRAGMENT::COMPILATION_FAILED\n{}\n", infoLog);
+        Logger::error("SHADER::FRAGMENT::COMPILATION_FAILED\n{}\n", infoLog);
         assert(false);
     };
 
@@ -251,7 +252,7 @@ RenderShaderObject::RenderShaderObject(const Asset::Shader& shader_asset)
     if (!success)
     {
         glGetProgramInfoLog(m_id, 512, NULL, infoLog);
-        Logger::Logger::get().error("SHADER::PROGRAM::LINKING_FAILED\n{}\n", infoLog);
+        Logger::error("SHADER::PROGRAM::LINKING_FAILED\n{}\n", infoLog);
         assert(false);
     }
     glDeleteShader(vertex);

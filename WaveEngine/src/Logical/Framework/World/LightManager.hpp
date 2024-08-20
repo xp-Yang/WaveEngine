@@ -1,12 +1,7 @@
 #ifndef LightManager_hpp
 #define LightManager_hpp
 
-#include "Core/Math.hpp"
-
-// TODO
-extern float WINDOW_WIDTH;
-extern float WINDOW_HEIGHT;
-extern float ASPECT_RATIO;
+#include "Core/Math/Math.hpp"
 
 struct Light {
 	Color4 luminousColor = { 1.0f, 1.0f, 1.0f, 1.0f };
@@ -43,10 +38,11 @@ struct PointLightComponent : public Light {
 
 struct DirectionalLightComponent : public Light {
 	Vec3 direction;
+	float aspectRatio{ 16.0f / 9.0f }; // TODO should on window size change
 
 	Mat4 lightReferenceMatrix() const
 	{
-		Mat4 light_projection = Ortho(-30.0f * ASPECT_RATIO, 30.0f * ASPECT_RATIO, -30.0f, 30.0f, 0.1f, 100.0f);
+		Mat4 light_projection = Ortho(-30.0f * aspectRatio, 30.0f * aspectRatio, -30.0f, 30.0f, 0.1f, 100.0f);
 		Mat4 light_view = LookAt(Vec3(0.0f) - direction, Vec3(0.0f), Vec3(0.0f, 1.0f, 0.0f));
 		return light_projection * light_view;
 	}

@@ -11,6 +11,8 @@
 #include "Logical/Framework/World/Skybox.hpp"
 #endif
 
+#include "Core/Signal/Signal.hpp"
+
 class Scene {
 public:
 	void load();
@@ -20,11 +22,11 @@ public:
 
 	void onUpdate(float delta_time);
 	GObject* rootObject() const { return m_root_object; }
+	GObject* loadModel(const std::string& filepath);
 #if ENABLE_ECS
-	ecs::Object* rootObject() const { return m_root_object; }
-	ecs::Object* loadModel(const std::string& filepath);
-	Object* object(const Entity& entity) { return m_root_object->find(entity); }
+	GObject* object(const Entity& entity) { return m_root_object->find(entity); }
 #else
+	const std::vector<std::shared_ptr<GObject>>& getPickedObjects() { return m_picked_objects; }
 	const std::vector<std::shared_ptr<GObject>>& getObjects() { return m_objects; }
 	std::shared_ptr<LightManager> getLightManager() { return m_light_manager; }
 	std::shared_ptr<Skybox> getSkybox() { return m_skybox; }
@@ -34,6 +36,10 @@ public:
 		return *camera;
 }
 #endif
+
+public slots:
+	void onPickedChanged(std::vector<GObjectID> added, std::vector<GObjectID> removed);
+
 private:
 	GObject* m_root_object{ nullptr };
 #if ENABLE_ECS
@@ -44,6 +50,7 @@ private:
 	std::vector<std::shared_ptr<GObject>> m_objects;
 	std::shared_ptr<LightManager> m_light_manager;
 	std::shared_ptr<Skybox> m_skybox;
+	std::vector<std::shared_ptr<GObject>> m_picked_objects;
 #endif
 };
 

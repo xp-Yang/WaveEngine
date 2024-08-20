@@ -9,6 +9,30 @@
 
 namespace Logger {
 
+template<typename... Args>
+void trace(spdlog::string_view_t fmt, const Args &... args)
+{
+	Logger::get().trace(fmt, args...);
+}
+
+template<typename... Args>
+void debug(spdlog::string_view_t fmt, const Args &... args)
+{
+	Logger::get().debug(fmt, args...);
+}
+
+template<typename... Args>
+void info(spdlog::string_view_t fmt, const Args &... args)
+{
+	Logger::get().info(fmt, args...);
+}
+
+template<typename... Args>
+void error(spdlog::string_view_t fmt, const Args &... args)
+{
+	Logger::get().error(fmt, args...);
+}
+
 class Logger {
 public:
 	enum OutputMode {

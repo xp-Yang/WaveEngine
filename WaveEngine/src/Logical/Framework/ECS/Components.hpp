@@ -1,20 +1,14 @@
 #ifndef Components_hpp
 #define Components_hpp
 
-#include <string>
-#include <vector>
-#include "Core/Math.hpp"
+#if ENABLE_ECS
+
 #include "World.hpp"
 #include "ResourceManager/AssetManager.hpp"
 #include "Logical/Input/CameraManipulator.hpp"
-
-// TODO
-extern float WINDOW_WIDTH;
-extern float WINDOW_HEIGHT;
-extern float ASPECT_RATIO;
+#include "Engine.hpp"
 
 namespace ecs {
-
 
 struct NameComponent {
     std::string name;
@@ -147,5 +141,7 @@ struct ExplosionComponent {
 #define AllComponents ecs::NameComponent, ecs::TransformComponent, ecs::CameraComponent, ecs::RenderableComponent, ecs::SkyboxComponent, ecs::PointLightComponent, ecs::DirectionalLightComponent, ecs::PickedComponent, ecs::ExplosionComponent
 
 }
+
+#endif
 
 #endif

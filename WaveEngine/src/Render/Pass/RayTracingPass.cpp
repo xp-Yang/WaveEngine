@@ -2,12 +2,16 @@
 
 void RayTracingPass::init()
 {
-	m_framebuffer = std::make_unique<FrameBuffer>(WINDOW_WIDTH, WINDOW_HEIGHT);
-	m_framebuffer->create({ AttachmentType::RGBA });
-}
-
-void RayTracingPass::prepare(FrameBuffer* framebuffer)
-{
+	RhiTexture* color_texture = m_rhi->newTexture(RhiTexture::Format::RGB16F, Vec2(DEFAULT_RENDER_RESOLUTION_X, DEFAULT_RENDER_RESOLUTION_Y));
+	RhiTexture* depth_texture = m_rhi->newTexture(RhiTexture::Format::DEPTH, Vec2(DEFAULT_RENDER_RESOLUTION_X, DEFAULT_RENDER_RESOLUTION_Y));
+	color_texture->create();
+	depth_texture->create();
+	RhiAttachment color_attachment = RhiAttachment(color_texture);
+	RhiAttachment depth_ttachment = RhiAttachment(depth_texture);
+	RhiFrameBuffer* fb = m_rhi->newFrameBuffer(color_attachment, Vec2(DEFAULT_RENDER_RESOLUTION_X, DEFAULT_RENDER_RESOLUTION_Y));
+	fb->setDepthAttachment(depth_ttachment);
+	fb->create();
+	m_framebuffer = std::unique_ptr<RhiFrameBuffer>(fb);
 }
 
 void RayTracingPass::draw()
@@ -17,8 +21,6 @@ void RayTracingPass::draw()
 
 	static RenderShaderObject* rt_shader = RenderShaderObject::getShaderObject(Asset::ShaderType::RayTracingShader);
 	auto camera = m_render_source_data->render_camera;
-
-	Viewport rt_viewport = Application::GetApp().getWindow()->getViewport(ViewportType::RayTracing).value_or(Viewport());
 
 	{
 		rt_shader->start_using();
@@ -41,11 +43,8 @@ void RayTracingPass::draw()
 		// random
 		rt_shader->setFloat("randOrigin", 674764.0f * (Math::randomUnit() + 1.0f));
 		// render to m_framebuffer
-		Renderer::drawIndex(m_screen_quad->getVAO(), m_screen_quad->indicesCount());
+		m_rhi->drawIndexed(m_screen_quad->getVAO(), m_screen_quad->indicesCount());
 	}
-}
 
-FrameBuffer* RayTracingPass::getFrameBuffer()
-{
-	return m_framebuffer.get();
+	m_framebuffer->unBind();
 }

@@ -13,12 +13,6 @@ set(ENGINE_SRC_DIR ${ENGINE_DIR}/src)
 set(ENGINE_RESOURCE_DIR ${ENGINE_DIR}/resource)
 set(ENGINE_ASSET_DIR ${ENGINE_DIR}/asset)
 
-set(ENGINE_INCLUDE_DIR ${ENGINE_DIR}/include)
-set(IMGUI_INCLUDE_DIR ${THIRD_PARTY_DIR})
-set(GLFW_INCLUDE_DIR ${THIRD_PARTY_DIR}/glfw/include)
-set(GLAD_INCLUDE_DIR ${THIRD_PARTY_DIR}/glad/include)
-set(ASSIMP_INCLUDE_DIR ${THIRD_PARTY_DIR}/assimp/include)
-
 # ---- Include guards ----
 if(PROJECT_SOURCE_DIR STREQUAL PROJECT_BINARY_DIR)
   message(
@@ -37,5 +31,4 @@ target_compile_definitions(WaveRuntime PUBLIC ASSET_DIR="${ENGINE_ASSET_DIR}")
 target_compile_definitions(WaveRuntime PUBLIC ENABLE_ECS=false)
 
 file(COPY ${PROJECT_SOURCE_DIR}/imgui.ini DESTINATION ${CMAKE_BINARY_DIR}/test)
-#TODO 自定义输出binary的路径
 #set_target_properties(MyTarget PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)

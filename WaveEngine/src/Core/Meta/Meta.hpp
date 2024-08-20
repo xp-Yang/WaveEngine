@@ -8,7 +8,7 @@
 #include <string>
 #include <memory>
 #include <assert.h>
-#include <json11/json11.hpp>
+#include <json11.hpp>
 
 #include "traits.hpp"
 

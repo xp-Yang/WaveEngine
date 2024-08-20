@@ -1,18 +1,12 @@
 #ifndef RenderSourceData_hpp
 #define RenderSourceData_hpp
 
-#include "Core/Math.hpp"
+#include "Core/Common.hpp"
 #include "ResourceManager/AssetManager.hpp"
+#include "Logical/Framework/Object/GObjectID.hpp"
 #include "RenderShaderObject.hpp"
 
 using GL_RESOURCE_HANLE = unsigned int;
-
-struct RenderTextureData {
-    RenderTextureData(const Asset::Texture& texture_asset);
-    RenderTextureData(const Asset::CubeTexture& cube_texture_asset);
-
-    GL_RESOURCE_HANLE map;
-};
 
 struct RenderMaterialData {
     GL_RESOURCE_HANLE albedo_map{ 0 };
@@ -31,13 +25,30 @@ struct RenderMaterialData {
     GL_RESOURCE_HANLE height_map{ 0 };
 };
 
-class RenderSubMeshData {
+struct RenderMeshDataID {
+    RenderMeshDataID(GObjectID object_id, int sub_mesh_idx)
+        : object_id(object_id)
+        , sub_mesh_idx(sub_mesh_idx)
+    {}
+    bool operator==(const RenderMeshDataID& rhs) const {
+        return object_id == rhs.object_id && sub_mesh_idx == rhs.sub_mesh_idx;
+    }
+    GObjectID object_id;
+    int sub_mesh_idx;
+};
+struct RenderMeshDataIDHasher {
+    size_t operator()(const RenderMeshDataID& id) const {
+        return (std::hash<int>()(id.object_id.id) ^ (std::hash<int>()(id.sub_mesh_idx)) << 1);
+    }
+};
+
+class RenderMeshData {
 public:
-    RenderSubMeshData(int id, const Asset::SubMesh& sub_mesh_asset, const Mat4& model_transform = Mat4(1.0f));
-    ~RenderSubMeshData() { reset(); }
+    RenderMeshData(const RenderMeshDataID& id, const Asset::SubMesh& sub_mesh_asset, const Mat4& model_transform = Mat4(1.0f));
+    ~RenderMeshData() { reset(); }
 
     void reset();
-    int id() const { return m_id; }
+    RenderMeshDataID ID() const { return m_id; }
     GL_RESOURCE_HANLE getVAO() const { return m_VAO; }
     size_t indicesCount() const { return m_mesh_data->indices().size(); }
     size_t verticesCount() const { return m_mesh_data->vertices().size(); }
@@ -48,7 +59,6 @@ public:
 
 protected:
     void create_vbo();
-    void create_vao();
 
 private:
     GL_RESOURCE_HANLE m_VAO = 0;
@@ -57,7 +67,7 @@ private:
     std::shared_ptr<Asset::MeshData> m_mesh_data;
     RenderMaterialData m_material;
     Mat4 m_transform;
-    int m_id;
+    RenderMeshDataID m_id;
 };
 
 
@@ -73,13 +83,13 @@ struct RenderPointLightData {
     float radius;
     std::array<Mat4, 6> lightReferenceMatrix;
 
-    std::shared_ptr<RenderSubMeshData> render_sub_mesh_data;
+    std::shared_ptr<RenderMeshData> render_sub_mesh_data;
 };
 
 struct RenderSkyboxData {
     GL_RESOURCE_HANLE skybox_cube_map;
 
-    std::shared_ptr<RenderSubMeshData> render_sub_mesh_data;
+    std::shared_ptr<RenderMeshData> render_sub_mesh_data;
 };
 
 struct RenderCameraData {
@@ -91,12 +101,12 @@ struct RenderCameraData {
 };
 
 struct RenderSourceData {
-    std::vector<std::shared_ptr<RenderSubMeshData>> render_object_sub_mesh_data_list;
+    std::unordered_map<RenderMeshDataID, std::shared_ptr<RenderMeshData>, RenderMeshDataIDHasher> render_mesh_data_hash;
     std::vector<RenderDirectionalLightData> render_directional_light_data_list;
     std::vector<RenderPointLightData> render_point_light_data_list;
     RenderSkyboxData render_skybox_data;
 
-    std::vector<int> picked_ids;
+    std::vector<GObjectID> picked_ids;
 
     Vec3 camera_position;
     Mat4 view_matrix;
@@ -105,7 +115,7 @@ struct RenderSourceData {
     std::shared_ptr<RenderCameraData> render_camera;
 
     void reset() {
-        render_object_sub_mesh_data_list.clear();
+        render_mesh_data_hash.clear();
         render_directional_light_data_list.clear();
         render_point_light_data_list.clear();
         render_skybox_data.render_sub_mesh_data.reset();

@@ -6,15 +6,21 @@ BlurPass::BlurPass()
 
 void BlurPass::init()
 {
-    m_framebuffer = std::make_unique<FrameBuffer>(WINDOW_WIDTH, WINDOW_HEIGHT);
-    m_framebuffer->create({ AttachmentType::RGB16F });
+    RhiTexture* color_texture = m_rhi->newTexture(RhiTexture::Format::RGB16F, Vec2(DEFAULT_RENDER_RESOLUTION_X, DEFAULT_RENDER_RESOLUTION_Y));
+    color_texture->create();
+    RhiAttachment color_attachment = RhiAttachment(color_texture);
+    RhiFrameBuffer* fb = m_rhi->newFrameBuffer(color_attachment, Vec2(DEFAULT_RENDER_RESOLUTION_X, DEFAULT_RENDER_RESOLUTION_Y));
+    fb->create();
+    m_framebuffer = std::unique_ptr<RhiFrameBuffer>(fb);
 
-    m_pingpong_framebuffer = std::make_unique<FrameBuffer>(WINDOW_WIDTH, WINDOW_HEIGHT);
-    m_pingpong_framebuffer->create({ AttachmentType::RGB16F });
-}
-
-void BlurPass::prepare(FrameBuffer* framebuffer)
-{
+    {
+        RhiTexture* color_texture = m_rhi->newTexture(RhiTexture::Format::RGB16F, Vec2(DEFAULT_RENDER_RESOLUTION_X, DEFAULT_RENDER_RESOLUTION_Y));
+        RhiAttachment color_attachment = RhiAttachment(color_texture);
+        color_texture->create();
+        RhiFrameBuffer* fb = m_rhi->newFrameBuffer(color_attachment, Vec2(DEFAULT_RENDER_RESOLUTION_X, DEFAULT_RENDER_RESOLUTION_Y));
+        fb->create();
+        m_pingpong_framebuffer = std::unique_ptr<RhiFrameBuffer>(fb);
+    }
 }
 
 void BlurPass::draw()
@@ -24,8 +30,8 @@ void BlurPass::draw()
     m_pingpong_framebuffer->bind();
     m_pingpong_framebuffer->clear();
 
-    unsigned int map1 = m_framebuffer->getFirstAttachmentOf(AttachmentType::RGB16F).getMap();
-    unsigned int map2 = m_pingpong_framebuffer->getFirstAttachmentOf(AttachmentType::RGB16F).getMap();
+    unsigned int map1 = m_framebuffer->colorAttachmentAt(0)->texture()->id();
+    unsigned int map2 = m_pingpong_framebuffer->colorAttachmentAt(0)->texture()->id();
 
     static RenderShaderObject* blur_shader = RenderShaderObject::getShaderObject(Asset::ShaderType::GaussianBlur);
     bool horizontal = true;
@@ -42,20 +48,15 @@ void BlurPass::draw()
             blur_shader->setTexture("image", 0, (i == 0) ? m_bright_map : map1);
         }
         blur_shader->setInt("horizontal", horizontal);
-        Renderer::drawIndex(m_screen_quad->getVAO(), m_screen_quad->indicesCount());
+        m_rhi->drawIndexed(m_screen_quad->getVAO(), m_screen_quad->indicesCount());
         horizontal = !horizontal;
     }
     blur_shader->stop_using();
 }
 
-FrameBuffer* BlurPass::getFrameBuffer()
-{
-    return m_framebuffer.get();
-}
-
 unsigned int BlurPass::getBlurredBrightMap()
 {
-    return m_pingpong_framebuffer->getFirstAttachmentOf(AttachmentType::RGB16F).getMap();
+    return m_pingpong_framebuffer->colorAttachmentAt(0)->texture()->id();
 }
 
 void BlurPass::setBrightMap(unsigned int map)

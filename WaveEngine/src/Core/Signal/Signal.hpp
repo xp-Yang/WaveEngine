@@ -20,12 +20,19 @@ public:
         m_slots.push_back(std::make_shared<Slot<Args...>>(func));
     }
 
-    //void operator()(Args&&... args) // TODO FIXME
-    void operator()(Args&... args)
+    void operator()(Args&&... args) // 这里不是万能引用，Signal一声明，Args就确定了。万能引用发生在模板类型推导时
     {
         for (auto& iter : m_slots)
         {
             iter->exec(std::forward<Args>(args)...);
+        }
+    }
+
+    void operator()(const Args&... args)
+    {
+        for (auto& iter : m_slots)
+        {
+            iter->exec(args...);
         }
     }
 

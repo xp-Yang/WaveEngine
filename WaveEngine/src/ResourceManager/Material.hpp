@@ -1,7 +1,7 @@
 #ifndef Material_hpp
 #define Material_hpp
 
-#include "Core/Math.hpp"
+#include "Core/Math/Math.hpp"
 #include "Texture.hpp"
 
 namespace Asset {

@@ -147,7 +147,7 @@ std::shared_ptr<MeshData> MeshData::create_cube_mesh() {
     //glBindBuffer(GL_ARRAY_BUFFER, 0);
 
     // 没有normal和uv时
-    //GLfloat cubeVertices[] =
+    //float cubeVertices[] =
     //{
     //    // vertex           
     //    -0.2f, -0.2f,  0.2f, // 0 左下
@@ -159,7 +159,7 @@ std::shared_ptr<MeshData> MeshData::create_cube_mesh() {
     //     0.2f,  0.2f, -0.2f, // 6 后：右上
     //     0.2f, -0.2f, -0.2f, // 7 后：右下
     //};
-    //GLuint cubeIndices[] =
+    //int cubeIndices[] =
     //{
     //    0, 1, 2, 0, 2, 3, // Quad 0 前面
     //    4, 5, 6, 4, 6, 7, // Quad 1 后面
@@ -281,7 +281,7 @@ std::shared_ptr<MeshData> MeshData::create_icosphere_mesh(int regression_depth) 
         }
     }
 
-    // TODO 优化索引算法
+    // TODO optimize index method
     std::vector<int> indices;
     indices.reserve(all_vertices.size() + 1);
     for (int i = 0; i < all_vertices.size(); i++) {
@@ -291,7 +291,7 @@ std::shared_ptr<MeshData> MeshData::create_icosphere_mesh(int regression_depth) 
     QueryPerformanceCounter(&t2);
     auto time = (double)(t2.QuadPart - t1.QuadPart) / (double)tc.QuadPart;
 
-    Logger::Logger::get().info("MeshData::create_icosphere_mesh({}), time:{}", regression_depth, time);
+    Logger::info("MeshData::create_icosphere_mesh({}), time:{}", regression_depth, time);
 
     return std::make_shared<MeshData>(all_vertices, indices);
 }

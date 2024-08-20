@@ -1,7 +1,7 @@
 #ifndef Mesh_hpp
 #define Mesh_hpp
 
-#include <Core/Math.hpp>
+#include <Core/Math/Math.hpp>
 #include "Material.hpp"
 
 namespace Asset {

@@ -1,6 +1,7 @@
 #ifndef GObject_hpp
 #define GObject_hpp
 
+#include "GObjectID.hpp"
 #if !ENABLE_ECS
 #include "Logical/Framework/Component/CameraComponent.hpp"
 #include "Logical/Framework/Component/MeshComponent.hpp"
@@ -16,18 +17,6 @@ namespace Meta {
 		void allMetaRegister();
 	}
 }
-
-struct GObjectID {
-	GObjectID() : id(++global_id) {}
-	bool operator==(const GObjectID& rhs) {
-		return id == rhs.id;
-	}
-	operator int() { return id; }
-
-	int id;
-
-	static inline int global_id = 0;
-};
 
 #if !ENABLE_ECS
 class GObject {
