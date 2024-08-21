@@ -74,9 +74,9 @@ void RenderSystem::setRenderPathType(RenderPath::Type type)
     }
 }
 
-void RenderSystem::setRenderParams(const RenderParams& params)
+RenderParams& RenderSystem::renderParams()
 {
-    m_curr_path->setRenderParams(params);
+    return m_curr_path->m_render_params;
 }
 
 void RenderSystem::onUpdate()

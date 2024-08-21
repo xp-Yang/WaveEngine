@@ -10,7 +10,7 @@ public:
     void init();
     RenderPath::Type getRenderPathType();
     void setRenderPathType(RenderPath::Type type);
-    void setRenderParams(const RenderParams& params);
+    RenderParams& renderParams();
     void onUpdate();
     unsigned int getSceneTexture();
     unsigned int getPickingTexture();

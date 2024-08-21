@@ -20,6 +20,8 @@ void ImGuiGlobalConsole::render() {
         ImGui::Dummy(dummy);
     };
 
+    auto& render_params = m_ref_render_system->renderParams();
+
     ImGui::Dummy(dummy);
     ImGui::PushItemWidth(150.0f);
     int path_type_option = (int)m_ref_render_system->getRenderPathType();
@@ -39,30 +41,30 @@ void ImGuiGlobalConsole::render() {
     separator();
 
     ImGui::Text("Choose Shader:");
-    if (ImGui::RadioButton("Default", !m_render_params.wireframe && !m_render_params.checkerboard && !m_render_params.pbr)) {
-        m_render_params.pbr = false;
-        m_render_params.wireframe = false;
-        m_render_params.checkerboard = false;
+    if (ImGui::RadioButton("BlinnPhong", !render_params.wireframe && !render_params.checkerboard && !render_params.pbr)) {
+        render_params.pbr = false;
+        render_params.wireframe = false;
+        render_params.checkerboard = false;
     }
     ImGui::SameLine();
-    if (ImGui::RadioButton("PBR", m_render_params.pbr)) {
-        m_render_params.pbr = true;
-        m_render_params.wireframe = false;
-        m_render_params.checkerboard = false;
+    if (ImGui::RadioButton("PBR", render_params.pbr)) {
+        render_params.pbr = true;
+        render_params.wireframe = false;
+        render_params.checkerboard = false;
     }
     ImGui::SameLine();
-    if (ImGui::RadioButton("Wireframe", m_render_params.wireframe)) {
-        m_render_params.pbr = false;
-        m_render_params.wireframe = true;
-        m_render_params.checkerboard = false;
+    if (ImGui::RadioButton("Wireframe", render_params.wireframe)) {
+        render_params.pbr = false;
+        render_params.wireframe = true;
+        render_params.checkerboard = false;
     }
     ImGui::SameLine();
-    if (ImGui::RadioButton("Checkerboard", m_render_params.checkerboard)) {
-        m_render_params.pbr = false;
-        m_render_params.wireframe = false;
-        m_render_params.checkerboard = true;
+    if (ImGui::RadioButton("Checkerboard", render_params.checkerboard)) {
+        render_params.pbr = false;
+        render_params.wireframe = false;
+        render_params.checkerboard = true;
     }
-    //ImGui::SliderInt("pixel style", &m_render_params.pixelate_level, 1, 16);
+    //ImGui::SliderInt("pixel style", &render_params.pixelate_level, 1, 16);
 
     separator();
 
@@ -76,11 +78,12 @@ void ImGuiGlobalConsole::render() {
                 std::string label = std::to_string((int)std::pow(4, i)) + "x";
                 if (ImGui::Selectable(label.c_str(), selected)) {
                     curr_item = i;
-                    m_render_params.msaa_sample_count = (int)std::pow(4, i);
+                    render_params.msaa_sample_count = (int)std::pow(4, i);
                 }
             }
             ImGui::EndCombo();
         }
+        ImGui::SameLine();
         static unsigned int shadow_curr_item = 0;
         if (ImGui::BeginCombo("Shadow Map Resolution", (std::to_string((int)std::pow(4, shadow_curr_item)) + "x").c_str())) {
             for (int i = 0; i < 3; i++) {
@@ -88,17 +91,18 @@ void ImGuiGlobalConsole::render() {
                 std::string label = std::to_string((int)std::pow(4, i)) + "x";
                 if (ImGui::Selectable(label.c_str(), selected)) {
                     shadow_curr_item = i;
-                    m_render_params.shadow_map_sample_count = (int)std::pow(4, i);
+                    render_params.shadow_map_sample_count = (int)std::pow(4, i);
                 }
             }
             ImGui::EndCombo();
         }
         ImGui::PopItemWidth();
+        ImGui::SameLine();
     }
-    ImGui::Checkbox("skybox", &m_render_params.skybox); ImGui::SameLine();
-    ImGui::Checkbox("shadow", &m_render_params.shadow); ImGui::SameLine();
-    //ImGui::Checkbox("reflection", &m_render_params.reflection);
-    ImGui::Checkbox("normal", &m_render_params.normal_debug);
+    ImGui::Checkbox("skybox", &render_params.skybox); ImGui::SameLine();
+    ImGui::Checkbox("shadow", &render_params.shadow); ImGui::SameLine();
+    //ImGui::Checkbox("reflection", &render_params.reflection);
+    ImGui::Checkbox("normal", &render_params.normal_debug);
 
     separator();
 
@@ -131,10 +135,4 @@ void ImGuiGlobalConsole::render() {
     ImGui::Text("Average %.3f ms/frame (%.1f FPS)", 1000.0f / io.Framerate, io.Framerate);
 
     ImGui::End();
-}
-
-void ImGuiGlobalConsole::updateRenderParams()
-{
-    // TODO
-    //m_ref_render_system->setRenderParams(m_render_params);
 }

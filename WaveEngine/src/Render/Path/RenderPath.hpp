@@ -39,11 +39,9 @@ public:
     virtual unsigned int getPickingTexture() { return 0; };
     virtual unsigned int getPickingFBO() { return 0; };
     virtual unsigned int getShadowTexture() { return 0; };
-    void setRenderParams(const RenderParams& params) {
-        m_render_params = params;
-    }
 
 protected:
+    friend class RenderSystem;
     RenderParams m_render_params;
 };
 
