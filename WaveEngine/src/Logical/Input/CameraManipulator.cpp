@@ -162,7 +162,7 @@ void CameraManipulator::onMouseWheelUpdate(double yoffset, double mouse_x, doubl
         //Logger::debug("Mouse 3d position: {},{},{}", mouse_3d_pos.x, mouse_3d_pos.y, mouse_3d_pos.z);
         //Logger::debug("\n");
 
-        auto main_viewport = GetApp().editor()->viewPortWindowManager()->getMainViewport();
+        auto main_viewport = GetApp().editor()->canvasManager()->getMainViewport();
         float viewport_width = (float)main_viewport.width;
         float viewport_height = (float)main_viewport.height;
         Vec3 center_3d_pos = rayCastPlaneZero(viewport_width / 2.0f, viewport_height / 2.0f);
@@ -200,7 +200,7 @@ Vec3 CameraManipulator::rayCastPlaneZero(double mouse_x, double mouse_y)
 
     // 1.  get ray direction from mouse position
     Vec3 cam_right = main_camera.getRightDirection();
-    auto main_viewport = GetApp().editor()->viewPortWindowManager()->getMainViewport();
+    auto main_viewport = GetApp().editor()->canvasManager()->getMainViewport();
     float viewport_width = (float)main_viewport.width;
     float viewport_height = (float)main_viewport.height;
     // normalized the x, y coordinate and take the viewport center as origin

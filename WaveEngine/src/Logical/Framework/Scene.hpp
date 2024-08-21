@@ -27,6 +27,7 @@ public:
 	GObject* object(const Entity& entity) { return m_root_object->find(entity); }
 #else
 	const std::vector<std::shared_ptr<GObject>>& getPickedObjects() { return m_picked_objects; }
+	std::vector<GObjectID> getPickedObjectIDs();
 	const std::vector<std::shared_ptr<GObject>>& getObjects() { return m_objects; }
 	std::shared_ptr<LightManager> getLightManager() { return m_light_manager; }
 	std::shared_ptr<Skybox> getSkybox() { return m_skybox; }

@@ -58,7 +58,7 @@ void GUIInput::refreshState()
 Vec2 GUIInput::mapToMainViewportWindow(const Vec2 value)
 {
 	Vec2 pos = value;
-	auto main_viewport = GetApp().editor()->viewPortWindowManager()->getMainViewport();
+	auto main_viewport = GetApp().editor()->canvasManager()->getMainViewport();
 	pos.x -= main_viewport.x;
 	pos.y -= main_viewport.y;
 	pos.x *= GetApp().window()->getWidth() / main_viewport.width;

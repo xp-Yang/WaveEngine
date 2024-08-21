@@ -1,10 +1,6 @@
-#ifndef ImGuiImGuiViewPortWindow_hpp
-#define ImGuiImGuiViewPortWindow_hpp
+#ifndef ImGuiCanvas_hpp
+#define ImGuiCanvas_hpp
 
-#if ENABLE_ECS
-#include "Logical/FrameWork/ECS/World.hpp"
-#include "Logical/FrameWork/ECS/Components.hpp"
-#endif
 #include "Core/Common.hpp"
 
 struct Viewport {
@@ -31,25 +27,25 @@ struct Viewport {
     }
 };
 
-enum ViewportType : unsigned int {
+enum CanvasType : unsigned int {
     Main,
     Pick,
     Shadow,
     RayTracing,
 };
 
-class ImGuiViewPortWindow;
-class ImGuiViewPortWindowManager {
+class ImGuiCanvas;
+class ImGuiCanvasManager {
 public:
-	ImGuiViewPortWindowManager();
-	~ImGuiViewPortWindowManager();
+	ImGuiCanvasManager();
+	~ImGuiCanvasManager();
 	void render();
 
-    Viewport getViewport(ViewportType type) const;
+    Viewport getViewport(CanvasType type) const;
     Viewport getMainViewport() const;
 
 private:
-	std::vector<ImGuiViewPortWindow*> m_windows;
+	std::vector<ImGuiCanvas*> m_canvases;
 };
 
 #endif

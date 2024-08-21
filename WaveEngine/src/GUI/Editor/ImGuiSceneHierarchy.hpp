@@ -4,9 +4,10 @@
 #include "Core/Common.hpp"
 
 class GObject;
+class Scene;
 class ImGuiSceneHierarchy {
 public:
-	ImGuiSceneHierarchy() = default;
+	ImGuiSceneHierarchy();
 	void init();
 	void render();
 
@@ -16,6 +17,7 @@ protected:
 
 private:
 	std::unordered_map<std::string, std::function<void(std::string, void*)>> m_gui_creator;
+	Scene* m_ref_scene;
 };
 
 #endif

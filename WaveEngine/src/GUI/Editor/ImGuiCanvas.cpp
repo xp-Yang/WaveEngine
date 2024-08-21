@@ -1,29 +1,34 @@
-#include "ImGuiViewPortWindow.hpp"
+#include "ImGuiCanvas.hpp"
 #include <imgui.h>
 #include <imgui_internal.h>
 #include <ImGuizmo.h>
 #include "Engine.hpp"
 
-class ImGuiViewPortWindow {
+#if ENABLE_ECS
+#include "Logical/FrameWork/ECS/World.hpp"
+#include "Logical/FrameWork/ECS/Components.hpp"
+#endif
+
+class ImGuiCanvas {
 public:
     virtual void render() = 0;
     void setViewPort(const Viewport& viewport) { m_viewport = viewport; }
     Viewport getViewport() const { return m_viewport; }
-    ViewportType type() const { return m_type; }
+    CanvasType type() const { return m_type; }
 
 protected:
-    ViewportType m_type;
+    CanvasType m_type;
     Viewport m_viewport;
 };
 
-class MainViewPortWindow : public ImGuiViewPortWindow {
+class MainCanvas : public ImGuiCanvas {
 public:
     enum class ToolbarType : int {
         Translate,
         Rotate,
         Scale,
     };
-    MainViewPortWindow() { m_type = ViewportType::Main; }
+    MainCanvas() { m_type = CanvasType::Main; }
     void render() override;
 
 protected:
@@ -33,23 +38,23 @@ private:
     ToolbarType m_toolbar_type{ ToolbarType::Translate };
 };
 
-class PickingViewPortWindow : public ImGuiViewPortWindow {
+class PickingCanvas : public ImGuiCanvas {
 public:
-    PickingViewPortWindow() { m_type = ViewportType::Pick; }
+    PickingCanvas() { m_type = CanvasType::Pick; }
     void render() override;
 };
 
-class ShadowViewPortWindow : public ImGuiViewPortWindow {
+class ShadowCanvas : public ImGuiCanvas {
 public:
-    ShadowViewPortWindow() { m_type = ViewportType::Shadow; }
+    ShadowCanvas() { m_type = CanvasType::Shadow; }
     void render() override;
 };
 
-void MainViewPortWindow::render()
+void MainCanvas::render()
 {
     static ImGuiWindowFlags window_flags = 0;
     ImGui::SetNextWindowSize(ImVec2(1280, 720 + 20), ImGuiCond_Appearing);
-    if (ImGui::Begin("MainViewPortWindow", nullptr, window_flags | ImGuiWindowFlags_NoBackground)) {
+    if (ImGui::Begin("MainCanvas", nullptr, window_flags | ImGuiWindowFlags_NoBackground)) {
         ImGuiWindow* window = ImGui::GetCurrentWindow();
         bool hovered_window = ImGui::IsWindowHovered() && ImGui::IsMouseHoveringRect(window->InnerRect.Min, window->InnerRect.Max);
         window_flags = hovered_window ? ImGuiWindowFlags_NoMove : 0;
@@ -69,7 +74,7 @@ void MainViewPortWindow::render()
     ImGui::End();
 }
 
-void MainViewPortWindow::renderGizmos()
+void MainCanvas::renderGizmos()
 {
     ImGuizmo::OPERATION imguizmo_operation;
     switch (m_toolbar_type)
@@ -133,11 +138,11 @@ void MainViewPortWindow::renderGizmos()
 #endif
 }
 
-void PickingViewPortWindow::render()
+void PickingCanvas::render()
 {
     static ImGuiWindowFlags window_flags = 0;
     ImGui::SetNextWindowSize(ImVec2(400, 225), ImGuiCond_Appearing);
-    if (ImGui::Begin("PickingViewPortWindow", nullptr, window_flags | ImGuiWindowFlags_NoBackground)) {
+    if (ImGui::Begin("PickingCanvas", nullptr, window_flags | ImGuiWindowFlags_NoBackground)) {
         ImGuiWindow* window = ImGui::GetCurrentWindow();
         bool hovered_window = ImGui::IsWindowHovered() && ImGui::IsMouseHoveringRect(window->InnerRect.Min, window->InnerRect.Max);
         window_flags = hovered_window ? ImGuiWindowFlags_NoMove : 0;
@@ -151,11 +156,11 @@ void PickingViewPortWindow::render()
     ImGui::End();
 }
 
-void ShadowViewPortWindow::render()
+void ShadowCanvas::render()
 {
     static ImGuiWindowFlags window_flags = 0;
     ImGui::SetNextWindowSize(ImVec2(400, 225), ImGuiCond_Appearing);
-    if (ImGui::Begin("ShadowViewPortWindow", nullptr, window_flags | ImGuiWindowFlags_NoBackground)) {
+    if (ImGui::Begin("ShadowCanvas", nullptr, window_flags | ImGuiWindowFlags_NoBackground)) {
         ImGuiWindow* window = ImGui::GetCurrentWindow();
         bool hovered_window = ImGui::IsWindowHovered() && ImGui::IsMouseHoveringRect(window->InnerRect.Min, window->InnerRect.Max);
         window_flags = hovered_window ? ImGuiWindowFlags_NoMove : 0;
@@ -170,39 +175,39 @@ void ShadowViewPortWindow::render()
 }
 
 
-ImGuiViewPortWindowManager::ImGuiViewPortWindowManager()
+ImGuiCanvasManager::ImGuiCanvasManager()
 {
-    ImGuiViewPortWindow* main_view = new MainViewPortWindow();
-    ImGuiViewPortWindow* picking_view = new PickingViewPortWindow();
-    ImGuiViewPortWindow* shadow_view = new ShadowViewPortWindow();
-    m_windows.assign({ main_view, picking_view, shadow_view });
+    ImGuiCanvas* main_canvas = new MainCanvas();
+    ImGuiCanvas* picking_canvas = new PickingCanvas();
+    ImGuiCanvas* shadow_canvas = new ShadowCanvas();
+    m_canvases.assign({ main_canvas, picking_canvas, shadow_canvas });
 }
 
-ImGuiViewPortWindowManager::~ImGuiViewPortWindowManager()
+ImGuiCanvasManager::~ImGuiCanvasManager()
 {
-    for (auto& view : m_windows) {
-        delete view;
+    for (auto& canvas : m_canvases) {
+        delete canvas;
     }
-    m_windows.clear();
+    m_canvases.clear();
 }
 
-void ImGuiViewPortWindowManager::render()
+void ImGuiCanvasManager::render()
 {
-    for (auto& view : m_windows) {
-        view->render();
+    for (auto& canvas : m_canvases) {
+        canvas->render();
     }
 }
 
-Viewport ImGuiViewPortWindowManager::getViewport(ViewportType type) const
+Viewport ImGuiCanvasManager::getViewport(CanvasType type) const
 {
-    for (const auto& window : m_windows) {
-        if (window->type() == type)
-            return window->getViewport();
+    for (const auto& canvas : m_canvases) {
+        if (canvas->type() == type)
+            return canvas->getViewport();
     }
     return {};
 }
 
-Viewport ImGuiViewPortWindowManager::getMainViewport() const
+Viewport ImGuiCanvasManager::getMainViewport() const
 {
-    return getViewport(ViewportType::Main);
+    return getViewport(CanvasType::Main);
 }

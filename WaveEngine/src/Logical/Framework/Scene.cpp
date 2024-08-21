@@ -53,6 +53,20 @@ GObject* Scene::loadModel(const std::string& filepath)
 	return res;
 }
 
+std::vector<GObjectID> Scene::getPickedObjectIDs()
+{
+	std::vector<GObjectID> res;
+	res.reserve(m_picked_objects.size());
+	// TODO  ≤√¥Œ Ã‚£ø
+	//std::transform(m_picked_objects.begin(), m_picked_objects.end(), res.begin(), [](const std::shared_ptr<GObject>& obj) {
+	//	return obj->ID();
+	//	});
+	for (const auto& obj : m_picked_objects) {
+		res.push_back(obj->ID());
+	}
+	return res;
+}
+
 void Scene::init()
 {
 #if ENABLE_ECS

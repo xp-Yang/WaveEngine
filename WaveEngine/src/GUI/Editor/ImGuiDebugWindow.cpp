@@ -6,7 +6,7 @@
 
 void ImGuiDebugWindow::render()
 {
-    ImGui::Begin("Main Camera", nullptr, ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse);
+    ImGui::Begin("Main Camera Info", nullptr, ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse);
 
     auto& camera = GetApp().scene()->getMainCamera();
     ImGui::NewLine();

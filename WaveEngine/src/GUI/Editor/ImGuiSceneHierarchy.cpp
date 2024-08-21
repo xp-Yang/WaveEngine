@@ -6,6 +6,11 @@
 #include "Logical/FrameWork/Scene.hpp"
 #include <Engine.hpp>
 
+ImGuiSceneHierarchy::ImGuiSceneHierarchy()
+    : m_ref_scene(GetApp().scene())
+{
+}
+
 void ImGuiSceneHierarchy::init()
 {
     m_gui_creator["TransformComponent"] = [this](const std::string& name, void* value_ptr) -> void {
@@ -111,62 +116,6 @@ void ImGuiSceneHierarchy::init()
 
 void ImGuiSceneHierarchy::renderNode(GObject* node)
 {
-    //for (int i = 0; i < node->children().size(); i++)
-    //{
-    //    auto child_node = node->children()[i];
-    //    const auto& childe_entity = child_node->entity();
-    //    static ImGuiTreeNodeFlags node_flags = ImGuiTreeNodeFlags_SpanAvailWidth;
-    //    for (const auto& picked_entity : world.getPickedEntities()) {
-    //        if (picked_entity == childe_entity)
-    //            node_flags |= ImGuiTreeNodeFlags_Selected;
-    //        else
-    //            node_flags &= ~ImGuiTreeNodeFlags_Selected;
-    //    }
-    //    std::string node_name = world.getComponent<ecs::NameComponent>(childe_entity)->name;
-    //    std::string display_text = node_name + " (Entity: " + std::to_string(childe_entity.getId()) + ")";
-    //    bool node_open = ImGui::TreeNodeEx((void*)(intptr_t)i, node_flags, display_text.c_str());
-    //    if (ImGui::IsItemClicked() && !ImGui::IsItemToggledOpen()) {
-    //        bool close = false;
-    //        for (const auto& picked_entity : world.getPickedEntities()) {
-    //            if (picked_entity.getId() == childe_entity.getId()) {
-    //                world.removeComponent<ecs::PickedComponent>(childe_entity);
-    //                close = true;
-    //            }
-    //        }
-    //        if (!close) {
-    //            for (const auto& picked_entity : world.getPickedEntities()) {
-    //                world.removeComponent<ecs::PickedComponent>(picked_entity);
-    //            }
-    //            world.addComponent<ecs::PickedComponent>(childe_entity);
-    //        }
-    //    }
-    //    if (node_open)
-    //    {
-    //        if (child_node->children().empty()) {
-    //            // TODO display all components name_str belong to this entity
-    //            ImGui::Text("Entity: %d", childe_entity);
-    //            if (world.hasComponent<ecs::NameComponent>(childe_entity))
-    //                ImGui::Text("<NameComponent>");
-    //            if (world.hasComponent<ecs::TransformComponent>(childe_entity))
-    //                ImGui::Text("<TransformComponent>");
-    //            if (world.hasComponent<ecs::RenderableComponent>(childe_entity))
-    //                ImGui::Text("<RenderableComponent>");
-    //            if (world.hasComponent<ecs::ExplosionComponent>(childe_entity))
-    //                ImGui::Text("<ExplosionComponent>");
-    //            if (world.hasComponent<ecs::SkyboxComponent>(childe_entity))
-    //                ImGui::Text("<SkyboxComponent>");
-    //            if (world.hasComponent<ecs::PointLightComponent>(childe_entity))
-    //                ImGui::Text("<PointLightComponent>");
-    //            if (world.hasComponent<ecs::DirectionalLightComponent>(childe_entity))
-    //                ImGui::Text("<DirectionalLightComponent>");
-    //        }
-    //        else {
-    //            renderSceneHierarchyNode(child_node);
-    //        }
-    //        ImGui::TreePop();
-    //    }
-    //}
-
     for (int i = 0; i < node->children().size(); i++)
     {
         auto child_node = node->children()[i];
@@ -174,21 +123,20 @@ void ImGuiSceneHierarchy::renderNode(GObject* node)
         std::string child_name = child_node->name();
         std::string display_text = child_name + " (ID: " + std::to_string(child_id.id) + ")";
 
-        static ImGuiTreeNodeFlags node_flags = ImGuiTreeNodeFlags_SpanAvailWidth;
-        //for (const auto& picked_entity : world.getPickedEntities()) {
-        //    if (picked_entity == childe_entity)
-        //        node_flags |= ImGuiTreeNodeFlags_Selected;
-        //    else
-        //        node_flags &= ~ImGuiTreeNodeFlags_Selected;
-        //}
+        ImGuiTreeNodeFlags node_flags = ImGuiTreeNodeFlags_SpanAvailWidth;
+        const auto& original_picked_ids = m_ref_scene->getPickedObjectIDs();
+        if (std::find(original_picked_ids.begin(), original_picked_ids.end(), child_id) != original_picked_ids.end())
+            node_flags |= ImGuiTreeNodeFlags_Selected;
+        else
+            node_flags &= ~ImGuiTreeNodeFlags_Selected;
 
         bool node_open = ImGui::TreeNodeEx((void*)(intptr_t)i, node_flags, display_text.c_str());
         if (ImGui::IsItemClicked() && !ImGui::IsItemToggledOpen()) {
-            // TODO set gobject selected
+            m_ref_scene->onPickedChanged({ child_id }, original_picked_ids);
         }
         if (node_open)
         {
-            if (child_node->children().empty()) {
+            if (child_node->isLeaf()) {
                 for (auto& com : child_node->getComponents()) {
                     auto refl = Meta::DynamicReflectionInstance(com->typeName(), com.get());
                     renderLeafNode(refl);
@@ -211,9 +159,9 @@ void ImGuiSceneHierarchy::renderLeafNode(Meta::DynamicReflectionInstance& refl_i
     {
         for (int i = 0; i < refl_instance.fieldCount(); i++) {
             auto field = refl_instance.field(i);
-            if (field.is_array) {
+            if (field.is_array) { // TODO field.is_array
                 ImGui::TreePop();
-                return; // TODO
+                return;
             }
             std::string field_type_name = field.field_type_name;
             std::string field_name = field.field_name;
@@ -233,13 +181,63 @@ void ImGuiSceneHierarchy::render()
 {
     if (ImGui::Begin(("Scene Hierarchy"), nullptr, ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse)) {
         ImGuiWindow* scene_hierarchy_window = ImGui::GetCurrentWindow();
-
-        auto scene_hierarchy = GetApp().scene();
-        auto root_node = scene_hierarchy->rootObject();
+        auto root_node = m_ref_scene->rootObject();
         renderNode(root_node);
     }
     ImGui::End();
 
-    //ImVec2 pos = ImVec2(scene_hierarchy_window->Pos.x + scene_hierarchy_window->Size.x, scene_hierarchy_window->Pos.y);
-    //renderPickedEntityController(pos, world.getPickedEntities());
+    // TODO render lights node
 }
+
+#if ENABLE_ECS
+void ImGuiEditor::renderPickedEntityController(const ImVec2& pos, const std::vector<ecs::Entity>& picked_entities)
+{
+    if (picked_entities.empty())
+        return;
+    auto entity = picked_entities[0];
+    if (!world.hasComponent<ecs::NameComponent>(entity))
+        return;
+    std::string obj_name = world.getComponent<ecs::NameComponent>(entity)->name;
+    ImGui::SetNextWindowPos(pos, ImGuiCond_Always, ImVec2(0.0f, 0.0f));
+    ImGui::Begin((obj_name).c_str(), nullptr, ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse);
+    ImGui::BringWindowToDisplayFront(ImGui::GetCurrentWindow());
+
+    if (world.hasComponent<ecs::RenderableComponent>(entity)) {
+        auto renderable = world.getComponent<ecs::RenderableComponent>(entity);
+        // 编辑对象材质属性
+        for (int i = 0; i < renderable->sub_meshes.size(); i++) {
+            auto& material = renderable->sub_meshes[i].material;
+
+            ImGui::PushItemWidth(80.0f);
+            ImGui::SliderFloat((std::string("##albedo.x") + "##" + obj_name).c_str(), &material.albedo.x, 0.0f, 1.0f);
+            ImGui::SameLine();
+            ImGui::SliderFloat((std::string("##albedo.y") + "##" + obj_name).c_str(), &material.albedo.y, 0.0f, 1.0f);
+            ImGui::SameLine();
+            ImGui::SliderFloat((std::string("albedo") + "##" + obj_name).c_str(), &material.albedo.z, 0.0f, 1.0f);
+            ImGui::PopItemWidth();
+
+            ImGui::SliderFloat((std::string("metallic") + "##" + obj_name).c_str(), &material.metallic, 0.0f, 1.0f);
+            ImGui::SliderFloat((std::string("roughness") + "##" + obj_name).c_str(), &material.roughness, 0.01f, 1.0f);
+            ImGui::SliderFloat((std::string("ao") + "##" + obj_name).c_str(), &material.ao, 0.0f, 1.0f);
+        }
+    }
+    if (world.hasComponent<ecs::ExplosionComponent>(entity)) {
+        auto& explosion = *world.getComponent<ecs::ExplosionComponent>(entity);
+        ImGui::SliderFloat((std::string("explosion ratio") + "##" + obj_name).c_str(), &explosion.explosionRatio, 0.0f, 1.0f);
+    }
+    if (world.hasComponent<ecs::PointLightComponent>(entity)) {
+        Vec4& luminousColor = world.getComponent<ecs::PointLightComponent>(entity)->luminousColor;
+        float* radius = &world.getComponent<ecs::PointLightComponent>(entity)->radius;
+        ImGui::ColorEdit3((std::string("Luminous Color") + "##" + obj_name).c_str(), (float*)&luminousColor);
+        ImGui::SliderFloat((std::string("Radius") + "##" + obj_name).c_str(), radius, 5.0f, 50.0f);
+    }
+    if (world.hasComponent<ecs::DirectionalLightComponent>(entity)) {
+        auto dir_light_component = world.getComponent<ecs::DirectionalLightComponent>(entity);
+        // dir_light_component->direction = ;
+        Vec4& luminousColor = dir_light_component->luminousColor;
+        ImGui::ColorEdit3((std::string("Luminous Color") + "##" + obj_name).c_str(), (float*)&luminousColor);
+    }
+
+    ImGui::End();
+}
+#endif // ENABLE_ECS

@@ -5,8 +5,8 @@
 #include "GUI/Application.hpp"
 //#include "Render/RHI/rhi.hpp"
 
-static inline constexpr float DEFAULT_RENDER_RESOLUTION_X = 3840.0f;
-static inline constexpr float DEFAULT_RENDER_RESOLUTION_Y = 2160.0f;
+static inline constexpr float DEFAULT_RENDER_RESOLUTION_X = 1920.0f;
+static inline constexpr float DEFAULT_RENDER_RESOLUTION_Y = 1080.0f;
 static inline constexpr float DEFAULT_WINDOW_WIDTH = 1920.0f;
 static inline constexpr float DEFAULT_WINDOW_HEIGHT = 1080.0f;
 

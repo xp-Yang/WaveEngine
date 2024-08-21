@@ -29,7 +29,7 @@ bool InputSystem::onUpdate()
 		int y = m_mouse_y;
 		// map to picking framebuffer size
 		// picking framebuffer is full screen size
-		auto main_viewport = GetApp().editor()->viewPortWindowManager()->getMainViewport();
+		auto main_viewport = GetApp().editor()->canvasManager()->getMainViewport();
 		x *= DEFAULT_RENDER_RESOLUTION_X / (float)main_viewport.width;
 		y *= DEFAULT_RENDER_RESOLUTION_Y / (float)main_viewport.height;
 		// glReadPixels()的坐标是相对于屏幕左下角的

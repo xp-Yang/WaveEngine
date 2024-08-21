@@ -10,7 +10,6 @@ public:
 		static PickingSolver instance;
 		return instance;
 	}
-	const std::vector<GObjectID> getPickedIds() const { return picked_ids; }
 
 signals:
 	Signal<std::vector<GObjectID>, std::vector<GObjectID>> pickedChanged;
@@ -20,7 +19,6 @@ public slots:
 
 private:
 	PickingSolver();
-	std::vector<GObjectID> picked_ids;
 };
 
 #endif

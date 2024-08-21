@@ -28,8 +28,7 @@ void PickingSolver::onPicking(float mouse_x, float mouse_y)
 	glReadPixels(x, y, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, data);
 	int picked_id = (int)data[0] + (((int)data[1]) << 8) + (((int)data[2]) << 16);
 	// TODO 多picked的管理
-	emit pickedChanged({ picked_id }, picked_ids);
-	picked_ids.assign({ picked_id });
+	emit pickedChanged({ picked_id }, GetApp().scene()->getPickedObjectIDs());
 	//glReadBuffer(GL_NONE);
 }
 
