@@ -1,7 +1,7 @@
 #ifndef ImGuiInput_hpp
 #define ImGuiInput_hpp
 
-#include "ImGuiImGuiViewPortWindow.hpp"
+#include "ImGuiViewPortWindow.hpp"
 #include "Logical/Input/InputEnums.hpp"
 
 class GUIInput {

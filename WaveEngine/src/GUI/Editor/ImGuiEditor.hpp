@@ -2,32 +2,12 @@
 #define ImGuiEditor_hpp
 
 #include "Core/Common.hpp"
-#include "ImGuiImGuiViewPortWindow.hpp"
+#include "ImGuiViewPortWindow.hpp"
 #include "ImGuiInput.hpp"
+#include "ImGuiGlobalConsole.hpp"
+#include "ImGuiSceneHierarchy.hpp"
+#include "ImGuiDebugWindow.hpp"
 
-enum class ToolbarType : int {
-	Translate,
-	Rotate,
-	Scale,
-};
-
-struct RenderDashBoardParams { // TODO gui≤„Œ¨ª§ / render≤„Œ¨ª§
-	int     msaa_sample_count = 4;
-	bool    skybox = false;
-	bool    shadow = true;
-	int     shadow_map_sample_count = 1;
-
-	// for MainCameraPass
-	bool    reflection = false;
-	bool    normal_debug = false;
-	bool    wireframe = false;
-	bool    checkerboard = false;
-	bool    pbr = true;
-	//int     pixelate_level = 1;
-};
-
-class RenderSystem;
-class GObject;
 class ImGuiEditor {
 public:
 	ImGuiEditor();
@@ -40,30 +20,17 @@ public:
 protected:
 	void renderGlobalMenu();
 	void renderEmptyMainDockerSpaceWindow();
-	void renderGlobalConsole();
-	void renderCameraController();
-	void renderSceneHierarchyNode(GObject* node);
-	void renderLeafNode(Meta::DynamicReflectionInstance& refl_instance);
-	void renderSceneHierarchy();
-
 #if ENABLE_ECS
 	void renderPickedEntityController(const ImVec2& pos, const std::vector<ecs::Entity>& picked_entities);
 #endif
-
-	void renderGizmos();
-	void updateRenderParams();
-
 	void configUIStyle();
 
 private:
-	std::unordered_map<std::string, std::function<void(std::string, void*)>> m_gui_creator;
-
 	std::unique_ptr<ImGuiViewPortWindowManager> m_view_manager;
 	std::unique_ptr<GUIInput> m_gui_input;
-	RenderSystem* m_ref_render_system;
-	RenderDashBoardParams m_render_params;
-
-	ToolbarType m_toolbar_type{ ToolbarType::Translate };
+	std::unique_ptr<ImGuiSceneHierarchy> m_scene_hierarchy_window;
+	std::unique_ptr<ImGuiGlobalConsole> m_global_console_window;
+	std::unique_ptr<ImGuiDebugWindow> m_debug_window;
 };
 
 #endif

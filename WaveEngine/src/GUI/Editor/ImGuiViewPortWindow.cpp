@@ -1,4 +1,4 @@
-#include "ImGuiImGuiViewPortWindow.hpp"
+#include "ImGuiViewPortWindow.hpp"
 #include <imgui.h>
 #include <imgui_internal.h>
 #include <ImGuizmo.h>
@@ -18,8 +18,19 @@ protected:
 
 class MainViewPortWindow : public ImGuiViewPortWindow {
 public:
+    enum class ToolbarType : int {
+        Translate,
+        Rotate,
+        Scale,
+    };
     MainViewPortWindow() { m_type = ViewportType::Main; }
     void render() override;
+
+protected:
+    void renderGizmos();
+
+private:
+    ToolbarType m_toolbar_type{ ToolbarType::Translate };
 };
 
 class PickingViewPortWindow : public ImGuiViewPortWindow {
@@ -53,9 +64,73 @@ void MainViewPortWindow::render()
         ImGuizmo::SetDrawlist();
         ImGuizmo::SetRect(content_pos.x, content_pos.y, content_size.x, content_size.y);
         setViewPort({ (int)content_pos.x, (int)content_pos.y, (int)content_size.x, (int)content_size.y });
-        //renderGizmos();
+        renderGizmos();
     }
     ImGui::End();
+}
+
+void MainViewPortWindow::renderGizmos()
+{
+    ImGuizmo::OPERATION imguizmo_operation;
+    switch (m_toolbar_type)
+    {
+    case ToolbarType::Translate:
+        imguizmo_operation = ImGuizmo::TRANSLATE;
+        break;
+    case ToolbarType::Rotate:
+        imguizmo_operation = ImGuizmo::ROTATE;
+        break;
+    case ToolbarType::Scale:
+        imguizmo_operation = ImGuizmo::SCALE;
+        break;
+    default:
+        break;
+    }
+
+    auto& camera = GetApp().scene()->getMainCamera();
+
+    for (const auto& object : GetApp().scene()->getPickedObjects()) {
+        TransformComponent* transform_component = object->getComponent<TransformComponent>();
+        Mat4 model_matrix = transform_component->transform();
+        ImGuizmo::Manipulate((float*)(&camera.view), (float*)(&camera.projection), imguizmo_operation, ImGuizmo::LOCAL, (float*)(&model_matrix), NULL, NULL, NULL, NULL);
+        float matrixTranslation[3], matrixRotation[3], matrixScale[3];
+        ImGuizmo::DecomposeMatrixToComponents((float*)&model_matrix, matrixTranslation, matrixRotation, matrixScale);
+        transform_component->translation = Vec3(matrixTranslation[0], matrixTranslation[1], matrixTranslation[2]);
+        transform_component->scale = Vec3(matrixScale[0], matrixScale[1], matrixScale[2]);
+        transform_component->rotation = Vec3(matrixRotation[0], matrixRotation[1], matrixRotation[2]);
+    }
+
+    ImVec2 air_window_size = ImVec2(128, 128);
+    ImVec2 air_window_pos = ImVec2(m_viewport.x + m_viewport.width - air_window_size.x, m_viewport.y);
+    float camDistance = 8.f;
+    ImGuizmo::ViewManipulate((float*)(&camera.view), camDistance, air_window_pos, air_window_size, 0x10101010);
+
+#if ENABLE_ECS
+    ecs::TransformComponent* transform_component = nullptr;
+    auto picked_entities = world.getPickedEntities();
+    for (auto entity : picked_entities) {
+        transform_component = world.getComponent<ecs::TransformComponent>(entity);
+        break;
+    }
+
+    if (transform_component) {
+        Mat4 model_matrix = transform_component->transform();
+        ImGuizmo::Manipulate((float*)(&camera.view), (float*)(&camera.projection), imguizmo_operation, ImGuizmo::LOCAL, (float*)(&model_matrix), NULL, NULL, NULL, NULL);
+        float matrixTranslation[3], matrixRotation[3], matrixScale[3];
+        ImGuizmo::DecomposeMatrixToComponents((float*)&model_matrix, matrixTranslation, matrixRotation, matrixScale);
+        transform_component->translation = Vec3(matrixTranslation[0], matrixTranslation[1], matrixTranslation[2]);
+        transform_component->scale = Vec3(matrixScale[0], matrixScale[1], matrixScale[2]);
+        transform_component->rotation = Vec3(matrixRotation[0], matrixRotation[1], matrixRotation[2]);
+    }
+
+    if (camera) {
+        Viewport viewport = GetApp().window()->getMainViewport().value_or(Viewport());
+        viewport.transToScreenCoordinates();
+        ImVec2 air_window_size = ImVec2(128, 128);
+        float camDistance = 8.f;
+        ImGuizmo::ViewManipulate((float*)(&camera->view), camDistance, ImVec2(viewport.x + viewport.width - air_window_size.x, viewport.y), air_window_size, 0x10101010);
+    }
+#endif
 }
 
 void PickingViewPortWindow::render()
