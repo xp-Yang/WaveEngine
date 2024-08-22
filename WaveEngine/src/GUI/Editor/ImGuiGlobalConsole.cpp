@@ -11,7 +11,7 @@ ImGuiGlobalConsole::ImGuiGlobalConsole()
 }
 
 void ImGuiGlobalConsole::render() {
-    ImGui::Begin("Console", nullptr, ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse);
+    ImGui::Begin("Console", nullptr, ImGuiWindowFlags_NoCollapse);
 
     ImVec2 dummy = ImGui::CalcTextSize("A");
     auto separator = [dummy]() {

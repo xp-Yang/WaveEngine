@@ -18,7 +18,7 @@ public:
 	GUIInput* guiInput() const { return m_gui_input.get(); }
 
 protected:
-	void renderGlobalMenu();
+	void renderMenuBar();
 	void renderEmptyMainDockerSpaceWindow();
 	void configUIStyle();
 

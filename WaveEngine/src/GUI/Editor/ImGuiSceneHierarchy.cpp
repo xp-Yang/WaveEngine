@@ -179,7 +179,7 @@ void ImGuiSceneHierarchy::renderLeafNode(Meta::DynamicReflectionInstance& refl_i
 
 void ImGuiSceneHierarchy::render()
 {
-    if (ImGui::Begin(("Scene Hierarchy"), nullptr, ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse)) {
+    if (ImGui::Begin(("Scene Hierarchy"), nullptr, ImGuiWindowFlags_NoCollapse)) {
         ImGuiWindow* scene_hierarchy_window = ImGui::GetCurrentWindow();
         auto root_node = m_ref_scene->rootObject();
         renderNode(root_node);

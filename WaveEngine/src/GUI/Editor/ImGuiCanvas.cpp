@@ -53,7 +53,7 @@ public:
 void MainCanvas::render()
 {
     static ImGuiWindowFlags window_flags = 0;
-    ImGui::SetNextWindowSize(ImVec2(1280, 720 + 20), ImGuiCond_Appearing);
+    ImGui::SetNextWindowSize(ImVec2(1280, 720), ImGuiCond_Appearing);
     if (ImGui::Begin("MainCanvas", nullptr, window_flags | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoBackground)) {
         ImGuiWindow* window = ImGui::GetCurrentWindow();
         bool hovered_window = ImGui::IsWindowHovered() && ImGui::IsMouseHoveringRect(window->InnerRect.Min, window->InnerRect.Max);
@@ -140,12 +140,10 @@ void MainCanvas::renderGizmos()
 
 void PickingCanvas::render()
 {
-    static ImGuiWindowFlags window_flags = 0;
-    ImGui::SetNextWindowSize(ImVec2(400, 225), ImGuiCond_Appearing);
-    if (ImGui::Begin("PickingCanvas", nullptr, window_flags | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoBackground)) {
+    ImGui::SetNextWindowSize(ImVec2(1280, 720), ImGuiCond_Appearing);
+    if (ImGui::Begin("PickingCanvas", nullptr, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoBackground)) {
         ImGuiWindow* window = ImGui::GetCurrentWindow();
         bool hovered_window = ImGui::IsWindowHovered() && ImGui::IsMouseHoveringRect(window->InnerRect.Min, window->InnerRect.Max);
-        window_flags = hovered_window ? ImGuiWindowFlags_NoMove : 0;
         ImVec2 window_pos = ImGui::GetWindowPos();
         ImVec2 window_size = ImGui::GetWindowSize();
         ImVec2 content_size = ImGui::GetContentRegionAvail();
@@ -158,12 +156,10 @@ void PickingCanvas::render()
 
 void ShadowCanvas::render()
 {
-    static ImGuiWindowFlags window_flags = 0;
-    ImGui::SetNextWindowSize(ImVec2(400, 225), ImGuiCond_Appearing);
-    if (ImGui::Begin("ShadowCanvas", nullptr, window_flags | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoBackground)) {
+    ImGui::SetNextWindowSize(ImVec2(1280, 720), ImGuiCond_Appearing);
+    if (ImGui::Begin("ShadowCanvas", nullptr, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoBackground)) {
         ImGuiWindow* window = ImGui::GetCurrentWindow();
         bool hovered_window = ImGui::IsWindowHovered() && ImGui::IsMouseHoveringRect(window->InnerRect.Min, window->InnerRect.Max);
-        window_flags = hovered_window ? ImGuiWindowFlags_NoMove : 0;
         ImVec2 window_pos = ImGui::GetWindowPos();
         ImVec2 window_size = ImGui::GetWindowSize();
         ImVec2 content_size = ImGui::GetContentRegionAvail();

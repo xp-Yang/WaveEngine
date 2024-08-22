@@ -76,9 +76,9 @@ void ImGuiEditor::onUpdate()
     }
 }
 
-void ImGuiEditor::renderGlobalMenu()
+void ImGuiEditor::renderMenuBar()
 {
-    if (ImGui::BeginMainMenuBar())
+    if (ImGui::BeginMenuBar())
     {
         if (ImGui::BeginMenu("File"))
         {
@@ -105,18 +105,17 @@ void ImGuiEditor::renderGlobalMenu()
         //    if (ImGui::MenuItem("Paste", "CTRL+V")) {}
         //    ImGui::EndMenu();
         //}
-        ImGui::EndMainMenuBar();
+        ImGui::EndMenuBar();
     }
 }
 
 void ImGuiEditor::renderEmptyMainDockerSpaceWindow()
 {
-    renderGlobalMenu();
-
-    ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoTitleBar |
-        ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize |
+    ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoBringToFrontOnFocus | 
+        ImGuiWindowFlags_MenuBar;
+        /*ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize |
         ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoBackground |
-        ImGuiConfigFlags_NoMouseCursorChange | ImGuiWindowFlags_NoBringToFrontOnFocus;
+        ImGuiConfigFlags_NoMouseCursorChange | ImGuiWindowFlags_NoBringToFrontOnFocus*/;
 
     ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
     ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
@@ -124,16 +123,23 @@ void ImGuiEditor::renderEmptyMainDockerSpaceWindow()
 
     // When enabling ImGuiConfigFlags_ViewportsEnable, the coordinate system changes,
     // e.g. (0,0) generally becomes the top-left corner of primary monitor.
-    const ImGuiViewport* viewport = ImGui::GetMainViewport();
-    ImGui::SetNextWindowPos(viewport->WorkPos);
-    ImGui::SetNextWindowSize(viewport->WorkSize);
-    ImGui::SetNextWindowViewport(viewport->ID);
-    ImGui::Begin("Main Window", nullptr, window_flags);
+    //const ImGuiViewport* viewport = ImGui::GetMainViewport();
+    //ImGui::SetNextWindowPos(viewport->WorkPos);
+    //ImGui::SetNextWindowSize(viewport->WorkSize);
+    //ImGui::SetNextWindowViewport(viewport->ID);
+    ImGui::SetNextWindowSize(ImVec2(1920, 1080), ImGuiCond_Appearing);
+    static bool show = true;
+    ImGui::Begin("Engine", &show, window_flags);
     ImGuiID main_dock_id = ImGui::GetID("Main Dock");
     ImGui::DockSpace(main_dock_id);
+    renderMenuBar();
     ImGui::End();
 
     ImGui::PopStyleVar(3);
+
+    if (!show) {
+        glfwSetWindowShouldClose((GLFWwindow*)GetApp().window()->getNativeWindowHandle(), true);
+    }
 }
 
 void ImGuiEditor::configUIStyle()

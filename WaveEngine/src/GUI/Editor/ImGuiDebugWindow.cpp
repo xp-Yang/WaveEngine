@@ -6,9 +6,9 @@
 
 void ImGuiDebugWindow::render()
 {
-    ImGui::SetNextWindowSize(ImVec2(1280, 720));
+    ImGui::SetNextWindowSize(ImVec2(1280, 720), ImGuiCond_Appearing);
     ImGui::Begin("Debug Window", nullptr, 
-        ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoBackground | ImGuiConfigFlags_NoMouseCursorChange | ImGuiWindowFlags_NoBringToFrontOnFocus);
+        ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoBringToFrontOnFocus);
     ImGuiID debug_dock_id = ImGui::GetID("Debug Dock");
     ImGui::DockSpace(debug_dock_id);
     ImGui::End();

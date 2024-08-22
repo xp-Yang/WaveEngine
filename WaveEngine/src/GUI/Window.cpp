@@ -24,6 +24,8 @@ Window::Window(int width, int height)
 	//glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);//不允许用户调整窗口的大小
 	//glEnable(GL_MULTISAMPLE);
 	//glfwWindowHint(GLFW_SAMPLES, 16);
+	// 设置 offscreen context 的标志位，隐藏标题栏
+	glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
 
 	m_window = glfwCreateWindow(width, height, "RenderEngine", nullptr, nullptr);
 	if (m_window == nullptr)
