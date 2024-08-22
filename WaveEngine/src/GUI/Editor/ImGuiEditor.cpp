@@ -6,6 +6,8 @@
 #include <imgui_impl_opengl3.h>
 #include <ImGuizmo.h>
 
+#include <GLFW/glfw3.h>
+
 #include "GUI/FileDialog.hpp"
 #include "Render/RenderSystem.hpp"
 #include "Logical/FrameWork/Scene.hpp"
@@ -23,7 +25,7 @@ ImGuiEditor::ImGuiEditor()
         ImGui::CreateContext();
         ImGuiIO& io = ImGui::GetIO();
         io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;         // Enable Docking
-        //io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;       // Enable Multi-Viewport / Platform Windows
+        io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;       // Enable Multi-Viewport / Platform Windows
         ImGui_ImplGlfw_InitForOpenGL((GLFWwindow*)GetApp().window()->getNativeWindowHandle(), true);
         ImGui_ImplOpenGL3_Init("#version 330");
     }
@@ -53,7 +55,6 @@ void ImGuiEditor::onUpdate()
     ImGui::NewFrame();
     ImGuizmo::BeginFrame();
 
-        renderGlobalMenu();
         renderEmptyMainDockerSpaceWindow();
         m_gui_input->refreshState();
         m_canvas_manager->render();
@@ -66,13 +67,13 @@ void ImGuiEditor::onUpdate()
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
     // Update and Render additional Platform Windows
     // (Platform functions may change the current OpenGL context, so we save/restore it to make it easier to paste this code elsewhere.
-    //if (ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
-    //{
-    //	GLFWwindow* backup_current_context = glfwGetCurrentContext();
-    //	ImGui::UpdatePlatformWindows();
-    //	ImGui::RenderPlatformWindowsDefault();
-    //	glfwMakeContextCurrent(backup_current_context);
-    //}
+    if (ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
+    {
+    	GLFWwindow* backup_current_context = glfwGetCurrentContext();
+    	ImGui::UpdatePlatformWindows();
+    	ImGui::RenderPlatformWindowsDefault();
+    	glfwMakeContextCurrent(backup_current_context);
+    }
 }
 
 void ImGuiEditor::renderGlobalMenu()
@@ -119,13 +120,15 @@ void ImGuiEditor::renderEmptyMainDockerSpaceWindow()
     ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
     ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
 
-    ImGui::SetNextWindowPos(ImVec2(0, 18.0f), ImGuiCond_Always);
+    ImGui::SetNextWindowPos(ImVec2(0, 0), ImGuiCond_Always);
     int window_width = GetApp().window()->getWidth();
     int window_height = GetApp().window()->getHeight();
     ImGui::SetNextWindowSize(ImVec2(window_width, window_height), ImGuiCond_Always);
     ImGui::Begin("Main Dock Space Window", nullptr, window_flags);
     ImGuiID main_docking_id = ImGui::GetID("Main Docking");
-    ImGui::DockSpace(main_docking_id);
+    ImGuiDockNodeFlags dockspace_flags = ImGuiDockNodeFlags_PassthruCentralNode;
+    ImGui::DockSpace(main_docking_id, ImVec2(0.0f, 0.0f), dockspace_flags);
+    renderGlobalMenu();
     ImGui::End();
 
     ImGui::PopStyleVar(3);
