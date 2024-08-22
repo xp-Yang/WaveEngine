@@ -147,7 +147,7 @@ void LightingPass::draw()
 		skybox_shader->stop_using();
 	}
 
-	// TODO 可控制
+	// TODO light亮度加强，bloom直接提取亮度超出阈值的部分
 	// draw bright map to do bloom effect
 	//m_lights_framebuffer->bind();
 	//m_lights_framebuffer->clear();

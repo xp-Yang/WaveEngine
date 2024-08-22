@@ -54,7 +54,7 @@ void MainCanvas::render()
 {
     static ImGuiWindowFlags window_flags = 0;
     ImGui::SetNextWindowSize(ImVec2(1280, 720 + 20), ImGuiCond_Appearing);
-    if (ImGui::Begin("MainCanvas", nullptr, window_flags | ImGuiWindowFlags_NoBackground)) {
+    if (ImGui::Begin("MainCanvas", nullptr, window_flags | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoBackground)) {
         ImGuiWindow* window = ImGui::GetCurrentWindow();
         bool hovered_window = ImGui::IsWindowHovered() && ImGui::IsMouseHoveringRect(window->InnerRect.Min, window->InnerRect.Max);
         window_flags = hovered_window ? ImGuiWindowFlags_NoMove : 0;
@@ -142,7 +142,7 @@ void PickingCanvas::render()
 {
     static ImGuiWindowFlags window_flags = 0;
     ImGui::SetNextWindowSize(ImVec2(400, 225), ImGuiCond_Appearing);
-    if (ImGui::Begin("PickingCanvas", nullptr, window_flags | ImGuiWindowFlags_NoBackground)) {
+    if (ImGui::Begin("PickingCanvas", nullptr, window_flags | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoBackground)) {
         ImGuiWindow* window = ImGui::GetCurrentWindow();
         bool hovered_window = ImGui::IsWindowHovered() && ImGui::IsMouseHoveringRect(window->InnerRect.Min, window->InnerRect.Max);
         window_flags = hovered_window ? ImGuiWindowFlags_NoMove : 0;
@@ -160,7 +160,7 @@ void ShadowCanvas::render()
 {
     static ImGuiWindowFlags window_flags = 0;
     ImGui::SetNextWindowSize(ImVec2(400, 225), ImGuiCond_Appearing);
-    if (ImGui::Begin("ShadowCanvas", nullptr, window_flags | ImGuiWindowFlags_NoBackground)) {
+    if (ImGui::Begin("ShadowCanvas", nullptr, window_flags | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoBackground)) {
         ImGuiWindow* window = ImGui::GetCurrentWindow();
         bool hovered_window = ImGui::IsWindowHovered() && ImGui::IsMouseHoveringRect(window->InnerRect.Min, window->InnerRect.Max);
         window_flags = hovered_window ? ImGuiWindowFlags_NoMove : 0;

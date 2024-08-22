@@ -56,11 +56,11 @@ void ImGuiEditor::onUpdate()
     ImGuizmo::BeginFrame();
 
         renderEmptyMainDockerSpaceWindow();
+        m_debug_window->render(); // render first, the debug window need to be docked
         m_gui_input->refreshState();
         m_canvas_manager->render();
         m_scene_hierarchy_window->render();
         m_global_console_window->render();
-        m_debug_window->render();
 
     // end frame
     ImGui::Render();
@@ -128,9 +128,9 @@ void ImGuiEditor::renderEmptyMainDockerSpaceWindow()
     ImGui::SetNextWindowPos(viewport->WorkPos);
     ImGui::SetNextWindowSize(viewport->WorkSize);
     ImGui::SetNextWindowViewport(viewport->ID);
-    ImGui::Begin("Main Dock Space Window", nullptr, window_flags);
-    ImGuiID main_docking_id = ImGui::GetID("Main Docking");
-    ImGui::DockSpace(main_docking_id);
+    ImGui::Begin("Main Window", nullptr, window_flags);
+    ImGuiID main_dock_id = ImGui::GetID("Main Dock");
+    ImGui::DockSpace(main_dock_id);
     ImGui::End();
 
     ImGui::PopStyleVar(3);
