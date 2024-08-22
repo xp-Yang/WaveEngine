@@ -111,6 +111,8 @@ void ImGuiEditor::renderGlobalMenu()
 
 void ImGuiEditor::renderEmptyMainDockerSpaceWindow()
 {
+    renderGlobalMenu();
+
     ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoTitleBar |
         ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize |
         ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoBackground |
@@ -120,6 +122,8 @@ void ImGuiEditor::renderEmptyMainDockerSpaceWindow()
     ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
     ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
 
+    // When enabling ImGuiConfigFlags_ViewportsEnable, the coordinate system changes,
+    // e.g. (0,0) generally becomes the top-left corner of primary monitor.
     const ImGuiViewport* viewport = ImGui::GetMainViewport();
     ImGui::SetNextWindowPos(viewport->WorkPos);
     ImGui::SetNextWindowSize(viewport->WorkSize);
@@ -127,7 +131,6 @@ void ImGuiEditor::renderEmptyMainDockerSpaceWindow()
     ImGui::Begin("Main Dock Space Window", nullptr, window_flags);
     ImGuiID main_docking_id = ImGui::GetID("Main Docking");
     ImGui::DockSpace(main_docking_id);
-    renderGlobalMenu();
     ImGui::End();
 
     ImGui::PopStyleVar(3);
