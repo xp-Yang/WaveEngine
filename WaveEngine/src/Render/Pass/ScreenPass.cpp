@@ -1,5 +1,6 @@
 #include "ScreenPass.hpp"
-
+// TODO remove
+#include <glad/glad.h>
 void ScreenPass::init()
 {
 	RhiTexture* color_texture = m_rhi->newTexture(RhiTexture::Format::RGB16F, Vec2(DEFAULT_RENDER_RESOLUTION_X, DEFAULT_RENDER_RESOLUTION_Y));
@@ -39,4 +40,7 @@ void ScreenPass::draw()
 	m_rhi->drawIndexed(m_screen_quad->getVAO(), m_screen_quad->indicesCount());
 
 	m_framebuffer->unBind(); // bind GL_FRAMEBUFFER to default: 0
+
+	glClearColor(0.45f, 0.55f, 0.60f, 1.00f);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 }

@@ -120,14 +120,13 @@ void ImGuiEditor::renderEmptyMainDockerSpaceWindow()
     ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
     ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
 
-    ImGui::SetNextWindowPos(ImVec2(0, 0), ImGuiCond_Always);
-    int window_width = GetApp().window()->getWidth();
-    int window_height = GetApp().window()->getHeight();
-    ImGui::SetNextWindowSize(ImVec2(window_width, window_height), ImGuiCond_Always);
+    const ImGuiViewport* viewport = ImGui::GetMainViewport();
+    ImGui::SetNextWindowPos(viewport->WorkPos);
+    ImGui::SetNextWindowSize(viewport->WorkSize);
+    ImGui::SetNextWindowViewport(viewport->ID);
     ImGui::Begin("Main Dock Space Window", nullptr, window_flags);
     ImGuiID main_docking_id = ImGui::GetID("Main Docking");
-    ImGuiDockNodeFlags dockspace_flags = ImGuiDockNodeFlags_PassthruCentralNode;
-    ImGui::DockSpace(main_docking_id, ImVec2(0.0f, 0.0f), dockspace_flags);
+    ImGui::DockSpace(main_docking_id);
     renderGlobalMenu();
     ImGui::End();
 
