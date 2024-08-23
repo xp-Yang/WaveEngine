@@ -5,8 +5,6 @@
 void InputSystem::init()
 {
 	m_camera_manipulator = std::make_shared<CameraManipulator>();
-
-	connect(this, &picking, &PickingSolver::get(), &PickingSolver::onPicking);
 }
 
 bool InputSystem::onUpdate()
@@ -25,17 +23,7 @@ bool InputSystem::onUpdate()
 	}
 
 	if (m_last_mouse_state == MouseState::Holding && m_mouse_state == MouseState::Released) {
-		int x = m_mouse_x;
-		int y = m_mouse_y;
-		// map to picking framebuffer size
-		// picking framebuffer is full screen size
-		auto main_viewport = GetApp().editor()->canvasManager()->getMainViewport();
-		x *= DEFAULT_RENDER_RESOLUTION_X / (float)main_viewport.width;
-		y *= DEFAULT_RENDER_RESOLUTION_Y / (float)main_viewport.height;
-		// glReadPixels()的坐标是相对于屏幕左下角的
-		y = DEFAULT_RENDER_RESOLUTION_Y - y;
-		Logger::debug("InputSystem::onUpdate()，picking({}, {}), mouse({}, {})", x, y, m_mouse_x, m_mouse_y);
-		emit picking(x, y);
+		PickingSolver::get().onPicking(m_mouse_x, m_mouse_y, KeysDown[Key_LeftCtrl]);
 	}
 
 	m_camera_manipulator->onUpdate();

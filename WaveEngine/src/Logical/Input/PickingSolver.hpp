@@ -15,7 +15,7 @@ signals:
 	Signal<std::vector<GObjectID>, std::vector<GObjectID>> pickedChanged;
 
 public slots:
-	void onPicking(float mouse_x, float mouse_y);
+	void onPicking(float mouse_x, float mouse_y, bool retain_old = false);
 
 private:
 	PickingSolver();

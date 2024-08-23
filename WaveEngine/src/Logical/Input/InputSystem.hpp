@@ -10,9 +10,6 @@ public:
 	void init();
 	bool onUpdate();
 
-signals:
-	Signal<float, float> picking;
-
 protected:
 	MouseState m_last_mouse_state{ MouseState::None };
 	MouseState m_mouse_state{ MouseState::None };
@@ -23,7 +20,7 @@ protected:
 	float m_delta_mouse_y;
 	float m_mouse_wheel;
 
-	bool KeysDown[512];
+	bool KeysDown[Key_COUNT];
 
 	float m_frame_time;
 

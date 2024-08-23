@@ -43,8 +43,8 @@ void GUIInput::refreshState()
 		m_mouse_state = MouseState::Released;
 	}
 
-	m_mouse_x = mapToMainViewportWindow(Vec2(io.MousePos.x, io.MousePos.y)).x;
-	m_mouse_y = mapToMainViewportWindow(Vec2(io.MousePos.x, io.MousePos.y)).y;
+	m_mouse_x = mapToMainCanvasWindow(Vec2(io.MousePos.x, io.MousePos.y)).x;
+	m_mouse_y = mapToMainCanvasWindow(Vec2(io.MousePos.x, io.MousePos.y)).y;
 	m_delta_mouse_x = m_mouse_x - m_last_mouse_x;
 	m_delta_mouse_y = -(m_mouse_y - m_last_mouse_y);
 	m_last_mouse_x = m_mouse_x;
@@ -55,7 +55,7 @@ void GUIInput::refreshState()
 	//Logger::debug("delta_x: {}, delta_y: {}", m_delta_mouse_x, m_delta_mouse_y);
 }
 
-Vec2 GUIInput::mapToMainViewportWindow(const Vec2 value)
+Vec2 GUIInput::mapToMainCanvasWindow(const Vec2 value)
 {
 	Vec2 pos = value;
 	auto main_viewport = GetApp().editor()->canvasManager()->getMainViewport();

@@ -9,7 +9,7 @@ public:
 	void refreshState();
 
 protected:
-	Vec2 mapToMainViewportWindow(const Vec2 value);
+	Vec2 mapToMainCanvasWindow(const Vec2 value);
 
 	friend class InputSystem;
 
@@ -24,7 +24,7 @@ protected:
 	float m_delta_mouse_y;
 	float m_mouse_wheel;
 
-	bool KeysDown[512];
+	bool KeysDown[Key_COUNT];
 
 	float m_frame_time;
 };
