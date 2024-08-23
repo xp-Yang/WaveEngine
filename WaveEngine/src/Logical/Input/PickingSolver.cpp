@@ -16,7 +16,6 @@ void PickingSolver::onPicking(float mouse_x, float mouse_y, bool retain_old)
 	y *= DEFAULT_RENDER_RESOLUTION_Y / (float)main_viewport.height;
 	// in gl coordinate system, left-bottom is as origin
 	y = DEFAULT_RENDER_RESOLUTION_Y - y;
-	Logger::debug("PickingSolver::onPicking(), picking({}, {}), mouse({}, {})", x, y, mouse_x, mouse_y);
 
 	unsigned char data[4] = { 0,0,0,0 };
 	unsigned int frame_buffer_id = GetApp().renderSystem()->getPickingFBO();
@@ -25,6 +24,8 @@ void PickingSolver::onPicking(float mouse_x, float mouse_y, bool retain_old)
 	glReadPixels(x, y, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, data);
 	int picked_id = (int)data[0] + (((int)data[1]) << 8) + (((int)data[2]) << 16);
 	emit pickedChanged({ picked_id }, retain_old ? std::vector<GObjectID>() : GetApp().scene()->getPickedObjectIDs());
+
+	Logger::debug("PickingSolver::onPicking(), picking({}, {}), mouse({}, {}), picked_id:{}", x, y, mouse_x, mouse_y, picked_id);
 }
 
 PickingSolver::PickingSolver()

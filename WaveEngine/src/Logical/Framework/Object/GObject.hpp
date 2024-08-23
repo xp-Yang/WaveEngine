@@ -1,7 +1,7 @@
 #ifndef GObject_hpp
 #define GObject_hpp
 
-#include "GObjectID.hpp"
+#include "Logical/Framework/IDAllocator.hpp"
 #if !ENABLE_ECS
 #include "Logical/Framework/Component/CameraComponent.hpp"
 #include "Logical/Framework/Component/MeshComponent.hpp"
@@ -19,6 +19,12 @@ namespace Meta {
 }
 
 #if !ENABLE_ECS
+class GObjectID : public IDAllocator<GObjectID> {
+public:
+	GObjectID() = default;
+	GObjectID(int id) : IDAllocator<GObjectID>(id) {}
+};
+
 class GObject {
 public:
 	GObject(GObject* parent, const std::string& name) : m_id(GObjectID()), m_name(name), m_parent(parent) { if (parent) parent->append(this); }

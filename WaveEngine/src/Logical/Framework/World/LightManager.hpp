@@ -2,6 +2,7 @@
 #define LightManager_hpp
 
 #include "Core/Math/Math.hpp"
+#include "Logical/Framework/IDAllocator.hpp"
 
 struct Light {
 	Color4 luminousColor = { 1.0f, 1.0f, 1.0f, 1.0f };
@@ -46,6 +47,11 @@ struct DirectionalLightComponent : public Light {
 		Mat4 light_view = LookAt(Vec3(0.0f) - direction, Vec3(0.0f), Vec3(0.0f, 1.0f, 0.0f));
 		return light_projection * light_view;
 	}
+};
+
+class LightID : public IDAllocator<LightID> {
+	LightID() = default;
+	LightID(int id) : IDAllocator<LightID>(id) {}
 };
 
 class LightManager {

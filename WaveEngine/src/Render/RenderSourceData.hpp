@@ -3,7 +3,7 @@
 
 #include "Core/Common.hpp"
 #include "ResourceManager/AssetManager.hpp"
-#include "Logical/Framework/Object/GObjectID.hpp"
+#include "Logical/Framework/Object/GObject.hpp"
 #include "RenderShaderObject.hpp"
 
 using GL_RESOURCE_HANLE = unsigned int;
