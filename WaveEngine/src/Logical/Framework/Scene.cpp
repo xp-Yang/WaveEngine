@@ -39,9 +39,9 @@ GObject* Scene::loadModel(const std::string& filepath)
 	for (int idx : obj_sub_meshes_idx) {
 		renderable.sub_meshes.push_back(Asset::SubMesh{ idx, Asset::MeshFileRef{ Asset::MeshFileType::OBJ, filepath}, {}, Mat4(1.0f) });
 	}
-	auto res = new GObject(m_root_object, entity);
+	auto res = new GObject(nullptr, entity);
 #else
-	auto res = new GObject(m_root_object, name);
+	auto res = new GObject(nullptr, name);
 	res->addComponent<TransformComponent>();
 	MeshComponent& mesh = res->addComponent<MeshComponent>();
 	for (int idx : obj_sub_meshes_idx) {
@@ -53,17 +53,12 @@ GObject* Scene::loadModel(const std::string& filepath)
 	return res;
 }
 
-std::vector<GObjectID> Scene::getPickedObjectIDs()
+std::vector<GObjectID> Scene::getPickedObjectIDs() const
 {
-	std::vector<GObjectID> res;
-	res.reserve(m_picked_objects.size());
-	// TODO  ≤√¥Œ Ã‚£ø
-	//std::transform(m_picked_objects.begin(), m_picked_objects.end(), res.begin(), [](const std::shared_ptr<GObject>& obj) {
-	//	return obj->ID();
-	//	});
-	for (const auto& obj : m_picked_objects) {
-		res.push_back(obj->ID());
-	}
+	std::vector<GObjectID> res(m_picked_objects.size());
+	std::transform(m_picked_objects.begin(), m_picked_objects.end(), res.begin(), [](const std::shared_ptr<GObject>& obj) {
+		return obj->ID();
+		});
 	return res;
 }
 
@@ -73,7 +68,6 @@ void Scene::init()
 	auto& world = ecs::World::get();
 	auto root_entity = world.create_entity();
 	world.addComponent<ecs::NameComponent>(root_entity).name = "Root";
-	m_root_object = new GObject(nullptr, root_entity);
 
 	//initMainCamera
 	auto camera = world.create_entity();
@@ -98,7 +92,7 @@ void Scene::init()
 
 	//createDirectionalLight
 	auto dir_light_entity = world.create_entity();
-	auto directional_light_node = new GObject(m_root_object, dir_light_entity);
+	auto directional_light_node = new GObject(nullptr, dir_light_entity);
 	world.addComponent<ecs::NameComponent>(dir_light_entity).name = "Directional Light";
 	auto& dir_light_properties = world.addComponent<ecs::DirectionalLightComponent>(dir_light_entity);
 	dir_light_properties.luminousColor = Color4(2.0f);
@@ -107,7 +101,7 @@ void Scene::init()
 	size_t point_lights_count = 2;
 	auto root_point_lights_entity = world.create_entity();
 	world.addComponent<ecs::NameComponent>(root_point_lights_entity).name = "Point Lights";
-	auto m_root_point_light_object = new GObject(m_root_object, root_point_lights_entity);
+	auto m_root_point_light_object = new GObject(nullptr, root_point_lights_entity);
 	for (int i = 0; i < point_lights_count; i++) {
 		auto point_light_entity = world.create_entity();
 		auto point_light_node = new GObject(m_root_point_light_object, point_light_entity);
@@ -160,7 +154,7 @@ void Scene::init()
 	size_t spheres_count = 64;
 	auto root_sphere_entity = world.create_entity();
 	world.addComponent<ecs::NameComponent>(root_sphere_entity).name = "Spheres";
-	m_root_sphere_object = new GObject(m_root_object, root_sphere_entity);
+	m_root_sphere_object = new GObject(nullptr, root_sphere_entity);
 	for (int i = 0; i < spheres_count; i++) {
 		auto sphere_entity = world.create_entity();
 		auto sphere_node = new GObject(m_root_sphere_object, sphere_entity);
@@ -199,7 +193,7 @@ void Scene::init()
 
 	//createPlaneGround
 	auto ground_entity = world.create_entity();
-	auto ground_node = new GObject(m_root_object, ground_entity);
+	auto ground_node = new GObject(nullptr, ground_entity);
 	world.addComponent<ecs::NameComponent>(ground_entity).name = "Gound";
 	auto& ground_transform = world.addComponent<ecs::TransformComponent>(ground_entity);
 	ground_transform.scale = Vec3(1.0f);
@@ -224,8 +218,6 @@ void Scene::init()
 
 #endif // ENABLE_ECS
 
-	m_root_object = new GObject(nullptr, "Root");
-
 	m_skybox = std::make_shared<Skybox>();
 
 	m_light_manager = std::make_shared<LightManager>();
@@ -233,7 +225,7 @@ void Scene::init()
 
 	size_t cubes_count = 36;
 	for (int i = 0; i < cubes_count; i++) {
-		GObject* cube_obj = new GObject(m_root_object, "Cube");
+		GObject* cube_obj = new GObject(nullptr, "Cube");
 		MeshComponent& mesh = cube_obj->addComponent<MeshComponent>();
 		Asset::SubMesh cube_sub_mesh;
 		cube_sub_mesh.mesh_file_ref = { Asset::MeshFileType::CustomCube, "" };
@@ -250,7 +242,7 @@ void Scene::init()
 	}
 
 	{
-		GObject* plane_obj = new GObject(m_root_object, "Ground");
+		GObject* plane_obj = new GObject(nullptr, "Ground");
 		MeshComponent& plane_mesh = plane_obj->addComponent<MeshComponent>();
 		Asset::SubMesh plane_sub_mesh;
 		plane_sub_mesh.mesh_file_ref = { Asset::MeshFileType::CustomGround, "" };
@@ -286,6 +278,7 @@ void Scene::onUpdate(float delta_time)
 
 void Scene::onPickedChanged(std::vector<GObjectID> added, std::vector<GObjectID> removed)
 {
+	m_picked_light.reset();
 	m_picked_objects.erase(std::remove_if(m_picked_objects.begin(), m_picked_objects.end(), [removed](const std::shared_ptr<GObject>& obj) {
 		return std::find(removed.begin(), removed.end(), obj->ID()) != removed.end();
 		}), m_picked_objects.end());
@@ -294,5 +287,19 @@ void Scene::onPickedChanged(std::vector<GObjectID> added, std::vector<GObjectID>
 			m_picked_objects.push_back(obj);
 			Logger::debug("Scene::onPickedChanged(), added obj: {} {}", obj->ID().id, obj->name());
 		}
+	}
+}
+
+void Scene::onPickedChanged(LightID light_id)
+{
+	m_picked_light.reset();
+	m_picked_objects.clear();
+	const std::vector<std::shared_ptr<Light>>& lights = m_light_manager->lights();
+	auto it = std::find_if(lights.begin(), lights.end(), [light_id](const std::shared_ptr<Light>& light) {
+		return light->ID() == light_id;
+		});
+	if (it != lights.end()) {
+		m_picked_light = *it;
+		Logger::debug("Scene::onPickedChanged(), light: {} {}", m_picked_light->ID().id, m_picked_light->name());
 	}
 }

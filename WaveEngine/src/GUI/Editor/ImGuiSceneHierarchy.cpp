@@ -13,7 +13,7 @@ ImGuiSceneHierarchy::ImGuiSceneHierarchy()
 
 void ImGuiSceneHierarchy::init()
 {
-    m_gui_creator["TransformComponent"] = [this](const std::string& name, void* value_ptr) -> void {
+    m_widget_creator["TransformComponent"] = [this](const std::string& name, void* value_ptr) -> void {
         auto DrawVecControl = [](const std::string& label, Vec3& values, float resetValue = 0.0f, float columnWidth = 100.0f)
         {
             ImGui::PushID(label.c_str());
@@ -78,7 +78,7 @@ void ImGuiSceneHierarchy::init()
             DrawVecControl("Scale", trans_ptr->scale);
         }
     };
-    m_gui_creator[Meta::traits::className<Vec3>()] = [this](const std::string& name, void* value_ptr) -> void {
+    m_widget_creator[Meta::traits::className<Vec3>()] = [this](const std::string& name, void* value_ptr) -> void {
         Vec3* vec_ptr = static_cast<Vec3*>(value_ptr);
         float    val[3] = { vec_ptr->x, vec_ptr->y, vec_ptr->z };
 
@@ -91,21 +91,21 @@ void ImGuiSceneHierarchy::init()
         vec_ptr->y = val[1];
         vec_ptr->z = val[2];
     };
-    m_gui_creator["bool"] = [this](const std::string& name, void* value_ptr)  -> void {
+    m_widget_creator["bool"] = [this](const std::string& name, void* value_ptr)  -> void {
         {
             std::string full_label = "##" + name;
             ImGui::Text("%s", name.c_str());
             ImGui::Checkbox(full_label.c_str(), static_cast<bool*>(value_ptr));
         }
     };
-    m_gui_creator["int"] = [this](const std::string& name, void* value_ptr) -> void {
+    m_widget_creator["int"] = [this](const std::string& name, void* value_ptr) -> void {
         {
             std::string full_label = "##" + name;
             ImGui::Text("%s", (name + ":").c_str());
             ImGui::InputInt(full_label.c_str(), static_cast<int*>(value_ptr));
         }
     };
-    m_gui_creator["float"] = [this](const std::string& name, void* value_ptr) -> void {
+    m_widget_creator["float"] = [this](const std::string& name, void* value_ptr) -> void {
         {
             std::string full_label = "##" + name;
             ImGui::Text("%s", (name + ":").c_str());
@@ -114,11 +114,11 @@ void ImGuiSceneHierarchy::init()
     };
 }
 
-void ImGuiSceneHierarchy::renderNode(GObject* node)
+void ImGuiSceneHierarchy::renderNodes(const std::vector<GObject*>& nodes)
 {
-    for (int i = 0; i < node->children().size(); i++)
+    for (int i = 0; i < nodes.size(); i++)
     {
-        auto child_node = node->children()[i];
+        auto child_node = nodes[i];
         GObjectID child_id = child_node->ID();
         std::string child_name = child_node->name();
         std::string display_text = child_name + " (ID: " + std::to_string(child_id.id) + ")";
@@ -130,7 +130,7 @@ void ImGuiSceneHierarchy::renderNode(GObject* node)
         else
             node_flags &= ~ImGuiTreeNodeFlags_Selected;
 
-        bool node_open = ImGui::TreeNodeEx((void*)(intptr_t)i, node_flags, display_text.c_str());
+        bool node_open = ImGui::TreeNodeEx((void*)(intptr_t)(i+ std::hash<std::string>()(child_name)), node_flags, display_text.c_str());
         if (ImGui::IsItemClicked() && !ImGui::IsItemToggledOpen()) {
             m_ref_scene->onPickedChanged({ child_id }, original_picked_ids);
         }
@@ -139,18 +139,49 @@ void ImGuiSceneHierarchy::renderNode(GObject* node)
             if (child_node->isLeaf()) {
                 for (auto& com : child_node->getComponents()) {
                     auto refl = Meta::DynamicReflectionInstance(com->typeName(), com.get());
-                    renderLeafNode(refl);
+                    renderReflectionWidget(refl);
                 }
             }
             else {
-                renderNode(child_node);
+                renderNodes(child_node->children());
             }
             ImGui::TreePop();
         }
     }
 }
 
-void ImGuiSceneHierarchy::renderLeafNode(Meta::DynamicReflectionInstance& refl_instance)
+void ImGuiSceneHierarchy::renderNodes(const std::vector<Light*>& nodes)
+{
+    for (int i = 0; i < nodes.size(); i++)
+    {
+        auto child_node = nodes[i];
+        LightID child_id = child_node->ID();
+        std::string child_name = child_node->name();
+        std::string display_text = child_name + " (ID: " + std::to_string(child_id.id) + ")";
+
+        ImGuiTreeNodeFlags node_flags = ImGuiTreeNodeFlags_SpanAvailWidth;
+        if (m_ref_scene->getPickedLight() && m_ref_scene->getPickedLight()->ID()== child_id)
+            node_flags |= ImGuiTreeNodeFlags_Selected;
+        else
+            node_flags &= ~ImGuiTreeNodeFlags_Selected;
+
+        bool node_open = ImGui::TreeNodeEx((void*)(intptr_t)(i + std::hash<std::string>()(child_name)), node_flags, display_text.c_str());
+        if (ImGui::IsItemClicked() && !ImGui::IsItemToggledOpen()) {
+            m_ref_scene->onPickedChanged(child_id);
+        }
+        if (node_open)
+        {
+            // TODO light 对象也用component组合
+            //for (auto& com : child_node->getComponents()) {
+            //    auto refl = Meta::DynamicReflectionInstance(com->typeName(), com.get());
+            //    renderReflectionWidget(refl);
+            //}
+            ImGui::TreePop();
+        }
+    }
+}
+
+void ImGuiSceneHierarchy::renderReflectionWidget(Meta::DynamicReflectionInstance& refl_instance)
 {
     static ImGuiTableFlags flags = ImGuiTableFlags_Resizable | ImGuiTableFlags_NoSavedSettings;
     bool                   node_open = false;
@@ -166,11 +197,11 @@ void ImGuiSceneHierarchy::renderLeafNode(Meta::DynamicReflectionInstance& refl_i
             std::string field_type_name = field.field_type_name;
             std::string field_name = field.field_name;
             void* var = refl_instance.getFieldValue(i);
-            if (m_gui_creator.find(field_type_name) != m_gui_creator.end())
-                m_gui_creator[field_type_name](field_name, var);
+            if (m_widget_creator.find(field_type_name) != m_widget_creator.end())
+                m_widget_creator[field_type_name](field_name, var);
             else {
                 auto child_refl = Meta::DynamicReflectionInstance(field_type_name, var);
-                renderLeafNode(child_refl);
+                renderReflectionWidget(child_refl);
             }
         }
         ImGui::TreePop();
@@ -181,12 +212,22 @@ void ImGuiSceneHierarchy::render()
 {
     if (ImGui::Begin(("Scene Hierarchy"), nullptr, ImGuiWindowFlags_NoCollapse)) {
         ImGuiWindow* scene_hierarchy_window = ImGui::GetCurrentWindow();
-        auto root_node = m_ref_scene->rootObject();
-        renderNode(root_node);
+
+        const std::vector<std::shared_ptr<Light>>& lights = m_ref_scene->getLightManager()->lights();
+        std::vector<Light*> light_nodes(lights.size());
+        std::transform(lights.begin(), lights.end(), light_nodes.begin(), [](auto& light) {
+            return light.get();
+            });
+        renderNodes(light_nodes);
+
+        const std::vector<std::shared_ptr<GObject>>& objects = m_ref_scene->getObjects();
+        std::vector<GObject*> object_nodes(objects.size());
+        std::transform(objects.begin(), objects.end(), object_nodes.begin(), [](auto& object) {
+            return object.get();
+            });
+        renderNodes(object_nodes);
     }
     ImGui::End();
-
-    // TODO render lights node
 }
 
 #if ENABLE_ECS

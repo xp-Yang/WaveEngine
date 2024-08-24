@@ -27,7 +27,7 @@ public:
 
 class GObject {
 public:
-	GObject(GObject* parent, const std::string& name) : m_id(GObjectID()), m_name(name), m_parent(parent) { if (parent) parent->append(this); }
+	GObject(GObject* parent, const std::string& name) : m_name(name), m_parent(parent) { if (parent) parent->append(this); }
 	void append(GObject* node) { m_children.push_back(node); }
 	int index() const { return m_parent ? m_parent->indexOf(this) : -1; }
 	int indexOf(const GObject* child) const;

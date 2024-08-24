@@ -104,6 +104,14 @@ void MainCanvas::renderGizmos()
         transform_component->scale = Vec3(matrixScale[0], matrixScale[1], matrixScale[2]);
         transform_component->rotation = Vec3(matrixRotation[0], matrixRotation[1], matrixRotation[2]);
     }
+        Light* light = GetApp().scene()->getPickedLight().get();
+        if (auto point_light = dynamic_cast<PointLight*>(light)) {
+            Mat4 model_matrix = Math::Translate(point_light->position);
+            ImGuizmo::Manipulate((float*)(&camera.view), (float*)(&camera.projection), imguizmo_operation, ImGuizmo::LOCAL, (float*)(&model_matrix), NULL, NULL, NULL, NULL);
+            float matrixTranslation[3], matrixRotation[3], matrixScale[3];
+            ImGuizmo::DecomposeMatrixToComponents((float*)&model_matrix, matrixTranslation, matrixRotation, matrixScale);
+            point_light->position = Vec3(matrixTranslation[0], matrixTranslation[1], matrixTranslation[2]);
+        }
 
     ImVec2 air_window_size = ImVec2(128, 128);
     ImVec2 air_window_pos = ImVec2(m_viewport.x + m_viewport.width - air_window_size.x, m_viewport.y);

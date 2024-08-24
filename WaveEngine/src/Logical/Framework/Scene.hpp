@@ -21,16 +21,16 @@ public:
 	void init();
 
 	void onUpdate(float delta_time);
-	GObject* rootObject() const { return m_root_object; }
 	GObject* loadModel(const std::string& filepath);
 #if ENABLE_ECS
 	GObject* object(const Entity& entity) { return m_root_object->find(entity); }
 #else
-	const std::vector<std::shared_ptr<GObject>>& getPickedObjects() { return m_picked_objects; }
-	std::vector<GObjectID> getPickedObjectIDs();
-	const std::vector<std::shared_ptr<GObject>>& getObjects() { return m_objects; }
-	std::shared_ptr<LightManager> getLightManager() { return m_light_manager; }
-	std::shared_ptr<Skybox> getSkybox() { return m_skybox; }
+	const std::vector<std::shared_ptr<GObject>>& getPickedObjects() const { return m_picked_objects; }
+	std::vector<GObjectID> getPickedObjectIDs() const;
+	std::shared_ptr<Light> getPickedLight() const { return m_picked_light; }
+	const std::vector<std::shared_ptr<GObject>>& getObjects() const { return m_objects; }
+	std::shared_ptr<LightManager> getLightManager() const { return m_light_manager; }
+	std::shared_ptr<Skybox> getSkybox() const { return m_skybox; }
 
 	CameraComponent& getMainCamera() {
 		static CameraComponent* camera = new CameraComponent(nullptr);
@@ -40,9 +40,9 @@ public:
 
 public slots:
 	void onPickedChanged(std::vector<GObjectID> added, std::vector<GObjectID> removed);
+	void onPickedChanged(LightID light_id);
 
 private:
-	GObject* m_root_object{ nullptr };
 #if ENABLE_ECS
 	GObject* m_root_point_light_object{ nullptr };
 	GObject* m_root_cube_object{ nullptr };
@@ -52,6 +52,7 @@ private:
 	std::shared_ptr<LightManager> m_light_manager;
 	std::shared_ptr<Skybox> m_skybox;
 	std::vector<std::shared_ptr<GObject>> m_picked_objects;
+	std::shared_ptr<Light> m_picked_light;
 #endif
 };
 

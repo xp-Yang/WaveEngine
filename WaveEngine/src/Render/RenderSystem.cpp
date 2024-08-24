@@ -297,16 +297,28 @@ void RenderSystem::updateRenderSourceData()
         const auto& dir_light = scene.getLightManager()->mainDirectionalLight();
         m_render_source_data->render_directional_light_data_list.emplace_back(
             RenderDirectionalLightData{ dir_light->luminousColor, dir_light->direction, dir_light->lightReferenceMatrix() });
+    }
 
-        const auto& point_lights = scene.getLightManager()->pointLights();
-        for (const auto& point_light : point_lights) {
+    const auto& point_lights = scene.getLightManager()->pointLights();
+    for (const auto& point_light : point_lights) {
+        Mat4 point_light_matrix = Math::Translate(point_light->position);
+        auto render_mesh_data_id = RenderMeshDataID(-point_light->ID().id, 0);
+        auto it = std::find_if(m_render_source_data->render_point_light_data_list.begin(), m_render_source_data->render_point_light_data_list.end(),
+            [render_mesh_data_id](const RenderPointLightData& point_light_data) {
+                return point_light_data.render_sub_mesh_data->ID() == render_mesh_data_id;
+            }
+        );
+        if (it != m_render_source_data->render_point_light_data_list.end())
+        {
+            it->position = point_light->position;
+            it->render_sub_mesh_data->updateTransform(point_light_matrix);
+        }
+        else {
             Asset::SubMesh point_light_mesh;
             point_light_mesh.mesh_file_ref = { Asset::MeshFileType::CustomSphere, "" };
-            Mat4 point_light_matrix = Math::Translate(point_light->position);
             m_render_source_data->render_point_light_data_list.emplace_back(
                 RenderPointLightData{ point_light->luminousColor, point_light->position, point_light->radius, point_light->lightReferenceMatrix(),
-                // TODO light 也应该分配id ?
-                std::make_shared<RenderMeshData>(RenderMeshDataID(-1, 0), point_light_mesh, point_light_matrix)});
+                std::make_shared<RenderMeshData>(render_mesh_data_id, point_light_mesh, point_light_matrix) });
         }
     }
 

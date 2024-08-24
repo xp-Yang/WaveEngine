@@ -4,11 +4,29 @@
 #include "Core/Math/Math.hpp"
 #include "Logical/Framework/IDAllocator.hpp"
 
-struct Light {
-	Color4 luminousColor = { 1.0f, 1.0f, 1.0f, 1.0f };
+class LightID : public IDAllocator<LightID> {
+public:
+	LightID() = default;
+	LightID(int id) : IDAllocator<LightID>(id) {}
 };
 
-struct PointLightComponent : public Light {
+class Light {
+public:
+	Light(const std::string& name) : m_name(name) {}
+	virtual ~Light() {};
+	Color4 luminousColor = { 1.0f, 1.0f, 1.0f, 1.0f };
+	LightID ID() const { return m_id; }
+	std::string name() const { return m_name; }
+
+protected:
+	LightID m_id;
+	std::string m_name;
+};
+
+class PointLight : public Light {
+public:
+	PointLight() : Light("Point Light") {}
+
 	float radius;
 	Vec3 position;
 
@@ -37,7 +55,10 @@ struct PointLightComponent : public Light {
 	}
 };
 
-struct DirectionalLightComponent : public Light {
+class DirectionalLight : public Light {
+public:
+	DirectionalLight() : Light("Directional Light") {}
+
 	Vec3 direction;
 	float aspectRatio{ 16.0f / 9.0f }; // TODO should on window size change
 
@@ -49,26 +70,22 @@ struct DirectionalLightComponent : public Light {
 	}
 };
 
-class LightID : public IDAllocator<LightID> {
-	LightID() = default;
-	LightID(int id) : IDAllocator<LightID>(id) {}
-};
-
 class LightManager {
 public:
 	void init();
-	const DirectionalLightComponent* mainDirectionalLight() const {
+	const DirectionalLight* mainDirectionalLight() const {
 		// TODO
-		return static_cast<DirectionalLightComponent*>(m_lights[0].get());
+		return static_cast<DirectionalLight*>(m_lights[0].get());
 	}
-	std::vector<const PointLightComponent*> pointLights() const {
-		std::vector<const PointLightComponent*> res;
+	std::vector<const PointLight*> pointLights() const {
+		std::vector<const PointLight*> res;
 		for (const auto& light : m_lights) {
 			if (light.get() != mainDirectionalLight())
-				res.push_back(static_cast<const PointLightComponent*>(light.get()));
+				res.push_back(static_cast<const PointLight*>(light.get()));
 		}
 		return res; 
 	}
+	const std::vector<std::shared_ptr<Light>>& lights() const { return m_lights; }
 
 protected:
 	void addPointLight();

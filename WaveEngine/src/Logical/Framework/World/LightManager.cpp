@@ -10,7 +10,7 @@ void LightManager::init()
 
 void LightManager::addPointLight()
 {
-	std::shared_ptr<PointLightComponent> point_light = std::make_shared<PointLightComponent>();
+	std::shared_ptr<PointLight> point_light = std::make_shared<PointLight>();
 	double r1 = random(-15.0f, 15.0f);
 	double r2 = random(3.0f, 10.0f);
 	double r3 = random(-15.0f, 15.0f);
@@ -22,7 +22,7 @@ void LightManager::addPointLight()
 
 void LightManager::addDirectionalLight()
 {
-	std::shared_ptr<DirectionalLightComponent> dir_light = std::make_shared<DirectionalLightComponent>();
+	std::shared_ptr<DirectionalLight> dir_light = std::make_shared<DirectionalLight>();
 	dir_light->luminousColor = Color4(2.0f);
 	dir_light->direction = { 15.0f, -30.0f, 15.0f };
 	m_lights.push_back(dir_light);
