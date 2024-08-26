@@ -64,7 +64,7 @@ void MainCanvas::render()
         ImVec2 content_size = ImGui::GetContentRegionAvail();
         ImVec2 content_pos = ImVec2(ImGui::GetWindowContentRegionMin().x + window_pos.x, ImGui::GetWindowContentRegionMin().y + window_pos.y);
         ImTextureID scene_tex_id = (ImTextureID)GetApp().renderSystem()->getSceneTexture();
-        ImGui::Image(scene_tex_id, content_size, ImVec2(0, 1), ImVec2(1, 0)); // TODO uv0 ,uv1 ²ÎÊýº¬Òå
+        ImGui::Image(scene_tex_id, content_size, ImVec2(0, 1), ImVec2(1, 0)); // https://github.com/ocornut/imgui/wiki/Image-Loading-and-Displaying-Examples#about-texture-coordinates
         ImGuizmo::SetOrthographic(true);
         ImGuizmo::SetDrawlist();
         ImGuizmo::SetRect(content_pos.x, content_pos.y, content_size.x, content_size.y);

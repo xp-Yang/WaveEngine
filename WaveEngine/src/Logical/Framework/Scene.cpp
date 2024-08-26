@@ -39,9 +39,9 @@ GObject* Scene::loadModel(const std::string& filepath)
 	for (int idx : obj_sub_meshes_idx) {
 		renderable.sub_meshes.push_back(Asset::SubMesh{ idx, Asset::MeshFileRef{ Asset::MeshFileType::OBJ, filepath}, {}, Mat4(1.0f) });
 	}
-	auto res = new GObject(nullptr, entity);
+	auto res = GObject::create(nullptr, entity);
 #else
-	auto res = new GObject(nullptr, name);
+	auto res = GObject::create(nullptr, name);
 	res->addComponent<TransformComponent>();
 	MeshComponent& mesh = res->addComponent<MeshComponent>();
 	for (int idx : obj_sub_meshes_idx) {
@@ -92,7 +92,7 @@ void Scene::init()
 
 	//createDirectionalLight
 	auto dir_light_entity = world.create_entity();
-	auto directional_light_node = new GObject(nullptr, dir_light_entity);
+	auto directional_light_node = GObject::create(nullptr, dir_light_entity);
 	world.addComponent<ecs::NameComponent>(dir_light_entity).name = "Directional Light";
 	auto& dir_light_properties = world.addComponent<ecs::DirectionalLightComponent>(dir_light_entity);
 	dir_light_properties.luminousColor = Color4(2.0f);
@@ -101,10 +101,10 @@ void Scene::init()
 	size_t point_lights_count = 2;
 	auto root_point_lights_entity = world.create_entity();
 	world.addComponent<ecs::NameComponent>(root_point_lights_entity).name = "Point Lights";
-	auto m_root_point_light_object = new GObject(nullptr, root_point_lights_entity);
+	auto m_root_point_light_object = GObject::create(nullptr, root_point_lights_entity);
 	for (int i = 0; i < point_lights_count; i++) {
 		auto point_light_entity = world.create_entity();
-		auto point_light_node = new GObject(m_root_point_light_object, point_light_entity);
+		auto point_light_node = GObject::create(m_root_point_light_object, point_light_entity);
 		world.addComponent<ecs::NameComponent>(point_light_entity).name = std::string("Point Light ") + std::to_string(i);
 		auto& point_light_transform = world.addComponent<ecs::TransformComponent>(point_light_entity);
 		double r1 = random(-15.0f, 15.0f);
@@ -154,10 +154,10 @@ void Scene::init()
 	size_t spheres_count = 64;
 	auto root_sphere_entity = world.create_entity();
 	world.addComponent<ecs::NameComponent>(root_sphere_entity).name = "Spheres";
-	m_root_sphere_object = new GObject(nullptr, root_sphere_entity);
+	m_root_sphere_object = GObject::create(nullptr, root_sphere_entity);
 	for (int i = 0; i < spheres_count; i++) {
 		auto sphere_entity = world.create_entity();
-		auto sphere_node = new GObject(m_root_sphere_object, sphere_entity);
+		auto sphere_node = GObject::create(m_root_sphere_object, sphere_entity);
 		world.addComponent<ecs::NameComponent>(sphere_entity).name = std::string("Sphere") + std::to_string(i);
 		world.addComponent<TransformComponent>(sphere_entity);
 
@@ -193,7 +193,7 @@ void Scene::init()
 
 	//createPlaneGround
 	auto ground_entity = world.create_entity();
-	auto ground_node = new GObject(nullptr, ground_entity);
+	auto ground_node = GObject::create(nullptr, ground_entity);
 	world.addComponent<ecs::NameComponent>(ground_entity).name = "Gound";
 	auto& ground_transform = world.addComponent<ecs::TransformComponent>(ground_entity);
 	ground_transform.scale = Vec3(1.0f);
@@ -225,7 +225,7 @@ void Scene::init()
 
 	size_t cubes_count = 36;
 	for (int i = 0; i < cubes_count; i++) {
-		GObject* cube_obj = new GObject(nullptr, "Cube");
+		GObject* cube_obj = GObject::create(nullptr, "Cube");
 		MeshComponent& mesh = cube_obj->addComponent<MeshComponent>();
 		Asset::SubMesh cube_sub_mesh;
 		cube_sub_mesh.mesh_file_ref = { Asset::MeshFileType::CustomCube, "" };
@@ -242,7 +242,7 @@ void Scene::init()
 	}
 
 	{
-		GObject* plane_obj = new GObject(nullptr, "Ground");
+		GObject* plane_obj = GObject::create(nullptr, "Ground");
 		MeshComponent& plane_mesh = plane_obj->addComponent<MeshComponent>();
 		Asset::SubMesh plane_sub_mesh;
 		plane_sub_mesh.mesh_file_ref = { Asset::MeshFileType::CustomGround, "" };

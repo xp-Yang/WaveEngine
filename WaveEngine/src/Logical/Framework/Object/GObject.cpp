@@ -1,5 +1,11 @@
 #include "GObject.hpp"
 
+GObject* GObject::create(GObject* parent, const std::string& name)
+{
+	GObject* obj = new GObject(parent, name);
+	return obj;
+}
+
 int GObject::indexOf(const GObject* child) const {
 	if (!child)
 		return -1;
@@ -11,43 +17,43 @@ int GObject::indexOf(const GObject* child) const {
 	return -1;
 }
 
-void GObject::remove(const GObject* node)
+bool GObject::remove(GObject* node)
 {
-	for (auto child : m_children) {
-		child->remove(node);
+	if (node == nullptr) {
+		node = this;
 	}
-	auto it = std::find_if(m_children.begin(), m_children.end(), [node](GObject* child) {
-		return child->m_id == node->m_id;
-		});
-	if (it != m_children.end()) {
-		m_children.erase(it);
+	if (include(node)) {
+		node->releaseAllChildren();
+		if (auto node_parent = node->m_parent) {
+			node_parent->m_children.erase(node_parent->m_children.begin() + node->index());
+		}
+		delete node;
+		node = nullptr;
+		return true;
 	}
+	return false;
 }
 
-GObject* GObject::find(const GObject* node)
+bool GObject::include(const GObject* node)
 {
+	if (node == this)
+		return true;
 	for (auto child : m_children) {
-		auto res = child->find(node);
-		if (res)
-			return res;
+		if (child->include(node))
+			return true;
 	}
-	return m_id == node->m_id ? this : nullptr;
+	return false;
 }
 
 const std::vector<GObject*> GObject::allLeaves2()
 {
 	if (isLeaf())
 		return { this };
-	// 深度优先
+	// depth-first
 	std::vector<GObject*> leaves;
 	for (auto child : m_children) {
-		if (child->children().empty()) {
-			leaves.push_back(child);
-		}
-		else {
-			auto child_leaves = child->allLeaves2();
-			leaves.insert(leaves.end(), child_leaves.begin(), child_leaves.end());
-		}
+		auto child_leaves = child->allLeaves2();
+		leaves.insert(leaves.end(), child_leaves.begin(), child_leaves.end());
 	}
 	return leaves;
 }
@@ -56,13 +62,13 @@ const std::vector<GObject*> GObject::allLeaves()
 {
 	if (isLeaf())
 		return { this };
-	// 广度优先
+	// breadth-first
 	std::vector<GObject*> leaves;
 	std::vector<GObject*> nodes;
 	nodes.push_back(this);
 	while (!nodes.empty()) {
-		auto node = nodes.back();
-		nodes.pop_back();
+		auto node = nodes.front();
+		nodes.erase(nodes.begin());
 		for (auto child : node->children()) {
 			if (!child->children().empty()) {
 				nodes.push_back(child);
@@ -73,6 +79,16 @@ const std::vector<GObject*> GObject::allLeaves()
 		}
 	}
 	return leaves;
+}
+
+void GObject::releaseAllChildren()
+{
+	for (int i = 0; i < m_children.size(); ++i) {
+		m_children[i]->releaseAllChildren();
+		delete m_children[i];
+		m_children[i] = nullptr;
+		m_children.erase(m_children.begin() + i);
+	}
 }
 
 bool GObject::load()

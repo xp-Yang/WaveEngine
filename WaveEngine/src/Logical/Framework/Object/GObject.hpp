@@ -27,15 +27,15 @@ public:
 
 class GObject {
 public:
-	GObject(GObject* parent, const std::string& name) : m_name(name), m_parent(parent) { if (parent) parent->append(this); }
+	static GObject* create(GObject* parent, const std::string& name);
 	void append(GObject* node) { m_children.push_back(node); }
 	int index() const { return m_parent ? m_parent->indexOf(this) : -1; }
 	int indexOf(const GObject* child) const;
-	// TODO 这些方法如果自己是leaf就不对了
-	void remove(const GObject* node);
-	GObject* find(const GObject* node);
+	bool remove(GObject* node = nullptr);
+	bool include(const GObject* node);
 	const std::vector<GObject*> allLeaves2();
 	const std::vector<GObject*> allLeaves();
+	void releaseAllChildren();
 	bool isLeaf() const { return m_children.empty(); }
 	const std::vector<GObject*>& children() const { return m_children; }
 
@@ -79,12 +79,14 @@ public:
 	virtual void tick(float delta_time);
 
 protected:
-	GObject* m_parent;
-	std::vector<GObject*> m_children;
+	GObject(GObject* parent, const std::string& name) : m_parent(parent), m_name(name) { if (parent) parent->append(this); }
+	GObject(const GObject&) = delete;
+	GObject& operator=(const GObject&) = delete;
 
-private:
 	friend void Meta::Register::allMetaRegister();
 
+	GObject* m_parent;
+	std::vector<GObject*> m_children;
 	GObjectID m_id;
 	std::string m_name;
 	std::vector<std::shared_ptr<Component>> m_components;
@@ -109,7 +111,6 @@ public:
 		}
 		return -1;
 	}
-	// TODO 这些方法如果自己是leaf就不对了
 	void remove(const ecs::Entity& entity) {
 		for (auto child : m_children) {
 			child->remove(entity);
