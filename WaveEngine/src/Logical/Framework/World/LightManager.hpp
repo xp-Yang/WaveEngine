@@ -73,17 +73,16 @@ public:
 class LightManager {
 public:
 	void init();
-	const DirectionalLight* mainDirectionalLight() const {
-		// TODO
-		return static_cast<DirectionalLight*>(m_lights[0].get());
+	std::shared_ptr<DirectionalLight> mainDirectionalLight() const {
+		return std::dynamic_pointer_cast<DirectionalLight>(m_lights[0]);
 	}
-	std::vector<const PointLight*> pointLights() const {
-		std::vector<const PointLight*> res;
+	std::vector<std::shared_ptr<PointLight>> pointLights() const {
+		std::vector<std::shared_ptr<PointLight>> res;
 		for (const auto& light : m_lights) {
-			if (light.get() != mainDirectionalLight())
-				res.push_back(static_cast<const PointLight*>(light.get()));
+			if (light != mainDirectionalLight())
+				res.push_back(std::dynamic_pointer_cast<PointLight>(light));
 		}
-		return res; 
+		return res;
 	}
 	const std::vector<std::shared_ptr<Light>>& lights() const { return m_lights; }
 
