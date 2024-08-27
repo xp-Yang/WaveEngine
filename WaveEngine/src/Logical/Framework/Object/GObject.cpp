@@ -6,6 +6,16 @@ GObject* GObject::create(GObject* parent, const std::string& name)
 	return obj;
 }
 
+GObject::~GObject()
+{
+	while (!m_children.empty()) {
+		delete m_children.front();
+	}
+	if (m_parent) {
+		m_parent->m_children.erase(m_parent->m_children.begin() + index());
+	}
+}
+
 int GObject::indexOf(const GObject* child) const {
 	if (!child)
 		return -1;
@@ -23,10 +33,6 @@ bool GObject::remove(GObject* node)
 		node = this;
 	}
 	if (include(node)) {
-		node->releaseAllChildren();
-		if (auto node_parent = node->m_parent) {
-			node_parent->m_children.erase(node_parent->m_children.begin() + node->index());
-		}
 		delete node;
 		node = nullptr;
 		return true;
@@ -79,16 +85,6 @@ const std::vector<GObject*> GObject::allLeaves()
 		}
 	}
 	return leaves;
-}
-
-void GObject::releaseAllChildren()
-{
-	for (int i = 0; i < m_children.size(); ++i) {
-		m_children[i]->releaseAllChildren();
-		delete m_children[i];
-		m_children[i] = nullptr;
-		m_children.erase(m_children.begin() + i);
-	}
 }
 
 bool GObject::load()

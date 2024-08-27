@@ -28,6 +28,7 @@ public:
 class GObject {
 public:
 	static GObject* create(GObject* parent, const std::string& name);
+	~GObject();
 	void append(GObject* node) { m_children.push_back(node); }
 	int index() const { return m_parent ? m_parent->indexOf(this) : -1; }
 	int indexOf(const GObject* child) const;
@@ -35,7 +36,6 @@ public:
 	bool include(const GObject* node);
 	const std::vector<GObject*> allLeaves2();
 	const std::vector<GObject*> allLeaves();
-	void releaseAllChildren();
 	bool isLeaf() const { return m_children.empty(); }
 	const std::vector<GObject*>& children() const { return m_children; }
 
