@@ -8,11 +8,8 @@ GObject* GObject::create(GObject* parent, const std::string& name)
 
 GObject::~GObject()
 {
-	while (!m_children.empty()) {
-		delete m_children.front();
-	}
-	if (m_parent) {
-		m_parent->m_children.erase(m_parent->m_children.begin() + index());
+	for (auto child : m_children) {
+		delete child;
 	}
 }
 
@@ -33,8 +30,10 @@ bool GObject::remove(GObject* node)
 		node = this;
 	}
 	if (include(node)) {
+		if (node->m_parent) {
+			node->m_parent->m_children.erase(node->m_parent->m_children.begin() + node->index());
+		}
 		delete node;
-		node = nullptr;
 		return true;
 	}
 	return false;
