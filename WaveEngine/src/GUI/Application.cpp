@@ -35,6 +35,7 @@ void Application::run() {
 			m_window->swapBuffer();
 		}
 	}
+	fps_timer.stop();
 }
 
 void Application::init()

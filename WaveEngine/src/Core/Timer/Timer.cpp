@@ -10,8 +10,8 @@ void Timer::start()
 
 void Timer::restart()
 {
-	m_start = std::chrono::high_resolution_clock::now();
-	m_running = true;
+	stop();
+	start();
 }
 
 void Timer::stop()
