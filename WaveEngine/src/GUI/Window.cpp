@@ -34,6 +34,7 @@ Window::Window(int width, int height)
 		glfwTerminate();
 	}
 	glfwMakeContextCurrent(m_window);
+	glfwSwapInterval(0); // disable vsync
 
 	glfwSetWindowUserPointer(m_window, this);
 

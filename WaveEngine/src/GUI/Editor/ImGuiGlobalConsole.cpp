@@ -131,8 +131,5 @@ void ImGuiGlobalConsole::render() {
     //ImGui::SameLine();
     //ImGui::Text("point light number: %d", point_light_count);
 
-    ImGuiIO& io = ImGui::GetIO();
-    ImGui::Text("Average %.3f ms/frame (%.1f FPS)", 1000.0f / io.Framerate, io.Framerate);
-
     ImGui::End();
 }

@@ -15,19 +15,25 @@ Application& Application::get()
 }
 
 void Application::run() {
+	Timer fps_timer;
+	fps_timer.start();
 	while (!m_window->shouldClose()) {
-		// TODO control frame rate
-		// logical
-		m_input_system->onUpdate();
-		m_animation_system->onUpdate();
+		double duration = fps_timer.duration();
+		if (duration >= MILLISECONDS_PER_FRAME) {
+			fps_timer.restart();
 
-		// render
-		m_render_system->onUpdate();
+			// logical
+			m_input_system->onUpdate();
+			m_animation_system->onUpdate();
 
-		// gui
-		m_editor->onUpdate();
+			// render
+			m_render_system->onUpdate();
 
-		m_window->swapBuffer();
+			// gui
+			m_editor->onUpdate();
+
+			m_window->swapBuffer();
+		}
 	}
 }
 

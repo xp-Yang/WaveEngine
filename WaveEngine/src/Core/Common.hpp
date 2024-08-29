@@ -9,6 +9,7 @@
 #include "Meta/Serializer.hpp"
 #include "Signal/Signal.hpp"
 #include "Utils/Utils.hpp"
+#include "Timer/Timer.hpp"
 #include "Logger/Logger.hpp"
 
 #endif // !define Common_hpp
