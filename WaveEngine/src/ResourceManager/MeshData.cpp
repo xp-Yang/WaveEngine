@@ -332,18 +332,18 @@ std::shared_ptr<MeshData> MeshData::create_quad_mesh(const Point3& origin, const
     return std::make_shared<MeshData>(vertices, indices);
 }
 
-std::shared_ptr<MeshData> MeshData::create_ground_mesh(const Vec2& size)
+std::shared_ptr<MeshData> MeshData::create_complex_quad_mesh(const Vec2& size)
 {
     std::vector<Vertex> vertices;
     std::vector<int> indices;
 
-    Point3 start_point = Point3(-size.x / 2, 0.0f, size.y / 2);
-    Vec3 u = Vec3(-2 * start_point.x, 0, 0);
-    Vec3 v = Vec3(0, 0, -2 * start_point.z);
+    Point3 start_point = Point3(-size.x / 2.0f, 0.0f, size.y / 2.0f);
+    Vec3 u = Vec3(-2.0f * start_point.x, 0, 0);
+    Vec3 v = Vec3(0, 0, -2.0f * start_point.z);
     Point3 end_point = start_point + u + v;
 
-    size_t sub_quad_num_u = (size_t)(size.x) / 5;
-    size_t sub_quad_num_v = (size_t)(size.y) / 5;
+    size_t sub_quad_num_u = (size_t)(size.x);
+    size_t sub_quad_num_v = (size_t)(size.y);
     Vec3 sub_u = u / (float)sub_quad_num_u;
     Vec3 sub_v = v / (float)sub_quad_num_v;
     for (int i = 0; i < sub_quad_num_v; i++) {

@@ -30,11 +30,7 @@ RenderMeshData::RenderMeshData(const RenderMeshDataID& id, const Asset::SubMesh&
         break;
     }
     case Asset::MeshFileType::CustomGround: {
-        m_mesh_data = Asset::MeshData::create_ground_mesh(Vec2(60.0f));
-        break;
-    }
-    case Asset::MeshFileType::CustomGrid: {
-        m_mesh_data = Asset::MeshData::create_ground_mesh(Vec2(1000.0f));
+        m_mesh_data = Asset::MeshData::create_complex_quad_mesh(Vec2(1.0f));
         break;
     }
     case Asset::MeshFileType::CustomScreen: {

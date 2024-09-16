@@ -31,6 +31,7 @@ ImGuiEditor::ImGuiEditor()
     }
 
     init();
+    // TODO 实现右键打开对象上下文菜单
 }
 
 ImGuiEditor::~ImGuiEditor()
@@ -111,22 +112,13 @@ void ImGuiEditor::renderMenuBar()
 
 void ImGuiEditor::renderEmptyMainDockerSpaceWindow()
 {
-    ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoBringToFrontOnFocus | 
-        ImGuiWindowFlags_MenuBar;
-        /*ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize |
-        ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoBackground |
-        ImGuiConfigFlags_NoMouseCursorChange | ImGuiWindowFlags_NoBringToFrontOnFocus*/;
-
     ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
     ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
     ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
 
-    // When enabling ImGuiConfigFlags_ViewportsEnable, the coordinate system changes,
-    // e.g. (0,0) generally becomes the top-left corner of primary monitor.
-    //const ImGuiViewport* viewport = ImGui::GetMainViewport();
-    //ImGui::SetNextWindowPos(viewport->WorkPos);
-    //ImGui::SetNextWindowSize(viewport->WorkSize);
-    //ImGui::SetNextWindowViewport(viewport->ID);
+#if NO_TITLE_BAR
+    ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoBringToFrontOnFocus |
+        ImGuiWindowFlags_MenuBar;
     ImGui::SetNextWindowSize(ImVec2(1920, 1080), ImGuiCond_Appearing);
     static bool show = true;
     ImGui::Begin("Engine", &show, window_flags);
@@ -134,12 +126,27 @@ void ImGuiEditor::renderEmptyMainDockerSpaceWindow()
     ImGui::DockSpace(main_dock_id);
     renderMenuBar();
     ImGui::End();
-
-    ImGui::PopStyleVar(3);
-
     if (!show) {
         glfwSetWindowShouldClose((GLFWwindow*)GetApp().window()->getNativeWindowHandle(), true);
     }
+#else
+    ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_MenuBar |
+    ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove |
+    ImGuiWindowFlags_NoBackground | ImGuiConfigFlags_NoMouseCursorChange | ImGuiWindowFlags_NoBringToFrontOnFocus;
+    // When enabling ImGuiConfigFlags_ViewportsEnable, the coordinate system changes,
+    // e.g. (0,0) generally becomes the top-left corner of primary monitor.
+    const ImGuiViewport* viewport = ImGui::GetMainViewport();
+    ImGui::SetNextWindowPos(viewport->WorkPos);
+    ImGui::SetNextWindowSize(viewport->WorkSize);
+    ImGui::SetNextWindowViewport(viewport->ID);
+    ImGui::Begin("Engine", nullptr, window_flags);
+    ImGuiID main_dock_id = ImGui::GetID("Main Dock");
+    ImGui::DockSpace(main_dock_id);
+    renderMenuBar();
+    ImGui::End();
+#endif
+
+    ImGui::PopStyleVar(3);
 }
 
 void ImGuiEditor::configUIStyle()

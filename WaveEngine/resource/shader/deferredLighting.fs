@@ -32,7 +32,7 @@ void main()
 
     if(Normal.xyz == vec3(1.0)){
         // return if sample the blank area in GBuffer
-        FragColor = vec4(0.6, 0.6, 0.6, 1.0);
+        FragColor = vec4(0.046, 0.046, 0.046, 1.0);
         return;
     }
     

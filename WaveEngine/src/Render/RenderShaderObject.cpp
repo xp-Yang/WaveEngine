@@ -118,6 +118,9 @@ RenderShaderObject* RenderShaderObject::getShaderObject(const Asset::ShaderType&
     Asset::Shader shader_asset;
     switch (type)
     {
+    case Asset::ShaderType::PristineGridShader:
+        shader_asset = Asset::Shader{ type, resource_dir + "/shader/pristineGrid.vs", resource_dir + "/shader/pristineGrid.fs" };
+        break;
     case Asset::ShaderType::GBufferShader:
         shader_asset = Asset::Shader{ type, resource_dir + "/shader/gBufferPass.vs", resource_dir + "/shader/gBufferPass.fs" };
         break;

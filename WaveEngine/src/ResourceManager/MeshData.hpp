@@ -10,7 +10,7 @@ public:
 	static std::shared_ptr<MeshData> create_cube_mesh();
 	static std::shared_ptr<MeshData> create_icosphere_mesh(int regression_depth);
 	static std::shared_ptr<MeshData> create_quad_mesh(const Point3& origin, const Vec3& positive_dir_u, const Vec3& positive_dir_v);
-	static std::shared_ptr<MeshData> create_ground_mesh(const Vec2& size);
+	static std::shared_ptr<MeshData> create_complex_quad_mesh(const Vec2& size);
 	static std::shared_ptr<MeshData> create_screen_mesh();
 
 public:

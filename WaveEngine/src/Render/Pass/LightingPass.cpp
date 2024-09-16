@@ -147,6 +147,16 @@ void LightingPass::draw()
 		skybox_shader->stop_using();
 	}
 
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	static RenderShaderObject* grid_shader = RenderShaderObject::getShaderObject(Asset::ShaderType::PristineGridShader);
+	grid_shader->start_using();
+	grid_shader->setMatrix("view", 1, m_render_source_data->view_matrix);
+	grid_shader->setMatrix("proj", 1, m_render_source_data->proj_matrix);
+	m_rhi->drawIndexed(m_screen_quad->getVAO(), m_screen_quad->indicesCount());
+	grid_shader->stop_using();
+	glDisable(GL_BLEND);
+
 	// TODO light亮度加强，bloom直接提取亮度超出阈值的部分
 	// draw bright map to do bloom effect
 	//m_lights_framebuffer->bind();

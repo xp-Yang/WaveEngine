@@ -14,7 +14,6 @@ enum class MeshFileType {
 	CustomCube,
 	CustomSphere,
 	CustomGround,
-	CustomGrid,
 	CustomScreen,
 };
 

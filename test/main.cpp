@@ -57,7 +57,7 @@
 // 54. 去除所有gl裸调用
 // 55. 软光栅+软光追，opengl光栅+opengl光追，opengl光栅+软光追，
 // 56. 重心坐标为什么不是投影不变的
-int main()
+int WinMain()
 {
     auto& app = GetApp();
     app.init();

@@ -181,16 +181,6 @@ void Scene::init()
 		//Meta::Serialization::Serializer::write(world.getComponent<TransformComponent>(sphere_entity));
 	}
 
-	// createGridGround
-	auto ground_entity = world.create_entity();
-	world.addComponent<ecs::NameComponent>(ground_entity).name = "Grid";
-	auto& ground_transform = world.addComponent<ecs::TransformComponent>(ground_entity);
-	ground_transform.translation = Vec3(0.0f, -0.05f, 0.0f);
-	auto& ground_renderable = world.addComponent<ecs::RenderableComponent>(ground_entity);
-	Asset::SubMesh sub_mesh;
-	sub_mesh.mesh_file_ref = { Asset::MeshFileType::CustomGrid, "" };
-	ground_renderable.sub_meshes.push_back(sub_mesh);
-
 	//createPlaneGround
 	auto ground_entity = world.create_entity();
 	auto ground_node = GObject::create(nullptr, ground_entity);
@@ -253,19 +243,23 @@ void Scene::init()
 		plane_mesh.sub_meshes.push_back(plane_sub_mesh);
 
 		TransformComponent& plane_transform = plane_obj->addComponent<TransformComponent>();
+		plane_transform.scale = Vec3(50.f, 1.f, 50.f);
 
 		m_objects.push_back(std::shared_ptr<GObject>(plane_obj));
 	}
 
 	{
-		loadModel(resource_dir + "/model/nanosuit/nanosuit.obj");
+		GObject* nano_suit = loadModel(resource_dir + "/model/nanosuit/nanosuit.obj");
+		nano_suit->getComponent<TransformComponent>()->scale = Vec3(0.3f);
 
-		loadModel(resource_dir + "/model/vampire/dancing_vampire.dae");
+		GObject* vampire = loadModel(resource_dir + "/model/vampire/dancing_vampire.dae");
+		vampire->getComponent<TransformComponent>()->scale = Vec3(0.02f);
+		vampire->getComponent<TransformComponent>()->translation = Vec3(5.0f, 0.0f, 0.0f);
 
 		GObject* bunny_obj = loadModel(resource_dir + "/model/bunny.obj");
 		auto bunny_transform = bunny_obj->getComponent<TransformComponent>();
-		bunny_transform->scale = Vec3(40.0f);
-		bunny_transform->translation = Vec3(-10.0f, 0.0f, 0.0f);
+		bunny_transform->scale = Vec3(30.0f);
+		bunny_transform->translation = Vec3(-5.0f, 0.0f, 0.0f);
 	}
 }
 

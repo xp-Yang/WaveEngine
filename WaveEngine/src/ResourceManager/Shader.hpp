@@ -7,6 +7,7 @@ namespace Asset {
 
 enum class ShaderType {
 	None,
+	PristineGridShader,
 	GBufferShader,
 	DeferredLightingShader,
 	PBRShader,

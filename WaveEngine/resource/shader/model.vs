@@ -8,8 +8,8 @@ uniform mat4 view;
 uniform mat4 projection;
 
 out VS_OUT {
-    vec3 fragWorldPos;          //ÊÀ½ç×ø±ê
-    vec3 fragWorldNormal;       //ÊÀ½ç×ø±ê
+    vec3 fragWorldPos;          //ä¸–ç•Œåæ ‡
+    vec3 fragWorldNormal;       //ä¸–ç•Œåæ ‡
     vec2 fragUV;
 } vs_out;
 
@@ -18,7 +18,7 @@ void main()
 	vs_out.fragUV = vertex_uv;
     vs_out.fragWorldPos = vec3(model * vec4(vertex_pos, 1.0));
     vs_out.fragWorldNormal = normalize(mat3(model) * vertex_normal);
-    //ÕâÀïÊä³öµÄgl_PositionÎª²Ã¼ô¿Õ¼ä£¬¸øµ½gsÊ±»¹ÊÇ²Ã¼ô¿Õ¼ä£¬µ½fsÊ±ÒÑ¾­×Ô¶¯×öÁËÍ¸ÊÓ³ı·¨£¬±ä³ÉÁËNDC¿Õ¼ä
-    //²Ã¼ô×ø±ê
+    //è¿™é‡Œè¾“å‡ºçš„gl_Positionä¸ºClip Spaceï¼Œç»™åˆ°gsæ—¶è¿˜æ˜¯Clip Spaceï¼Œåˆ°fsæ—¶å·²ç»è‡ªåŠ¨åšäº† (é€è§†é™¤æ³•) => NDC => (è§†å£å˜æ¢) => Screen Spaceï¼Œå˜æˆäº†å±å¹•ç©ºé—´Screen Space
+    //è£å‰ªåæ ‡
     gl_Position = projection * view * model * vec4(vertex_pos, 1.0);
 }
