@@ -9,6 +9,10 @@ add_executable(${TEST_EXEC_NAME} ${HEAD_FILES} ${SRC_FILES})
 
 #设为vs默认启动项目
 set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT ${TEST_EXEC_NAME})
+set_target_properties(${TEST_EXEC_NAME} PROPERTIES
+    WIN32_EXECUTABLE ON
+    MACOSX_BUNDLE ON
+)
 
 target_link_libraries(${TEST_EXEC_NAME} WaveRuntime)
 
