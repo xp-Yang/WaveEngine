@@ -213,7 +213,9 @@ void Scene::init()
 	m_light_manager = std::make_shared<LightManager>();
 	m_light_manager->init();
 
-	size_t cubes_count = 36;
+	size_t cubes_count = 9;
+	size_t row_count = std::sqrt(cubes_count);
+	size_t col_count = cubes_count / row_count;
 	for (int i = 0; i < cubes_count; i++) {
 		GObject* cube_obj = GObject::create(nullptr, "Cube");
 		MeshComponent& mesh = cube_obj->addComponent<MeshComponent>();
@@ -226,7 +228,7 @@ void Scene::init()
 		mesh.sub_meshes.push_back(cube_sub_mesh);
 
 		TransformComponent& transform = cube_obj->addComponent<TransformComponent>();
-		transform.translation = { 1.5f * (i % 6), 0.5f + 1.5f * (i / 6), -10.0f };
+		transform.translation = { 1.5f * (i % col_count), 0.5f + 1.5f * (i / row_count), -10.0f };
 
 		m_objects.push_back(std::shared_ptr<GObject>(cube_obj));
 	}
@@ -236,7 +238,7 @@ void Scene::init()
 		MeshComponent& plane_mesh = plane_obj->addComponent<MeshComponent>();
 		Asset::SubMesh plane_sub_mesh;
 		plane_sub_mesh.mesh_file_ref = { Asset::MeshFileType::CustomGround, "" };
-		plane_sub_mesh.material.albedo = Vec3(1.0f, 1.0f, 1.0f);
+		plane_sub_mesh.material.albedo = Vec3(0.25f, 0.25f, 0.25f);
 		plane_sub_mesh.material.metallic = 0.0f;
 		plane_sub_mesh.material.roughness = 1.0f;
 		plane_sub_mesh.material.ao = 0.01;

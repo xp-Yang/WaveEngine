@@ -5,7 +5,7 @@
 #include "Logical/FrameWork/Scene.hpp"
 #include "Render/RenderSystem.hpp"
 #include "Editor/ImGuiEditor.hpp"
-#include "Logical/Input/InputSystem.hpp"
+#include "Editor/ImGuiInput.hpp"
 #include "Logical/Animation/AnimationSystem.hpp"
 
 class Application {
@@ -28,7 +28,7 @@ private:
 	std::unique_ptr<ImGuiEditor> m_editor;
 	std::unique_ptr<RenderSystem> m_render_system;
 	std::unique_ptr<AnimationSystem> m_animation_system;
-	std::unique_ptr<InputSystem> m_input_system;
+	std::unique_ptr<GUIInput> m_gui_input;
 	std::unique_ptr<Scene> m_scene;
 };
 

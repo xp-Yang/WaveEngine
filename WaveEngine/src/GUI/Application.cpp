@@ -23,7 +23,7 @@ void Application::run() {
 			fps_timer.restart();
 
 			// logical
-			m_input_system->onUpdate();
+			m_gui_input->onUpdate();
 			m_animation_system->onUpdate();
 
 			// render
@@ -46,12 +46,13 @@ void Application::init()
 
 	m_scene = std::make_unique<Scene>();
 	m_scene->init();
-	m_input_system = std::make_unique<InputSystem>();
-	m_input_system->init();
+	m_gui_input = std::make_unique<GUIInput>();
+	m_gui_input->init();
 	m_animation_system = std::make_unique<AnimationSystem>();
 	m_render_system = std::make_unique<RenderSystem>();
 	m_render_system->init();
 	m_editor = std::make_unique<ImGuiEditor>();
+	m_editor->init();
 }
 
 void Application::shutdown()

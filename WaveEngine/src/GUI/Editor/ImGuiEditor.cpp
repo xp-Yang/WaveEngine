@@ -13,8 +13,8 @@
 #include "Logical/FrameWork/Scene.hpp"
 
 ImGuiEditor::ImGuiEditor()
-    : m_gui_input(std::make_unique<GUIInput>())
-    , m_canvas_manager(std::make_unique<ImGuiCanvasManager>())
+    : m_canvas_manager(std::make_unique<ImGuiCanvasManager>())
+    , m_context_menu(std::make_unique<ImGuiContextMenu>())
     , m_scene_hierarchy_window(std::make_unique<ImGuiSceneHierarchy>())
     , m_global_console_window(std::make_unique<ImGuiGlobalConsole>())
     , m_debug_window(std::make_unique<ImGuiDebugWindow>())
@@ -29,9 +29,6 @@ ImGuiEditor::ImGuiEditor()
         ImGui_ImplGlfw_InitForOpenGL((GLFWwindow*)GetApp().window()->getNativeWindowHandle(), true);
         ImGui_ImplOpenGL3_Init("#version 330");
     }
-
-    init();
-    // TODO 实现右键打开对象上下文菜单
 }
 
 ImGuiEditor::~ImGuiEditor()
@@ -58,8 +55,8 @@ void ImGuiEditor::onUpdate()
 
         renderEmptyMainDockerSpaceWindow();
         m_debug_window->render(); // render first, the debug window need to be docked
-        m_gui_input->refreshState();
         m_canvas_manager->render();
+        m_context_menu->render();
         m_scene_hierarchy_window->render();
         m_global_console_window->render();
 
@@ -75,6 +72,16 @@ void ImGuiEditor::onUpdate()
     	ImGui::RenderPlatformWindowsDefault();
     	glfwMakeContextCurrent(backup_current_context);
     }
+}
+
+void ImGuiEditor::popUpMenu()
+{
+    m_context_menu->popUp();
+}
+
+void ImGuiEditor::dismissMenu()
+{
+    m_context_menu->dismiss();
 }
 
 void ImGuiEditor::renderMenuBar()

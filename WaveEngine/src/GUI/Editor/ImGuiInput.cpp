@@ -1,14 +1,21 @@
 #include "ImGuiInput.hpp"
 #include <imgui.h>
 #include "Engine.hpp"
+#include "Logical/Input/PickingSolver.hpp"
 
-void GUIInput::refreshState()
+void GUIInput::init()
+{
+	m_camera_manipulator = std::make_shared<CameraManipulator>();
+}
+
+bool GUIInput::refreshState()
 {
 	ImGuiIO& io = ImGui::GetIO();
-	if (!io.WantPassThroughMouse) {
-		// ImGui级别的鼠标输入：移动窗口等。
-		return;
-	}
+
+	auto main_viewport = GetApp().editor()->canvasManager()->getMainViewport();
+	if (!(main_viewport.x <= io.MousePos.x && io.MousePos.x <= main_viewport.x + main_viewport.width &&
+		main_viewport.y <= io.MousePos.y && io.MousePos.y <= main_viewport.y + main_viewport.height))
+		return false;
 
 	m_mouse_button = MouseButton::None;
 	if (io.MouseDown[0] || ImGui::IsMouseReleased(ImGuiMouseButton_Left)) {
@@ -22,15 +29,15 @@ void GUIInput::refreshState()
 	}
 
 	m_mouse_state = MouseState::Moving;
-	if (ImGui::IsMouseDragging(ImGuiMouseButton_Left) ||
-		ImGui::IsMouseDragging(ImGuiMouseButton_Right) ||
-		ImGui::IsMouseDragging(ImGuiMouseButton_Middle)) {
-		m_mouse_state = MouseState::Dragging;
-	}
-	else if (ImGui::IsMouseClicked(ImGuiMouseButton_Left) ||
+	if (ImGui::IsMouseClicked(ImGuiMouseButton_Left) ||
 		ImGui::IsMouseClicked(ImGuiMouseButton_Right) ||
 		ImGui::IsMouseClicked(ImGuiMouseButton_Middle)) {
 		m_mouse_state = MouseState::Clicked;
+	}
+	else if (ImGui::IsMouseDragging(ImGuiMouseButton_Left) ||
+		ImGui::IsMouseDragging(ImGuiMouseButton_Right) ||
+		ImGui::IsMouseDragging(ImGuiMouseButton_Middle)) {
+		m_mouse_state = MouseState::Dragging;
 	}
 	else if (ImGui::IsMouseDown(ImGuiMouseButton_Left) ||
 		ImGui::IsMouseDown(ImGuiMouseButton_Right) ||
@@ -53,9 +60,55 @@ void GUIInput::refreshState()
 	m_frame_time = 1.0f / io.Framerate;
 	memcpy(KeysDown, io.KeysDown, sizeof(KeysDown));
 	//Logger::debug("delta_x: {}, delta_y: {}", m_delta_mouse_x, m_delta_mouse_y);
+	return true;
 }
 
-Vec2 GUIInput::mapToMainCanvasWindow(const Vec2 value)
+bool GUIInput::onUpdate()
+{
+	if (!refreshState()) {
+		GetApp().editor()->dismissMenu();
+		return false;
+	}
+
+	if (m_mouse_state == MouseState::Clicked)
+		GetApp().editor()->dismissMenu();
+
+	if (m_last_mouse_state == MouseState::Holding && m_mouse_state == MouseState::Released) {
+		PickingSolver::get().onPicking(m_mouse_x, m_mouse_y, KeysDown[Key_LeftCtrl]);
+		if (m_mouse_button == MouseButton::Right) {
+			//if (GetApp().scene()->getPickedObjects().empty())
+			GetApp().editor()->popUpMenu();
+		}
+	}
+
+	m_camera_manipulator->onUpdate();
+
+	if (m_mouse_state == MouseState::Dragging) {
+		m_camera_manipulator->onMouseUpdate(m_delta_mouse_x, m_delta_mouse_y, m_mouse_button);
+	}
+
+	if (!isApproxZero(m_mouse_wheel))
+		m_camera_manipulator->onMouseWheelUpdate(m_mouse_wheel, m_mouse_x, m_mouse_y);
+
+	if (KeysDown['W']) {
+		m_camera_manipulator->onKeyUpdate('W', m_frame_time);
+	}
+	if (KeysDown['A']) {
+		m_camera_manipulator->onKeyUpdate('A', m_frame_time);
+	}
+	if (KeysDown['S']) {
+		m_camera_manipulator->onKeyUpdate('S', m_frame_time);
+	}
+	if (KeysDown['D']) {
+		m_camera_manipulator->onKeyUpdate('D', m_frame_time);
+	}
+
+	m_last_mouse_state = m_mouse_state;
+
+	return true;
+}
+
+Vec2 GUIInput::mapToMainCanvasWindow(const Vec2& value)
 {
 	Vec2 pos = value;
 	auto main_viewport = GetApp().editor()->canvasManager()->getMainViewport();

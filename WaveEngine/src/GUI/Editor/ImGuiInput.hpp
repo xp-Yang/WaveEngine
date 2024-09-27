@@ -3,15 +3,16 @@
 
 #include "Logical/Input/InputEnums.hpp"
 #include "Core/Common.hpp"
+#include "Logical/Input/CameraManipulator.hpp"
 
 class GUIInput {
 public:
-	void refreshState();
+	void init();
+	bool onUpdate();
 
 protected:
-	Vec2 mapToMainCanvasWindow(const Vec2 value);
-
-	friend class InputSystem;
+	bool refreshState();
+	Vec2 mapToMainCanvasWindow(const Vec2& value);
 
 	MouseState m_last_mouse_state{ MouseState::None };
 	MouseState m_mouse_state{ MouseState::None };
@@ -27,6 +28,8 @@ protected:
 	bool KeysDown[Key_COUNT];
 
 	float m_frame_time;
+
+	std::shared_ptr<CameraManipulator> m_camera_manipulator;
 };
 
 #endif
