@@ -117,3 +117,13 @@ unsigned int DeferredRenderPath::getShadowTexture()
 {
     return m_shadow_pass->getFrameBuffer()->depthAttachment()->texture()->id();
 }
+
+unsigned int DeferredRenderPath::getGBufferTexture()
+{
+    return m_gbuffer_pass->getFrameBuffer()->colorAttachmentAt(0)->texture()->id();
+}
+
+unsigned int DeferredRenderPath::getLightingTexture()
+{
+    return m_lighting_pass->getFrameBuffer()->colorAttachmentAt(0)->texture()->id();
+}

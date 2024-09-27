@@ -106,6 +106,16 @@ unsigned int RenderSystem::getShadowTexture()
     return m_curr_path->getShadowTexture();
 }
 
+unsigned int RenderSystem::getGBufferTexture()
+{
+    return m_curr_path->getGBufferTexture();
+}
+
+unsigned int RenderSystem::getLightingTexture()
+{
+    return m_curr_path->getLightingTexture();
+}
+
 #if ENABLE_ECS
 void RenderSystem::onComponentInserted(int entt_id, int pool_id)
 {

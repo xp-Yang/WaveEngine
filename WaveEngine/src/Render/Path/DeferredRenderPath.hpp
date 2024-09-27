@@ -16,6 +16,8 @@ public:
     unsigned int getPickingTexture() override;
     unsigned int getPickingFBO() override;
     unsigned int getShadowTexture() override;
+    unsigned int getGBufferTexture() override;
+    unsigned int getLightingTexture() override;
 
 protected:
     std::unique_ptr<RenderPass> m_picking_pass;

@@ -1,8 +1,17 @@
 #include "ImGuiDebugWindow.hpp"
+#include "ImGuiCanvas.hpp"
 
 #include <imgui.h>
 
 #include <Engine.hpp>
+
+ImGuiDebugWindow::ImGuiDebugWindow()
+{
+    m_picking_canvas = std::make_unique<PickingCanvas>();
+    m_shadow_canvas = std::make_unique<ShadowCanvas>();
+    m_gbuffer_canvas = std::make_unique<GBufferCanvas>();
+    m_lighting_canvas = std::make_unique<LightingCanvas>();
+}
 
 void ImGuiDebugWindow::render()
 {
@@ -12,6 +21,11 @@ void ImGuiDebugWindow::render()
     ImGuiID debug_dock_id = ImGui::GetID("Debug Dock");
     ImGui::DockSpace(debug_dock_id);
     ImGui::End();
+
+    m_picking_canvas->render();
+    m_shadow_canvas->render();
+    m_gbuffer_canvas->render();
+    m_lighting_canvas->render();
 
     ImGui::Begin("Main Camera Info", nullptr, ImGuiWindowFlags_NoCollapse);
     auto& camera = GetApp().scene()->getMainCamera();
@@ -31,9 +45,6 @@ void ImGuiDebugWindow::render()
     ImGui::Text("camera direction:");
     std::string test_camera_dir = Utils::vec3ToStr(camera.direction);
     ImGui::Text(test_camera_dir.c_str());
-
-    ImGuiIO& io = ImGui::GetIO();
-    ImGui::Text("Average %.3f ms/frame (%.1f FPS)", 1000.0f / io.Framerate, io.Framerate);
 
     ImGui::End();
 }

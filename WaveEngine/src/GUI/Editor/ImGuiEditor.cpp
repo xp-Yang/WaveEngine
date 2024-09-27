@@ -13,7 +13,7 @@
 #include "Logical/FrameWork/Scene.hpp"
 
 ImGuiEditor::ImGuiEditor()
-    : m_canvas_manager(std::make_unique<ImGuiCanvasManager>())
+    : m_main_canvas(std::make_unique<MainCanvas>())
     , m_context_menu(std::make_unique<ImGuiContextMenu>())
     , m_scene_hierarchy_window(std::make_unique<ImGuiSceneHierarchy>())
     , m_global_console_window(std::make_unique<ImGuiGlobalConsole>())
@@ -53,9 +53,14 @@ void ImGuiEditor::onUpdate()
     ImGui::NewFrame();
     ImGuizmo::BeginFrame();
 
+        ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
+        ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
+        ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
         renderEmptyMainDockerSpaceWindow();
-        m_debug_window->render(); // render first, the debug window need to be docked
-        m_canvas_manager->render();
+        if (m_show_debug)
+            m_debug_window->render(); // render first, the debug window need to be docked
+        m_main_canvas->render();
+        ImGui::PopStyleVar(3);
         m_context_menu->render();
         m_scene_hierarchy_window->render();
         m_global_console_window->render();
@@ -72,6 +77,11 @@ void ImGuiEditor::onUpdate()
     	ImGui::RenderPlatformWindowsDefault();
     	glfwMakeContextCurrent(backup_current_context);
     }
+}
+
+Viewport ImGuiEditor::getMainViewport() const
+{
+    return m_main_canvas->getViewport();
 }
 
 void ImGuiEditor::popUpMenu()
@@ -103,26 +113,26 @@ void ImGuiEditor::renderMenuBar()
             }
             ImGui::EndMenu();
         }
-        //if (ImGui::BeginMenu("Edit"))
-        //{
-        //    if (ImGui::MenuItem("Undo", "CTRL+Z")) {}
-        //    if (ImGui::MenuItem("Redo", "CTRL+Y", false, false)) {}  // Disabled item
-        //    ImGui::Separator();
-        //    if (ImGui::MenuItem("Cut", "CTRL+X")) {}
-        //    if (ImGui::MenuItem("Copy", "CTRL+C")) {}
-        //    if (ImGui::MenuItem("Paste", "CTRL+V")) {}
-        //    ImGui::EndMenu();
-        //}
+        if (ImGui::BeginMenu("Edit"))
+        {
+            //if (ImGui::MenuItem("Undo", "CTRL+Z")) {}
+            //if (ImGui::MenuItem("Redo", "CTRL+Y", false, false)) {}  // Disabled item
+            //ImGui::Separator();
+            //if (ImGui::MenuItem("Cut", "CTRL+X")) {}
+            //if (ImGui::MenuItem("Copy", "CTRL+C")) {}
+            //if (ImGui::MenuItem("Paste", "CTRL+V")) {}
+            ImGui::EndMenu();
+        }
+        if (ImGui::BeginMenu("Options")) {
+            if (ImGui::MenuItem("Debug Window", "", &m_show_debug)) {}
+            ImGui::EndMenu();
+        }
         ImGui::EndMenuBar();
     }
 }
 
 void ImGuiEditor::renderEmptyMainDockerSpaceWindow()
 {
-    ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
-    ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
-    ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
-
 #if NO_TITLE_BAR
     ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoBringToFrontOnFocus |
         ImGuiWindowFlags_MenuBar;
@@ -152,8 +162,6 @@ void ImGuiEditor::renderEmptyMainDockerSpaceWindow()
     renderMenuBar();
     ImGui::End();
 #endif
-
-    ImGui::PopStyleVar(3);
 }
 
 void ImGuiEditor::configUIStyle()

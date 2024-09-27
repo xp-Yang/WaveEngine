@@ -9,47 +9,6 @@
 #include "Logical/FrameWork/ECS/Components.hpp"
 #endif
 
-class ImGuiCanvas {
-public:
-    virtual void render() = 0;
-    void setViewPort(const Viewport& viewport) { m_viewport = viewport; }
-    Viewport getViewport() const { return m_viewport; }
-    CanvasType type() const { return m_type; }
-
-protected:
-    CanvasType m_type;
-    Viewport m_viewport;
-};
-
-class MainCanvas : public ImGuiCanvas {
-public:
-    enum class ToolbarType : int {
-        Translate,
-        Rotate,
-        Scale,
-    };
-    MainCanvas() { m_type = CanvasType::Main; }
-    void render() override;
-
-protected:
-    void renderGizmos();
-
-private:
-    ToolbarType m_toolbar_type{ ToolbarType::Translate };
-};
-
-class PickingCanvas : public ImGuiCanvas {
-public:
-    PickingCanvas() { m_type = CanvasType::Pick; }
-    void render() override;
-};
-
-class ShadowCanvas : public ImGuiCanvas {
-public:
-    ShadowCanvas() { m_type = CanvasType::Shadow; }
-    void render() override;
-};
-
 void MainCanvas::render()
 {
     static ImGuiWindowFlags window_flags = 0;
@@ -63,11 +22,16 @@ void MainCanvas::render()
         ImVec2 content_size = ImGui::GetContentRegionAvail();
         ImVec2 content_pos = ImVec2(ImGui::GetWindowContentRegionMin().x + window_pos.x, ImGui::GetWindowContentRegionMin().y + window_pos.y);
         ImTextureID scene_tex_id = (ImTextureID)GetApp().renderSystem()->getSceneTexture();
+        auto cursor_pos = ImGui::GetCursorPos();
         ImGui::Image(scene_tex_id, content_size, ImVec2(0, 1), ImVec2(1, 0)); // https://github.com/ocornut/imgui/wiki/Image-Loading-and-Displaying-Examples#about-texture-coordinates
+        ImGuiIO& io = ImGui::GetIO();
+        ImGui::SetCursorPos(cursor_pos);
+        ImGui::Text("FPS %.1f", io.Framerate);
+        setViewPort({ (int)content_pos.x, (int)content_pos.y, (int)content_size.x, (int)content_size.y });
+
         ImGuizmo::SetOrthographic(true);
         ImGuizmo::SetDrawlist();
         ImGuizmo::SetRect(content_pos.x, content_pos.y, content_size.x, content_size.y);
-        setViewPort({ (int)content_pos.x, (int)content_pos.y, (int)content_size.x, (int)content_size.y });
         renderGizmos();
     }
     ImGui::End();
@@ -150,7 +114,6 @@ void PickingCanvas::render()
     ImGui::SetNextWindowSize(ImVec2(1280, 720), ImGuiCond_Appearing);
     if (ImGui::Begin("PickingCanvas", nullptr, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoBackground)) {
         ImGuiWindow* window = ImGui::GetCurrentWindow();
-        bool hovered_window = ImGui::IsWindowHovered() && ImGui::IsMouseHoveringRect(window->InnerRect.Min, window->InnerRect.Max);
         ImVec2 window_pos = ImGui::GetWindowPos();
         ImVec2 window_size = ImGui::GetWindowSize();
         ImVec2 content_size = ImGui::GetContentRegionAvail();
@@ -166,7 +129,6 @@ void ShadowCanvas::render()
     ImGui::SetNextWindowSize(ImVec2(1280, 720), ImGuiCond_Appearing);
     if (ImGui::Begin("ShadowCanvas", nullptr, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoBackground)) {
         ImGuiWindow* window = ImGui::GetCurrentWindow();
-        bool hovered_window = ImGui::IsWindowHovered() && ImGui::IsMouseHoveringRect(window->InnerRect.Min, window->InnerRect.Max);
         ImVec2 window_pos = ImGui::GetWindowPos();
         ImVec2 window_size = ImGui::GetWindowSize();
         ImVec2 content_size = ImGui::GetContentRegionAvail();
@@ -177,40 +139,41 @@ void ShadowCanvas::render()
     ImGui::End();
 }
 
-
-ImGuiCanvasManager::ImGuiCanvasManager()
+void GBufferCanvas::render()
 {
-    ImGuiCanvas* main_canvas = new MainCanvas();
-    ImGuiCanvas* picking_canvas = new PickingCanvas();
-    ImGuiCanvas* shadow_canvas = new ShadowCanvas();
-    m_canvases.assign({ main_canvas, picking_canvas, shadow_canvas });
-}
-
-ImGuiCanvasManager::~ImGuiCanvasManager()
-{
-    for (auto& canvas : m_canvases) {
-        delete canvas;
+    ImGui::SetNextWindowSize(ImVec2(1280, 720), ImGuiCond_Appearing);
+    if (ImGui::Begin("GBufferCanvas", nullptr, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoBackground)) {
+        ImGuiWindow* window = ImGui::GetCurrentWindow();
+        ImVec2 window_pos = ImGui::GetWindowPos();
+        ImVec2 window_size = ImGui::GetWindowSize();
+        ImVec2 content_pos = ImGui::GetWindowContentRegionMin();
+        ImVec2 content_size = ImGui::GetContentRegionAvail();
+        unsigned int begin_tex_id = GetApp().renderSystem()->getGBufferTexture();
+        for (int i = 0; i < 4; ++i) {
+            int row = i / 2;
+            int col = i % 2;
+            ImVec2 child_content_pos = ImVec2(content_pos.x + content_size.x / 2.0f * col, content_pos.y + content_size.y / 2.0f * row);
+            ImVec2 child_content_size = content_size / 2.0f;
+            ImGui::SetCursorPos(child_content_pos);
+            ImTextureID tex_id = (ImTextureID)(begin_tex_id++);
+            ImGui::Image(tex_id, child_content_size, ImVec2(0, 1), ImVec2(1, 0));
+        }
+        setViewPort({ (int)window_pos.x, (int)window_pos.y, (int)window_size.x, (int)window_size.y });
     }
-    m_canvases.clear();
+    ImGui::End();
 }
 
-void ImGuiCanvasManager::render()
+void LightingCanvas::render()
 {
-    for (auto& canvas : m_canvases) {
-        canvas->render();
+    ImGui::SetNextWindowSize(ImVec2(1280, 720), ImGuiCond_Appearing);
+    if (ImGui::Begin("LightingCanvas", nullptr, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoBackground)) {
+        ImGuiWindow* window = ImGui::GetCurrentWindow();
+        ImVec2 window_pos = ImGui::GetWindowPos();
+        ImVec2 window_size = ImGui::GetWindowSize();
+        ImVec2 content_size = ImGui::GetContentRegionAvail();
+        ImTextureID tex_id = (ImTextureID)GetApp().renderSystem()->getLightingTexture();
+        ImGui::Image(tex_id, content_size, ImVec2(0, 1), ImVec2(1, 0));
+        setViewPort({ (int)window_pos.x, (int)window_pos.y, (int)window_size.x, (int)window_size.y });
     }
-}
-
-Viewport ImGuiCanvasManager::getViewport(CanvasType type) const
-{
-    for (const auto& canvas : m_canvases) {
-        if (canvas->type() == type)
-            return canvas->getViewport();
-    }
-    return {};
-}
-
-Viewport ImGuiCanvasManager::getMainViewport() const
-{
-    return getViewport(CanvasType::Main);
+    ImGui::End();
 }

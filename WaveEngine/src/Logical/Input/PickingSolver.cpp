@@ -11,7 +11,7 @@ void PickingSolver::onPicking(float mouse_x, float mouse_y, bool retain_old)
 	int y = (int)mouse_y;
 	// map to picking framebuffer size
 	// picking framebuffer is {DEFAULT_RENDER_RESOLUTION_X, DEFAULT_RENDER_RESOLUTION_Y} size
-	auto main_viewport = GetApp().editor()->canvasManager()->getMainViewport();
+	auto main_viewport = GetApp().editor()->getMainViewport();
 	x *= DEFAULT_RENDER_RESOLUTION_X / (float)main_viewport.width;
 	y *= DEFAULT_RENDER_RESOLUTION_Y / (float)main_viewport.height;
 	// in gl coordinate system, left-bottom is as origin

@@ -12,7 +12,7 @@ bool GUIInput::refreshState()
 {
 	ImGuiIO& io = ImGui::GetIO();
 
-	auto main_viewport = GetApp().editor()->canvasManager()->getMainViewport();
+	auto main_viewport = GetApp().editor()->getMainViewport();
 	if (!(main_viewport.x <= io.MousePos.x && io.MousePos.x <= main_viewport.x + main_viewport.width &&
 		main_viewport.y <= io.MousePos.y && io.MousePos.y <= main_viewport.y + main_viewport.height))
 		return false;
@@ -111,7 +111,7 @@ bool GUIInput::onUpdate()
 Vec2 GUIInput::mapToMainCanvasWindow(const Vec2& value)
 {
 	Vec2 pos = value;
-	auto main_viewport = GetApp().editor()->canvasManager()->getMainViewport();
+	auto main_viewport = GetApp().editor()->getMainViewport();
 	pos.x -= main_viewport.x;
 	pos.y -= main_viewport.y;
 	pos.x *= GetApp().window()->getWidth() / main_viewport.width;

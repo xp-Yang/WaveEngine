@@ -39,6 +39,8 @@ public:
     virtual unsigned int getPickingTexture() { return 0; };
     virtual unsigned int getPickingFBO() { return 0; };
     virtual unsigned int getShadowTexture() { return 0; };
+    virtual unsigned int getGBufferTexture() { return 0; };
+    virtual unsigned int getLightingTexture() { return 0; };
 
 protected:
     friend class RenderSystem;

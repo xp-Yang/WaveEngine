@@ -10,7 +10,7 @@ public:
 	bool create() override; // true generate and bind frameBuffer
 	void bind() override;
 	void unBind() override;
-	void clear(Color4 clear_color = Color4(1.0f)) override;
+	void clear(Color4 clear_color) override;
 	void blitTo(RhiFrameBuffer* dest, RhiTexture::Format format = RhiTexture::Format::RGB16F) override;
 };
 

@@ -31,21 +31,62 @@ enum CanvasType : unsigned int {
     Main,
     Pick,
     Shadow,
+    GBuffer,
+    Lighting,
     RayTracing,
 };
 
-class ImGuiCanvas;
-class ImGuiCanvasManager {
+class ImGuiCanvas {
 public:
-	ImGuiCanvasManager();
-	~ImGuiCanvasManager();
-	void render();
+    virtual void render() = 0;
+    void setViewPort(const Viewport& viewport) { m_viewport = viewport; }
+    Viewport getViewport() const { return m_viewport; }
+    CanvasType type() const { return m_type; }
 
-    Viewport getViewport(CanvasType type) const;
-    Viewport getMainViewport() const;
+protected:
+    CanvasType m_type;
+    Viewport m_viewport;
+};
+
+class MainCanvas : public ImGuiCanvas {
+public:
+    enum class ToolbarType : int {
+        Translate,
+        Rotate,
+        Scale,
+    };
+    MainCanvas() { m_type = CanvasType::Main; }
+    void render() override;
+
+protected:
+    void renderGizmos();
 
 private:
-	std::vector<ImGuiCanvas*> m_canvases;
+    ToolbarType m_toolbar_type{ ToolbarType::Translate };
+};
+
+class PickingCanvas : public ImGuiCanvas {
+public:
+    PickingCanvas() { m_type = CanvasType::Pick; }
+    void render() override;
+};
+
+class ShadowCanvas : public ImGuiCanvas {
+public:
+    ShadowCanvas() { m_type = CanvasType::Shadow; }
+    void render() override;
+};
+
+class GBufferCanvas : public ImGuiCanvas {
+public:
+    GBufferCanvas() { m_type = CanvasType::GBuffer; }
+    void render() override;
+};
+
+class LightingCanvas : public ImGuiCanvas {
+public:
+    LightingCanvas() { m_type = CanvasType::Lighting; }
+    void render() override;
 };
 
 #endif
