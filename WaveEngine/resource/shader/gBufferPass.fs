@@ -1,13 +1,13 @@
 #version 330 core
-layout (location = 0) out vec3 gPosition;
-layout (location = 1) out vec3 gNormal;
-layout (location = 2) out vec3 gDiffuse;
-layout (location = 3) out vec3 gSpecular;
+layout (location = 0) out vec4 gPosition;
+layout (location = 1) out vec4 gNormal;
+layout (location = 2) out vec4 gDiffuse;
+layout (location = 3) out vec4 gSpecular;
 // pbr
-layout (location = 4) out vec3 gAlbedo;
-layout (location = 5) out vec3 gMetallic;
-layout (location = 6) out vec3 gRoughness;
-layout (location = 7) out vec3 gAo;
+layout (location = 4) out vec4 gAlbedo;
+layout (location = 5) out vec4 gMetallic;
+layout (location = 6) out vec4 gRoughness;
+layout (location = 7) out vec4 gAo;
 
 in VS_OUT{
     vec3 fragWorldPos;
@@ -25,13 +25,13 @@ uniform float ao;
 
 void main()
 {    
-    gPosition = fs_in.fragWorldPos;
-    gNormal = normalize(fs_in.fragWorldNormal);
-    gDiffuse.rgb = texture(diffuse_map, fs_in.fragUV).rgb;
-    gSpecular.rgb = texture(specular_map, fs_in.fragUV).rgb;
+    gPosition = vec4(fs_in.fragWorldPos, 1.0);
+    gNormal = vec4(normalize(fs_in.fragWorldNormal), 1.0);
+    gDiffuse = vec4(texture(diffuse_map, fs_in.fragUV).rgb, 1.0);
+    gSpecular = vec4(texture(specular_map, fs_in.fragUV).rgb, 1.0);
 
-    gAlbedo = albedo;
-    gMetallic = vec3(metallic);
-    gRoughness = vec3(roughness);
-    gAo = vec3(ao);
+    gAlbedo = vec4(albedo, 1.0);
+    gMetallic = vec4(vec3(metallic), 1.0);
+    gRoughness = vec4(vec3(roughness), 1.0);
+    gAo = vec4(vec3(ao), 1.0);
 }  

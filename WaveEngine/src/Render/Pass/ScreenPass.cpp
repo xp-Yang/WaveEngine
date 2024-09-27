@@ -45,8 +45,6 @@ void ScreenPass::draw()
 	m_rhi->drawIndexed(m_screen_quad->getVAO(), m_screen_quad->indicesCount());
 
 	// pristine grid
-	glEnable(GL_BLEND);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	m_input_passes[0]->getFrameBuffer()->blitTo(m_framebuffer.get(), RhiTexture::Format::DEPTH);
 	static RenderShaderObject* grid_shader = RenderShaderObject::getShaderObject(Asset::ShaderType::PristineGridShader);
 	grid_shader->start_using();
@@ -56,7 +54,6 @@ void ScreenPass::draw()
 	grid_shader->stop_using();
 
 	m_framebuffer->unBind(); // bind GL_FRAMEBUFFER to default: 0
-	glDisable(GL_BLEND);
 	glClearColor(0.45f, 0.55f, 0.60f, 1.00f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 }

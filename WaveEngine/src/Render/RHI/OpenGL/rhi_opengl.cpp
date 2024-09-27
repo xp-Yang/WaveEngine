@@ -13,6 +13,9 @@ RhiOpenGL::RhiOpenGL()
 
 	glEnable(GL_DEPTH_TEST);
 	glDepthMask(GL_TRUE);
+
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 }
 
 void RhiOpenGL::drawIndexed(unsigned int vao_id, size_t indices_count)
