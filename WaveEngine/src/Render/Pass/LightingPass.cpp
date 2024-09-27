@@ -113,6 +113,7 @@ void LightingPass::draw()
 	// TODO 拷贝深度图后才能画法线
 	gbuffer_framebuffer->blitTo(m_framebuffer.get(), RhiTexture::Format::DEPTH);
 	
+	// TODO lights直接instancing rendering
 	// lights
 	static Asset::Shader point_light_shader_asset { Asset::ShaderType::CustomShader, std::string(RESOURCE_DIR) + "/shader/light.vs", std::string(RESOURCE_DIR) + "/shader/light.fs" };
 	static RenderShaderObject* point_light_shader = new RenderShaderObject(point_light_shader_asset);

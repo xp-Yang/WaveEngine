@@ -120,9 +120,9 @@ void OpenGLFrameBuffer::unBind()
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
-void OpenGLFrameBuffer::clear(Color3 clear_color)
+void OpenGLFrameBuffer::clear(Color4 clear_color)
 {
     bind();
-    glClearColor(clear_color.x, clear_color.y, clear_color.z, 1.0f);
+    glClearColor(clear_color.x, clear_color.y, clear_color.z, clear_color.w);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 }
