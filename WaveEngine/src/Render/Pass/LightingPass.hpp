@@ -30,7 +30,7 @@ private:
     bool m_checkerboard = false;
     bool m_pbr = false;
 
-    unsigned int m_shadow_map = 0;
+    unsigned int m_dir_light_shadow_map = 0;
     std::vector<unsigned int> m_cube_maps;
 };
 

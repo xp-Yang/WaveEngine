@@ -66,29 +66,24 @@ void LightingPass::draw()
 	lighting_shader->setTexture("gMetallic", 5, g_position_map + 5);
 	lighting_shader->setTexture("gRoughness", 6, g_position_map + 6);
 	lighting_shader->setTexture("gAo", 7, g_position_map + 7);
-
+	// debug option
 	lighting_shader->setBool("enablePBR", m_pbr);
 
 	RhiFrameBuffer* shadow_framebuffer = m_input_passes[1]->getFrameBuffer();
-	m_shadow_map = shadow_framebuffer->depthAttachment()->texture()->id();
-
+	m_dir_light_shadow_map = shadow_framebuffer->depthAttachment()->texture()->id();
 	lighting_shader->setFloat3("cameraPos", m_render_source_data->camera_position);
 	for (const auto& render_directional_light_data : m_render_source_data->render_directional_light_data_list) {
 		lighting_shader->setFloat3("directionalLight.direction", render_directional_light_data.direction);
 		lighting_shader->setFloat4("directionalLight.color", render_directional_light_data.color);
-		if (m_shadow_map != 0) {
+		if (m_dir_light_shadow_map != 0) {
 			lighting_shader->setMatrix("lightSpaceMatrix", 1, render_directional_light_data.lightReferenceMatrix);
-			lighting_shader->setTexture("shadow_map", 8, m_shadow_map);
+			lighting_shader->setTexture("shadow_map", 8, m_dir_light_shadow_map);
 		}
 	}
-
-	//for (const auto& render_point_light_data : m_render_source_data->render_point_light_data_list) {
-		for (int i = 0; i < m_cube_maps.size(); i++) {
-			std::string cube_map_id = std::string("cube_shadow_maps[") + std::to_string(i) + "]";
-			lighting_shader->setCubeTexture(cube_map_id, 9 + i, m_cube_maps[i]);
-		}
-	//}
-
+	for (int i = 0; i < m_cube_maps.size(); i++) {
+		std::string cube_map_id = std::string("cube_shadow_maps[") + std::to_string(i) + "]";
+		lighting_shader->setCubeTexture(cube_map_id, 9 + i, m_cube_maps[i]);
+	}
 	int point_light_idx = 0;
 	for (const auto& render_point_light_data : m_render_source_data->render_point_light_data_list) {
 		std::string light_id = std::string("pointLights[") + std::to_string(point_light_idx) + "]";
@@ -102,9 +97,8 @@ void LightingPass::draw()
 	lighting_shader->stop_using();
 
 
-	// TODO 拷贝深度图后才能画法线
 	gbuffer_framebuffer->blitTo(m_framebuffer.get(), RhiTexture::Format::DEPTH);
-	
+
 	// TODO lights直接instancing rendering
 	// lights
 	static Asset::Shader point_light_shader_asset { Asset::ShaderType::CustomShader, std::string(RESOURCE_DIR) + "/shader/light.vs", std::string(RESOURCE_DIR) + "/shader/light.fs" };
@@ -139,17 +133,6 @@ void LightingPass::draw()
 		m_rhi->drawIndexed(render_skybox_sub_mesh_data->getVAO(), render_skybox_sub_mesh_data->indicesCount());
 		skybox_shader->stop_using();
 	}
-
-	// pristine grid
-	glEnable(GL_BLEND);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	static RenderShaderObject* grid_shader = RenderShaderObject::getShaderObject(Asset::ShaderType::PristineGridShader);
-	grid_shader->start_using();
-	grid_shader->setMatrix("view", 1, m_render_source_data->view_matrix);
-	grid_shader->setMatrix("proj", 1, m_render_source_data->proj_matrix);
-	m_rhi->drawIndexed(m_screen_quad->getVAO(), m_screen_quad->indicesCount());
-	grid_shader->stop_using();
-	glDisable(GL_BLEND);
 
 	// TODO light亮度加强，bloom直接提取亮度超出阈值的部分
 	// draw bright map to do bloom effect
