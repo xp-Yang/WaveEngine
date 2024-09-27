@@ -1,6 +1,5 @@
 #include "EdgeDetectionPass.hpp"
-// TODO remove
-#include <glad/glad.h>
+
 EdgeDetectionPass::EdgeDetectionPass()
 {
 }
@@ -39,8 +38,6 @@ void EdgeDetectionPass::draw()
         for (auto picked_id : m_render_source_data->picked_ids) {
             // render the picked one
             // TODO to optimize 需要先把实际的深度贴图拷贝到当前深度缓冲中
-            glEnable(GL_DEPTH_TEST);
-
             static RenderShaderObject* picking_shader = RenderShaderObject::getShaderObject(Asset::ShaderType::PickingShader);
             picking_shader->start_using();
             picking_shader->setMatrix("view", 1, m_render_source_data->view_matrix);

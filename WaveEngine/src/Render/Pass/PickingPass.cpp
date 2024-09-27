@@ -1,6 +1,5 @@
 #include "PickingPass.hpp"
-// TODO remove
-#include <glad/glad.h>
+
 void PickingPass::init()
 {
     RhiTexture* color_texture = m_rhi->newTexture(RhiTexture::Format::RGB16F, Vec2(DEFAULT_RENDER_RESOLUTION_X, DEFAULT_RENDER_RESOLUTION_Y));
@@ -20,8 +19,6 @@ void PickingPass::draw()
     // render for picking
     m_framebuffer->bind();
     m_framebuffer->clear();
-
-    glEnable(GL_DEPTH_TEST);
 
     static RenderShaderObject* picking_shader = RenderShaderObject::getShaderObject(Asset::ShaderType::PickingShader);
     picking_shader->start_using();

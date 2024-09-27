@@ -10,6 +10,9 @@ RhiOpenGL::RhiOpenGL()
 	//初始化GLAD，使其可以管理OpenGL函数指针
 	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
 		assert(false);
+
+	glEnable(GL_DEPTH_TEST);
+	glDepthMask(GL_TRUE);
 }
 
 void RhiOpenGL::drawIndexed(unsigned int vao_id, size_t indices_count)

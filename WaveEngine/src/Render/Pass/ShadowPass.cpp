@@ -61,8 +61,6 @@ void ShadowPass::drawDirectionalLightShadowMap()
     m_framebuffer->bind();
     m_framebuffer->clear();
 
-    glEnable(GL_DEPTH_TEST);
-
     static RenderShaderObject* depth_shader = RenderShaderObject::getShaderObject(Asset::ShaderType::DepthShader);
     depth_shader->start_using();
     Mat4 light_ref_matrix = m_render_source_data->render_directional_light_data_list.front().lightReferenceMatrix;
@@ -77,7 +75,6 @@ void ShadowPass::drawPointLightShadowMap()
 {
     glBindFramebuffer(GL_FRAMEBUFFER, m_cube_map_fbo);
     glViewport(0, 0, DEFAULT_RENDER_RESOLUTION_Y, DEFAULT_RENDER_RESOLUTION_Y); // TODO 显然窗口大小变化后不是default大小
-    glEnable(GL_DEPTH_TEST);
 
     static RenderShaderObject* depth_shader = RenderShaderObject::getShaderObject(Asset::ShaderType::CubeMapShader);
 

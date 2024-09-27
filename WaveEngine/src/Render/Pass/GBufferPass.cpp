@@ -1,6 +1,5 @@
 #include "GBufferPass.hpp"
-// TODO remove
-#include <glad/glad.h>
+
 void GBufferPass::init()
 {
     RhiTexture* color_texture0 = m_rhi->newTexture(RhiTexture::Format::RGB16F, Vec2(DEFAULT_RENDER_RESOLUTION_X, DEFAULT_RENDER_RESOLUTION_Y));
@@ -35,8 +34,6 @@ void GBufferPass::draw()
 {
     m_framebuffer->bind();
     m_framebuffer->clear();
-
-    glEnable(GL_DEPTH_TEST);
 
     static RenderShaderObject* g_shader = RenderShaderObject::getShaderObject(Asset::ShaderType::GBufferShader);
 

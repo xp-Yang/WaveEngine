@@ -1,6 +1,5 @@
 #include "MainCameraPass.hpp"
-// TODO remove
-#include <glad/glad.h>
+
 void MainCameraPass::init()
 {
     RhiTexture* color_texture = m_rhi->newTexture(RhiTexture::Format::RGB16F, Vec2(DEFAULT_RENDER_RESOLUTION_X, DEFAULT_RENDER_RESOLUTION_Y));
@@ -44,19 +43,24 @@ void MainCameraPass::draw()
     m_framebuffer->bind();
     m_framebuffer->clear();
 
-    //glEnable(GL_BLEND);
-    //glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    glEnable(GL_DEPTH_TEST);
-
     Mat4 light_ref_matrix = m_render_source_data->render_directional_light_data_list.front().lightReferenceMatrix;
     Vec3 light_direction = m_render_source_data->render_directional_light_data_list.front().direction;
     Vec4 light_color = m_render_source_data->render_directional_light_data_list.front().color;
 
     static RenderShaderObject* shader = RenderShaderObject::getShaderObject(Asset::ShaderType::PBRShader);
+    shader->start_using();
+    int k = 0;
+    for (const auto& render_point_light_data : m_render_source_data->render_point_light_data_list) {
+        std::string light_id = std::string("pointLights[") + std::to_string(k) + "]";
+        shader->setFloat3(light_id + ".position", render_point_light_data.position);
+        shader->setFloat4(light_id + ".color", render_point_light_data.color);
+        shader->setFloat(light_id + ".radius", render_point_light_data.radius);
+        k++;
+    }
+    shader->setInt("point_lights_size", k);
     for (const auto& pair : m_render_source_data->render_mesh_data_hash) {
         const auto& render_sub_mesh_data = pair.second;
         auto& material = render_sub_mesh_data->renderMaterialData();
-        shader->start_using();
         // temp
         shader->setFloat3("albedo", material.albedo);
         shader->setFloat("metallic", material.metallic);
@@ -71,17 +75,6 @@ void MainCameraPass::draw()
         shader->setFloat3("directionalLight.direction", light_direction);
         shader->setFloat4("directionalLight.color", light_color);
 
-        // 点光源这里的循环造成了卡顿，需要deferred rendering解决
-        int k = 0;
-        for (const auto& render_point_light_data : m_render_source_data->render_point_light_data_list) {
-            std::string light_id = std::string("pointLights[") + std::to_string(k) + "]";
-            shader->setFloat3(light_id + ".position", render_point_light_data.position);
-            shader->setFloat4(light_id + ".color", render_point_light_data.color);
-            shader->setFloat(light_id + ".radius", render_point_light_data.radius);
-            k++;
-        }
-        shader->setInt("point_lights_size", k);
-
         shader->setCubeTexture("skybox", 4, m_render_source_data->render_skybox_data.skybox_cube_map);
         shader->setBool("enable_skybox_sample", m_reflection);
         if (m_shadow_map != 0) {
@@ -94,8 +87,8 @@ void MainCameraPass::draw()
             }
         }
         m_rhi->drawIndexed(render_sub_mesh_data->getVAO(), render_sub_mesh_data->indicesCount());
-        shader->stop_using();
     }
+    shader->stop_using();
     
     static RenderShaderObject* skybox_shader = RenderShaderObject::getShaderObject(Asset::ShaderType::SkyboxShader);
     if (m_skybox) {

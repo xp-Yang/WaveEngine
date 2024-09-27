@@ -89,12 +89,6 @@ void LightingPass::draw()
 		}
 	//}
 
-	// 模拟正向渲染的嵌套for循环，性能明显下降
-	// 正向vs延迟渲染：
-	// drawcall调用：  renderable.sub_meshes.size()次  vs  gbufferPass：renderable.sub_meshes.size()次 + LightingPass 1次。
-	// for循环设置shader光源属性：  renderable.sub_meshes.size() * Lights.size()次  vs  Lights.size()次。
-	// shader计算：  每次drawcall，每个VAO绘制时，shader对光栅化后的片段并行计算，每个shader内部循环Lights.size()次
-	//  vs  LightingPass的一次drawcall中，shader对整个屏幕所有像素并行计算，每个shader内部循环Lights.size()次。
 	int point_light_idx = 0;
 	for (const auto& render_point_light_data : m_render_source_data->render_point_light_data_list) {
 		std::string light_id = std::string("pointLights[") + std::to_string(point_light_idx) + "]";
@@ -108,8 +102,6 @@ void LightingPass::draw()
 	lighting_shader->stop_using();
 
 
-	glEnable(GL_DEPTH_TEST);
-	glDepthMask(GL_TRUE);
 	// TODO 拷贝深度图后才能画法线
 	gbuffer_framebuffer->blitTo(m_framebuffer.get(), RhiTexture::Format::DEPTH);
 	
@@ -148,6 +140,7 @@ void LightingPass::draw()
 		skybox_shader->stop_using();
 	}
 
+	// pristine grid
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	static RenderShaderObject* grid_shader = RenderShaderObject::getShaderObject(Asset::ShaderType::PristineGridShader);
