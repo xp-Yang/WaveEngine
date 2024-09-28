@@ -42,7 +42,9 @@ void LightingPass::draw()
 	}
 
 	// deferred lighting
-	static RenderShaderObject* lighting_shader = RenderShaderObject::getShaderObject(Asset::ShaderType::DeferredLightingShader);
+	static RenderShaderObject* lighting_pbr_shader = RenderShaderObject::getShaderObject(Asset::ShaderType::DeferredLightingShader);
+	static RenderShaderObject* lighting_phong_shader = RenderShaderObject::getShaderObject(Asset::ShaderType::DeferredLightingPhongShader);
+	RenderShaderObject* lighting_shader = m_pbr ? lighting_pbr_shader : lighting_phong_shader;
 	RhiFrameBuffer* gbuffer_framebuffer = m_input_passes[0]->getFrameBuffer();
 	unsigned int g_position_map = gbuffer_framebuffer->colorAttachmentAt(0)->texture()->id();
 	lighting_shader->start_using();
@@ -55,8 +57,6 @@ void LightingPass::draw()
 	lighting_shader->setTexture("gMetallic", 5, g_position_map + 5);
 	lighting_shader->setTexture("gRoughness", 6, g_position_map + 6);
 	lighting_shader->setTexture("gAo", 7, g_position_map + 7);
-	// debug option
-	lighting_shader->setBool("enablePBR", m_pbr);
 
 	RhiFrameBuffer* shadow_framebuffer = m_input_passes[1]->getFrameBuffer();
 	m_dir_light_shadow_map = shadow_framebuffer->depthAttachment()->texture()->id();
