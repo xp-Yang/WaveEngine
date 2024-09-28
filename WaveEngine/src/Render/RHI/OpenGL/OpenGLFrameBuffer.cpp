@@ -82,20 +82,6 @@ bool OpenGLFrameBuffer::create()
 //    }
 //}
 
-//void OpenGLFrameBuffer::blitColorMapTo(OpenGLFrameBuffer* dest)
-//{
-//    glBindFramebuffer(GL_READ_FRAMEBUFFER, getFBO());
-//    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, dest->getFBO());
-//    glBlitFramebuffer(0, 0, m_width, m_height, 0, 0, dest->getWidth(), dest->getHeight(), GL_COLOR_BUFFER_BIT, GL_NEAREST);
-//}
-//
-//void OpenGLFrameBuffer::blitDepthMapTo(OpenGLFrameBuffer* dest)
-//{
-//    glBindFramebuffer(GL_READ_FRAMEBUFFER, getFBO());
-//    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, dest->getFBO());
-//    glBlitFramebuffer(0, 0, m_width, m_height, 0, 0, dest->getWidth(), dest->getHeight(), GL_DEPTH_BUFFER_BIT, GL_NEAREST);
-//}
-
 void OpenGLFrameBuffer::bind()
 {
     glBindFramebuffer(GL_FRAMEBUFFER, m_id);

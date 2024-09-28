@@ -217,7 +217,7 @@ public:
     const RhiAttachment* depthStencilAttachment() const { return &m_depthStencilAttachment; }
     void setDepthStencilAttachment(RhiAttachment depthStencilAttachment_) { m_depthStencilAttachment = depthStencilAttachment_; }
 
-    virtual bool create() = 0; // true generate and bind frameBuffer
+    virtual bool create() = 0; // truely generate and bind a frameBuffer
     virtual void bind() = 0;
     virtual void unBind() = 0;
     virtual void clear(Color4 clear_color = Color4(0.f, 0.f, 0.f, 1.0f)) = 0;
@@ -230,7 +230,7 @@ protected:
     RhiAttachment m_depthAttachment;
     RhiAttachment m_depthStencilAttachment;
     Vec2 m_pixelSize;
-    int m_sampleCount;
+    int m_sampleCount{ 1 };
     unsigned int m_id{ 0 };
 };
 

@@ -76,7 +76,6 @@ bool GUIInput::onUpdate()
 	if (m_last_mouse_state == MouseState::Holding && m_mouse_state == MouseState::Released) {
 		PickingSolver::get().onPicking(m_mouse_x, m_mouse_y, KeysDown[Key_LeftCtrl]);
 		if (m_mouse_button == MouseButton::Right) {
-			//if (GetApp().scene()->getPickedObjects().empty())
 			GetApp().editor()->popUpMenu();
 		}
 	}

@@ -86,7 +86,8 @@ Viewport ImGuiEditor::getMainViewport() const
 
 void ImGuiEditor::popUpMenu()
 {
-    m_context_menu->popUp();
+    ContextType context = GetApp().scene()->getPickedObjects().empty() ? ContextType::Void : ContextType::Object;
+    m_context_menu->popUp(context);
 }
 
 void ImGuiEditor::dismissMenu()
@@ -104,12 +105,13 @@ void ImGuiEditor::renderMenuBar()
                 FileDialog* file_dlg = FileDialog::create();
                 auto filepath = file_dlg->OpenFile("");
                 if (!filepath.empty()) {
-                    // TODO GetApp().scene()->loadModel(filepath);
+                    GetApp().scene()->loadModel(filepath);
                 }
             }
             if (ImGui::MenuItem("Save As..", "Ctrl+S")) {
                 FileDialog* file_dlg = FileDialog::create();
-                file_dlg->SaveFile("");
+                auto filepath = file_dlg->SaveFile("");
+                // TODO
             }
             ImGui::EndMenu();
         }

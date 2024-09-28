@@ -1,6 +1,5 @@
 #include "ScreenPass.hpp"
-// TODO remove
-#include <glad/glad.h>
+
 void ScreenPass::init()
 {
 	RhiTexture* color_texture = m_rhi->newTexture(RhiTexture::Format::RGB16F, Vec2(DEFAULT_RENDER_RESOLUTION_X, DEFAULT_RENDER_RESOLUTION_Y));
@@ -13,6 +12,9 @@ void ScreenPass::init()
 	fb->setDepthAttachment(depth_ttachment);
 	fb->create();
 	m_framebuffer = std::unique_ptr<RhiFrameBuffer>(fb);
+
+	RhiFrameBuffer* default_fb = m_rhi->newFrameBuffer(RhiAttachment(), Vec2(DEFAULT_RENDER_RESOLUTION_X, DEFAULT_RENDER_RESOLUTION_Y));
+	m_default_framebuffer = std::unique_ptr<RhiFrameBuffer>(default_fb);
 }
 
 //void ScreenPass::prepare(FrameBuffer* framebuffer)
@@ -33,15 +35,20 @@ void ScreenPass::draw()
 	frame_shader->start_using();
 	m_lighted_map = m_input_passes[0]->getFrameBuffer()->colorAttachmentAt(0)->texture()->id();
 	frame_shader->setTexture("Texture", 0, m_lighted_map);
-	if (m_input_passes.size() > 1) { // TODO frame graph
-		m_border_map = m_input_passes[1]->getFrameBuffer()->colorAttachmentAt(0)->texture()->id();
-		frame_shader->setTexture("borderMap", 1, m_border_map);
+	if (m_input_passes.size() > 1) {
+		m_blurred_bright_map = m_input_passes[1]->getFrameBuffer()->colorAttachmentAt(0)->texture()->id();
+		frame_shader->setTexture("bloomBlurMap", 1, m_blurred_bright_map);
+		frame_shader->setBool("bloom", true);
+	}
+	else
+		frame_shader->setBool("bloom", false);
+	if (m_input_passes.size() > 2) { // TODO frame graph
+		m_border_map = m_input_passes[2]->getFrameBuffer()->colorAttachmentAt(0)->texture()->id();
+		frame_shader->setTexture("borderMap", 2, m_border_map);
 		frame_shader->setBool("border", true);
 	}
 	else
 		frame_shader->setBool("border", false);
-	//frame_shader->setTexture("bloomBlurMap", 2, m_blurred_bright_map);
-	frame_shader->setBool("bloom", false);
 	m_rhi->drawIndexed(m_screen_quad->getVAO(), m_screen_quad->indicesCount());
 
 	// pristine grid
@@ -53,7 +60,6 @@ void ScreenPass::draw()
 	m_rhi->drawIndexed(m_screen_quad->getVAO(), m_screen_quad->indicesCount());
 	grid_shader->stop_using();
 
-	m_framebuffer->unBind(); // bind GL_FRAMEBUFFER to default: 0
-	glClearColor(0.45f, 0.55f, 0.60f, 1.00f);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+	m_default_framebuffer->bind();
+	m_default_framebuffer->clear(Color4(0.45f, 0.55f, 0.60f, 1.00f));
 }

@@ -234,7 +234,7 @@ static std::vector<Triangle> recursive_subdivide(const Triangle& triangle, int r
     return ret;
 }
 
-std::shared_ptr<MeshData> MeshData::create_icosphere_mesh(int regression_depth) {
+std::shared_ptr<MeshData> MeshData::create_icosphere_mesh(float radius, int regression_depth) {
     LARGE_INTEGER t1, t2, tc;
     QueryPerformanceFrequency(&tc);
     QueryPerformanceCounter(&t1);
@@ -266,7 +266,7 @@ std::shared_ptr<MeshData> MeshData::create_icosphere_mesh(int regression_depth) 
     std::vector<Vertex> all_vertices;
     for (auto& triangle : m_triangles) {
         for (auto& vertex : triangle.vertices) {
-            vertex.position = m_center + Normalize(vertex.position - m_center);
+            vertex.position = m_center + radius * Normalize(vertex.position - m_center);
         }
         for (auto& vertex : triangle.vertices) {
             //Vec3 a = triangle.vertices[0] - triangle.vertices[1];

@@ -7,8 +7,6 @@ class LightingPass : public RenderPass {
 public:
     void init() override;
     void draw() override;
-    unsigned int getSceneMap() const;
-    unsigned int getBrightMap() const;
     void enableSkybox(bool enable);
     void enableNormal(bool enable);
     void enableWireframe(bool enable);
@@ -22,8 +20,6 @@ protected:
     void drawCheckerboardMode();
 
 private:
-    std::unique_ptr<RhiFrameBuffer> m_lights_framebuffer;
-
     bool m_skybox = false;
     bool m_normal_debug = false;
     bool m_wireframe = false;

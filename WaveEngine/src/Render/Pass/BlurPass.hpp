@@ -9,8 +9,6 @@ public:
 	BlurPass();
 	void init() override;
 	void draw() override;
-	unsigned int getBlurredBrightMap();
-	void setBrightMap(unsigned int map);
 
 protected:
 	unsigned int m_bright_map;

@@ -33,6 +33,7 @@ enum CanvasType : unsigned int {
     Shadow,
     GBuffer,
     Lighting,
+    Blurred,
     RayTracing,
 };
 
@@ -86,6 +87,12 @@ public:
 class LightingCanvas : public ImGuiCanvas {
 public:
     LightingCanvas() { m_type = CanvasType::Lighting; }
+    void render() override;
+};
+
+class BlurredCanvas : public ImGuiCanvas {
+public:
+    BlurredCanvas() { m_type = CanvasType::Blurred; }
     void render() override;
 };
 

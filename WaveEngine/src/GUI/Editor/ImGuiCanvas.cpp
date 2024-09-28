@@ -177,3 +177,18 @@ void LightingCanvas::render()
     }
     ImGui::End();
 }
+
+void BlurredCanvas::render()
+{
+    ImGui::SetNextWindowSize(ImVec2(1280, 720), ImGuiCond_Appearing);
+    if (ImGui::Begin("BlurredCanvas", nullptr, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoBackground)) {
+        ImGuiWindow* window = ImGui::GetCurrentWindow();
+        ImVec2 window_pos = ImGui::GetWindowPos();
+        ImVec2 window_size = ImGui::GetWindowSize();
+        ImVec2 content_size = ImGui::GetContentRegionAvail();
+        ImTextureID tex_id = (ImTextureID)GetApp().renderSystem()->getBlurredTexture();
+        ImGui::Image(tex_id, content_size, ImVec2(0, 1), ImVec2(1, 0));
+        setViewPort({ (int)window_pos.x, (int)window_pos.y, (int)window_size.x, (int)window_size.y });
+    }
+    ImGui::End();
+}

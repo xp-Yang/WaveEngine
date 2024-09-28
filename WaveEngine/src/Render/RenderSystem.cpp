@@ -116,6 +116,11 @@ unsigned int RenderSystem::getLightingTexture()
     return m_curr_path->getLightingTexture();
 }
 
+unsigned int RenderSystem::getBlurredTexture()
+{
+    return m_curr_path->getBlurredTexture();
+}
+
 #if ENABLE_ECS
 void RenderSystem::onComponentInserted(int entt_id, int pool_id)
 {

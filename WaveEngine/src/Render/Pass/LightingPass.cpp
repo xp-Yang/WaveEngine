@@ -12,20 +12,6 @@ void LightingPass::init()
 	fb->setDepthAttachment(depth_ttachment);
 	fb->create();
 	m_framebuffer = std::unique_ptr<RhiFrameBuffer>(fb);
-
-
-	{
-		RhiTexture* color_texture = m_rhi->newTexture(RhiTexture::Format::RGB16F, Vec2(DEFAULT_RENDER_RESOLUTION_X, DEFAULT_RENDER_RESOLUTION_Y));
-		RhiTexture* depth_texture = m_rhi->newTexture(RhiTexture::Format::DEPTH, Vec2(DEFAULT_RENDER_RESOLUTION_X, DEFAULT_RENDER_RESOLUTION_Y));
-		color_texture->create();
-		depth_texture->create();
-		RhiAttachment color_attachment = RhiAttachment(color_texture);
-		RhiAttachment depth_ttachment = RhiAttachment(depth_texture);
-		RhiFrameBuffer* fb = m_rhi->newFrameBuffer(color_attachment, Vec2(DEFAULT_RENDER_RESOLUTION_X, DEFAULT_RENDER_RESOLUTION_Y));
-		fb->setDepthAttachment(depth_ttachment);
-		fb->create();
-		m_lights_framebuffer = std::unique_ptr<RhiFrameBuffer>(fb);
-	}
 }
 
 void LightingPass::draw()
@@ -133,34 +119,7 @@ void LightingPass::draw()
 		skybox_shader->stop_using();
 	}
 
-	// TODO light亮度加强，bloom直接提取亮度超出阈值的部分
-	// draw bright map to do bloom effect
-	//m_lights_framebuffer->bind();
-	//m_lights_framebuffer->clear();
-	//m_gbuffer_framebuffer->blitDepthMapTo(m_lights_framebuffer.get());
-	//for (const auto& render_point_light_data : m_render_source_data->render_point_light_data_list) {
-	//	const auto& render_point_light_sub_mesh_data = render_point_light_data.render_sub_mesh_data;
-	//	auto& material = render_point_light_sub_mesh_data->renderMaterialData();
-	//	point_light_shader->start_using();
-	//	point_light_shader->setFloat4("color", render_point_light_data.color);
-	//	point_light_shader->setMatrix("model", 1, render_point_light_sub_mesh_data->transform());
-	//	point_light_shader->setMatrix("view", 1, m_render_source_data->view_matrix);
-	//	point_light_shader->setMatrix("projection", 1, m_render_source_data->proj_matrix);
-	//	m_rhi->drawIndexed(render_point_light_sub_mesh_data->getVAO(), render_point_light_sub_mesh_data->indicesCount());
-	//	point_light_shader->stop_using();
-	//}
-
 	m_framebuffer->unBind();
-}
-
-unsigned int LightingPass::getSceneMap() const
-{
-	return m_framebuffer->colorAttachmentAt(0)->texture()->id();
-}
-
-unsigned int LightingPass::getBrightMap() const
-{
-	return m_lights_framebuffer->colorAttachmentAt(0)->texture()->id();
 }
 
 void LightingPass::enableSkybox(bool enable)

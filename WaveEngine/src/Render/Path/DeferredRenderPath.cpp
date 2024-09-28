@@ -87,14 +87,13 @@ void DeferredRenderPath::render()
     lighting_pass->setInputPasses({ m_gbuffer_pass.get(), m_shadow_pass.get()});
     lighting_pass->draw();
 
-    //static_cast<BlurPass*>(m_blur_pass.get())->setBrightMap(lighting_pass->getBrightMap());
-    //m_blur_pass->draw();
+    m_blur_pass->setInputPasses({ m_lighting_pass.get() });
+    m_blur_pass->draw();
 
     m_edge_detection_pass->draw();
 
     auto screen_pass = static_cast<ScreenPass*>(m_screen_pass.get());
-    //screen_pass->setBlurredBrightMap(static_cast<BlurPass*>(m_blur_pass.get())->getBlurredBrightMap());
-    screen_pass->setInputPasses({ m_lighting_pass.get(), m_edge_detection_pass.get() });
+    screen_pass->setInputPasses({ m_lighting_pass.get(), m_blur_pass.get(), m_edge_detection_pass.get() });
     screen_pass->draw();
 }
 
@@ -126,4 +125,9 @@ unsigned int DeferredRenderPath::getGBufferTexture()
 unsigned int DeferredRenderPath::getLightingTexture()
 {
     return m_lighting_pass->getFrameBuffer()->colorAttachmentAt(0)->texture()->id();
+}
+
+unsigned int DeferredRenderPath::getBlurredTexture()
+{
+    return m_blur_pass->getFrameBuffer()->colorAttachmentAt(0)->texture()->id();
 }

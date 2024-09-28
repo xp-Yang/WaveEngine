@@ -18,6 +18,7 @@ public:
     unsigned int getShadowTexture();
     unsigned int getGBufferTexture();
     unsigned int getLightingTexture();
+    unsigned int getBlurredTexture();
     Rhi* rhi() const { return m_rhi.get(); }
 
 public slots:

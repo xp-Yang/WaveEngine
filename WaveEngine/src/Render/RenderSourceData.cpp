@@ -26,7 +26,7 @@ RenderMeshData::RenderMeshData(const RenderMeshDataID& id, const Asset::SubMesh&
         break;
     }
     case Asset::MeshFileType::CustomSphere: {
-        m_mesh_data = Asset::MeshData::create_icosphere_mesh(4);
+        m_mesh_data = Asset::MeshData::create_icosphere_mesh(0.1f, 4);
         break;
     }
     case Asset::MeshFileType::CustomGround: {
