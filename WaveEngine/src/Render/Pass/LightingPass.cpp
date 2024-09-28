@@ -90,12 +90,12 @@ void LightingPass::draw()
 
 	// TODO lightsÖ±½Óinstancing rendering
 	// lights
-	static RenderShaderObject* point_light_shader = RenderShaderObject::getShaderObject(Asset::ShaderType::LightShader);
+	static RenderShaderObject* point_light_shader = RenderShaderObject::getShaderObject(Asset::ShaderType::OneColorShader);
 	for (const auto& render_point_light_data : m_render_source_data->render_point_light_data_list) {
 		const auto& render_point_light_sub_mesh_data = render_point_light_data.render_sub_mesh_data;
 		auto& material = render_point_light_sub_mesh_data->renderMaterialData();
 		point_light_shader->start_using();
-		point_light_shader->setFloat4("lightColor", render_point_light_data.color);
+		point_light_shader->setFloat4("color", render_point_light_data.color);
 		point_light_shader->setMatrix("model", 1, render_point_light_sub_mesh_data->transform());
 		point_light_shader->setMatrix("view", 1, m_render_source_data->view_matrix);
 		point_light_shader->setMatrix("projection", 1, m_render_source_data->proj_matrix);

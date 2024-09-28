@@ -130,8 +130,8 @@ RenderShaderObject* RenderShaderObject::getShaderObject(const Asset::ShaderType&
     case Asset::ShaderType::DeferredLightingPhongShader:
         shader_asset = Asset::Shader{ type, resource_dir + "/shader/screenQuad.vs", resource_dir + "/shader/deferredLighting_phong.fs" };
         break;
-    case Asset::ShaderType::LightShader:
-        shader_asset = Asset::Shader{ type, resource_dir + "/shader/model.vs", resource_dir + "/shader/light.fs" };
+    case Asset::ShaderType::OneColorShader:
+        shader_asset = Asset::Shader{ type, resource_dir + "/shader/model.vs", resource_dir + "/shader/oneColor.fs" };
         break;
     case Asset::ShaderType::PBRShader:
         shader_asset = Asset::Shader{ type, resource_dir + "/shader/model.vs", resource_dir + "/shader/pbr.fs" };
@@ -148,17 +148,11 @@ RenderShaderObject* RenderShaderObject::getShaderObject(const Asset::ShaderType&
     case Asset::ShaderType::CheckerboardShader:
         shader_asset = Asset::Shader{ type, resource_dir + "/shader/checkerboard.vs", resource_dir + "/shader/checkerboard.fs" };
         break;
-    case Asset::ShaderType::PickingShader:
-        shader_asset = Asset::Shader{ type, resource_dir + "/shader/model.vs", resource_dir + "/shader/picking.fs" };
-        break;
     case Asset::ShaderType::RayTracingShader:
         shader_asset = Asset::Shader{ type, resource_dir + "/shader/screenQuad.vs", resource_dir + "/shader/rayTracing.fs" };
         break;
     case Asset::ShaderType::QuadShader:
         shader_asset = Asset::Shader{ type, resource_dir + "/shader/screenQuad.vs", resource_dir + "/shader/screenQuad.fs" };
-        break;
-    case Asset::ShaderType::DepthShader:
-        shader_asset = Asset::Shader{ type, resource_dir + "/shader/model.vs", resource_dir + "/shader/depth.fs" };
         break;
     case Asset::ShaderType::CubeMapShader:
         shader_asset = Asset::Shader{ type, resource_dir + "/shader/model.vs", resource_dir + "/shader/cubeMap.fs" };

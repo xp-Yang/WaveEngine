@@ -44,7 +44,6 @@ void ShadowPass::clear()
 {
     m_framebuffer->bind();
     m_framebuffer->clear();
-    m_framebuffer->unBind();
 
     glBindFramebuffer(GL_FRAMEBUFFER, m_cube_map_fbo);
     for(const auto& cube_map : m_cube_maps)
@@ -61,7 +60,7 @@ void ShadowPass::drawDirectionalLightShadowMap()
     m_framebuffer->bind();
     m_framebuffer->clear();
 
-    static RenderShaderObject* depth_shader = RenderShaderObject::getShaderObject(Asset::ShaderType::DepthShader);
+    static RenderShaderObject* depth_shader = RenderShaderObject::getShaderObject(Asset::ShaderType::OneColorShader);
     depth_shader->start_using();
     Mat4 light_view = m_render_source_data->render_directional_light_data_list.front().lightViewMatrix;
     Mat4 light_proj = m_render_source_data->render_directional_light_data_list.front().lightProjMatrix;
@@ -70,6 +69,7 @@ void ShadowPass::drawDirectionalLightShadowMap()
         depth_shader->setMatrix("model", 1, render_sub_mesh_data->transform());
         depth_shader->setMatrix("view", 1, light_view);
         depth_shader->setMatrix("projection", 1, light_proj);
+        depth_shader->setFloat4("color", Color4(1.0));
         m_rhi->drawIndexed(render_sub_mesh_data->getVAO(), render_sub_mesh_data->indicesCount());
     }
 }
