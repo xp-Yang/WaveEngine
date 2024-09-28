@@ -12,25 +12,25 @@ namespace Logger {
 template<typename... Args>
 void trace(spdlog::string_view_t fmt, const Args &... args)
 {
-	Logger::get().trace(fmt, args...);
+	Logger::get().m_logger->trace(fmt, args...);
 }
 
 template<typename... Args>
 void debug(spdlog::string_view_t fmt, const Args &... args)
 {
-	Logger::get().debug(fmt, args...);
+	Logger::get().m_logger->debug(fmt, args...);
 }
 
 template<typename... Args>
 void info(spdlog::string_view_t fmt, const Args &... args)
 {
-	Logger::get().info(fmt, args...);
+	Logger::get().m_logger->info(fmt, args...);
 }
 
 template<typename... Args>
 void error(spdlog::string_view_t fmt, const Args &... args)
 {
-	Logger::get().error(fmt, args...);
+	Logger::get().m_logger->error(fmt, args...);
 }
 
 class Logger {
@@ -52,34 +52,19 @@ public:
 
 	void setLevel(spdlog::level::level_enum level);
 
-	template<typename... Args>
-	void trace(spdlog::string_view_t fmt, const Args &... args)
-	{
-		m_logger->trace(fmt, args...);
-	}
-
-	template<typename... Args>
-	void debug(spdlog::string_view_t fmt, const Args &... args)
-	{
-		m_logger->debug(fmt, args...);
-	}
-
-	template<typename... Args>
-	void info(spdlog::string_view_t fmt, const Args &... args)
-	{
-		m_logger->info(fmt, args...);
-	}
-
-	template<typename... Args>
-	void error(spdlog::string_view_t fmt, const Args &... args)
-	{
-		m_logger->error(fmt, args...);
-	}
-
 protected:
 	virtual void create() = 0;
-
 	void init_filepath();
+
+protected:
+	template<typename... Args>
+	friend void trace(spdlog::string_view_t fmt, const Args &... args);
+	template<typename... Args>
+	friend void debug(spdlog::string_view_t fmt, const Args &... args);
+	template<typename... Args>
+	friend void info(spdlog::string_view_t fmt, const Args &... args);
+	template<typename... Args>
+	friend void error(spdlog::string_view_t fmt, const Args &... args);
 
 	std::shared_ptr<spdlog::logger> m_logger;
 	std::string m_directory;

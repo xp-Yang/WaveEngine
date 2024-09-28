@@ -14,6 +14,8 @@ public:
 	~ImGuiEditor();
 	void init();
 	void onUpdate();
+	void beginFrame();
+	void endFrame();
 	Viewport getMainViewport() const;
 	void popUpMenu();
 	void dismissMenu();

@@ -21,17 +21,15 @@ void Application::run() {
 		double duration = fps_timer.duration();
 		if (duration >= MILLISECONDS_PER_FRAME) {
 			fps_timer.restart();
-
+			m_editor->beginFrame();
 			// logical
 			m_gui_input->onUpdate();
 			m_animation_system->onUpdate();
-
 			// render
 			m_render_system->onUpdate();
-
 			// gui
 			m_editor->onUpdate();
-
+			m_editor->endFrame();
 			m_window->swapBuffer();
 		}
 	}

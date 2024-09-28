@@ -47,35 +47,39 @@ void ImGuiEditor::init()
 
 void ImGuiEditor::onUpdate()
 {
-    // begin frame
+    ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
+    ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
+    ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
+    renderEmptyMainDockerSpaceWindow();
+    if (m_show_debug)
+        m_debug_window->render(); // render first, the debug window need to be docked
+    m_main_canvas->render();
+    ImGui::PopStyleVar(3);
+    m_context_menu->render();
+    m_scene_hierarchy_window->render();
+    m_global_console_window->render();
+}
+
+void ImGuiEditor::beginFrame()
+{
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
     ImGuizmo::BeginFrame();
+}
 
-        ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
-        ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
-        ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
-        renderEmptyMainDockerSpaceWindow();
-        if (m_show_debug)
-            m_debug_window->render(); // render first, the debug window need to be docked
-        m_main_canvas->render();
-        ImGui::PopStyleVar(3);
-        m_context_menu->render();
-        m_scene_hierarchy_window->render();
-        m_global_console_window->render();
-
-    // end frame
+void ImGuiEditor::endFrame()
+{
     ImGui::Render();
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
     // Update and Render additional Platform Windows
     // (Platform functions may change the current OpenGL context, so we save/restore it to make it easier to paste this code elsewhere.
     if (ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
     {
-    	GLFWwindow* backup_current_context = glfwGetCurrentContext();
-    	ImGui::UpdatePlatformWindows();
-    	ImGui::RenderPlatformWindowsDefault();
-    	glfwMakeContextCurrent(backup_current_context);
+        GLFWwindow* backup_current_context = glfwGetCurrentContext();
+        ImGui::UpdatePlatformWindows();
+        ImGui::RenderPlatformWindowsDefault();
+        glfwMakeContextCurrent(backup_current_context);
     }
 }
 
