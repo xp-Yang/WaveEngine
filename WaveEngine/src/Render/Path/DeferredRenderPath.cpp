@@ -90,6 +90,7 @@ void DeferredRenderPath::render()
     m_blur_pass->setInputPasses({ m_lighting_pass.get() });
     m_blur_pass->draw();
 
+    m_edge_detection_pass->setInputPasses({ m_lighting_pass.get() });
     m_edge_detection_pass->draw();
 
     auto screen_pass = static_cast<ScreenPass*>(m_screen_pass.get());

@@ -2,7 +2,8 @@
 
 in vec2 fragUV;
 
-uniform sampler2D Texture;
+uniform sampler2D objMap;
+uniform sampler2D objDepthMap;
 
 out vec4 FragColor;
 
@@ -18,11 +19,11 @@ void main()
         -1, 0
     );
 
-    vec2 tex_offset = 1.0 / textureSize(Texture, 0);
-    vec3 topLeftColor = texture(Texture, fragUV).rgb;
-    vec3 topRightColor = texture(Texture, fragUV + vec2(tex_offset.x, 0.0)).rgb;
-    vec3 bottomLeftColor = texture(Texture, fragUV + vec2(0.0, -tex_offset.y)).rgb;
-    vec3 bottomRightColor = texture(Texture, fragUV + vec2(tex_offset.x, -tex_offset.y)).rgb;
+    vec2 tex_offset = 1.0 / textureSize(objMap, 0);
+    vec3 topLeftColor = texture(objMap, fragUV).rgb;
+    vec3 topRightColor = texture(objMap, fragUV + vec2(tex_offset.x, 0.0)).rgb;
+    vec3 bottomLeftColor = texture(objMap, fragUV + vec2(0.0, -tex_offset.y)).rgb;
+    vec3 bottomRightColor = texture(objMap, fragUV + vec2(tex_offset.x, -tex_offset.y)).rgb;
 
     vec3 horizontal = topLeftColor * RobertsCrossX[0]; // top left (factor +1)
     horizontal += bottomRightColor * RobertsCrossX[3]; // bottom right (factor -1)
@@ -32,8 +33,6 @@ void main()
 
     float edge = sqrt(dot(horizontal, horizontal) + dot(vertical, vertical));
 
-    if(edge > 0.01)
-        FragColor = vec4(1.0, 1.0, 1.0, 1.0);
-    else
-        FragColor = vec4(0.0, 0.0, 0.0, 1.0);
+    FragColor = vec4(step(0.01, edge) * vec3(1.0, 1.0, 1.0), 1.0);
+    gl_FragDepth = texture(objDepthMap, fragUV).r;
 }
