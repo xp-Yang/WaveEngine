@@ -37,8 +37,11 @@ void EdgeDetectionPass::draw()
         m_source_framebuffer->bind();
         m_source_framebuffer->clear();
 
-        if (m_render_source_data->picked_ids.empty())
+        if (m_render_source_data->picked_ids.empty()) {
+            m_framebuffer->bind();
+            m_framebuffer->clear();
             return;
+        }
         for (auto picked_id : m_render_source_data->picked_ids) {
             // render the picked one
             static RenderShaderObject* picking_shader = RenderShaderObject::getShaderObject(Asset::ShaderType::PickingShader);
