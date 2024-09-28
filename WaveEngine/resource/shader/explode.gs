@@ -35,8 +35,8 @@ void main() {
     //vec3 normal = GetNormal();
     vec3 normal = (gs_in[0].fragWorldNormal + gs_in[1].fragWorldNormal + gs_in[2].fragWorldNormal) / 3;
 
-    //�����gs_in[0].fragWorldPosΪ��������
-    //����������gl_PositionΪ�ü��ռ�����
+    //输入的gs_in[0].pass_pos为世界坐标
+    //输入和输出的gl_Position为裁剪空间坐标
     gl_Position = projectionView * explode(gs_in[0].fragWorldPos, normal);
     gs_out.fragUV = gs_in[0].fragUV;
     gs_out.fragWorldNormal = gs_in[0].fragWorldNormal;

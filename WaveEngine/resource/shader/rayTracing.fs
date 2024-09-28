@@ -5,7 +5,7 @@ in vec2 fragUV;
 
 struct Camera {
     vec3 pos;
-    float distance; // ���˴��ٶ���ƽ��ľ��룬ʵ����������ֵ�����ԡ����߷�����fov��aspect_ratio����
+    float distance; // 到此处假定的平面的距离，实际上是任意值都可以。射线方向由fov和aspect_ratio决定
     float fov;
     float aspect_ratio;
     vec3 front;
@@ -48,50 +48,50 @@ float rand() {
 vec3 randomUnitVec() {
     while (true) {
         vec3 unit_cube = 2.0 * vec3(rand(), rand(), rand()) - vec3(1, 1, 1);
-        if (dot(unit_cube, unit_cube) < 1.0f) { //Ϊ�˾��ȷֲ��������һ������������Խ��ߵĳ����Ƚ϶�
+        if (dot(unit_cube, unit_cube) < 1.0f) { //为了均匀分布，否则归一化后沿立方体对角线的抽样比较多
             return normalize(unit_cube);
         }
     }
     return vec3(1.0f, 0, 0);
 }
 
-    vec3 getPointOnUnitSphere(vec3 plane_point, vec3 normal) {
-        float r_square = dot(plane_point, plane_point);
-        float h = sqrt(1 - r_square);
-        return plane_point + h * normal;
-    }
-    // ��λԲ�ڵĵ㰴������ȷֲ�(�Ǿ��ȷֲ�)
-    vec2 randomInUnitCircleByPolar() {
-        float r = rand();
-        float theta = 2 * 3.14159 * rand();
-        return vec2(r * cos(theta), r * sin(theta));
-    }
-    vec3 randomLambertianDistribution(vec3 normal) {
-        // 1. ������ƽ��
-        vec3 up = vec3(0, 1, 0);
-        vec3 local_u;
-        if (normal == up)
-            local_u = vec3(1, 0, 0);
-        else
-            local_u = cross(normal, up);
-        vec3 local_v = cross(normal, local_u);
+vec3 getPointOnUnitSphere(vec3 plane_point, vec3 normal) {
+    float r_square = dot(plane_point, plane_point);
+    float h = sqrt(1 - r_square);
+    return plane_point + h * normal;
+}
+ // 单位圆内的点按极轴均匀分布(非均匀分布)
+vec2 randomInUnitCircleByPolar() {
+    float r = rand();
+    float theta = 2 * 3.14159 * rand();
+    return vec2(r * cos(theta), r * sin(theta));
+}
+vec3 randomLambertianDistribution(vec3 normal) {
+    // 1. 构造切平面
+    vec3 up = vec3(0, 1, 0);
+    vec3 local_u;
+    if (normal == up)
+        local_u = vec3(1, 0, 0);
+    else
+        local_u = cross(normal, up);
+    vec3 local_v = cross(normal, local_u);
 
-        // 2. ����ƽ��ĵ�λԲ�ھ���ȡ��
-        vec3 random_plane_point;
-        vec2 coef = randomInUnitCircleByPolar();
-        random_plane_point = coef.x * local_u + coef.y * local_v;
+    // 2. 在切平面的单位圆内均匀取点
+    vec3 random_plane_point;
+    vec2 coef = randomInUnitCircleByPolar();
+    random_plane_point = coef.x * local_u + coef.y * local_v;
 
-        // 3. ����ӳ�������
-        return getPointOnUnitSphere(random_plane_point, normal);
-    }
+    // 3. 将点映射回球面
+    return getPointOnUnitSphere(random_plane_point, normal);
+}
 
-    vec3 randomOnHemisphere(vec3 normal) {
-        vec3 unit = randomUnitVec();
-        if (dot(unit, normal) > 0.0)
-            return unit;
-        else
-            return -unit;
-    }
+vec3 randomOnHemisphere(vec3 normal) {
+    vec3 unit = randomUnitVec();
+    if (dot(unit, normal) > 0.0)
+        return unit;
+    else
+        return -unit;
+}
 
 float valid_range;
 float hitSphere(Ray ray, Sphere sphere){
@@ -127,17 +127,17 @@ struct HitResult{
 
     bool is_metal;
 };
-// һ����ײ���޷��䣩
+// 一次碰撞（无反射）
 HitResult hitOnce(Ray ray, Sphere[3] sphereList){
-    //��ʼ������Ľ�
+    //初始化最近的解
     valid_range = 999999;
-    //������ĵ�
+    //求最近的点
     HitResult result;
     result.hit = false;
     float root;
     int closest_id;
     for(int i = 0; i < 3; i++){
-        //����� ��-��
+        //求根： 线-球
         root = hitSphere(ray, sphereList[i]);
         if(root > 0.0f){
             valid_range = root;
@@ -154,8 +154,8 @@ HitResult hitOnce(Ray ray, Sphere[3] sphereList){
 		result.albedo = sphereList[closest_id].albedo;
 		result.fuzzy = sphereList[closest_id].fuzzy;
 		result.is_metal = sphereList[closest_id].is_metal;
-        //�ݹ�鿴�ܲ�����hit��
-        //GLSL���ܵݹ飬����һ��ѭ��
+        //递归查看能不能再hit。
+        //GLSL不能递归，在上一层循环
     }
     return result;
 }
@@ -189,9 +189,9 @@ vec3 shading(Ray ray, Sphere[3] sphereList) {
 }
 
 void main() {
-    //��ʼ���������
+    //初始化随机种子
     wseed = uint(randOrigin * (fragUV.x * fragUV.y));
-    //1. ����ray
+    //1. 构造ray
 	Ray ray;
 	ray.origin = camera.pos;
 
@@ -199,7 +199,7 @@ void main() {
     float height = width / camera.aspect_ratio;
     vec3 leftbottom = camera.pos + camera.distance * camera.front - width / 2.0 * camera.right - height / 2.0 * camera.up;
 	ray.direction = normalize(leftbottom + (fragUV.x * width) * camera.right + (fragUV.y * height) * camera.up - camera.pos);
-    //2. ����sphere
+    //2. 构造sphere
     Sphere[3] sphereList;
         Sphere sphere0;
     sphere0.origin = vec3(-5.0, 4.0, -1.0);

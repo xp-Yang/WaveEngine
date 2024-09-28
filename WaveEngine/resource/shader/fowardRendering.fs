@@ -4,8 +4,8 @@
 #include "BlinnPhong.h"
 
 in VS_OUT {
-    vec3 fragWorldPos;          //��������
-    vec3 fragWorldNormal;       //��������
+    vec3 fragWorldPos;          //世界坐标
+    vec3 fragWorldNormal;       //世界坐标
     vec2 fragUV;
 } fs_in;
 
@@ -26,7 +26,7 @@ uniform bool enable_skybox_sample;
 
 void main()
 {
-    vec3 normal = normalize(fs_in.fragWorldNormal);//TODO normal��Ҫ�任������ռ䣬��Ҫע�ⲻ�ܴ�ƽ��?
+    vec3 normal = normalize(fs_in.fragWorldNormal);
     vec3 view_direction = normalize(cameraPos - fs_in.fragWorldPos);
     vec3 diffuse_coef = vec3(texture(material.diffuse_map, fs_in.fragUV));
     vec3 specular_coef = vec3(texture(material.specular_map, fs_in.fragUV));
