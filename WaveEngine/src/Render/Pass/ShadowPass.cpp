@@ -63,10 +63,13 @@ void ShadowPass::drawDirectionalLightShadowMap()
 
     static RenderShaderObject* depth_shader = RenderShaderObject::getShaderObject(Asset::ShaderType::DepthShader);
     depth_shader->start_using();
-    Mat4 light_ref_matrix = m_render_source_data->render_directional_light_data_list.front().lightReferenceMatrix;
+    Mat4 light_view = m_render_source_data->render_directional_light_data_list.front().lightViewMatrix;
+    Mat4 light_proj = m_render_source_data->render_directional_light_data_list.front().lightProjMatrix;
     for (const auto& pair : m_render_source_data->render_mesh_data_hash) {
         const auto& render_sub_mesh_data = pair.second;
-        depth_shader->setMatrix("mvp", 1, light_ref_matrix * render_sub_mesh_data->transform());
+        depth_shader->setMatrix("model", 1, render_sub_mesh_data->transform());
+        depth_shader->setMatrix("view", 1, light_view);
+        depth_shader->setMatrix("projection", 1, light_proj);
         m_rhi->drawIndexed(render_sub_mesh_data->getVAO(), render_sub_mesh_data->indicesCount());
     }
 }
@@ -80,11 +83,13 @@ void ShadowPass::drawPointLightShadowMap()
 
     depth_shader->start_using();
 
-    std::vector<std::array<Mat4, 6>> light_ref_matrix;
+    std::vector<std::array<Mat4, 6>> light_view;
+    std::vector<Mat4> light_proj;
     std::vector<Vec3> light_pos;
     std::vector<float> light_radius;
     for (const auto& render_point_light_data : m_render_source_data->render_point_light_data_list) {
-        light_ref_matrix.push_back(render_point_light_data.lightReferenceMatrix);
+        light_view.push_back(render_point_light_data.lightViewMatrix);
+        light_proj.push_back(render_point_light_data.lightProjMatrix);
         light_pos.push_back(render_point_light_data.position);
         light_radius.push_back(render_point_light_data.radius);
     }
@@ -102,7 +107,8 @@ void ShadowPass::drawPointLightShadowMap()
             for (const auto& pair : m_render_source_data->render_mesh_data_hash) {
                 const auto& render_sub_mesh_data = pair.second;
                 depth_shader->setMatrix("model", 1, render_sub_mesh_data->transform());
-                depth_shader->setMatrix("lightSpaceMatrix", 1, light_ref_matrix[cube_map_id][i]);
+                depth_shader->setMatrix("view", 1, light_view[cube_map_id][i]);
+                depth_shader->setMatrix("projection", 1, light_proj[cube_map_id]);
                 depth_shader->setFloat3("lightPos", light_pos[cube_map_id]);
                 depth_shader->setFloat("far_plane", light_radius[cube_map_id]);
                 m_rhi->drawIndexed(render_sub_mesh_data->getVAO(), render_sub_mesh_data->indicesCount());

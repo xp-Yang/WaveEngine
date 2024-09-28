@@ -15,9 +15,9 @@ out VS_OUT {
 
 void main()
 {
-	vs_out.fragUV = vertex_uv;
     vs_out.fragWorldPos = vec3(model * vec4(vertex_pos, 1.0));
     vs_out.fragWorldNormal = normalize(mat3(model) * vertex_normal);
+	vs_out.fragUV = vertex_uv;
     //这里输出的gl_Position为Clip Space，给到gs时还是Clip Space，到fs时已经自动做了 (透视除法) => NDC => (视口变换) => Screen Space，变成了屏幕空间Screen Space
     //裁剪坐标
     gl_Position = projection * view * model * vec4(vertex_pos, 1.0);

@@ -74,14 +74,16 @@ private:
 struct RenderDirectionalLightData {
     Color4 color;
     Vec3 direction;
-    Mat4 lightReferenceMatrix;
+    Mat4 lightViewMatrix;
+    Mat4 lightProjMatrix;
 };
 
 struct RenderPointLightData {
     Color4 color;
     Vec3 position;
     float radius;
-    std::array<Mat4, 6> lightReferenceMatrix;
+    std::array<Mat4, 6> lightViewMatrix;
+    Mat4 lightProjMatrix;
 
     std::shared_ptr<RenderMeshData> render_sub_mesh_data;
 };

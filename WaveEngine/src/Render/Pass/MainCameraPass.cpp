@@ -43,7 +43,8 @@ void MainCameraPass::draw()
     m_framebuffer->bind();
     m_framebuffer->clear();
 
-    Mat4 light_ref_matrix = m_render_source_data->render_directional_light_data_list.front().lightReferenceMatrix;
+    Mat4 light_ref_matrix = m_render_source_data->render_directional_light_data_list.front().lightProjMatrix * 
+        m_render_source_data->render_directional_light_data_list.front().lightViewMatrix;
     Vec3 light_direction = m_render_source_data->render_directional_light_data_list.front().direction;
     Vec4 light_color = m_render_source_data->render_directional_light_data_list.front().color;
 

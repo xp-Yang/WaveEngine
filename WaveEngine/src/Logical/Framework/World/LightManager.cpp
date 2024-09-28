@@ -4,8 +4,8 @@ void LightManager::init()
 {
 	addDirectionalLight();
 
-	addPointLight();
-	addPointLight();
+	for (int i = 0; i < 10; ++i) // TODO instancing
+		addPointLight();
 }
 
 void LightManager::addPointLight()

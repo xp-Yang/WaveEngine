@@ -311,7 +311,8 @@ void RenderSystem::updateRenderSourceData()
     if (!m_initialized) {
         const auto& dir_light = scene.getLightManager()->mainDirectionalLight();
         m_render_source_data->render_directional_light_data_list.emplace_back(
-            RenderDirectionalLightData{ dir_light->luminousColor, dir_light->direction, dir_light->lightReferenceMatrix() });
+            RenderDirectionalLightData{ dir_light->luminousColor, dir_light->direction,
+            dir_light->lightViewMatrix(), dir_light->lightProjMatrix() });
     }
 
     const auto& point_lights = scene.getLightManager()->pointLights();
@@ -332,7 +333,8 @@ void RenderSystem::updateRenderSourceData()
             Asset::SubMesh point_light_mesh;
             point_light_mesh.mesh_file_ref = { Asset::MeshFileType::CustomSphere, "" };
             m_render_source_data->render_point_light_data_list.emplace_back(
-                RenderPointLightData{ point_light->luminousColor, point_light->position, point_light->radius, point_light->lightReferenceMatrix(),
+                RenderPointLightData{ point_light->luminousColor, point_light->position, point_light->radius,
+                point_light->lightViewMatrix(), point_light->lightProjMatrix(),
                 std::make_shared<RenderMeshData>(render_mesh_data_id, point_light_mesh, point_light_matrix) });
         }
     }

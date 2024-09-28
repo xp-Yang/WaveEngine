@@ -10,9 +10,10 @@ enum class ShaderType {
 	PristineGridShader,
 	GBufferShader,
 	DeferredLightingShader,
+	DeferredLightingPhongShader,
+	LightShader,
 	PBRShader,
 	SkyboxShader,
-	BorderShader,
 	NormalShader,
 	WireframeShader,
 	CheckerboardShader,
@@ -23,7 +24,6 @@ enum class ShaderType {
 	CubeMapShader,
 	GaussianBlur,
 	EdgeDetection,
-	CustomShader,
 };
 
 struct Shader {

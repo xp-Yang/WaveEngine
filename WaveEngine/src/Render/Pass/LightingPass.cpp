@@ -3,12 +3,16 @@
 void LightingPass::init()
 {
 	RhiTexture* color_texture = m_rhi->newTexture(RhiTexture::Format::RGB16F, Vec2(DEFAULT_RENDER_RESOLUTION_X, DEFAULT_RENDER_RESOLUTION_Y));
+	RhiTexture* bright_color_texture = m_rhi->newTexture(RhiTexture::Format::RGB16F, Vec2(DEFAULT_RENDER_RESOLUTION_X, DEFAULT_RENDER_RESOLUTION_Y));
 	RhiTexture* depth_texture = m_rhi->newTexture(RhiTexture::Format::DEPTH, Vec2(DEFAULT_RENDER_RESOLUTION_X, DEFAULT_RENDER_RESOLUTION_Y));
 	color_texture->create();
+	bright_color_texture->create();
 	depth_texture->create();
 	RhiAttachment color_attachment = RhiAttachment(color_texture);
+	RhiAttachment bright_color_attachment = RhiAttachment(bright_color_texture);
 	RhiAttachment depth_ttachment = RhiAttachment(depth_texture);
 	RhiFrameBuffer* fb = m_rhi->newFrameBuffer(color_attachment, Vec2(DEFAULT_RENDER_RESOLUTION_X, DEFAULT_RENDER_RESOLUTION_Y));
+	fb->setColorAttachments({ color_texture , bright_color_texture });
 	fb->setDepthAttachment(depth_ttachment);
 	fb->create();
 	m_framebuffer = std::unique_ptr<RhiFrameBuffer>(fb);
@@ -61,7 +65,7 @@ void LightingPass::draw()
 		lighting_shader->setFloat3("directionalLight.direction", render_directional_light_data.direction);
 		lighting_shader->setFloat4("directionalLight.color", render_directional_light_data.color);
 		if (m_dir_light_shadow_map != 0) {
-			lighting_shader->setMatrix("lightSpaceMatrix", 1, render_directional_light_data.lightReferenceMatrix);
+			lighting_shader->setMatrix("lightSpaceMatrix", 1, render_directional_light_data.lightProjMatrix * render_directional_light_data.lightViewMatrix);
 			lighting_shader->setTexture("shadow_map", 8, m_dir_light_shadow_map);
 		}
 	}
@@ -86,13 +90,12 @@ void LightingPass::draw()
 
 	// TODO lightsÖ±½Óinstancing rendering
 	// lights
-	static Asset::Shader point_light_shader_asset { Asset::ShaderType::CustomShader, std::string(RESOURCE_DIR) + "/shader/light.vs", std::string(RESOURCE_DIR) + "/shader/light.fs" };
-	static RenderShaderObject* point_light_shader = new RenderShaderObject(point_light_shader_asset);
+	static RenderShaderObject* point_light_shader = RenderShaderObject::getShaderObject(Asset::ShaderType::LightShader);
 	for (const auto& render_point_light_data : m_render_source_data->render_point_light_data_list) {
 		const auto& render_point_light_sub_mesh_data = render_point_light_data.render_sub_mesh_data;
 		auto& material = render_point_light_sub_mesh_data->renderMaterialData();
 		point_light_shader->start_using();
-		point_light_shader->setFloat4("color", render_point_light_data.color);
+		point_light_shader->setFloat4("lightColor", render_point_light_data.color);
 		point_light_shader->setMatrix("model", 1, render_point_light_sub_mesh_data->transform());
 		point_light_shader->setMatrix("view", 1, m_render_source_data->view_matrix);
 		point_light_shader->setMatrix("projection", 1, m_render_source_data->proj_matrix);

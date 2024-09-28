@@ -13,10 +13,10 @@ public:
 class Light {
 public:
 	Light(const std::string& name) : m_name(name) {}
-	virtual ~Light() {};
 	Color4 luminousColor = { 1.0f, 1.0f, 1.0f, 1.0f };
 	LightID ID() const { return m_id; }
 	std::string name() const { return m_name; }
+	virtual Mat4 lightProjMatrix() const = 0;
 
 protected:
 	LightID m_id;
@@ -30,9 +30,14 @@ public:
 	float radius;
 	Vec3 position;
 
-	std::array<Mat4, 6> lightReferenceMatrix() const
+	Mat4 lightProjMatrix() const override
 	{
 		Mat4 light_projection = Perspective(deg2rad(90.0f), 1.0f, 0.1f, radius);
+		return light_projection;
+	}
+
+	std::array<Mat4, 6> lightViewMatrix() const
+	{
 		Vec3 light_pos = position;
 
 		// 这里up向量朝下，因为cubeMap从内部采样，是反过来的
@@ -45,12 +50,12 @@ public:
 		Mat4 light_view_back = LookAt(light_pos, light_pos + Vec3(0.0f, 0.0f, -1.0f), Vec3(0.0f, -1.0f, 0.0f));//远
 
 		std::array<Mat4, 6> result;
-		result[0] = (light_projection * light_view_right);
-		result[1] = (light_projection * light_view_left);
-		result[2] = (light_projection * light_view_up);
-		result[3] = (light_projection * light_view_down);
-		result[4] = (light_projection * light_view_front);
-		result[5] = (light_projection * light_view_back);
+		result[0] = light_view_right;
+		result[1] = light_view_left;
+		result[2] = light_view_up;
+		result[3] = light_view_down;
+		result[4] = light_view_front;
+		result[5] = light_view_back;
 		return result;
 	}
 };
@@ -62,11 +67,16 @@ public:
 	Vec3 direction;
 	float aspectRatio{ 16.0f / 9.0f }; // TODO should on window size change
 
-	Mat4 lightReferenceMatrix() const
+	Mat4 lightProjMatrix() const override
 	{
 		Mat4 light_projection = Ortho(-30.0f * aspectRatio, 30.0f * aspectRatio, -30.0f, 30.0f, 0.1f, 100.0f);
+		return light_projection;
+	}
+
+	Mat4 lightViewMatrix() const
+	{
 		Mat4 light_view = LookAt(Vec3(0.0f) - direction, Vec3(0.0f), Vec3(0.0f, 1.0f, 0.0f));
-		return light_projection * light_view;
+		return light_view;
 	}
 };
 

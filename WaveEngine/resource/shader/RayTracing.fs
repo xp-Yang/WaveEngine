@@ -1,11 +1,11 @@
 #version 330 core
 out vec4 FragColor;
 
-in vec2 uv;
+in vec2 fragUV;
 
 struct Camera {
     vec3 pos;
-    float distance; // µ½´Ë´¦¼Ù¶¨µÄÆ½ÃæµÄ¾àÀë£¬Êµ¼ÊÉÏÊÇÈÎÒâÖµ¶¼¿ÉÒÔ¡£ÉäÏß·½ÏòÓÉfovºÍaspect_ratio¾ö¶¨
+    float distance; // ï¿½ï¿½ï¿½Ë´ï¿½ï¿½Ù¶ï¿½ï¿½ï¿½Æ½ï¿½ï¿½Ä¾ï¿½ï¿½ë£¬Êµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Öµï¿½ï¿½ï¿½ï¿½ï¿½Ô¡ï¿½ï¿½ï¿½ï¿½ß·ï¿½ï¿½ï¿½ï¿½ï¿½fovï¿½ï¿½aspect_ratioï¿½ï¿½ï¿½ï¿½
     float fov;
     float aspect_ratio;
     vec3 front;
@@ -48,7 +48,7 @@ float rand() {
 vec3 randomUnitVec() {
     while (true) {
         vec3 unit_cube = 2.0 * vec3(rand(), rand(), rand()) - vec3(1, 1, 1);
-        if (dot(unit_cube, unit_cube) < 1.0f) { //ÎªÁË¾ùÔÈ·Ö²¼£¬·ñÔò¹éÒ»»¯ºóÑØÁ¢·½Ìå¶Ô½ÇÏßµÄ³éÑù±È½Ï¶à
+        if (dot(unit_cube, unit_cube) < 1.0f) { //Îªï¿½Ë¾ï¿½ï¿½È·Ö²ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ò»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ô½ï¿½ï¿½ßµÄ³ï¿½ï¿½ï¿½ï¿½È½Ï¶ï¿½
             return normalize(unit_cube);
         }
     }
@@ -60,14 +60,14 @@ vec3 randomUnitVec() {
         float h = sqrt(1 - r_square);
         return plane_point + h * normal;
     }
-    // µ¥Î»Ô²ÄÚµÄµã°´¼«Öá¾ùÔÈ·Ö²¼(·Ç¾ùÔÈ·Ö²¼)
+    // ï¿½ï¿½Î»Ô²ï¿½ÚµÄµã°´ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½È·Ö²ï¿½(ï¿½Ç¾ï¿½ï¿½È·Ö²ï¿½)
     vec2 randomInUnitCircleByPolar() {
         float r = rand();
         float theta = 2 * 3.14159 * rand();
         return vec2(r * cos(theta), r * sin(theta));
     }
     vec3 randomLambertianDistribution(vec3 normal) {
-        // 1. ¹¹ÔìÇÐÆ½Ãæ
+        // 1. ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ½ï¿½ï¿½
         vec3 up = vec3(0, 1, 0);
         vec3 local_u;
         if (normal == up)
@@ -76,12 +76,12 @@ vec3 randomUnitVec() {
             local_u = cross(normal, up);
         vec3 local_v = cross(normal, local_u);
 
-        // 2. ÔÚÇÐÆ½ÃæµÄµ¥Î»Ô²ÄÚ¾ùÔÈÈ¡µã
+        // 2. ï¿½ï¿½ï¿½ï¿½Æ½ï¿½ï¿½Äµï¿½Î»Ô²ï¿½Ú¾ï¿½ï¿½ï¿½È¡ï¿½ï¿½
         vec3 random_plane_point;
         vec2 coef = randomInUnitCircleByPolar();
         random_plane_point = coef.x * local_u + coef.y * local_v;
 
-        // 3. ½«µãÓ³Éä»ØÇòÃæ
+        // 3. ï¿½ï¿½ï¿½ï¿½Ó³ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
         return getPointOnUnitSphere(random_plane_point, normal);
     }
 
@@ -127,17 +127,17 @@ struct HitResult{
 
     bool is_metal;
 };
-// Ò»´ÎÅö×²£¨ÎÞ·´Éä£©
+// Ò»ï¿½ï¿½ï¿½ï¿½×²ï¿½ï¿½ï¿½Þ·ï¿½ï¿½ä£©
 HitResult hitOnce(Ray ray, Sphere[3] sphereList){
-    //³õÊ¼»¯×î½üµÄ½â
+    //ï¿½ï¿½Ê¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ä½ï¿½
     valid_range = 999999;
-    //Çó×î½üµÄµã
+    //ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Äµï¿½
     HitResult result;
     result.hit = false;
     float root;
     int closest_id;
     for(int i = 0; i < 3; i++){
-        //Çó¸ù£º Ïß-Çò
+        //ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½-ï¿½ï¿½
         root = hitSphere(ray, sphereList[i]);
         if(root > 0.0f){
             valid_range = root;
@@ -154,8 +154,8 @@ HitResult hitOnce(Ray ray, Sphere[3] sphereList){
 		result.albedo = sphereList[closest_id].albedo;
 		result.fuzzy = sphereList[closest_id].fuzzy;
 		result.is_metal = sphereList[closest_id].is_metal;
-        //µÝ¹é²é¿´ÄÜ²»ÄÜÔÙhit¡£
-        //GLSL²»ÄÜµÝ¹é£¬ÔÚÉÏÒ»²ãÑ­»·
+        //ï¿½Ý¹ï¿½é¿´ï¿½Ü²ï¿½ï¿½ï¿½ï¿½ï¿½hitï¿½ï¿½
+        //GLSLï¿½ï¿½ï¿½ÜµÝ¹é£¬ï¿½ï¿½ï¿½ï¿½Ò»ï¿½ï¿½Ñ­ï¿½ï¿½
     }
     return result;
 }
@@ -189,17 +189,17 @@ vec3 shading(Ray ray, Sphere[3] sphereList) {
 }
 
 void main() {
-    //³õÊ¼»¯Ëæ»úÖÖ×Ó
-    wseed = uint(randOrigin * (uv.x * uv.y));
-    //1. ¹¹Ôìray
+    //ï¿½ï¿½Ê¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+    wseed = uint(randOrigin * (fragUV.x * fragUV.y));
+    //1. ï¿½ï¿½ï¿½ï¿½ray
 	Ray ray;
 	ray.origin = camera.pos;
 
     float width = tan(camera.fov / 2) * camera.distance * 2.0;
     float height = width / camera.aspect_ratio;
     vec3 leftbottom = camera.pos + camera.distance * camera.front - width / 2.0 * camera.right - height / 2.0 * camera.up;
-	ray.direction = normalize(leftbottom + (uv.x * width) * camera.right + (uv.y * height) * camera.up - camera.pos);
-    //2. ¹¹Ôìsphere
+	ray.direction = normalize(leftbottom + (fragUV.x * width) * camera.right + (fragUV.y * height) * camera.up - camera.pos);
+    //2. ï¿½ï¿½ï¿½ï¿½sphere
     Sphere[3] sphereList;
         Sphere sphere0;
     sphere0.origin = vec3(-5.0, 4.0, -1.0);
@@ -239,7 +239,7 @@ void main() {
     //
     //random = (1 + random) / 2.0;
     //
-    //if(abs(uv.x - random.x) < 0.05 && abs(uv.y - random.y) < 0.05){
+    //if(abs(fragUV.x - random.x) < 0.05 && abs(fragUV.y - random.y) < 0.05){
     //  FragColor = vec4(1.0f);
     //}else
     //  FragColor = vec4(0.0f);

@@ -1,10 +1,9 @@
 #version 330 core
 
-in vec2 fragUV;
-
 #include "common.h"
-#include "BlinnPhong.h"
 #include "BRDF.h"
+
+in vec2 fragUV;
 
 uniform sampler2D gPosition;
 uniform sampler2D gNormal;
@@ -16,11 +15,10 @@ uniform sampler2D gMetallic;
 uniform sampler2D gRoughness;
 uniform sampler2D gAo;
 
-uniform bool enablePBR;
-
 uniform vec3 cameraPos;
 
 layout (location = 0) out vec4 FragColor;
+layout (location = 1) out vec4 BrightFragColor;
 
 void main()
 {             
@@ -30,89 +28,63 @@ void main()
     vec3 Diffuse = texture(gDiffuse, fragUV).rgb;
     vec3 Specular = texture(gSpecular, fragUV).rgb;
 
-    if(Normal.xyz == vec3(0.0)){
+    if (Normal.xyz == vec3(0.0)){
         // return if sample the blank area in GBuffer
         FragColor = vec4(0.046, 0.046, 0.046, 1.0);
         return;
     }
     
-    if(!enablePBR){
-        vec3 viewDir = normalize(cameraPos - Position);
+    vec3 albedo = Diffuse;
+    float metallic = texture(gMetallic, fragUV).r;
+    float roughness = texture(gRoughness, fragUV).r;
+    float ao = texture(gAo, fragUV).r;
 
-        // Directional Light Source:
-        vec3 lightDir = directionalLight.direction;
-        vec3 lightingByDirectionalLight = BlinnPhong(directionalLight.color.xyz * 0.0157, Normal, viewDir, -lightDir, Diffuse, Specular);
-        // Directional Light Shadow:
+    vec3 N = normalize(Normal);
+    vec3 V = normalize(cameraPos - Position);
+
+    // calculate reflectance at normal incidence; if dia-electric (like plastic) use F0 
+    // of 0.04 and if it's a metal, use the albedo color as F0 (metallic workflow)    
+    vec3 F0 = vec3(0.04); 
+    F0 = mix(F0, albedo, metallic);
+
+    // reflectance equation
+    vec3 Lo = vec3(0.0);
+        
+        // Shadow of Directional Light:
         vec4 fragPosLightSpace = lightSpaceMatrix * vec4(Position, 1.0);
         float shadowFactor = ShadowCalculation(fragPosLightSpace, shadow_map);
-        lightingByDirectionalLight *= shadowFactor;
 
-        // Point Light Source:
-        vec3 lightingByPointLight = vec3(0);
-        vec3 lightingByPointLights[MAX_POINT_LIGHTS_COUNT];
-        for(int i = 0; i < point_lights_size; i++){
-            vec3 lightDir = normalize(Position - pointLights[i].position);
-            float distance = length(Position - pointLights[i].position);
-            float attenuation = PointLightAttenuation(distance, pointLights[i].radius);
-            lightingByPointLights[i] = BlinnPhong(pointLights[i].color.xyz * attenuation, Normal, viewDir, -lightDir, Diffuse, Specular);
-            // Point Light Shadow:
-            float pointShadowFactor = OmnidirectionalShadowCalculation(Position - pointLights[i].position, cube_shadow_maps[i], pointLights[i].radius);
-            lightingByPointLights[i] *= pointShadowFactor;
-            lightingByPointLight += lightingByPointLights[i];
-        }
+        // Directional Light
+        vec3 L = normalize(-directionalLight.direction);
+        vec3 H = normalize(V + L);
+        vec3 radiance = directionalLight.color.xyz;  
+        Lo += shadowFactor * radiance * BRDF(L, V, N, F0, radiance, metallic, roughness);  // note that we already multiplied the BRDF by the Fresnel (kS) so we won't multiply by kS again
 
-        FragColor = vec4(lightingByDirectionalLight + lightingByPointLight, 1.0);
-    }
-    else{
-        vec3 albedo = Diffuse;
-        float metallic = texture(gMetallic, fragUV).r;
-        float roughness = texture(gRoughness, fragUV).r;
-        float ao = texture(gAo, fragUV).r;
+    for(int i = 0; i < point_lights_size; ++i) 
+    {
+        // calculate per-light radiance
+        vec3 L = normalize(pointLights[i].position - Position);
+        vec3 H = normalize(V + L);
+        float distance = length(pointLights[i].position - Position);
+        float k_quadratic = 0.2 / pointLights[i].radius;
+        float attenuation = step(0, (pointLights[i].radius - distance)) * (1.0 / (1.0 + k_quadratic * distance* distance));
+        vec3 radiance = pointLights[i].color.xyz * attenuation;  
 
-        vec3 N = normalize(Normal);
-        vec3 V = normalize(cameraPos - Position);
+        // Point Light Shadow:
+        float pointShadowFactor = OmnidirectionalShadowCalculation(Position - pointLights[i].position, cube_shadow_maps[i], pointLights[i].radius);
 
-        // calculate reflectance at normal incidence; if dia-electric (like plastic) use F0 
-        // of 0.04 and if it's a metal, use the albedo color as F0 (metallic workflow)    
-        vec3 F0 = vec3(0.04); 
-        F0 = mix(F0, albedo, metallic);
+        // add to outgoing radiance Lo
+        Lo += pointShadowFactor * radiance * BRDF(L, V, N, F0, radiance, metallic, roughness);  // note that we already multiplied the BRDF by the Fresnel (kS) so we won't multiply by kS again
+    }   
+    
+    // ambient lighting (note that the next IBL tutorial will replace 
+    // this ambient lighting with environment lighting).
+    vec3 ambient = 0.3 * albedo * ao;
 
-        // reflectance equation
-        vec3 Lo = vec3(0.0);
-            
-            // Shadow of Directional Light:
-            vec4 fragPosLightSpace = lightSpaceMatrix * vec4(Position, 1.0);
-            float shadowFactor = ShadowCalculation(fragPosLightSpace, shadow_map);
+    vec3 color = ambient + Lo;
 
-            // Directional Light
-            vec3 L = normalize(-directionalLight.direction);
-            vec3 H = normalize(V + L);
-            vec3 radiance = directionalLight.color.xyz;  
-            Lo += shadowFactor * radiance * BRDF(L, V, N, F0, radiance, metallic, roughness);  // note that we already multiplied the BRDF by the Fresnel (kS) so we won't multiply by kS again
+    FragColor = vec4(color, 1.0);
 
-        for(int i = 0; i < point_lights_size; ++i) 
-        {
-            // calculate per-light radiance
-            vec3 L = normalize(pointLights[i].position - Position);
-            vec3 H = normalize(V + L);
-            float distance = length(pointLights[i].position - Position);
-            float k_quadratic = 0.2 / pointLights[i].radius;
-            float attenuation = step(0, (pointLights[i].radius - distance)) * (1.0 / (1.0 + k_quadratic * distance* distance));
-            vec3 radiance = pointLights[i].color.xyz * attenuation;  
-
-            // Point Light Shadow:
-            float pointShadowFactor = OmnidirectionalShadowCalculation(Position - pointLights[i].position, cube_shadow_maps[i], pointLights[i].radius);
-
-            // add to outgoing radiance Lo
-            Lo += pointShadowFactor * radiance * BRDF(L, V, N, F0, radiance, metallic, roughness);  // note that we already multiplied the BRDF by the Fresnel (kS) so we won't multiply by kS again
-        }   
-        
-        // ambient lighting (note that the next IBL tutorial will replace 
-        // this ambient lighting with environment lighting).
-        vec3 ambient = 0.3 * albedo * ao;
-
-        vec3 color = ambient + Lo;
-
-        FragColor = vec4(color, 1.0);
-    }
+    float brightness = dot(FragColor.rgb, vec3(0.2126, 0.7152, 0.0722));
+    BrightFragColor = step(2.0, brightness) * vec4(FragColor.rgb, 1.0);
 }

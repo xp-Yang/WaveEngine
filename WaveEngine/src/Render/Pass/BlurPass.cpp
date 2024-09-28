@@ -30,7 +30,7 @@ void BlurPass::draw()
     m_pingpong_framebuffer->bind();
     m_pingpong_framebuffer->clear();
 
-    m_bright_map = m_input_passes[0]->getFrameBuffer()->colorAttachmentAt(0)->texture()->id();
+    m_bright_map = m_input_passes[0]->getFrameBuffer()->colorAttachmentAt(1)->texture()->id();
     unsigned int map1 = m_framebuffer->colorAttachmentAt(0)->texture()->id();
     unsigned int map2 = m_pingpong_framebuffer->colorAttachmentAt(0)->texture()->id();
 

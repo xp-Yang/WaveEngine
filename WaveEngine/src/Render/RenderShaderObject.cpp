@@ -122,19 +122,22 @@ RenderShaderObject* RenderShaderObject::getShaderObject(const Asset::ShaderType&
         shader_asset = Asset::Shader{ type, resource_dir + "/shader/pristineGrid.vs", resource_dir + "/shader/pristineGrid.fs" };
         break;
     case Asset::ShaderType::GBufferShader:
-        shader_asset = Asset::Shader{ type, resource_dir + "/shader/gBufferPass.vs", resource_dir + "/shader/gBufferPass.fs" };
+        shader_asset = Asset::Shader{ type, resource_dir + "/shader/model.vs", resource_dir + "/shader/gBufferPass.fs" };
         break;
     case Asset::ShaderType::DeferredLightingShader:
-        shader_asset = Asset::Shader{ type, resource_dir + "/shader/deferredLighting.vs", resource_dir + "/shader/deferredLighting.fs" };
+        shader_asset = Asset::Shader{ type, resource_dir + "/shader/screenQuad.vs", resource_dir + "/shader/deferredLighting.fs" };
+        break;
+    case Asset::ShaderType::DeferredLightingPhongShader:
+        shader_asset = Asset::Shader{ type, resource_dir + "/shader/screenQuad.vs", resource_dir + "/shader/deferredLighting_phong.fs" };
+        break;
+    case Asset::ShaderType::LightShader:
+        shader_asset = Asset::Shader{ type, resource_dir + "/shader/model.vs", resource_dir + "/shader/light.fs" };
         break;
     case Asset::ShaderType::PBRShader:
-        shader_asset = Asset::Shader{ type, resource_dir + "/shader/pbr.vs", resource_dir + "/shader/pbr.fs" };
+        shader_asset = Asset::Shader{ type, resource_dir + "/shader/model.vs", resource_dir + "/shader/pbr.fs" };
         break;
     case Asset::ShaderType::SkyboxShader:
-        shader_asset = Asset::Shader{ type, std::string(RESOURCE_DIR) + "/shader/skybox.vs", std::string(RESOURCE_DIR) + "/shader/skybox.fs" };
-        break;
-    case Asset::ShaderType::BorderShader:
-        shader_asset = Asset::Shader{ type, resource_dir + "/shader/border.vs", resource_dir + "/shader/border.fs" };
+        shader_asset = Asset::Shader{ type, resource_dir + "/shader/skybox.vs", resource_dir + "/shader/skybox.fs" };
         break;
     case Asset::ShaderType::NormalShader:
         shader_asset = Asset::Shader{ type, resource_dir + "/shader/model.vs", resource_dir + "/shader/normal.fs", resource_dir + "/shader/normal.gs" };
@@ -146,26 +149,26 @@ RenderShaderObject* RenderShaderObject::getShaderObject(const Asset::ShaderType&
         shader_asset = Asset::Shader{ type, resource_dir + "/shader/checkerboard.vs", resource_dir + "/shader/checkerboard.fs" };
         break;
     case Asset::ShaderType::PickingShader:
-        shader_asset = Asset::Shader{ type, resource_dir + "/shader/picking.vs", resource_dir + "/shader/picking.fs" };
+        shader_asset = Asset::Shader{ type, resource_dir + "/shader/model.vs", resource_dir + "/shader/picking.fs" };
         break;
     case Asset::ShaderType::RayTracingShader:
-        shader_asset = Asset::Shader{ type, resource_dir + "/shader/RayTracing.vs", resource_dir + "/shader/RayTracing.fs" };
+        shader_asset = Asset::Shader{ type, resource_dir + "/shader/screenQuad.vs", resource_dir + "/shader/rayTracing.fs" };
         break;
     case Asset::ShaderType::QuadShader:
         shader_asset = Asset::Shader{ type, resource_dir + "/shader/screenQuad.vs", resource_dir + "/shader/screenQuad.fs" };
         break;
     case Asset::ShaderType::DepthShader:
-        shader_asset = Asset::Shader{ type, resource_dir + "/shader/depth.vs", resource_dir + "/shader/depth.fs" };
+        shader_asset = Asset::Shader{ type, resource_dir + "/shader/model.vs", resource_dir + "/shader/depth.fs" };
         break;
     case Asset::ShaderType::CubeMapShader:
-        shader_asset = Asset::Shader{ type, resource_dir + "/shader/cubeMap.vs", resource_dir + "/shader/cubeMap.fs" };
+        shader_asset = Asset::Shader{ type, resource_dir + "/shader/model.vs", resource_dir + "/shader/cubeMap.fs" };
         //shader_asset = Asset::Shader{ type, resource_dir + "/shader/cubeMap2.vs", resource_dir + "/shader/cubeMap2.fs", resource_dir + "/shader/cubeMap2.gs" };
         break;
     case Asset::ShaderType::GaussianBlur:
-        shader_asset = Asset::Shader{ type, resource_dir + "/shader/gaussianBlur.vs", resource_dir + "/shader/gaussianBlur.fs" };
+        shader_asset = Asset::Shader{ type, resource_dir + "/shader/screenQuad.vs", resource_dir + "/shader/gaussianBlur.fs" };
         break;
     case Asset::ShaderType::EdgeDetection:
-        shader_asset = Asset::Shader{ type, resource_dir + "/shader/edgeDetection.vs", resource_dir + "/shader/edgeDetection.fs" };
+        shader_asset = Asset::Shader{ type, resource_dir + "/shader/screenQuad.vs", resource_dir + "/shader/edgeDetection.fs" };
         break;
     default:
         break;
