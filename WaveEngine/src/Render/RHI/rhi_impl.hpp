@@ -8,7 +8,7 @@ public:
     virtual ~RhiImpl() {};
 
     // render相关
-    virtual void drawIndexed(unsigned int vao_id, size_t indices_count) = 0;
+    virtual void drawIndexed(unsigned int vao_id, size_t indices_count, int inst_amount = -1) = 0;
     virtual void drawTriangles(unsigned int vao_id, size_t array_count) = 0;
     // context 全局状态
     virtual void setViewport() = 0;

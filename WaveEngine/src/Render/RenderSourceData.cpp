@@ -41,7 +41,7 @@ RenderMeshData::RenderMeshData(const RenderMeshDataID& id, const Asset::SubMesh&
         break;
     }
     updateRenderMaterialData(sub_mesh_asset.material);
-    create_vbo();
+    create();
 }
 
 void RenderMeshData::reset()
@@ -73,13 +73,31 @@ void RenderMeshData::updateRenderMaterialData(const Asset::Material& material_as
     m_material.height_map = height_map;
 }
 
-void RenderMeshData::create_vbo()
+void RenderMeshData::create_instancing(void* instancing_data, int instancing_data_size)
+{
+    Rhi* rhi = GetApp().renderSystem()->rhi();
+
+    RhiBuffer* inst_buf = rhi->newBuffer(RhiBuffer::Immutable, RhiBuffer::VertexBuffer, instancing_data, instancing_data_size);
+    inst_buf->create();
+
+    m_vertex_layout->setAttributes({
+        {0, RhiVertexAttribute::Format::Float3, sizeof(Vertex), 0},                            // position
+        {1, RhiVertexAttribute::Format::Float3, sizeof(Vertex), offsetof(Vertex, normal)},     // normal
+        {2, RhiVertexAttribute::Format::Float2, sizeof(Vertex), offsetof(Vertex, texture_uv)}, // uv
+        {3, RhiVertexAttribute::Format::Float4, 4 * sizeof(Vec4), 0},
+        {4, RhiVertexAttribute::Format::Float4, 4 * sizeof(Vec4), sizeof(Vec4)},
+        {5, RhiVertexAttribute::Format::Float4, 4 * sizeof(Vec4), 2 * sizeof(Vec4)},
+        {6, RhiVertexAttribute::Format::Float4, 4 * sizeof(Vec4), 3 * sizeof(Vec4)},
+        });
+    m_vertex_layout->createInstancing(inst_buf, 3);
+}
+
+void RenderMeshData::create()
 {
     Rhi* rhi = GetApp().renderSystem()->rhi();
 
     RhiBuffer* vbuf = rhi->newBuffer(RhiBuffer::Immutable, RhiBuffer::VertexBuffer, (void*)(&(m_mesh_data->vertices()[0])), m_mesh_data->vertices().size() * sizeof(Vertex));
     vbuf->create();
-    m_VBO = vbuf->id();
     //glGenBuffers(1, &m_VBO);
     //glBindBuffer(GL_ARRAY_BUFFER, m_VBO);
     //glBufferData(GL_ARRAY_BUFFER, m_mesh_data->vertices().size() * sizeof(Vertex), &(m_mesh_data->vertices()[0]), GL_STATIC_DRAW);
@@ -87,21 +105,20 @@ void RenderMeshData::create_vbo()
     assert(!m_mesh_data->indices().empty());
     RhiBuffer* ibuf = rhi->newBuffer(RhiBuffer::Immutable, RhiBuffer::IndexBuffer, (void*)(&(m_mesh_data->indices()[0])), m_mesh_data->indices().size() * sizeof(unsigned int));
     ibuf->create();
-    m_IBO = ibuf->id();
     //glGenBuffers(1, &m_IBO);
     ////glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_IBO);
     ////glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_mesh_data->indices().size() * sizeof(unsigned int), &(m_mesh_data->indices()[0]), GL_STATIC_DRAW);
     //glBindBuffer(GL_ARRAY_BUFFER, m_IBO);
     //glBufferData(GL_ARRAY_BUFFER, m_mesh_data->indices().size() * sizeof(unsigned int), &(m_mesh_data->indices()[0]), GL_STATIC_DRAW);
 
-    RhiVertexLayout* input_layout = rhi->newVertexLayout(vbuf, ibuf);
-    input_layout->setAttributes({
+    m_vertex_layout = rhi->newVertexLayout(vbuf, ibuf);
+    m_vertex_layout->setAttributes({
         {0, RhiVertexAttribute::Format::Float3, sizeof(Vertex), 0},                            // position
         {1, RhiVertexAttribute::Format::Float3, sizeof(Vertex), offsetof(Vertex, normal)},     // normal
         {2, RhiVertexAttribute::Format::Float2, sizeof(Vertex), offsetof(Vertex, texture_uv)}, // uv
         });
-    input_layout->create();
-    m_VAO = input_layout->id();
+    m_vertex_layout->create();
+    m_VAO = m_vertex_layout->id();
     //glGenVertexArrays(1, &m_VAO);
     //glBindVertexArray(m_VAO);
     //glBindBuffer(GL_ARRAY_BUFFER, m_VBO);

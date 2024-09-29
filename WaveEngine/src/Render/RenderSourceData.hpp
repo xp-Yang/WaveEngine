@@ -42,6 +42,7 @@ struct RenderMeshDataIDHasher {
     }
 };
 
+class RhiVertexLayout;
 class RenderMeshData {
 public:
     RenderMeshData(const RenderMeshDataID& id, const Asset::SubMesh& sub_mesh_asset, const Mat4& model_transform = Mat4(1.0f));
@@ -56,14 +57,14 @@ public:
     const Mat4& transform() const { return m_transform; }
     void updateTransform(const Mat4& transform);
     void updateRenderMaterialData(const Asset::Material& material_asset);
+    void create_instancing(void* instancing_data, int instancing_data_size);
 
 protected:
-    void create_vbo();
+    void create();
 
 private:
     GL_RESOURCE_HANLE m_VAO = 0;
-    GL_RESOURCE_HANLE m_VBO = 0;
-    GL_RESOURCE_HANLE m_IBO = 0;
+    RhiVertexLayout* m_vertex_layout;
     std::shared_ptr<Asset::MeshData> m_mesh_data;
     RenderMaterialData m_material;
     Mat4 m_transform;
@@ -106,6 +107,8 @@ struct RenderSourceData {
     std::unordered_map<RenderMeshDataID, std::shared_ptr<RenderMeshData>, RenderMeshDataIDHasher> render_mesh_data_hash;
     std::vector<RenderDirectionalLightData> render_directional_light_data_list;
     std::vector<RenderPointLightData> render_point_light_data_list;
+    std::shared_ptr<RenderMeshData> render_point_light_inst_mesh;
+    int point_light_inst_amount;
     RenderSkyboxData render_skybox_data;
 
     std::vector<GObjectID> picked_ids;

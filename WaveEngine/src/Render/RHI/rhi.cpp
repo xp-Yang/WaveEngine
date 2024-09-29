@@ -31,9 +31,9 @@ Rhi* Rhi::create()
 	return rhi;
 }
 
-void Rhi::drawIndexed(unsigned int vao_id, size_t indices_count)
+void Rhi::drawIndexed(unsigned int vao_id, size_t indices_count, int inst_amount)
 {
-	m_impl->drawIndexed(vao_id, indices_count);
+	m_impl->drawIndexed(vao_id, indices_count, inst_amount);
 }
 
 void Rhi::drawTriangles(unsigned int vao_id, size_t array_count)

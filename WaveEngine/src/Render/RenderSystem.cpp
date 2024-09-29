@@ -316,6 +316,22 @@ void RenderSystem::updateRenderSourceData()
     }
 
     const auto& point_lights = scene.getLightManager()->pointLights();
+    static Mat4* point_light_inst_matrix = nullptr;
+    static Color4* point_light_inst_color = nullptr;
+    if (!m_initialized) {
+        point_light_inst_matrix = new Mat4[point_lights.size()]{};
+        point_light_inst_color = new Color4[point_lights.size()]{};
+        for (int i = 0; i < point_lights.size(); ++i) {
+            point_light_inst_matrix[i] = Math::Translate(point_lights[i]->position);
+            point_light_inst_color[i] = point_lights[i]->luminousColor;
+        }
+
+        Asset::SubMesh point_light_mesh;
+        point_light_mesh.mesh_file_ref = { Asset::MeshFileType::CustomSphere, "" };
+        m_render_source_data->render_point_light_inst_mesh = std::make_shared<RenderMeshData>(RenderMeshDataID(-99999, 0), point_light_mesh, Mat4(1.0));
+        m_render_source_data->render_point_light_inst_mesh->create_instancing(point_light_inst_matrix, point_lights.size() * sizeof(Mat4));
+        m_render_source_data->point_light_inst_amount = point_lights.size();
+    }
     for (const auto& point_light : point_lights) {
         Mat4 point_light_matrix = Math::Translate(point_light->position);
         auto render_mesh_data_id = RenderMeshDataID(-point_light->ID().id, 0);

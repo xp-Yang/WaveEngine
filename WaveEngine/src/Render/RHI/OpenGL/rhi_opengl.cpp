@@ -19,9 +19,9 @@ RhiOpenGL::RhiOpenGL()
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 }
 
-void RhiOpenGL::drawIndexed(unsigned int vao_id, size_t indices_count)
+void RhiOpenGL::drawIndexed(unsigned int vao_id, size_t indices_count, int inst_amount)
 {
-	OpenGLRenderer::drawIndexed(vao_id, indices_count);
+	OpenGLRenderer::drawIndexed(vao_id, indices_count, inst_amount);
 }
 
 void RhiOpenGL::drawTriangles(unsigned int vao_id, size_t array_count)

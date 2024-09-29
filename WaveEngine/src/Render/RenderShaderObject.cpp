@@ -164,6 +164,9 @@ RenderShaderObject* RenderShaderObject::getShaderObject(const Asset::ShaderType&
     case Asset::ShaderType::EdgeDetection:
         shader_asset = Asset::Shader{ type, resource_dir + "/shader/screenQuad.vs", resource_dir + "/shader/edgeDetection.fs" };
         break;
+    case Asset::ShaderType::InstancingShader:
+        shader_asset = Asset::Shader{ type, resource_dir + "/shader/instancing.vs", resource_dir + "/shader/instancing.fs" };
+        break;
     default:
         break;
     }

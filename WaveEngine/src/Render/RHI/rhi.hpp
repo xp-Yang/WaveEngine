@@ -337,6 +337,8 @@ public:
 
     virtual bool create() = 0;
 
+    virtual bool createInstancing(RhiBuffer* inst_buffer, int instancin_location) = 0;
+
 protected:
     RhiVertexLayout() = default;
     RhiVertexLayout(RhiBuffer* vbuffer, RhiBuffer* ibuffer);
@@ -566,7 +568,7 @@ public:
     static Rhi* create();
 
 	// render相关
-	void drawIndexed(unsigned int vao_id, size_t indices_count);
+	void drawIndexed(unsigned int vao_id, size_t indices_count, int inst_amount = -1);
 	void drawTriangles(unsigned int vao_id, size_t array_count);
 	// context 全局状态
 	void setViewport();

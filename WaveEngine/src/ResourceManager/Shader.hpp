@@ -22,6 +22,7 @@ enum class ShaderType {
 	CubeMapShader,
 	GaussianBlur,
 	EdgeDetection,
+	InstancingShader,
 };
 
 struct Shader {
