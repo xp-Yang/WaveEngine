@@ -11,7 +11,6 @@ public:
 	void draw() override;
 
 protected:
-	unsigned int m_bright_map;
 	std::unique_ptr<RhiFrameBuffer> m_pingpong_framebuffer;
 };
 

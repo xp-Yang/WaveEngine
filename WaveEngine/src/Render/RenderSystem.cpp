@@ -116,6 +116,11 @@ unsigned int RenderSystem::getLightingTexture()
     return m_curr_path->getLightingTexture();
 }
 
+unsigned int RenderSystem::getBrightTexture()
+{
+    return m_curr_path->getBrightTexture();
+}
+
 unsigned int RenderSystem::getBlurredTexture()
 {
     return m_curr_path->getBlurredTexture();

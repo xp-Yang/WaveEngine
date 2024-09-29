@@ -30,7 +30,7 @@ void BlurPass::draw()
     m_pingpong_framebuffer->bind();
     m_pingpong_framebuffer->clear();
 
-    m_bright_map = m_input_passes[0]->getFrameBuffer()->colorAttachmentAt(1)->texture()->id();
+    auto bright_map = m_input_passes[0]->getFrameBuffer()->colorAttachmentAt(0)->texture()->id();
     unsigned int map1 = m_framebuffer->colorAttachmentAt(0)->texture()->id();
     unsigned int map2 = m_pingpong_framebuffer->colorAttachmentAt(0)->texture()->id();
 
@@ -42,11 +42,11 @@ void BlurPass::draw()
     {
         if (i % 2 == 0) {
             m_framebuffer->bind();
-            blur_shader->setTexture("image", 0, (i == 0) ? m_bright_map : map2);
+            blur_shader->setTexture("image", 0, (i == 0) ? bright_map : map2);
         }
         else {
             m_pingpong_framebuffer->bind();
-            blur_shader->setTexture("image", 0, (i == 0) ? m_bright_map : map1);
+            blur_shader->setTexture("image", 0, (i == 0) ? bright_map : map1);
         }
         blur_shader->setInt("horizontal", horizontal);
         m_rhi->drawIndexed(m_screen_quad->getVAO(), m_screen_quad->indicesCount());

@@ -3,16 +3,12 @@
 void LightingPass::init()
 {
 	RhiTexture* color_texture = m_rhi->newTexture(RhiTexture::Format::RGB16F, Vec2(DEFAULT_RENDER_RESOLUTION_X, DEFAULT_RENDER_RESOLUTION_Y));
-	RhiTexture* bright_color_texture = m_rhi->newTexture(RhiTexture::Format::RGB16F, Vec2(DEFAULT_RENDER_RESOLUTION_X, DEFAULT_RENDER_RESOLUTION_Y));
 	RhiTexture* depth_texture = m_rhi->newTexture(RhiTexture::Format::DEPTH, Vec2(DEFAULT_RENDER_RESOLUTION_X, DEFAULT_RENDER_RESOLUTION_Y));
 	color_texture->create();
-	bright_color_texture->create();
 	depth_texture->create();
 	RhiAttachment color_attachment = RhiAttachment(color_texture);
-	RhiAttachment bright_color_attachment = RhiAttachment(bright_color_texture);
 	RhiAttachment depth_ttachment = RhiAttachment(depth_texture);
 	RhiFrameBuffer* fb = m_rhi->newFrameBuffer(color_attachment, Vec2(DEFAULT_RENDER_RESOLUTION_X, DEFAULT_RENDER_RESOLUTION_Y));
-	fb->setColorAttachments({ color_texture , bright_color_texture });
 	fb->setDepthAttachment(depth_ttachment);
 	fb->create();
 	m_framebuffer = std::unique_ptr<RhiFrameBuffer>(fb);
@@ -22,24 +18,6 @@ void LightingPass::draw()
 {
 	m_framebuffer->bind();
 	m_framebuffer->clear();
-
-	// wireframe
-	if (m_wireframe) {
-		drawWireframeMode();
-		if (m_normal_debug) {
-			drawNormalMode();
-		}
-		return;
-	}
-
-	// checkerboard
-	if (m_checkerboard) {
-		drawCheckerboardMode();
-		if (m_normal_debug) {
-			drawNormalMode();
-		}
-		return;
-	}
 
 	// deferred lighting
 	static RenderShaderObject* lighting_pbr_shader = RenderShaderObject::getShaderObject(Asset::ShaderType::DeferredLightingShader);
@@ -110,12 +88,6 @@ void LightingPass::draw()
 	m_rhi->drawIndexed(m_render_source_data->render_point_light_inst_mesh->getVAO(), m_render_source_data->render_point_light_inst_mesh->indicesCount(), m_render_source_data->point_light_inst_amount);
 	point_light_instancing_shader->stop_using();
 
-
-	// normal
-	if (m_normal_debug) {
-		drawNormalMode();
-	}
-
 	// skybox
 	static RenderShaderObject* skybox_shader = RenderShaderObject::getShaderObject(Asset::ShaderType::SkyboxShader);
 	if (m_skybox) {
@@ -138,64 +110,7 @@ void LightingPass::enableSkybox(bool enable)
 	m_skybox = enable;
 }
 
-void LightingPass::enableNormal(bool enable)
-{
-	m_normal_debug = enable;
-}
-
-void LightingPass::enableWireframe(bool enable)
-{
-	m_wireframe = enable;
-}
-
-void LightingPass::enableCheckerboard(bool enable)
-{
-	m_checkerboard = enable;
-}
-
 void LightingPass::enablePBR(bool enable)
 {
 	m_pbr = enable;
-}
-
-void LightingPass::drawNormalMode()
-{
-	static RenderShaderObject* normal_shader = RenderShaderObject::getShaderObject(Asset::ShaderType::NormalShader);
-	normal_shader->start_using();
-	normal_shader->setMatrix("view", 1, m_render_source_data->view_matrix);
-	normal_shader->setMatrix("projection", 1, m_render_source_data->proj_matrix);
-	normal_shader->setMatrix("projectionView", 1, m_render_source_data->proj_matrix * m_render_source_data->view_matrix);
-	for (const auto& pair : m_render_source_data->render_mesh_data_hash) {
-		const auto& render_sub_mesh_data = pair.second;
-		normal_shader->setMatrix("model", 1, render_sub_mesh_data->transform());
-		m_rhi->drawIndexed(render_sub_mesh_data->getVAO(), render_sub_mesh_data->indicesCount());
-	}
-}
-
-void LightingPass::drawWireframeMode()
-{
-	static RenderShaderObject* wireframe_shader = RenderShaderObject::getShaderObject(Asset::ShaderType::WireframeShader);
-	wireframe_shader->start_using();
-	wireframe_shader->setMatrix("view", 1, m_render_source_data->view_matrix);
-	wireframe_shader->setMatrix("projection", 1, m_render_source_data->proj_matrix);
-	for (const auto& pair : m_render_source_data->render_mesh_data_hash) {
-		const auto& render_sub_mesh_data = pair.second;
-		wireframe_shader->setMatrix("model", 1, render_sub_mesh_data->transform());
-		m_rhi->drawIndexed(render_sub_mesh_data->getVAO(), render_sub_mesh_data->indicesCount());
-	}
-}
-
-void LightingPass::drawCheckerboardMode()
-{
-	static RenderShaderObject* shader = RenderShaderObject::getShaderObject(Asset::ShaderType::CheckerboardShader);
-	shader->start_using();
-	shader->setMatrix("view", 1, m_render_source_data->view_matrix);
-	shader->setMatrix("projection", 1, m_render_source_data->proj_matrix);
-	for (const auto& pair : m_render_source_data->render_mesh_data_hash) {
-		const auto& render_sub_mesh_data = pair.second;
-		shader->setMatrix("modelScale", 1, Math::Scale(Vec3(1.0f))); // TODO get scale of model_matrix
-		shader->setMatrix("model", 1, render_sub_mesh_data->transform());
-		m_rhi->drawIndexed(render_sub_mesh_data->getVAO(), render_sub_mesh_data->indicesCount());
-	}
-	shader->stop_using();
 }

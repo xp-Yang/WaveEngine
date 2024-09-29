@@ -18,13 +18,18 @@ public:
     unsigned int getShadowTexture() override;
     unsigned int getGBufferTexture() override;
     unsigned int getLightingTexture() override;
+    unsigned int getBrightTexture() override;
     unsigned int getBlurredTexture() override;
 
 protected:
     std::unique_ptr<RenderPass> m_picking_pass;
     std::unique_ptr<RenderPass> m_shadow_pass;
+    std::unique_ptr<RenderPass> m_wireframe_pass;
+    std::unique_ptr<RenderPass> m_checkerboard_pass;
+    std::unique_ptr<RenderPass> m_normal_pass;
     std::unique_ptr<RenderPass> m_gbuffer_pass;
     std::unique_ptr<RenderPass> m_lighting_pass;
+    std::unique_ptr<RenderPass> m_bright_pass;
     std::unique_ptr<RenderPass> m_blur_pass;
     std::unique_ptr<RenderPass> m_edge_detection_pass;
     std::unique_ptr<RenderPass> m_screen_pass;

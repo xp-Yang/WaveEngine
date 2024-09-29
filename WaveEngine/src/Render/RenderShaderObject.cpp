@@ -158,6 +158,9 @@ RenderShaderObject* RenderShaderObject::getShaderObject(const Asset::ShaderType&
         shader_asset = Asset::Shader{ type, resource_dir + "/shader/model.vs", resource_dir + "/shader/cubeMap.fs" };
         //shader_asset = Asset::Shader{ type, resource_dir + "/shader/cubeMap2.vs", resource_dir + "/shader/cubeMap2.fs", resource_dir + "/shader/cubeMap2.gs" };
         break;
+    case Asset::ShaderType::ExtractBrightShader:
+        shader_asset = Asset::Shader{ type, resource_dir + "/shader/screenQuad.vs", resource_dir + "/shader/extractBright.fs" };
+        break;
     case Asset::ShaderType::GaussianBlur:
         shader_asset = Asset::Shader{ type, resource_dir + "/shader/screenQuad.vs", resource_dir + "/shader/gaussianBlur.fs" };
         break;

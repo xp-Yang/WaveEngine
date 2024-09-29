@@ -186,7 +186,7 @@ void BrightCanvas::render()
         ImVec2 window_pos = ImGui::GetWindowPos();
         ImVec2 window_size = ImGui::GetWindowSize();
         ImVec2 content_size = ImGui::GetContentRegionAvail();
-        ImTextureID tex_id = (ImTextureID)(GetApp().renderSystem()->getLightingTexture() + 1);
+        ImTextureID tex_id = (ImTextureID)(GetApp().renderSystem()->getBrightTexture());
         ImGui::Image(tex_id, content_size, ImVec2(0, 1), ImVec2(1, 0));
         setViewPort({ (int)window_pos.x, (int)window_pos.y, (int)window_size.x, (int)window_size.y });
     }

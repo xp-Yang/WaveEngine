@@ -24,6 +24,11 @@ public:
 	void setInputPasses(const std::vector<RenderPass*>& input_passes) { m_input_passes = input_passes; }
 	RhiFrameBuffer* getFrameBuffer() const { return m_framebuffer.get(); };
 	virtual void draw() = 0;
+	virtual void clear() {
+		m_framebuffer->bind();
+		m_framebuffer->clear();
+	};
+
 protected:
 	std::shared_ptr<RenderMeshData> m_screen_quad;
 	std::shared_ptr<RenderSourceData> m_render_source_data;

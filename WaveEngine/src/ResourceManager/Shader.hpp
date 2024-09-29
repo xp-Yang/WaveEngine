@@ -20,6 +20,7 @@ enum class ShaderType {
 	RayTracingShader,
 	QuadShader,
 	CubeMapShader,
+	ExtractBrightShader,
 	GaussianBlur,
 	EdgeDetection,
 	InstancingShader,

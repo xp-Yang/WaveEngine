@@ -16,6 +16,7 @@ struct RenderParams {
     // for MainCameraPass
     bool    reflection = false;
     bool    normal_debug = false;
+    bool    bloom = false;
     bool    wireframe = false;
     bool    checkerboard = false;
     bool    pbr = true;
@@ -41,6 +42,7 @@ public:
     virtual unsigned int getShadowTexture() { return 0; };
     virtual unsigned int getGBufferTexture() { return 0; };
     virtual unsigned int getLightingTexture() { return 0; };
+    virtual unsigned int getBrightTexture() { return 0; };
     virtual unsigned int getBlurredTexture() { return 0; };
 
 protected:

@@ -101,8 +101,9 @@ void ImGuiGlobalConsole::render() {
     }
     ImGui::Checkbox("skybox", &render_params.skybox); ImGui::SameLine();
     ImGui::Checkbox("shadow", &render_params.shadow); ImGui::SameLine();
-    //ImGui::Checkbox("reflection", &render_params.reflection);
-    ImGui::Checkbox("normal", &render_params.normal_debug);
+    //ImGui::Checkbox("reflection", &render_params.reflection); ImGui::SameLine();
+    ImGui::Checkbox("normal", &render_params.normal_debug); ImGui::SameLine();
+    ImGui::Checkbox("bloom", &render_params.bloom);
 
     separator();
 

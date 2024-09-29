@@ -4,7 +4,7 @@ void LightManager::init()
 {
 	addDirectionalLight();
 
-	for (int i = 0; i < 50; ++i)
+	for (int i = 0; i < 3; ++i)
 		addPointLight();
 }
 

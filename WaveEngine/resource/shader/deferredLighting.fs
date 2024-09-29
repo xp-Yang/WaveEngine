@@ -18,7 +18,6 @@ uniform sampler2D gAo;
 uniform vec3 cameraPos;
 
 layout (location = 0) out vec4 FragColor;
-layout (location = 1) out vec4 BrightFragColor;
 
 void main()
 {             
@@ -84,7 +83,4 @@ void main()
     vec3 color = ambient + Lo;
 
     FragColor = vec4(color, 1.0);
-
-    float brightness = dot(FragColor.rgb, vec3(0.2126, 0.7152, 0.0722));
-    BrightFragColor = step(2.0, brightness) * vec4(FragColor.rgb, 1.0);
 }

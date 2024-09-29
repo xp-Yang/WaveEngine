@@ -36,14 +36,21 @@ void ScreenPass::draw()
 	m_lighted_map = m_input_passes[0]->getFrameBuffer()->colorAttachmentAt(0)->texture()->id();
 	frame_shader->setTexture("Texture", 0, m_lighted_map);
 	if (m_input_passes.size() > 1) {
-		m_blurred_bright_map = m_input_passes[1]->getFrameBuffer()->colorAttachmentAt(0)->texture()->id();
+		auto normal_map = m_input_passes[1]->getFrameBuffer()->colorAttachmentAt(0)->texture()->id();
+		frame_shader->setTexture("normalMap", 3, normal_map);
+		frame_shader->setBool("normal", true);
+	}
+	else
+		frame_shader->setBool("normal", false);
+	if (m_input_passes.size() > 2) {
+		m_blurred_bright_map = m_input_passes[2]->getFrameBuffer()->colorAttachmentAt(0)->texture()->id();
 		frame_shader->setTexture("bloomBlurMap", 1, m_blurred_bright_map);
 		frame_shader->setBool("bloom", true);
 	}
 	else
 		frame_shader->setBool("bloom", false);
-	if (m_input_passes.size() > 2) { // TODO frame graph
-		m_border_map = m_input_passes[2]->getFrameBuffer()->colorAttachmentAt(0)->texture()->id();
+	if (m_input_passes.size() > 3) { // TODO frame graph
+		m_border_map = m_input_passes[3]->getFrameBuffer()->colorAttachmentAt(0)->texture()->id();
 		frame_shader->setTexture("borderMap", 2, m_border_map);
 		frame_shader->setBool("border", true);
 	}
