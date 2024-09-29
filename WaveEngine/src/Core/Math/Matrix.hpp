@@ -34,18 +34,54 @@ inline Mat4 Translate(const Vec3& translation) {
     return glm::translate(Mat4(1.0f), translation);
 }
 
-void ShearX();
-void ShearY();
-void ShearZ();
+inline void ShearX();
+inline void ShearY();
+inline void ShearZ();
+
 
 template <typename Mat>
-Mat Inverse(const Mat& mat) {
+Mat Inverse(const Mat& mat) 
+{
     return glm::inverse(mat);
 }
-void Determinant();
 
-void SVDDecomposition();
-void Decomposition();
+inline float Determinant(const Mat4& matrix)
+{
+    return glm::determinant(matrix);
+}
+
+inline void SVDDecomposition();
+
+inline void DecomposeMatrix(const Mat4& matrix, Mat4& translation, Mat4& rotation, Mat4& scale)
+{
+    scale = Mat4(1.0f);
+    scale[0][0] = Math::Length(matrix[0]);
+    scale[1][1] = Math::Length(matrix[1]);
+    scale[2][2] = Math::Length(matrix[2]);
+
+    rotation = Mat4(1.0f);
+    rotation[0][0] = (matrix[0][0] / scale[0][0]);
+    rotation[0][1] = (matrix[0][1] / scale[0][0]);
+    rotation[0][2] = (matrix[0][2] / scale[0][0]);
+    rotation[0][3] = 0.f;
+    rotation[1][0] = (matrix[1][0] / scale[1][1]);
+    rotation[1][1] = (matrix[1][1] / scale[1][1]);
+    rotation[1][2] = (matrix[1][2] / scale[1][1]);
+    rotation[1][3] = 0.f;
+    rotation[2][0] = (matrix[2][0] / scale[2][2]);
+    rotation[2][1] = (matrix[2][1] / scale[2][2]);
+    rotation[2][2] = (matrix[2][2] / scale[2][2]);
+    rotation[2][3] = 0.f;
+    rotation[3][0] = 0.f;
+    rotation[3][1] = 0.f;
+    rotation[3][2] = 0.f;
+    rotation[3][3] = 1.0f;
+
+    translation = Mat4(1.0f);
+    translation[3][0] = matrix[3][0];
+    translation[3][1] = matrix[3][1];
+    translation[3][2] = matrix[3][2];
+}
 
 }
 

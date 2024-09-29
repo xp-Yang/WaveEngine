@@ -25,6 +25,11 @@ float Dot(const Vec& vec1, const Vec& vec2) {
 }
 
 template<typename Vec>
+float Length(Vec v) {
+    return std::sqrt(Dot(v, v));
+}
+
+template<typename Vec>
 Vec Cross(const Vec& vec1, const Vec& vec2) {
     return glm::cross(vec1, vec2);
 }

@@ -3,21 +3,13 @@
 in vec3 fragScaledModelPos;
 in vec3 fragWorldPos;
 
+out vec4 outColor;
+
 void main()
 {
-    vec3 integer = floor(fragScaledModelPos);
-    if((mod(integer.x, 2) == 0 && mod(integer.z, 2) == 0) ||
-        (mod(integer.x, 2) == 1 && mod(integer.z, 2) == 1))
-    {
-        if(mod(integer.y, 2) == 0)
-            gl_FragColor = vec4(0.1, 0.1, 0.1, 1.0);
-        else
-            gl_FragColor = vec4(0.75, 0.75, 0.75, 1.0);
-    }
-    else{
-        if(mod(integer.y, 2) == 0)
-            gl_FragColor = vec4(0.75, 0.75, 0.75, 1.0);
-        else
-            gl_FragColor = vec4(0.1, 0.1, 0.1, 1.0);
-    }
+    vec3 i = fragScaledModelPos / 2.0;
+    vec3 f = fract(i);
+    bool black = ((f.x < 0.5 && f.z < 0.5) || (f.x > 0.5 && f.z > 0.5)) && (f.y < 0.5);
+    black = black || (((f.x < 0.5 && f.z > 0.5) || (f.x > 0.5 && f.z < 0.5)) && (f.y > 0.5));
+    outColor = vec4(vec3(0.75) - float(black) * vec3(0.65), 1.0);
 }
