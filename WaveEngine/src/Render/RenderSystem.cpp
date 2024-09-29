@@ -321,42 +321,41 @@ void RenderSystem::updateRenderSourceData()
     }
 
     const auto& point_lights = scene.getLightManager()->pointLights();
-    static Mat4* point_light_inst_matrix = nullptr;
-    static Color4* point_light_inst_color = nullptr;
+    struct inst_data {
+        Mat4 inst_matrix;
+        Color4 inst_color;
+    };
+    static inst_data* point_light_inst_data = new inst_data[point_lights.size()]{};
     if (!m_initialized) {
-        point_light_inst_matrix = new Mat4[point_lights.size()]{};
-        point_light_inst_color = new Color4[point_lights.size()]{};
         for (int i = 0; i < point_lights.size(); ++i) {
-            point_light_inst_matrix[i] = Math::Translate(point_lights[i]->position);
-            point_light_inst_color[i] = point_lights[i]->luminousColor;
+            point_light_inst_data[i].inst_matrix = Math::Translate(point_lights[i]->position);
+            point_light_inst_data[i].inst_color = point_lights[i]->luminousColor;
         }
 
         Asset::SubMesh point_light_mesh;
         point_light_mesh.mesh_file_ref = { Asset::MeshFileType::CustomSphere, "" };
         m_render_source_data->render_point_light_inst_mesh = std::make_shared<RenderMeshData>(RenderMeshDataID(-99999, 0), point_light_mesh, Mat4(1.0));
-        m_render_source_data->render_point_light_inst_mesh->create_instancing(point_light_inst_matrix, point_lights.size() * sizeof(Mat4));
+        m_render_source_data->render_point_light_inst_mesh->create_instancing(point_light_inst_data, point_lights.size() * sizeof(inst_data));
         m_render_source_data->point_light_inst_amount = point_lights.size();
     }
     for (const auto& point_light : point_lights) {
         Mat4 point_light_matrix = Math::Translate(point_light->position);
-        auto render_mesh_data_id = RenderMeshDataID(-point_light->ID().id, 0);
+        int point_light_id = point_light->ID().id;
         auto it = std::find_if(m_render_source_data->render_point_light_data_list.begin(), m_render_source_data->render_point_light_data_list.end(),
-            [render_mesh_data_id](const RenderPointLightData& point_light_data) {
-                return point_light_data.render_sub_mesh_data->ID() == render_mesh_data_id;
+            [point_light_id](const RenderPointLightData& point_light_data) {
+                return point_light_data.id == point_light_id;
             }
         );
         if (it != m_render_source_data->render_point_light_data_list.end())
         {
             it->position = point_light->position;
-            it->render_sub_mesh_data->updateTransform(point_light_matrix);
         }
         else {
             Asset::SubMesh point_light_mesh;
             point_light_mesh.mesh_file_ref = { Asset::MeshFileType::CustomSphere, "" };
             m_render_source_data->render_point_light_data_list.emplace_back(
-                RenderPointLightData{ point_light->luminousColor, point_light->position, point_light->radius,
-                point_light->lightViewMatrix(), point_light->lightProjMatrix(),
-                std::make_shared<RenderMeshData>(render_mesh_data_id, point_light_mesh, point_light_matrix) });
+                RenderPointLightData{ point_light_id, point_light->luminousColor, point_light->position, point_light->radius,
+                point_light->lightViewMatrix(), point_light->lightProjMatrix() });
         }
     }
 

@@ -8,6 +8,13 @@
 
 using GL_RESOURCE_HANLE = unsigned int;
 
+struct RenderTextureData {
+    RenderTextureData(const Asset::Texture& texture_asset);
+    RenderTextureData(const Asset::CubeTexture& cube_texture_asset);
+
+    GL_RESOURCE_HANLE id;
+};
+
 struct RenderMaterialData {
     GL_RESOURCE_HANLE albedo_map{ 0 };
     GL_RESOURCE_HANLE metallic_map{ 0 };
@@ -80,13 +87,12 @@ struct RenderDirectionalLightData {
 };
 
 struct RenderPointLightData {
+    int id;
     Color4 color;
     Vec3 position;
     float radius;
     std::array<Mat4, 6> lightViewMatrix;
     Mat4 lightProjMatrix;
-
-    std::shared_ptr<RenderMeshData> render_sub_mesh_data;
 };
 
 struct RenderSkyboxData {

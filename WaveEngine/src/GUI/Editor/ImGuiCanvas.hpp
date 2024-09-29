@@ -50,21 +50,14 @@ protected:
     Viewport m_viewport;
 };
 
+class ImGuiToolbar;
 class MainCanvas : public ImGuiCanvas {
 public:
-    enum class ToolbarType : int {
-        Translate,
-        Rotate,
-        Scale,
-    };
     MainCanvas() { m_type = CanvasType::Main; }
     void render() override;
 
 protected:
-    void renderGizmos();
-
-private:
-    ToolbarType m_toolbar_type{ ToolbarType::Translate };
+    ImGuiToolbar* m_toolbar{ nullptr };
 };
 
 class PickingCanvas : public ImGuiCanvas {

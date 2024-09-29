@@ -18,7 +18,6 @@ uniform sampler2D gAo;
 uniform vec3 cameraPos;
 
 layout (location = 0) out vec4 FragColor;
-layout (location = 1) out vec4 BrightFragColor;
 
 void main()
 {             
@@ -28,7 +27,7 @@ void main()
     vec3 Diffuse = texture(gDiffuse, fragUV).rgb;
     vec3 Specular = texture(gSpecular, fragUV).rgb;
 
-    if(Normal.xyz == vec3(0.0)){
+    if (Normal.xyz == vec3(0.0)){
         // return if sample the blank area in GBuffer
         FragColor = vec4(0.046, 0.046, 0.046, 1.0);
         return;
@@ -59,7 +58,4 @@ void main()
     }
 
     FragColor = vec4(lightingByDirectionalLight + lightingByPointLight, 1.0);
-
-    float brightness = dot(FragColor.rgb, vec3(0.2126, 0.7152, 0.0722));
-    BrightFragColor = step(2.0, brightness) * vec4(FragColor.rgb, 1.0);
 }

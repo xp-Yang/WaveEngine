@@ -10,5 +10,5 @@ void main() {
 
     vec4 color =  texture(Texture, fragUV);
     float brightness = dot(color.rgb, vec3(0.2126, 0.7152, 0.0722));
-    outColor = step(2.0, brightness) * vec4(color.rgb, 1.0);
+    outColor = step(1.5, brightness) * vec4(color.rgb, 1.0);
 }

@@ -3,13 +3,6 @@
 #include "stb_image.h"
 #include "Engine.hpp"
 
-struct RenderTextureData {
-    RenderTextureData(const Asset::Texture& texture_asset);
-    RenderTextureData(const Asset::CubeTexture& cube_texture_asset);
-
-    GL_RESOURCE_HANLE map;
-};
-
 RenderMeshData::RenderMeshData(const RenderMeshDataID& id, const Asset::SubMesh& sub_mesh_asset, const Mat4& model_transform)
     : m_id(id)
     , m_transform(model_transform * sub_mesh_asset.local_transform)
@@ -26,7 +19,7 @@ RenderMeshData::RenderMeshData(const RenderMeshDataID& id, const Asset::SubMesh&
         break;
     }
     case Asset::MeshFileType::CustomSphere: {
-        m_mesh_data = Asset::MeshData::create_icosphere_mesh(0.1f, 4);
+        m_mesh_data = Asset::MeshData::create_icosphere_mesh(0.05f, 4);
         break;
     }
     case Asset::MeshFileType::CustomGround: {
@@ -63,13 +56,13 @@ void RenderMeshData::updateRenderMaterialData(const Asset::Material& material_as
     m_material.ao = material_asset.ao;
 
     // TODO 贴图更新了，texture数据的释放和加载
-    unsigned int diffuse_map = RenderTextureData(material_asset.diffuse_texture).map;
+    unsigned int diffuse_map = RenderTextureData(material_asset.diffuse_texture).id;
     m_material.diffuse_map = diffuse_map;
-    unsigned int specular_map = RenderTextureData(material_asset.specular_texture).map;
+    unsigned int specular_map = RenderTextureData(material_asset.specular_texture).id;
     m_material.specular_map = specular_map;
-    unsigned int normal_map = RenderTextureData(material_asset.normal_texture).map;
+    unsigned int normal_map = RenderTextureData(material_asset.normal_texture).id;
     m_material.normal_map = normal_map;
-    unsigned int height_map = RenderTextureData(material_asset.height_texture).map;
+    unsigned int height_map = RenderTextureData(material_asset.height_texture).id;
     m_material.height_map = height_map;
 }
 
@@ -84,10 +77,11 @@ void RenderMeshData::create_instancing(void* instancing_data, int instancing_dat
         {0, RhiVertexAttribute::Format::Float3, sizeof(Vertex), 0},                            // position
         {1, RhiVertexAttribute::Format::Float3, sizeof(Vertex), offsetof(Vertex, normal)},     // normal
         {2, RhiVertexAttribute::Format::Float2, sizeof(Vertex), offsetof(Vertex, texture_uv)}, // uv
-        {3, RhiVertexAttribute::Format::Float4, 4 * sizeof(Vec4), 0},
-        {4, RhiVertexAttribute::Format::Float4, 4 * sizeof(Vec4), sizeof(Vec4)},
-        {5, RhiVertexAttribute::Format::Float4, 4 * sizeof(Vec4), 2 * sizeof(Vec4)},
-        {6, RhiVertexAttribute::Format::Float4, 4 * sizeof(Vec4), 3 * sizeof(Vec4)},
+        {3, RhiVertexAttribute::Format::Float4, 5 * sizeof(Vec4), 0},
+        {4, RhiVertexAttribute::Format::Float4, 5 * sizeof(Vec4), sizeof(Vec4)},
+        {5, RhiVertexAttribute::Format::Float4, 5 * sizeof(Vec4), 2 * sizeof(Vec4)},
+        {6, RhiVertexAttribute::Format::Float4, 5 * sizeof(Vec4), 3 * sizeof(Vec4)},
+        {7, RhiVertexAttribute::Format::Float4, 5 * sizeof(Vec4), 4 * sizeof(Vec4)},
         });
     m_vertex_layout->createInstancing(inst_buf, 3);
 }
@@ -152,7 +146,7 @@ RenderTextureData::RenderTextureData(const Asset::Texture& texture_asset)
         RhiTexture* texture = rhi->newTexture(format, Vec2(width, height), 1, RhiTexture::Flag::sRGB, data);
         texture->create();
 
-        map = texture->id();
+        id = texture->id();
 
         stbi_image_free(data);
     }

@@ -78,7 +78,7 @@ void LightingPass::draw()
 	//	m_rhi->drawIndexed(render_point_light_sub_mesh_data->getVAO(), render_point_light_sub_mesh_data->indicesCount());
 	//	point_light_shader->stop_using();
 	//}
-
+	// instancing lights
 	static RenderShaderObject* point_light_instancing_shader = RenderShaderObject::getShaderObject(Asset::ShaderType::InstancingShader);
 	m_render_source_data->render_point_light_inst_mesh;
 	point_light_instancing_shader->start_using();

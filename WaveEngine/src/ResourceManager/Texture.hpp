@@ -16,6 +16,7 @@ enum class TextureType {
 	Metallic,
 	Roughness,
 	AO,
+	Custom,
 };
 
 struct Texture {
