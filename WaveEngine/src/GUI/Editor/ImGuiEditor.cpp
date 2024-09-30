@@ -12,6 +12,8 @@
 #include "Render/RenderSystem.hpp"
 #include "Logical/FrameWork/Scene.hpp"
 
+#include "EngineAPI.hpp"
+
 ImGuiEditor::ImGuiEditor()
     : m_main_canvas(std::make_unique<MainCanvas>())
     , m_context_menu(std::make_unique<ImGuiContextMenu>())

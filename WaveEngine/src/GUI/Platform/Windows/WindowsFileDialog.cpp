@@ -6,6 +6,8 @@
 
 #include <commdlg.h> // Windows SDK
 
+#include "EngineAPI.hpp"
+
 std::string WindowsFileDialog::OpenFile(const char* filter)
 {
 	// 打开搜索文件的窗口, 需要传入一个OPENFILENAMEA对象

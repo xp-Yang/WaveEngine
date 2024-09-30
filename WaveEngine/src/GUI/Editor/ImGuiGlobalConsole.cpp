@@ -3,7 +3,7 @@
 #include <imgui.h>
 #include <imgui_internal.h>
 
-#include <Engine.hpp>
+#include "EngineAPI.hpp"
 
 ImGuiGlobalConsole::ImGuiGlobalConsole()
     : m_ref_render_system(GetApp().renderSystem())
@@ -31,7 +31,7 @@ void ImGuiGlobalConsole::render() {
         for (int i = 0; i < combo_strs.size(); i++) {
             bool selected = path_type_option == i;
             if (ImGui::Selectable(combo_strs[i].c_str(), selected)) {
-                m_ref_render_system->setRenderPathType(RenderPath::Type(i));
+                m_ref_render_system->setRenderPathType(RenderPathType(i));
             }
         }
         ImGui::EndCombo();
@@ -69,7 +69,7 @@ void ImGuiGlobalConsole::render() {
     separator();
 
     ImGui::Text("Params:");
-    if (m_ref_render_system->getRenderPathType() == RenderPath::Type::Forward) {
+    if (m_ref_render_system->getRenderPathType() == RenderPathType::Forward) {
         ImGui::PushItemWidth(50.0f);
         static unsigned int curr_item = 1;
         if (ImGui::BeginCombo("MSAA", (std::to_string((int)std::pow(4, curr_item)) + "x").c_str())) {

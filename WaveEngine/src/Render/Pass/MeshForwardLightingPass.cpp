@@ -1,6 +1,6 @@
-#include "MainCameraPass.hpp"
+#include "MeshForwardLightingPass.hpp"
 
-void MainCameraPass::init()
+void MeshForwardLightingPass::init()
 {
     RhiTexture* color_texture = m_rhi->newTexture(RhiTexture::Format::RGB16F, Vec2(DEFAULT_RENDER_RESOLUTION_X, DEFAULT_RENDER_RESOLUTION_Y));
     RhiTexture* depth_texture = m_rhi->newTexture(RhiTexture::Format::DEPTH24STENCIL8, Vec2(DEFAULT_RENDER_RESOLUTION_X, DEFAULT_RENDER_RESOLUTION_Y));
@@ -14,7 +14,7 @@ void MainCameraPass::init()
     m_framebuffer = std::unique_ptr<RhiFrameBuffer>(fb);
 }
 
-//void MainCameraPass::prepare(FrameBuffer* framebuffer)
+//void MeshForwardLightingPass::prepare(FrameBuffer* framebuffer)
 //{
 //    if (framebuffer)
 //        m_shadow_map = framebuffer->getFirstAttachmentOf(AttachmentType::DEPTH).getMap();
@@ -22,7 +22,7 @@ void MainCameraPass::init()
 //        m_shadow_map = 0;
 //}
 
-void MainCameraPass::configShader(bool skybox, bool reflection, bool normal_debug, bool wireframe)
+void MeshForwardLightingPass::configShader(bool skybox, bool reflection, bool normal_debug, bool wireframe)
 {
     //config shader ²ÎÊý
     m_skybox = skybox;
@@ -31,14 +31,14 @@ void MainCameraPass::configShader(bool skybox, bool reflection, bool normal_debu
     m_wireframe = wireframe;
 }
 
-void MainCameraPass::configSamples(int samples)
+void MeshForwardLightingPass::configSamples(int samples)
 {
     //config FrameBuffer
     m_framebuffer->bind();
     //m_framebuffer->setSamples(samples);
 }
 
-void MainCameraPass::draw()
+void MeshForwardLightingPass::draw()
 {
     m_framebuffer->bind();
     m_framebuffer->clear();

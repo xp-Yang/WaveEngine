@@ -1,25 +1,42 @@
 #ifndef RenderSystem_hpp
 #define RenderSystem_hpp
 
-#include "Path/RenderPath.hpp"
 #include "Core/Signal/Signal.hpp"
+#include "Path/RenderPath.hpp"
+
+enum class RenderPathType {
+    Forward,
+    Deferred,
+    RayTracing,
+};
+
+struct RenderParams {
+    int     msaa_sample_count = 4;
+    bool    skybox = false;
+    bool    shadow = true;
+    int     shadow_map_sample_count = 1;
+
+    bool    reflection = false;
+    bool    normal_debug = false;
+    bool    bloom = false;
+    bool    wireframe = false;
+    bool    checkerboard = false;
+    bool    pbr = true;
+    bool    hdr = true;
+    bool    gamma = true;
+    //int     pixelate_level = 1;
+};
 
 class RenderSystem {
 public:
     RenderSystem();
     void init();
-    RenderPath::Type getRenderPathType();
-    void setRenderPathType(RenderPath::Type type);
+    RenderPathType getRenderPathType();
+    void setRenderPathType(RenderPathType type);
     RenderParams& renderParams();
     void onUpdate();
-    unsigned int getSceneTexture();
-    unsigned int getPickingTexture();
     unsigned int getPickingFBO();
-    unsigned int getShadowTexture();
-    unsigned int getGBufferTexture();
-    unsigned int getLightingTexture();
-    unsigned int getBrightTexture();
-    unsigned int getBlurredTexture();
+    unsigned int renderPassTexture(RenderPass::Type render_pass_type);
     Rhi* rhi() const { return m_rhi.get(); }
 
 public slots:
@@ -30,7 +47,8 @@ protected:
     void updateRenderSourceData();
 
 private:
-    RenderPath::Type m_path_type;
+    RenderPathType m_path_type;
+    RenderParams m_render_params;
 
     std::shared_ptr<RenderPath> m_forward_path;
     std::shared_ptr<RenderPath> m_deferred_path;
@@ -38,7 +56,6 @@ private:
 
     std::shared_ptr<RenderPath> m_curr_path;
 
-    std::shared_ptr<RenderMeshData> m_screen_quad;
     std::shared_ptr<RenderSourceData> m_render_source_data;
     bool m_initialized{ false };
     bool m_need_insert_source_data{ false };

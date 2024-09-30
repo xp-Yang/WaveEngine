@@ -1,10 +1,11 @@
-#ifndef ScreenPass_hpp
-#define ScreenPass_hpp
+#ifndef CombinePass_hpp
+#define CombinePass_hpp
 
 #include "RenderPass.hpp"
 
-class ScreenPass : public RenderPass {
+class CombinePass : public RenderPass {
 public:
+    CombinePass();
     void init() override;
     void draw() override;
 

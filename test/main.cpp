@@ -1,4 +1,4 @@
-#include "Engine.hpp"
+#include "EngineAPI.hpp"
 
 // TODO list:
 // done: nanosuit 放在cube前加载就有问题: 答: body是nanosuit的最后一个材质，可能被cube覆盖了？已经无法复现。
@@ -20,7 +20,7 @@
 // done: 抗锯齿
 // done: 帧缓冲的附件理解
 // done: 窗口大小可缩放
-// done: deferred rendering 性能分析 答：见LightingPass.cpp的相关注释
+// done: deferred rendering 性能分析 答：见DeferredLightingPass.cpp的相关注释
 // done: 集成imgizmo
 // done: 集成imgui窗口停靠，多viewport
 // done: 解决相机运动至极点屏幕反转问题 答：原因是lookat()函数计算view矩阵时，用direction×up计算右矢，使得经过极点时右矢翻转。解决方法：维护相机自身的camera_up，并在计算view矩阵时，传给lookat()函数 camera_up参数而不是全局up参数即可。

@@ -1,9 +1,9 @@
-#ifndef MainCameraPass_hpp
-#define MainCameraPass_hpp
+#ifndef MeshForwardLightingPass_hpp
+#define MeshForwardLightingPass_hpp
 
 #include "RenderPass.hpp"
 
-class MainCameraPass : public RenderPass {
+class MeshForwardLightingPass : public RenderPass {
 public:
     void init() override;
     void configShader(bool skybox, bool reflection, bool normal_debug, bool wireframe);

@@ -10,6 +10,8 @@
 
 #include <Logical/Framework/Scene.hpp>
 
+#include "EngineAPI.hpp"
+
 RenderSystem::RenderSystem()
     : m_rhi(std::shared_ptr<Rhi>(Rhi::create()))
 {
@@ -17,31 +19,24 @@ RenderSystem::RenderSystem()
 
 void RenderSystem::init()
 {
-    Asset::SubMesh m_screen_quad_sub_mesh;
-    m_screen_quad_sub_mesh.mesh_file_ref = { Asset::MeshFileType::CustomScreen, "" };
-    m_screen_quad = std::make_shared<RenderMeshData>(RenderMeshDataID(-1, -1), m_screen_quad_sub_mesh);
-
     m_render_source_data = std::make_shared<RenderSourceData>();
 
     m_forward_path = std::make_shared<ForwardRenderPath>();
     m_forward_path->prepareRhi(m_rhi);
     m_forward_path->init();
-    m_forward_path->prepareScreenQuadData(m_screen_quad);
     m_forward_path->prepareRenderSourceData(m_render_source_data);
 
     m_deferred_path = std::make_shared<DeferredRenderPath>();
     m_deferred_path->prepareRhi(m_rhi);
     m_deferred_path->init();
-    m_deferred_path->prepareScreenQuadData(m_screen_quad);
     m_deferred_path->prepareRenderSourceData(m_render_source_data);
 
     m_ray_tracing_path = std::make_shared<RayTracingRenderPath>();
     m_ray_tracing_path->prepareRhi(m_rhi);
     m_ray_tracing_path->init();
-    m_ray_tracing_path->prepareScreenQuadData(m_screen_quad);
     m_ray_tracing_path->prepareRenderSourceData(m_render_source_data);
 
-    setRenderPathType(RenderPath::Type::Deferred);
+    setRenderPathType(RenderPathType::Deferred);
 
 #if ENABLE_ECS
     connect(&(ecs::World::get()), &ecs::World::get().componentInserted, this, &RenderSystem::onComponentInserted);
@@ -49,24 +44,24 @@ void RenderSystem::init()
 #endif
 }
 
-RenderPath::Type RenderSystem::getRenderPathType()
+RenderPathType RenderSystem::getRenderPathType()
 {
     return m_path_type;
 }
 
-void RenderSystem::setRenderPathType(RenderPath::Type type)
+void RenderSystem::setRenderPathType(RenderPathType type)
 {
     m_path_type = type;
 
     switch (m_path_type)
     {
-    case RenderPath::Type::Forward:
+    case RenderPathType::Forward:
         m_curr_path = m_forward_path;
         break;
-    case RenderPath::Type::Deferred:
+    case RenderPathType::Deferred:
         m_curr_path = m_deferred_path;
         break;
-    case RenderPath::Type::RayTracing:
+    case RenderPathType::RayTracing:
         m_curr_path = m_ray_tracing_path;
         break;
     default:
@@ -76,7 +71,7 @@ void RenderSystem::setRenderPathType(RenderPath::Type type)
 
 RenderParams& RenderSystem::renderParams()
 {
-    return m_curr_path->m_render_params;
+    return m_render_params;
 }
 
 void RenderSystem::onUpdate()
@@ -86,44 +81,14 @@ void RenderSystem::onUpdate()
     m_curr_path->render();
 }
 
-unsigned int RenderSystem::getSceneTexture()
-{
-    return m_curr_path->getSceneTexture();
-}
-
-unsigned int RenderSystem::getPickingTexture()
-{
-    return m_curr_path->getPickingTexture();
-}
-
 unsigned int RenderSystem::getPickingFBO()
 {
     return m_curr_path->getPickingFBO();
 }
 
-unsigned int RenderSystem::getShadowTexture()
+unsigned int RenderSystem::renderPassTexture(RenderPass::Type render_pass_type)
 {
-    return m_curr_path->getShadowTexture();
-}
-
-unsigned int RenderSystem::getGBufferTexture()
-{
-    return m_curr_path->getGBufferTexture();
-}
-
-unsigned int RenderSystem::getLightingTexture()
-{
-    return m_curr_path->getLightingTexture();
-}
-
-unsigned int RenderSystem::getBrightTexture()
-{
-    return m_curr_path->getBrightTexture();
-}
-
-unsigned int RenderSystem::getBlurredTexture()
-{
-    return m_curr_path->getBlurredTexture();
+    return m_curr_path->renderPassTexture(render_pass_type)->id();
 }
 
 #if ENABLE_ECS
@@ -313,6 +278,12 @@ void RenderSystem::updateRenderSourceData()
 void RenderSystem::updateRenderSourceData()
 {
     auto& scene = *GetApp().scene();
+    if (!m_initialized) {
+        Asset::SubMesh m_screen_quad_sub_mesh;
+        m_screen_quad_sub_mesh.mesh_file_ref = { Asset::MeshFileType::CustomScreen, "" };
+        m_render_source_data->screen_quad = std::make_shared<RenderMeshData>(RenderMeshDataID(-1, -1), m_screen_quad_sub_mesh);
+    }
+
     if (!m_initialized) {
         const auto& dir_light = scene.getLightManager()->mainDirectionalLight();
         m_render_source_data->render_directional_light_data_list.emplace_back(

@@ -2,7 +2,7 @@
 #include "ImGuiToolbar.hpp"
 #include <imgui.h>
 #include <imgui_internal.h>
-#include "Engine.hpp"
+#include "EngineAPI.hpp"
 
 #if ENABLE_ECS
 #include "Logical/FrameWork/ECS/World.hpp"
@@ -24,7 +24,7 @@ void MainCanvas::render()
         ImVec2 window_size = ImGui::GetWindowSize();
         ImVec2 content_size = ImGui::GetContentRegionAvail();
         ImVec2 content_pos = ImVec2(ImGui::GetWindowContentRegionMin().x + window_pos.x, ImGui::GetWindowContentRegionMin().y + window_pos.y);
-        ImTextureID scene_tex_id = (ImTextureID)GetApp().renderSystem()->getSceneTexture();
+        ImTextureID scene_tex_id = (ImTextureID)GetApp().renderSystem()->renderPassTexture(RenderPass::Type::Combined);
         auto cursor_pos = ImGui::GetCursorPos();
         ImGui::Image(scene_tex_id, content_size, ImVec2(0, 1), ImVec2(1, 0)); // https://github.com/ocornut/imgui/wiki/Image-Loading-and-Displaying-Examples#about-texture-coordinates
         ImGuiIO& io = ImGui::GetIO();
@@ -45,7 +45,7 @@ void PickingCanvas::render()
         ImVec2 window_pos = ImGui::GetWindowPos();
         ImVec2 window_size = ImGui::GetWindowSize();
         ImVec2 content_size = ImGui::GetContentRegionAvail();
-        ImTextureID picking_tex_id = (ImTextureID)GetApp().renderSystem()->getPickingTexture();
+        ImTextureID picking_tex_id = (ImTextureID)GetApp().renderSystem()->renderPassTexture(RenderPass::Type::Picking);
         ImGui::Image(picking_tex_id, content_size, ImVec2(0, 1), ImVec2(1, 0));
         setViewPort({(int)window_pos.x, (int)window_pos.y, (int)window_size.x, (int)window_size.y});
     }
@@ -60,7 +60,7 @@ void ShadowCanvas::render()
         ImVec2 window_pos = ImGui::GetWindowPos();
         ImVec2 window_size = ImGui::GetWindowSize();
         ImVec2 content_size = ImGui::GetContentRegionAvail();
-        ImTextureID shadow_tex_id = (ImTextureID)GetApp().renderSystem()->getShadowTexture();
+        ImTextureID shadow_tex_id = (ImTextureID)GetApp().renderSystem()->renderPassTexture(RenderPass::Type::Shadow);
         ImGui::Image(shadow_tex_id, content_size, ImVec2(0, 1), ImVec2(1, 0));
         setViewPort({ (int)window_pos.x, (int)window_pos.y, (int)window_size.x, (int)window_size.y});
     }
@@ -76,7 +76,7 @@ void GBufferCanvas::render()
         ImVec2 window_size = ImGui::GetWindowSize();
         ImVec2 content_pos = ImGui::GetWindowContentRegionMin();
         ImVec2 content_size = ImGui::GetContentRegionAvail();
-        unsigned int begin_tex_id = GetApp().renderSystem()->getGBufferTexture();
+        unsigned int begin_tex_id = GetApp().renderSystem()->renderPassTexture(RenderPass::Type::GBuffer);
         for (int i = 0; i < 4; ++i) {
             int row = i / 2;
             int col = i % 2;
@@ -99,7 +99,7 @@ void LightingCanvas::render()
         ImVec2 window_pos = ImGui::GetWindowPos();
         ImVec2 window_size = ImGui::GetWindowSize();
         ImVec2 content_size = ImGui::GetContentRegionAvail();
-        ImTextureID tex_id = (ImTextureID)GetApp().renderSystem()->getLightingTexture();
+        ImTextureID tex_id = (ImTextureID)GetApp().renderSystem()->renderPassTexture(RenderPass::Type::DeferredLighting);
         ImGui::Image(tex_id, content_size, ImVec2(0, 1), ImVec2(1, 0));
         setViewPort({ (int)window_pos.x, (int)window_pos.y, (int)window_size.x, (int)window_size.y });
     }
@@ -114,7 +114,7 @@ void BrightCanvas::render()
         ImVec2 window_pos = ImGui::GetWindowPos();
         ImVec2 window_size = ImGui::GetWindowSize();
         ImVec2 content_size = ImGui::GetContentRegionAvail();
-        ImTextureID tex_id = (ImTextureID)(GetApp().renderSystem()->getBrightTexture());
+        ImTextureID tex_id = (ImTextureID)(GetApp().renderSystem()->renderPassTexture(RenderPass::Type::Bloom));
         ImGui::Image(tex_id, content_size, ImVec2(0, 1), ImVec2(1, 0));
         setViewPort({ (int)window_pos.x, (int)window_pos.y, (int)window_size.x, (int)window_size.y });
     }
@@ -129,7 +129,7 @@ void BlurredCanvas::render()
         ImVec2 window_pos = ImGui::GetWindowPos();
         ImVec2 window_size = ImGui::GetWindowSize();
         ImVec2 content_size = ImGui::GetContentRegionAvail();
-        ImTextureID tex_id = (ImTextureID)GetApp().renderSystem()->getBlurredTexture();
+        ImTextureID tex_id = (ImTextureID)GetApp().renderSystem()->renderPassTexture(RenderPass::Type::Bloom);
         ImGui::Image(tex_id, content_size, ImVec2(0, 1), ImVec2(1, 0));
         setViewPort({ (int)window_pos.x, (int)window_pos.y, (int)window_size.x, (int)window_size.y });
     }

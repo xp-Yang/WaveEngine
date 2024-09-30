@@ -1,5 +1,10 @@
 #include "PickingPass.hpp"
 
+PickingPass::PickingPass()
+{
+    m_type = RenderPass::Type::Picking;
+}
+
 void PickingPass::init()
 {
     RhiTexture* color_texture = m_rhi->newTexture(RhiTexture::Format::RGB16F, Vec2(DEFAULT_RENDER_RESOLUTION_X, DEFAULT_RENDER_RESOLUTION_Y));

@@ -1,6 +1,11 @@
-#include "LightingPass.hpp"
+#include "DeferredLightingPass.hpp"
 
-void LightingPass::init()
+DeferredLightingPass::DeferredLightingPass()
+{
+	m_type = RenderPass::Type::DeferredLighting;
+}
+
+void DeferredLightingPass::init()
 {
 	RhiTexture* color_texture = m_rhi->newTexture(RhiTexture::Format::RGB16F, Vec2(DEFAULT_RENDER_RESOLUTION_X, DEFAULT_RENDER_RESOLUTION_Y));
 	RhiTexture* depth_texture = m_rhi->newTexture(RhiTexture::Format::DEPTH, Vec2(DEFAULT_RENDER_RESOLUTION_X, DEFAULT_RENDER_RESOLUTION_Y));
@@ -14,7 +19,7 @@ void LightingPass::init()
 	m_framebuffer = std::unique_ptr<RhiFrameBuffer>(fb);
 }
 
-void LightingPass::draw()
+void DeferredLightingPass::draw()
 {
 	m_framebuffer->bind();
 	m_framebuffer->clear();
@@ -60,7 +65,7 @@ void LightingPass::draw()
 		point_light_idx++;
 	}
 	lighting_shader->setInt("point_lights_size", m_render_source_data->render_point_light_data_list.size());
-	m_rhi->drawIndexed(m_screen_quad->getVAO(), m_screen_quad->indicesCount());
+	m_rhi->drawIndexed(m_render_source_data->screen_quad->getVAO(), m_render_source_data->screen_quad->indicesCount());
 	lighting_shader->stop_using();
 
 
@@ -105,12 +110,12 @@ void LightingPass::draw()
 	m_framebuffer->unBind();
 }
 
-void LightingPass::enableSkybox(bool enable)
+void DeferredLightingPass::enableSkybox(bool enable)
 {
 	m_skybox = enable;
 }
 
-void LightingPass::enablePBR(bool enable)
+void DeferredLightingPass::enablePBR(bool enable)
 {
 	m_pbr = enable;
 }

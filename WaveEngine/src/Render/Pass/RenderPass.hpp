@@ -2,8 +2,12 @@
 #define RenderPass_hpp
 
 #include "Render/RenderSourceData.hpp"
-#include "Engine.hpp"
 #include "Render/RHI/rhi.hpp"
+
+static inline constexpr float DEFAULT_RENDER_RESOLUTION_X = 1920.0f;
+static inline constexpr float DEFAULT_RENDER_RESOLUTION_Y = 1080.0f;
+static inline constexpr float DEFAULT_WINDOW_WIDTH = 1920.0f;
+static inline constexpr float DEFAULT_WINDOW_HEIGHT = 1080.0f;
 
 // Interface class
 // each RenderPass corresponds to a framebuffer
@@ -13,29 +17,44 @@
 // a graphics-pipeline need shader program and vertices to execute
 class RenderPass {
 public:
+	enum class Type {
+		Picking,
+		Shadow,
+		GBuffer,
+		DeferredLighting,
+
+		// post process
+		Bloom,
+		Outline,
+		Combined,
+
+		WireFrame,
+		CheckerBoard,
+		Normal,
+	};
+
 	RenderPass() = default;
 	RenderPass(const RenderPass&) = delete;
 	RenderPass& operator=(const RenderPass&) = delete;
 	virtual ~RenderPass() = default;
 	virtual void init() = 0;
-	void prepareRhi(const std::shared_ptr<Rhi>& rhi) { m_rhi = rhi; }
-	void prepareRenderSourceData(const std::shared_ptr<RenderSourceData>& render_source_data) { m_render_source_data = render_source_data; }
-	void prepareScreenQuadData(const std::shared_ptr<RenderMeshData>& screen_quad_data) { m_screen_quad = screen_quad_data; }
-	void setInputPasses(const std::vector<RenderPass*>& input_passes) { m_input_passes = input_passes; }
-	RhiFrameBuffer* getFrameBuffer() const { return m_framebuffer.get(); };
 	virtual void draw() = 0;
 	virtual void clear() {
 		m_framebuffer->bind();
 		m_framebuffer->clear();
 	};
+	void prepareRhi(const std::shared_ptr<Rhi>& rhi) { m_rhi = rhi; }
+	void prepareRenderSourceData(const std::shared_ptr<RenderSourceData>& render_source_data) { m_render_source_data = render_source_data; }
+	void setInputPasses(const std::vector<RenderPass*>& input_passes) { m_input_passes = input_passes; }
+	RhiFrameBuffer* getFrameBuffer() const { return m_framebuffer.get(); };
 
 protected:
-	std::shared_ptr<RenderMeshData> m_screen_quad;
-	std::shared_ptr<RenderSourceData> m_render_source_data;
 	std::shared_ptr<Rhi> m_rhi;
+	std::shared_ptr<RenderSourceData> m_render_source_data;
 
 	std::vector<RenderPass*> m_input_passes;
 	std::unique_ptr<RhiFrameBuffer> m_framebuffer;
+	Type m_type;
 };
 
 #endif // !RenderPass_hpp

@@ -5,6 +5,7 @@
 
 class GBufferPass : public RenderPass {
 public:
+    GBufferPass();
     void init() override;
     void draw() override;
 };

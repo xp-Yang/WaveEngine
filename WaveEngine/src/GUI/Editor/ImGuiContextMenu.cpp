@@ -2,8 +2,6 @@
 
 #include <imgui.h>
 
-#include <Engine.hpp>
-
 void ImGuiContextMenu::render()
 {
     if (m_menu_opened)

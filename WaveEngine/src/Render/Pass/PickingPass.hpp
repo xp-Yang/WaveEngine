@@ -5,6 +5,7 @@
 
 class PickingPass : public RenderPass {
 public:
+    PickingPass();
     void init() override;
     void draw() override;
 

@@ -1,6 +1,6 @@
 #include "ImGuiInput.hpp"
 #include <imgui.h>
-#include "Engine.hpp"
+#include "EngineAPI.hpp"
 #include "Logical/Input/PickingSolver.hpp"
 
 void GUIInput::init()

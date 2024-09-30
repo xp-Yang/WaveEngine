@@ -1,18 +1,17 @@
-#ifndef EdgeDetectionPass_hpp
-#define EdgeDetectionPass_hpp
+#ifndef OutlinePass_hpp
+#define OutlinePass_hpp
 
 #include "RenderPass.hpp"
 
-class EdgeDetectionPass : public RenderPass
+class OutlinePass : public RenderPass
 {
 public:
-	EdgeDetectionPass();
+	OutlinePass();
 	void init() override;
 	void draw() override;
 
 protected:
 	std::unique_ptr<RhiFrameBuffer> m_source_framebuffer;
-	unsigned int m_source_map;
 };
 
 #endif

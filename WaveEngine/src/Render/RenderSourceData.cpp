@@ -1,7 +1,7 @@
 #include "RenderSourceData.hpp"
 #include "Render/RHI/rhi.hpp"
 #include "stb_image.h"
-#include "Engine.hpp"
+#include "EngineAPI.hpp"
 
 RenderMeshData::RenderMeshData(const RenderMeshDataID& id, const Asset::SubMesh& sub_mesh_asset, const Mat4& model_transform)
     : m_id(id)
@@ -185,4 +185,11 @@ RenderTextureData::RenderTextureData(const Asset::CubeTexture& cube_texture_asse
     //glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
 
     //map = textureID;
+}
+
+RenderTextureData& RenderTextureData::defaultTexture()
+{
+    static Asset::Texture diffuse_texture(Asset::TextureType::Custom, std::string(RESOURCE_DIR) + "/images/default_map.png", false);
+    static RenderTextureData texture(diffuse_texture);
+    return texture;
 }

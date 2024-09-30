@@ -43,7 +43,7 @@ void RayTracingPass::draw()
 		// random
 		rt_shader->setFloat("randOrigin", 674764.0f * (Math::randomUnit() + 1.0f));
 		// render to m_framebuffer
-		m_rhi->drawIndexed(m_screen_quad->getVAO(), m_screen_quad->indicesCount());
+		m_rhi->drawIndexed(m_render_source_data->screen_quad->getVAO(), m_render_source_data->screen_quad->indicesCount());
 	}
 
 	m_framebuffer->unBind();

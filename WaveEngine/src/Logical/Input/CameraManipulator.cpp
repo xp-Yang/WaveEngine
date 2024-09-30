@@ -1,6 +1,6 @@
 #include "CameraManipulator.hpp"
 
-#include "Engine.hpp"
+#include "EngineAPI.hpp"
 
 #if ENABLE_ECS
 #include "Logical/Framework/ECS/Components.hpp"

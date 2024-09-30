@@ -18,11 +18,11 @@ enum class ShaderType {
 	WireframeShader,
 	CheckerboardShader,
 	RayTracingShader,
-	QuadShader,
+	CombineShader,
 	CubeMapShader,
 	ExtractBrightShader,
 	GaussianBlur,
-	EdgeDetection,
+	OutlineShader,
 	InstancingShader,
 };
 

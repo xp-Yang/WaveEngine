@@ -2,6 +2,7 @@
 
 CheckerBoardPass::CheckerBoardPass()
 {
+    m_type = RenderPass::Type::CheckerBoard;
 }
 
 void CheckerBoardPass::init()

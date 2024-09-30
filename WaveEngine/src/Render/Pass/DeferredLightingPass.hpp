@@ -1,10 +1,11 @@
-#ifndef LightingPass_hpp
-#define LightingPass_hpp
+#ifndef DeferredLightingPass_hpp
+#define DeferredLightingPass_hpp
 
 #include "RenderPass.hpp"
 
-class LightingPass : public RenderPass {
+class DeferredLightingPass : public RenderPass {
 public:
+    DeferredLightingPass();
     void init() override;
     void draw() override;
     void enableSkybox(bool enable);

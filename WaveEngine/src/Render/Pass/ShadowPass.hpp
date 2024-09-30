@@ -5,6 +5,7 @@
 
 class ShadowPass : public RenderPass {
 public:
+    ShadowPass();
     void init() override;
     void configSamples(int samples);
     void draw() override;

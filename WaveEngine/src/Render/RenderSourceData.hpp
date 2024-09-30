@@ -13,6 +13,8 @@ struct RenderTextureData {
     RenderTextureData(const Asset::CubeTexture& cube_texture_asset);
 
     GL_RESOURCE_HANLE id;
+
+    static RenderTextureData& defaultTexture();
 };
 
 struct RenderMaterialData {
@@ -116,6 +118,7 @@ struct RenderSourceData {
     std::shared_ptr<RenderMeshData> render_point_light_inst_mesh;
     int point_light_inst_amount;
     RenderSkyboxData render_skybox_data;
+    std::shared_ptr<RenderMeshData> screen_quad;
 
     std::vector<GObjectID> picked_ids;
 

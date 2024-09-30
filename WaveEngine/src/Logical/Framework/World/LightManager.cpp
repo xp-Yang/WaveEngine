@@ -23,7 +23,7 @@ void LightManager::addPointLight()
 void LightManager::addDirectionalLight()
 {
 	std::shared_ptr<DirectionalLight> dir_light = std::make_shared<DirectionalLight>();
-	dir_light->luminousColor = Color4(3.0f);
+	dir_light->luminousColor = Color4(1.0f);
 	dir_light->direction = { 15.0f, -30.0f, 15.0f };
 	m_lights.push_back(dir_light);
 }

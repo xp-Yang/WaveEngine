@@ -1,7 +1,7 @@
 #ifndef FileDialog_hpp
 #define FileDialog_hpp
 
-#include <Engine.hpp>
+#include <string>
 
 class FileDialog
 {
