@@ -10,10 +10,12 @@ enum class ToolbarType : int {
     Scale,
 };
 
+class Scene;
 class ImGuiCanvas;
 class ImGuiToolbar {
 public:
     ImGuiToolbar(ImGuiCanvas* parent);
+    void init(std::shared_ptr<Scene> scene);
     void render();
 
 protected:
@@ -25,6 +27,8 @@ protected:
     unsigned int m_tranlate_icon_id{ 0 };
     unsigned int m_rotate_icon_id{ 0 };
     unsigned int m_scale_icon_id{ 0 };
+
+    std::shared_ptr<Scene> ref_scene;
 };
 
 #endif

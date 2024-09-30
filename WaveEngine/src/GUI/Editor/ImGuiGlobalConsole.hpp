@@ -1,14 +1,16 @@
 #ifndef ImGuiGlobalConsole_hpp
 #define ImGuiGlobalConsole_hpp
 
-class RenderSystem;
+#include "Core/Common.hpp"
+
+class ImGuiEditor;
 class ImGuiGlobalConsole {
 public:
-	ImGuiGlobalConsole();
+	ImGuiGlobalConsole(ImGuiEditor* parent) : m_parent(parent) {}
 	void render();
 
 private:
-	RenderSystem* m_ref_render_system;
+	ImGuiEditor* m_parent;
 };
 
 #endif

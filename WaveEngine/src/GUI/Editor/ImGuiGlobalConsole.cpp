@@ -3,12 +3,8 @@
 #include <imgui.h>
 #include <imgui_internal.h>
 
-#include "EngineAPI.hpp"
-
-ImGuiGlobalConsole::ImGuiGlobalConsole()
-    : m_ref_render_system(GetApp().renderSystem())
-{
-}
+#include "ImGuiEditor.hpp"
+#include "Render/RenderSystem.hpp"
 
 void ImGuiGlobalConsole::render() {
     ImGui::Begin("Console", nullptr, ImGuiWindowFlags_NoCollapse);
@@ -20,18 +16,18 @@ void ImGuiGlobalConsole::render() {
         ImGui::Dummy(dummy);
     };
 
-    auto& render_params = m_ref_render_system->renderParams();
+    auto& render_params = m_parent->ref_render_system->renderParams();
 
     ImGui::Dummy(dummy);
     ImGui::PushItemWidth(150.0f);
-    int path_type_option = (int)m_ref_render_system->getRenderPathType();
+    int path_type_option = (int)m_parent->ref_render_system->getRenderPathType();
     std::array<std::string, 3> combo_strs = { "Forward", "Deferred", "RayTracing" };
     ImGui::Text("Choose Render Path:");
     if (ImGui::BeginCombo("##Render Path", combo_strs[path_type_option].c_str())) {
         for (int i = 0; i < combo_strs.size(); i++) {
             bool selected = path_type_option == i;
             if (ImGui::Selectable(combo_strs[i].c_str(), selected)) {
-                m_ref_render_system->setRenderPathType(RenderPathType(i));
+                m_parent->ref_render_system->setRenderPathType(RenderPathType(i));
             }
         }
         ImGui::EndCombo();
@@ -69,7 +65,7 @@ void ImGuiGlobalConsole::render() {
     separator();
 
     ImGui::Text("Params:");
-    if (m_ref_render_system->getRenderPathType() == RenderPathType::Forward) {
+    if (m_parent->ref_render_system->getRenderPathType() == RenderPathType::Forward) {
         ImGui::PushItemWidth(50.0f);
         static unsigned int curr_item = 1;
         if (ImGui::BeginCombo("MSAA", (std::to_string((int)std::pow(4, curr_item)) + "x").c_str())) {
@@ -109,7 +105,7 @@ void ImGuiGlobalConsole::render() {
 
     // TODO Add/Delete point light
     //ImGui::Text("Add/Delete point light:");
-    //auto scene_hierarchy = GetApp().scene();
+    //auto scene_hierarchy = scene();
     //int point_light_count = scene_hierarchy->pointLightCount();
     //float spacing = ImGui::GetStyle().ItemInnerSpacing.x;
     //ImGui::PushButtonRepeat(true);

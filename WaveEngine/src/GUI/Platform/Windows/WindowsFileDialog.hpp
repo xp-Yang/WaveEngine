@@ -5,6 +5,8 @@
 
 class WindowsFileDialog : public FileDialog {
 public:
+	WindowsFileDialog(Window* window) : FileDialog(window) {}
+
 	std::string OpenFile(const char* filter) override;
 	std::string SaveFile(const char* filter) override;
 };

@@ -1,12 +1,11 @@
 #include "WindowsFileDialog.hpp"
 
+#include "GUI/Window.hpp"
 #include <GLFW/glfw3.h>
 #define GLFW_EXPOSE_NATIVE_WIN32
 #include <GLFW/glfw3native.h>
 
 #include <commdlg.h> // Windows SDK
-
-#include "EngineAPI.hpp"
 
 std::string WindowsFileDialog::OpenFile(const char* filter)
 {
@@ -15,7 +14,7 @@ std::string WindowsFileDialog::OpenFile(const char* filter)
 	CHAR szFile[260] = { 0 };
 	ZeroMemory(&ofn, sizeof(OPENFILENAME));
 	ofn.lStructSize = sizeof(OPENFILENAME);
-	ofn.hwndOwner = glfwGetWin32Window((GLFWwindow*)GetApp().window()->getNativeWindowHandle());
+	ofn.hwndOwner = glfwGetWin32Window((GLFWwindow*)(m_window->getNativeWindowHandle()));
 	ofn.lpstrFile = szFile;
 	ofn.nMaxFile = sizeof(szFile);
 	ofn.lpstrFilter = filter;
@@ -35,7 +34,7 @@ std::string WindowsFileDialog::SaveFile(const char* filter)
 	CHAR szFile[260] = { 0 };
 	ZeroMemory(&ofn, sizeof(OPENFILENAME));
 	ofn.lStructSize = sizeof(OPENFILENAME);
-	ofn.hwndOwner = glfwGetWin32Window((GLFWwindow*)GetApp().window()->getNativeWindowHandle());
+	ofn.hwndOwner = glfwGetWin32Window((GLFWwindow*)(m_window->getNativeWindowHandle()));
 	ofn.lpstrFile = szFile;
 	ofn.nMaxFile = sizeof(szFile);
 	ofn.lpstrFilter = filter;

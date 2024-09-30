@@ -5,9 +5,10 @@
 #include "Core/Common.hpp"
 #include "Logical/Input/CameraManipulator.hpp"
 
+class ImGuiEditor;
 class GUIInput {
 public:
-	void init();
+	void init(std::shared_ptr<ImGuiEditor> editor);
 	bool onUpdate();
 
 protected:
@@ -30,6 +31,8 @@ protected:
 	float m_frame_time;
 
 	std::shared_ptr<CameraManipulator> m_camera_manipulator;
+
+	std::shared_ptr<ImGuiEditor> ref_editor;
 };
 
 #endif

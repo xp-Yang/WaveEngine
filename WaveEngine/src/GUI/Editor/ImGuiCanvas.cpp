@@ -1,18 +1,25 @@
 #include "ImGuiCanvas.hpp"
 #include "ImGuiToolbar.hpp"
+#include "ImGuiEditor.hpp"
 #include <imgui.h>
 #include <imgui_internal.h>
-#include "EngineAPI.hpp"
 
 #if ENABLE_ECS
 #include "Logical/FrameWork/ECS/World.hpp"
 #include "Logical/FrameWork/ECS/Components.hpp"
 #endif
 
+#include "Render/RenderSystem.hpp"
+#include "Logical/Framework/Scene.hpp"
+
 void MainCanvas::render()
 {
-    if (!m_toolbar)
+    auto render_system = m_parent->ref_render_system;
+    if (!m_toolbar) {
+        auto scene = m_parent->ref_scene;
         m_toolbar = new ImGuiToolbar(this);
+        m_toolbar->init(scene);
+    }
 
     static ImGuiWindowFlags window_flags = 0;
     ImGui::SetNextWindowSize(ImVec2(1280, 720), ImGuiCond_Appearing);
@@ -24,7 +31,7 @@ void MainCanvas::render()
         ImVec2 window_size = ImGui::GetWindowSize();
         ImVec2 content_size = ImGui::GetContentRegionAvail();
         ImVec2 content_pos = ImVec2(ImGui::GetWindowContentRegionMin().x + window_pos.x, ImGui::GetWindowContentRegionMin().y + window_pos.y);
-        ImTextureID scene_tex_id = (ImTextureID)GetApp().renderSystem()->renderPassTexture(RenderPass::Type::Combined);
+        ImTextureID scene_tex_id = (ImTextureID)render_system->renderPassTexture(RenderPass::Type::Combined);
         auto cursor_pos = ImGui::GetCursorPos();
         ImGui::Image(scene_tex_id, content_size, ImVec2(0, 1), ImVec2(1, 0)); // https://github.com/ocornut/imgui/wiki/Image-Loading-and-Displaying-Examples#about-texture-coordinates
         ImGuiIO& io = ImGui::GetIO();
@@ -39,13 +46,14 @@ void MainCanvas::render()
 
 void PickingCanvas::render()
 {
+    auto render_system = m_parent->ref_render_system;
     ImGui::SetNextWindowSize(ImVec2(1280, 720), ImGuiCond_Appearing);
     if (ImGui::Begin("PickingCanvas", nullptr, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoBackground)) {
         ImGuiWindow* window = ImGui::GetCurrentWindow();
         ImVec2 window_pos = ImGui::GetWindowPos();
         ImVec2 window_size = ImGui::GetWindowSize();
         ImVec2 content_size = ImGui::GetContentRegionAvail();
-        ImTextureID picking_tex_id = (ImTextureID)GetApp().renderSystem()->renderPassTexture(RenderPass::Type::Picking);
+        ImTextureID picking_tex_id = (ImTextureID)render_system->renderPassTexture(RenderPass::Type::Picking);
         ImGui::Image(picking_tex_id, content_size, ImVec2(0, 1), ImVec2(1, 0));
         setViewPort({(int)window_pos.x, (int)window_pos.y, (int)window_size.x, (int)window_size.y});
     }
@@ -54,13 +62,14 @@ void PickingCanvas::render()
 
 void ShadowCanvas::render()
 {
+    auto render_system = m_parent->ref_render_system;
     ImGui::SetNextWindowSize(ImVec2(1280, 720), ImGuiCond_Appearing);
     if (ImGui::Begin("ShadowCanvas", nullptr, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoBackground)) {
         ImGuiWindow* window = ImGui::GetCurrentWindow();
         ImVec2 window_pos = ImGui::GetWindowPos();
         ImVec2 window_size = ImGui::GetWindowSize();
         ImVec2 content_size = ImGui::GetContentRegionAvail();
-        ImTextureID shadow_tex_id = (ImTextureID)GetApp().renderSystem()->renderPassTexture(RenderPass::Type::Shadow);
+        ImTextureID shadow_tex_id = (ImTextureID)render_system->renderPassTexture(RenderPass::Type::Shadow);
         ImGui::Image(shadow_tex_id, content_size, ImVec2(0, 1), ImVec2(1, 0));
         setViewPort({ (int)window_pos.x, (int)window_pos.y, (int)window_size.x, (int)window_size.y});
     }
@@ -69,6 +78,7 @@ void ShadowCanvas::render()
 
 void GBufferCanvas::render()
 {
+    auto render_system = m_parent->ref_render_system;
     ImGui::SetNextWindowSize(ImVec2(1280, 720), ImGuiCond_Appearing);
     if (ImGui::Begin("GBufferCanvas", nullptr, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoBackground)) {
         ImGuiWindow* window = ImGui::GetCurrentWindow();
@@ -76,7 +86,7 @@ void GBufferCanvas::render()
         ImVec2 window_size = ImGui::GetWindowSize();
         ImVec2 content_pos = ImGui::GetWindowContentRegionMin();
         ImVec2 content_size = ImGui::GetContentRegionAvail();
-        unsigned int begin_tex_id = GetApp().renderSystem()->renderPassTexture(RenderPass::Type::GBuffer);
+        unsigned int begin_tex_id = render_system->renderPassTexture(RenderPass::Type::GBuffer);
         for (int i = 0; i < 4; ++i) {
             int row = i / 2;
             int col = i % 2;
@@ -93,13 +103,14 @@ void GBufferCanvas::render()
 
 void LightingCanvas::render()
 {
+    auto render_system = m_parent->ref_render_system;
     ImGui::SetNextWindowSize(ImVec2(1280, 720), ImGuiCond_Appearing);
     if (ImGui::Begin("LightingCanvas", nullptr, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoBackground)) {
         ImGuiWindow* window = ImGui::GetCurrentWindow();
         ImVec2 window_pos = ImGui::GetWindowPos();
         ImVec2 window_size = ImGui::GetWindowSize();
         ImVec2 content_size = ImGui::GetContentRegionAvail();
-        ImTextureID tex_id = (ImTextureID)GetApp().renderSystem()->renderPassTexture(RenderPass::Type::DeferredLighting);
+        ImTextureID tex_id = (ImTextureID)render_system->renderPassTexture(RenderPass::Type::DeferredLighting);
         ImGui::Image(tex_id, content_size, ImVec2(0, 1), ImVec2(1, 0));
         setViewPort({ (int)window_pos.x, (int)window_pos.y, (int)window_size.x, (int)window_size.y });
     }
@@ -108,13 +119,14 @@ void LightingCanvas::render()
 
 void BrightCanvas::render()
 {
+    auto render_system = m_parent->ref_render_system;
     ImGui::SetNextWindowSize(ImVec2(1280, 720), ImGuiCond_Appearing);
     if (ImGui::Begin("BrightCanvas", nullptr, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoBackground)) {
         ImGuiWindow* window = ImGui::GetCurrentWindow();
         ImVec2 window_pos = ImGui::GetWindowPos();
         ImVec2 window_size = ImGui::GetWindowSize();
         ImVec2 content_size = ImGui::GetContentRegionAvail();
-        ImTextureID tex_id = (ImTextureID)(GetApp().renderSystem()->renderPassTexture(RenderPass::Type::Bloom));
+        ImTextureID tex_id = (ImTextureID)(render_system->renderPassTexture(RenderPass::Type::Bloom));
         ImGui::Image(tex_id, content_size, ImVec2(0, 1), ImVec2(1, 0));
         setViewPort({ (int)window_pos.x, (int)window_pos.y, (int)window_size.x, (int)window_size.y });
     }
@@ -123,13 +135,14 @@ void BrightCanvas::render()
 
 void BlurredCanvas::render()
 {
+    auto render_system = m_parent->ref_render_system;
     ImGui::SetNextWindowSize(ImVec2(1280, 720), ImGuiCond_Appearing);
     if (ImGui::Begin("BlurredCanvas", nullptr, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoBackground)) {
         ImGuiWindow* window = ImGui::GetCurrentWindow();
         ImVec2 window_pos = ImGui::GetWindowPos();
         ImVec2 window_size = ImGui::GetWindowSize();
         ImVec2 content_size = ImGui::GetContentRegionAvail();
-        ImTextureID tex_id = (ImTextureID)GetApp().renderSystem()->renderPassTexture(RenderPass::Type::Bloom);
+        ImTextureID tex_id = (ImTextureID)render_system->renderPassTexture(RenderPass::Type::Bloom);
         ImGui::Image(tex_id, content_size, ImVec2(0, 1), ImVec2(1, 0));
         setViewPort({ (int)window_pos.x, (int)window_pos.y, (int)window_size.x, (int)window_size.y });
     }

@@ -5,6 +5,7 @@
 #include "ResourceManager/AssetManager.hpp"
 #include "Logical/Framework/Object/GObject.hpp"
 #include "RenderShaderObject.hpp"
+#include "Render/RHI/rhi.hpp"
 
 using GL_RESOURCE_HANLE = unsigned int;
 
@@ -51,7 +52,6 @@ struct RenderMeshDataIDHasher {
     }
 };
 
-class RhiVertexLayout;
 class RenderMeshData {
 public:
     RenderMeshData(const RenderMeshDataID& id, const Asset::SubMesh& sub_mesh_asset, const Mat4& model_transform = Mat4(1.0f));
@@ -112,6 +112,11 @@ struct RenderCameraData {
 };
 
 struct RenderSourceData {
+    static inline std::shared_ptr<Rhi> rhi;
+    static void initRHI() {
+        rhi = std::shared_ptr<Rhi>(Rhi::create());
+    }
+
     std::unordered_map<RenderMeshDataID, std::shared_ptr<RenderMeshData>, RenderMeshDataIDHasher> render_mesh_data_hash;
     std::vector<RenderDirectionalLightData> render_directional_light_data_list;
     std::vector<RenderPointLightData> render_point_light_data_list;

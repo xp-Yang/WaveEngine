@@ -1,20 +1,19 @@
 #include "CameraManipulator.hpp"
 
-#include "EngineAPI.hpp"
-
 #if ENABLE_ECS
 #include "Logical/Framework/ECS/Components.hpp"
 #else
 #include "Logical/Framework/Scene.hpp"
 #endif
 
-CameraManipulator::CameraManipulator()
-#if ENABLE_ECS
-    : main_camera(*ecs::World::get().getMainCameraComponent())
-#else
-    : main_camera(GetApp().scene()->getMainCamera())
-#endif
+CameraManipulator::CameraManipulator(CameraComponent& camera)
+    : main_camera(camera)
 {
+}
+
+void CameraManipulator::syncContext(const Viewport& viewport)
+{
+    m_viewport = viewport;
 }
 
 void CameraManipulator::onUpdate()
@@ -23,7 +22,7 @@ void CameraManipulator::onUpdate()
         return;
     
     main_camera.fov = lerp(main_camera.fov, m_goal_fov, 0.1f);
-    float aspect_ratio = GetApp().window()->getAspectRatio();
+    float aspect_ratio = m_viewport.AspectRatio();
     main_camera.projection = Math::Perspective(main_camera.fov, aspect_ratio, main_camera.nearPlane, main_camera.farPlane);
 
     if (isApproxZero(main_camera.fov - m_goal_fov))
@@ -162,9 +161,8 @@ void CameraManipulator::onMouseWheelUpdate(double yoffset, double mouse_x, doubl
         //Logger::debug("Mouse 3d position: {},{},{}", mouse_3d_pos.x, mouse_3d_pos.y, mouse_3d_pos.z);
         //Logger::debug("\n");
 
-        auto main_viewport = GetApp().editor()->getMainViewport();
-        float viewport_width = (float)main_viewport.width;
-        float viewport_height = (float)main_viewport.height;
+        float viewport_width = (float)m_viewport.width;
+        float viewport_height = (float)m_viewport.height;
         Vec3 center_3d_pos = rayCastPlaneZero(viewport_width / 2.0f, viewport_height / 2.0f);
         Vec3 displacement = mouse_3d_pos - center_3d_pos;
 
@@ -190,7 +188,7 @@ void CameraManipulator::onMouseWheelUpdate(double yoffset, double mouse_x, doubl
 
         // 4. set view matrix, projection matrix
         main_camera.view = LookAt(main_camera.pos, main_camera.pos + main_camera.direction, main_camera.upDirection);
-        float aspect_ratio = GetApp().window()->getAspectRatio();
+        float aspect_ratio = m_viewport.AspectRatio();
         main_camera.projection = Math::Perspective(main_camera.fov, aspect_ratio, main_camera.nearPlane, main_camera.farPlane);
     }
 }
@@ -200,16 +198,15 @@ Vec3 CameraManipulator::rayCastPlaneZero(double mouse_x, double mouse_y)
 
     // 1.  get ray direction from mouse position
     Vec3 cam_right = main_camera.getRightDirection();
-    auto main_viewport = GetApp().editor()->getMainViewport();
-    float viewport_width = (float)main_viewport.width;
-    float viewport_height = (float)main_viewport.height;
+    float viewport_width = (float)m_viewport.width;
+    float viewport_height = (float)m_viewport.height;
     // normalized the x, y coordinate and take the viewport center as origin
     float u = 2.0f * mouse_x / viewport_width - 1.0f;
     float v = 2.0f * mouse_y / viewport_height - 1.0f;
     v = -v;
 
     float tangent = std::tan(main_camera.fov / 2.0f);
-    Vec3 ray_direction = main_camera.direction + cam_right * tangent * u * (main_viewport.AspectRatio()) + main_camera.upDirection * tangent * v;
+    Vec3 ray_direction = main_camera.direction + cam_right * tangent * u * (m_viewport.AspectRatio()) + main_camera.upDirection * tangent * v;
     ray_direction = Normalize(ray_direction);
     // 2.  solve the intersection equation of the ray and the plane: 
     // plane_normal. Dot(m_position + t * ray_direction - p0) = 0 

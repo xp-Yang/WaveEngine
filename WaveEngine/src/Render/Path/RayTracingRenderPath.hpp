@@ -7,7 +7,6 @@ class RayTracingRenderPath : public RenderPath {
 public:
     RayTracingRenderPath();
     void init() override;
-    void prepareRhi(const std::shared_ptr<Rhi>& rhi) override;
     void prepareRenderSourceData(const std::shared_ptr<RenderSourceData>& render_source_data) override;
     void render() override;
 

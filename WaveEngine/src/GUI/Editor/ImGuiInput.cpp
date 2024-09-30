@@ -1,18 +1,22 @@
 #include "ImGuiInput.hpp"
-#include <imgui.h>
-#include "EngineAPI.hpp"
+#include "ImGuiEditor.hpp"
 #include "Logical/Input/PickingSolver.hpp"
+#include "Logical/FrameWork/Scene.hpp"
+#include "GUI/Window.hpp"
 
-void GUIInput::init()
+#include <imgui.h>
+
+void GUIInput::init(std::shared_ptr<ImGuiEditor> editor)
 {
-	m_camera_manipulator = std::make_shared<CameraManipulator>();
+	ref_editor = editor;
+	m_camera_manipulator = std::make_shared<CameraManipulator>(ref_editor->ref_scene->getMainCamera());
 }
 
 bool GUIInput::refreshState()
 {
 	ImGuiIO& io = ImGui::GetIO();
 
-	auto main_viewport = GetApp().editor()->getMainViewport();
+	auto main_viewport = ref_editor->getMainViewport();
 	if (!(main_viewport.x <= io.MousePos.x && io.MousePos.x <= main_viewport.x + main_viewport.width &&
 		main_viewport.y <= io.MousePos.y && io.MousePos.y <= main_viewport.y + main_viewport.height))
 		return false;
@@ -66,20 +70,21 @@ bool GUIInput::refreshState()
 bool GUIInput::onUpdate()
 {
 	if (!refreshState()) {
-		GetApp().editor()->dismissMenu();
+		ref_editor->dismissMenu();
 		return false;
 	}
 
 	if (m_mouse_state == MouseState::Clicked)
-		GetApp().editor()->dismissMenu();
+		ref_editor->dismissMenu();
 
 	if (m_last_mouse_state == MouseState::Holding && m_mouse_state == MouseState::Released) {
 		PickingSolver::get().onPicking(m_mouse_x, m_mouse_y, KeysDown[Key_LeftCtrl]);
 		if (m_mouse_button == MouseButton::Right) {
-			GetApp().editor()->popUpMenu();
+			ref_editor->popUpMenu();
 		}
 	}
 
+	m_camera_manipulator->syncContext(ref_editor->getMainViewport());
 	m_camera_manipulator->onUpdate();
 
 	if (m_mouse_state == MouseState::Dragging) {
@@ -110,10 +115,10 @@ bool GUIInput::onUpdate()
 Vec2 GUIInput::mapToMainCanvasWindow(const Vec2& value)
 {
 	Vec2 pos = value;
-	auto main_viewport = GetApp().editor()->getMainViewport();
+	auto main_viewport = ref_editor->getMainViewport();
 	pos.x -= main_viewport.x;
 	pos.y -= main_viewport.y;
-	pos.x *= GetApp().window()->getWidth() / main_viewport.width;
-	pos.y *= GetApp().window()->getHeight() / main_viewport.height;
+	pos.x *= ref_editor->ref_window->getWidth() / main_viewport.width;
+	pos.y *= ref_editor->ref_window->getHeight() / main_viewport.height;
 	return pos;
 }

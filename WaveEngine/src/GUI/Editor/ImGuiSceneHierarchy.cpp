@@ -3,13 +3,8 @@
 #include <imgui.h>
 #include <imgui_internal.h>
 
+#include "ImGuiEditor.hpp"
 #include "Logical/FrameWork/Scene.hpp"
-#include "EngineAPI.hpp"
-
-ImGuiSceneHierarchy::ImGuiSceneHierarchy()
-    : m_ref_scene(GetApp().scene())
-{
-}
 
 void ImGuiSceneHierarchy::init()
 {
@@ -124,7 +119,7 @@ void ImGuiSceneHierarchy::renderNodes(const std::vector<GObject*>& nodes)
         std::string display_text = child_name + " (ID: " + std::to_string(child_id.id) + ")";
 
         ImGuiTreeNodeFlags node_flags = ImGuiTreeNodeFlags_SpanAvailWidth;
-        const auto& original_picked_ids = m_ref_scene->getPickedObjectIDs();
+        const auto& original_picked_ids = m_parent->ref_scene->getPickedObjectIDs();
         if (std::find(original_picked_ids.begin(), original_picked_ids.end(), child_id) != original_picked_ids.end())
             node_flags |= ImGuiTreeNodeFlags_Selected;
         else
@@ -132,7 +127,7 @@ void ImGuiSceneHierarchy::renderNodes(const std::vector<GObject*>& nodes)
 
         bool node_open = ImGui::TreeNodeEx((void*)(intptr_t)(i+ std::hash<std::string>()(child_name)), node_flags, display_text.c_str());
         if (ImGui::IsItemClicked() && !ImGui::IsItemToggledOpen()) {
-            m_ref_scene->onPickedChanged({ child_id }, original_picked_ids);
+            m_parent->ref_scene->onPickedChanged({ child_id }, original_picked_ids);
         }
         if (node_open)
         {
@@ -160,14 +155,14 @@ void ImGuiSceneHierarchy::renderNodes(const std::vector<Light*>& nodes)
         std::string display_text = child_name + " (ID: " + std::to_string(child_id.id) + ")";
 
         ImGuiTreeNodeFlags node_flags = ImGuiTreeNodeFlags_SpanAvailWidth;
-        if (m_ref_scene->getPickedLight() && m_ref_scene->getPickedLight()->ID()== child_id)
+        if (m_parent->ref_scene->getPickedLight() && m_parent->ref_scene->getPickedLight()->ID()== child_id)
             node_flags |= ImGuiTreeNodeFlags_Selected;
         else
             node_flags &= ~ImGuiTreeNodeFlags_Selected;
 
         bool node_open = ImGui::TreeNodeEx((void*)(intptr_t)(i + std::hash<std::string>()(child_name)), node_flags, display_text.c_str());
         if (ImGui::IsItemClicked() && !ImGui::IsItemToggledOpen()) {
-            m_ref_scene->onPickedChanged(child_id);
+            m_parent->ref_scene->onPickedChanged(child_id);
         }
         if (node_open)
         {
@@ -213,14 +208,14 @@ void ImGuiSceneHierarchy::render()
     if (ImGui::Begin(("Scene Hierarchy"), nullptr, ImGuiWindowFlags_NoCollapse)) {
         ImGuiWindow* scene_hierarchy_window = ImGui::GetCurrentWindow();
 
-        const std::vector<std::shared_ptr<Light>>& lights = m_ref_scene->getLightManager()->lights();
+        const std::vector<std::shared_ptr<Light>>& lights = m_parent->ref_scene->getLightManager()->lights();
         std::vector<Light*> light_nodes(lights.size());
         std::transform(lights.begin(), lights.end(), light_nodes.begin(), [](auto& light) {
             return light.get();
             });
         renderNodes(light_nodes);
 
-        const std::vector<std::shared_ptr<GObject>>& objects = m_ref_scene->getObjects();
+        const std::vector<std::shared_ptr<GObject>>& objects = m_parent->ref_scene->getObjects();
         std::vector<GObject*> object_nodes(objects.size());
         std::transform(objects.begin(), objects.end(), object_nodes.begin(), [](auto& object) {
             return object.get();

@@ -5,13 +5,15 @@
 #include "../Pass/PickingPass.hpp"
 #include "../Pass/CombinePass.hpp"
 
-#include "EngineAPI.hpp"
+#include "../RenderSystem.hpp"
 
-ForwardRenderPath::ForwardRenderPath() {
+ForwardRenderPath::ForwardRenderPath(RenderSystem* render_system) {
     m_picking_pass = std::make_unique<PickingPass>();
     m_shadow_pass = std::make_unique<ShadowPass>();
     m_main_camera_pass = std::make_unique<MeshForwardLightingPass>();
     m_combine_pass = std::make_unique<CombinePass>();
+
+    ref_render_system = render_system;
 }
 
 void ForwardRenderPath::init()
@@ -20,14 +22,6 @@ void ForwardRenderPath::init()
     m_shadow_pass->init();
     m_main_camera_pass->init();
     m_combine_pass->init();
-}
-
-void ForwardRenderPath::prepareRhi(const std::shared_ptr<Rhi>& rhi)
-{
-    m_picking_pass->prepareRhi(rhi);
-    m_shadow_pass->prepareRhi(rhi);
-    m_main_camera_pass->prepareRhi(rhi);
-    m_combine_pass->prepareRhi(rhi);
 }
 
 void ForwardRenderPath::prepareRenderSourceData(const std::shared_ptr<RenderSourceData>& render_source_data)
@@ -40,7 +34,7 @@ void ForwardRenderPath::prepareRenderSourceData(const std::shared_ptr<RenderSour
 
 void ForwardRenderPath::render()
 {
-    auto render_params = GetApp().renderSystem()->renderParams();
+    auto render_params = ref_render_system->renderParams();
 
     m_picking_pass->draw();
 

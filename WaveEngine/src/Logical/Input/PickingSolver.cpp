@@ -1,9 +1,9 @@
 #include "PickingSolver.hpp"
-#include "EngineAPI.hpp"
 #include "Logical/Framework/Scene.hpp"
 #include "Render/RHI/rhi.hpp"
 // TODO remove
 #include <glad/glad.h>
+#include "EngineAPI.hpp"
 
 void PickingSolver::onPicking(float mouse_x, float mouse_y, bool retain_old)
 {

@@ -3,16 +3,19 @@
 
 #include <imgui.h>
 
-#include <Engine.hpp>
+#include "Logical/Framework/Scene.hpp"
+#include "Render/RenderSystem.hpp"
+#include "ImGuiEditor.hpp"
 
-ImGuiDebugWindow::ImGuiDebugWindow()
+ImGuiDebugWindow::ImGuiDebugWindow(ImGuiEditor* parent)
+    : m_parent(parent)
 {
-    m_picking_canvas = std::make_unique<PickingCanvas>();
-    m_shadow_canvas = std::make_unique<ShadowCanvas>();
-    m_gbuffer_canvas = std::make_unique<GBufferCanvas>();
-    m_lighting_canvas = std::make_unique<LightingCanvas>();
-    m_bright_canvas = std::make_unique<BrightCanvas>();
-    m_blurred_canvas = std::make_unique<BlurredCanvas>();
+    m_picking_canvas = std::make_unique<PickingCanvas>(m_parent);
+    m_shadow_canvas = std::make_unique<ShadowCanvas>(m_parent);
+    m_gbuffer_canvas = std::make_unique<GBufferCanvas>(m_parent);
+    m_lighting_canvas = std::make_unique<LightingCanvas>(m_parent);
+    m_bright_canvas = std::make_unique<BrightCanvas>(m_parent);
+    m_blurred_canvas = std::make_unique<BlurredCanvas>(m_parent);
 }
 
 void ImGuiDebugWindow::render()
@@ -32,7 +35,7 @@ void ImGuiDebugWindow::render()
     m_blurred_canvas->render();
 
     ImGui::Begin("Main Camera Info", nullptr, ImGuiWindowFlags_NoCollapse);
-    auto& camera = GetApp().scene()->getMainCamera();
+    auto& camera = m_parent->ref_scene->getMainCamera();
     ImGui::NewLine();
     ImGui::Text("view matrix:");
     std::string test_view = Utils::mat4ToStr(camera.view);

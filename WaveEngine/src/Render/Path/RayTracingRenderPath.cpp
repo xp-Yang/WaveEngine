@@ -15,12 +15,6 @@ void RayTracingRenderPath::init()
     m_combine_pass->init();
 }
 
-void RayTracingRenderPath::prepareRhi(const std::shared_ptr<Rhi>& rhi)
-{
-    m_ray_tracing_pass->prepareRhi(rhi);
-    m_combine_pass->prepareRhi(rhi);
-}
-
 void RayTracingRenderPath::prepareRenderSourceData(const std::shared_ptr<RenderSourceData>& render_source_data)
 {
     m_ray_tracing_pass->prepareRenderSourceData(render_source_data);

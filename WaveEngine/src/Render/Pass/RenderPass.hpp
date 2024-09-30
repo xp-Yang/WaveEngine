@@ -2,7 +2,6 @@
 #define RenderPass_hpp
 
 #include "Render/RenderSourceData.hpp"
-#include "Render/RHI/rhi.hpp"
 
 static inline constexpr float DEFAULT_RENDER_RESOLUTION_X = 1920.0f;
 static inline constexpr float DEFAULT_RENDER_RESOLUTION_Y = 1080.0f;
@@ -43,8 +42,10 @@ public:
 		m_framebuffer->bind();
 		m_framebuffer->clear();
 	};
-	void prepareRhi(const std::shared_ptr<Rhi>& rhi) { m_rhi = rhi; }
-	void prepareRenderSourceData(const std::shared_ptr<RenderSourceData>& render_source_data) { m_render_source_data = render_source_data; }
+	void prepareRenderSourceData(const std::shared_ptr<RenderSourceData>& render_source_data) { 
+		m_rhi = RenderSourceData::rhi;
+		m_render_source_data = render_source_data;
+	}
 	void setInputPasses(const std::vector<RenderPass*>& input_passes) { m_input_passes = input_passes; }
 	RhiFrameBuffer* getFrameBuffer() const { return m_framebuffer.get(); };
 

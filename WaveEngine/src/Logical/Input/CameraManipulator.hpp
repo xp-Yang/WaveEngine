@@ -3,6 +3,7 @@
 
 #include "Core/Math/Math.hpp"
 #include "Logical/Input/InputEnums.hpp"
+#include "Render/RHI/Viewport.hpp"
 
 #if ENABLE_ECS
 namespace ecs {
@@ -31,7 +32,8 @@ public:
 
 	inline static Vec3 global_up = Vec3(0.0f, 1.0f, 0.0f); //vec3(0.0f, 1.0f, 0.0f) (y为上) or vec3(0.0f, 0.0f, 1.0f) (z为上)
 
-	CameraManipulator();
+	CameraManipulator(CameraComponent& camera);
+	void syncContext(const Viewport& viewport);
 	void onUpdate();
 	void onKeyUpdate(int key, float frame_time);
 	void onMouseUpdate(double delta_x, double delta_y, MouseButton mouse_button);
@@ -49,6 +51,8 @@ protected:
 #else 
 	CameraComponent& main_camera;
 #endif
+
+	Viewport m_viewport;
 
 	float m_goal_fov;
 

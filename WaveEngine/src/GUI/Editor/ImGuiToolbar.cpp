@@ -1,10 +1,11 @@
 #include "ImGuiToolbar.hpp"
 #include "ImGuiCanvas.hpp"
+#include "Logical/Framework/Scene.hpp"
 #include "Render/RenderSourceData.hpp"
+
 #include <imgui.h>
 #include <imgui_internal.h>
 #include <ImGuizmo.h>
-#include "EngineAPI.hpp"
 
 ImGuiToolbar::ImGuiToolbar(ImGuiCanvas* parent)
     : m_parent(parent)
@@ -16,6 +17,11 @@ ImGuiToolbar::ImGuiToolbar(ImGuiCanvas* parent)
     m_tranlate_icon_id = RenderTextureData(tranlate_icon).id;
     m_rotate_icon_id = RenderTextureData(rotate_icon).id;
     m_scale_icon_id = RenderTextureData(scale_icon).id;
+}
+
+void ImGuiToolbar::init(std::shared_ptr<Scene> scene)
+{
+    ref_scene = scene;
 }
 
 void ImGuiToolbar::render()
@@ -75,9 +81,9 @@ void ImGuiToolbar::renderGizmos()
     ImGuizmo::SetDrawlist();
     ImGuizmo::SetRect(main_viewport.x, main_viewport.y, main_viewport.width, main_viewport.height);
 
-    auto& camera = GetApp().scene()->getMainCamera();
+    auto& camera = ref_scene->getMainCamera();
 
-    for (const auto& object : GetApp().scene()->getPickedObjects()) {
+    for (const auto& object : ref_scene->getPickedObjects()) {
         TransformComponent* transform_component = object->getComponent<TransformComponent>();
         Mat4 model_matrix = transform_component->transform();
         ImGuizmo::Manipulate((float*)(&camera.view), (float*)(&camera.projection), imguizmo_operation, ImGuizmo::LOCAL, (float*)(&model_matrix), NULL, NULL, NULL, NULL);
@@ -87,7 +93,7 @@ void ImGuiToolbar::renderGizmos()
         transform_component->scale = Vec3(matrixScale[0], matrixScale[1], matrixScale[2]);
         transform_component->rotation = Vec3(matrixRotation[0], matrixRotation[1], matrixRotation[2]);
     }
-    Light* light = GetApp().scene()->getPickedLight().get();
+    Light* light = ref_scene->getPickedLight().get();
     if (auto point_light = dynamic_cast<PointLight*>(light)) {
         Mat4 model_matrix = Math::Translate(point_light->position);
         ImGuizmo::Manipulate((float*)(&camera.view), (float*)(&camera.projection), imguizmo_operation, ImGuizmo::LOCAL, (float*)(&model_matrix), NULL, NULL, NULL, NULL);
@@ -120,7 +126,7 @@ void ImGuiToolbar::renderGizmos()
     }
 
     if (camera) {
-        Viewport viewport = GetApp().window()->getMainViewport().value_or(Viewport());
+        Viewport viewport = getMainViewport().value_or(Viewport());
         viewport.transToScreenCoordinates();
         ImVec2 air_window_size = ImVec2(128, 128);
         float camDistance = 8.f;

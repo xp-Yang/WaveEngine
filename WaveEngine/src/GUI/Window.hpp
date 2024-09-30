@@ -2,6 +2,7 @@
 #define Window_hpp
 
 struct GLFWwindow;
+class FileDialog;
 class Window {
 public:
     Window(int width, int height);
@@ -12,6 +13,8 @@ public:
     int getWidth() const;
     int getHeight() const;
     float getAspectRatio() const;
+
+    FileDialog* createFileDialog();
 
 private:
     GLFWwindow* m_window{ nullptr };

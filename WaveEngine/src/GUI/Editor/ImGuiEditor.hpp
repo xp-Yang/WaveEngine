@@ -8,11 +8,14 @@
 #include "ImGuiGlobalConsole.hpp"
 #include "ImGuiDebugWindow.hpp"
 
+class Window;
+class RenderSystem;
+class Scene;
 class ImGuiEditor {
 public:
 	ImGuiEditor();
 	~ImGuiEditor();
-	void init();
+	void init(std::shared_ptr<Window> window, std::shared_ptr<RenderSystem> render_system, std::shared_ptr<Scene> scene);
 	void onUpdate();
 	void beginFrame();
 	void endFrame();
@@ -33,6 +36,11 @@ private:
 	std::unique_ptr<ImGuiDebugWindow> m_debug_window;
 
 	bool m_show_debug{ false };
+
+public:
+	std::shared_ptr<Window> ref_window;
+	std::shared_ptr<RenderSystem> ref_render_system;
+	std::shared_ptr<Scene> ref_scene;
 };
 
 #endif

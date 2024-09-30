@@ -6,7 +6,6 @@
 #include "World.hpp"
 #include "ResourceManager/AssetManager.hpp"
 #include "Logical/Input/CameraManipulator.hpp"
-#include "Engine.hpp"
 
 namespace ecs {
 

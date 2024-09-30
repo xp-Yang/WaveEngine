@@ -11,9 +11,9 @@
 #include "../Pass/OutlinePass.hpp"
 #include "../Pass/CombinePass.hpp"
 
-#include "EngineAPI.hpp"
+#include "../RenderSystem.hpp"
 
-DeferredRenderPath::DeferredRenderPath()
+DeferredRenderPath::DeferredRenderPath(RenderSystem* render_system)
 {
     m_picking_pass = std::make_unique<PickingPass>();
     m_wireframe_pass = std::make_unique<WireFramePass>();
@@ -25,6 +25,8 @@ DeferredRenderPath::DeferredRenderPath()
     m_bloom_pass = std::make_unique<BloomPass>();
     m_outline_pass = std::make_unique<OutlinePass>();
     m_combine_pass = std::make_unique<CombinePass>();
+
+    ref_render_system = render_system;
 }
 
 void DeferredRenderPath::init()
@@ -39,20 +41,6 @@ void DeferredRenderPath::init()
     m_bloom_pass->init();
     m_outline_pass->init();
     m_combine_pass->init();
-}
-
-void DeferredRenderPath::prepareRhi(const std::shared_ptr<Rhi>& rhi)
-{
-    m_picking_pass->prepareRhi(rhi);
-    m_wireframe_pass->prepareRhi(rhi);
-    m_checkerboard_pass->prepareRhi(rhi);
-    m_normal_pass->prepareRhi(rhi);
-    m_shadow_pass->prepareRhi(rhi);
-    m_gbuffer_pass->prepareRhi(rhi);
-    m_lighting_pass->prepareRhi(rhi);
-    m_bloom_pass->prepareRhi(rhi);
-    m_outline_pass->prepareRhi(rhi);
-    m_combine_pass->prepareRhi(rhi);
 }
 
 void DeferredRenderPath::prepareRenderSourceData(const std::shared_ptr<RenderSourceData>& render_source_data)
@@ -71,7 +59,7 @@ void DeferredRenderPath::prepareRenderSourceData(const std::shared_ptr<RenderSou
 
 void DeferredRenderPath::render()
 {
-    const auto& render_params = GetApp().renderSystem()->renderParams();
+    const auto& render_params = ref_render_system->renderParams();
 
     auto combine_pass = static_cast<CombinePass*>(m_combine_pass.get());
 

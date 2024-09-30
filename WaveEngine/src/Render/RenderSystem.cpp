@@ -10,31 +10,28 @@
 
 #include <Logical/Framework/Scene.hpp>
 
-#include "EngineAPI.hpp"
-
 RenderSystem::RenderSystem()
-    : m_rhi(std::shared_ptr<Rhi>(Rhi::create()))
 {
+    RenderSourceData::initRHI();
 }
 
-void RenderSystem::init()
+void RenderSystem::init(std::shared_ptr<Scene> scene)
 {
+    m_scene = scene;
+
     m_render_source_data = std::make_shared<RenderSourceData>();
 
-    m_forward_path = std::make_shared<ForwardRenderPath>();
-    m_forward_path->prepareRhi(m_rhi);
-    m_forward_path->init();
+    m_forward_path = std::make_shared<ForwardRenderPath>(this);
     m_forward_path->prepareRenderSourceData(m_render_source_data);
+    m_forward_path->init();
 
-    m_deferred_path = std::make_shared<DeferredRenderPath>();
-    m_deferred_path->prepareRhi(m_rhi);
-    m_deferred_path->init();
+    m_deferred_path = std::make_shared<DeferredRenderPath>(this);
     m_deferred_path->prepareRenderSourceData(m_render_source_data);
+    m_deferred_path->init();
 
     m_ray_tracing_path = std::make_shared<RayTracingRenderPath>();
-    m_ray_tracing_path->prepareRhi(m_rhi);
-    m_ray_tracing_path->init();
     m_ray_tracing_path->prepareRenderSourceData(m_render_source_data);
+    m_ray_tracing_path->init();
 
     setRenderPathType(RenderPathType::Deferred);
 
@@ -277,7 +274,6 @@ void RenderSystem::updateRenderSourceData()
 #else
 void RenderSystem::updateRenderSourceData()
 {
-    auto& scene = *GetApp().scene();
     if (!m_initialized) {
         Asset::SubMesh m_screen_quad_sub_mesh;
         m_screen_quad_sub_mesh.mesh_file_ref = { Asset::MeshFileType::CustomScreen, "" };
@@ -285,13 +281,13 @@ void RenderSystem::updateRenderSourceData()
     }
 
     if (!m_initialized) {
-        const auto& dir_light = scene.getLightManager()->mainDirectionalLight();
+        const auto& dir_light = m_scene->getLightManager()->mainDirectionalLight();
         m_render_source_data->render_directional_light_data_list.emplace_back(
             RenderDirectionalLightData{ dir_light->luminousColor, dir_light->direction,
             dir_light->lightViewMatrix(), dir_light->lightProjMatrix() });
     }
 
-    const auto& point_lights = scene.getLightManager()->pointLights();
+    const auto& point_lights = m_scene->getLightManager()->pointLights();
     struct inst_data {
         Mat4 inst_matrix;
         Color4 inst_color;
@@ -330,7 +326,7 @@ void RenderSystem::updateRenderSourceData()
         }
     }
 
-    const auto& objects = scene.getObjects();
+    const auto& objects = m_scene->getObjects();
     for (const auto& object : objects) {
         auto& sub_meshes = object->getComponent<MeshComponent>()->sub_meshes;
         auto& model_matrix = object->getComponent<TransformComponent>()->transform();
@@ -346,11 +342,11 @@ void RenderSystem::updateRenderSourceData()
 
     // picked
     m_render_source_data->picked_ids.clear();
-    for (const auto& object : scene.getPickedObjects()) {
+    for (const auto& object : m_scene->getPickedObjects()) {
         m_render_source_data->picked_ids.push_back(object->ID());
     }
 
-    CameraComponent& camera = scene.getMainCamera();
+    CameraComponent& camera = m_scene->getMainCamera();
     m_render_source_data->camera_position = camera.pos;
     m_render_source_data->view_matrix = camera.view;
     m_render_source_data->proj_matrix = camera.projection;

@@ -38,17 +38,17 @@ void Application::init()
 {
 	Meta::Register::allMetaRegister();
 
-	m_window = std::make_unique<Window>((int)DEFAULT_WINDOW_WIDTH, (int)DEFAULT_WINDOW_HEIGHT);
+	m_window = std::make_shared<Window>((int)DEFAULT_WINDOW_WIDTH, (int)DEFAULT_WINDOW_HEIGHT);
 
-	m_scene = std::make_unique<Scene>();
+	m_scene = std::make_shared<Scene>();
 	m_scene->init();
-	m_gui_input = std::make_unique<GUIInput>();
-	m_gui_input->init();
-	m_animation_system = std::make_unique<AnimationSystem>();
-	m_render_system = std::make_unique<RenderSystem>();
-	m_render_system->init();
-	m_editor = std::make_unique<ImGuiEditor>();
-	m_editor->init();
+	m_animation_system = std::make_shared<AnimationSystem>();
+	m_render_system = std::make_shared<RenderSystem>();
+	m_render_system->init(m_scene);
+	m_editor = std::make_shared<ImGuiEditor>();
+	m_editor->init(m_window, m_render_system, m_scene);
+	m_gui_input = std::make_shared<GUIInput>();
+	m_gui_input->init(m_editor);
 }
 
 void Application::shutdown()

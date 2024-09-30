@@ -3,11 +3,11 @@
 
 #include "RenderPath.hpp"
 
+class RenderSystem;
 class ForwardRenderPath : public RenderPath {
 public:
-    ForwardRenderPath();
+    ForwardRenderPath(RenderSystem* render_system);
     void init() override;
-    void prepareRhi(const std::shared_ptr<Rhi>& rhi) override;
     void prepareRenderSourceData(const std::shared_ptr<RenderSourceData>& render_source_data) override;
     void render() override;
     unsigned int getPickingFBO() override;
@@ -19,6 +19,7 @@ protected:
     std::unique_ptr<RenderPass> m_main_camera_pass;
     std::unique_ptr<RenderPass> m_combine_pass;
 
+    RenderSystem* ref_render_system{ nullptr };
 };
 
 #endif // !ForwardRenderPath_hpp

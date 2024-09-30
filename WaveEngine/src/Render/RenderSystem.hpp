@@ -27,17 +27,17 @@ struct RenderParams {
     //int     pixelate_level = 1;
 };
 
+class Scene;
 class RenderSystem {
 public:
     RenderSystem();
-    void init();
+    void init(std::shared_ptr<Scene> scene);
     RenderPathType getRenderPathType();
     void setRenderPathType(RenderPathType type);
     RenderParams& renderParams();
     void onUpdate();
     unsigned int getPickingFBO();
     unsigned int renderPassTexture(RenderPass::Type render_pass_type);
-    Rhi* rhi() const { return m_rhi.get(); }
 
 public slots:
     void onComponentInserted(int entt_id, int pool_id);
@@ -63,7 +63,7 @@ private:
     int m_need_insert_id{ -1 };
     int m_need_remove_id{ -1 };
 
-    std::shared_ptr<Rhi> m_rhi;
+    std::shared_ptr<Scene> m_scene;
 };
 
 #endif // !RenderSystem_hpp

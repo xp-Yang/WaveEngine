@@ -1,7 +1,6 @@
 #include "RenderSourceData.hpp"
 #include "Render/RHI/rhi.hpp"
 #include "stb_image.h"
-#include "EngineAPI.hpp"
 
 RenderMeshData::RenderMeshData(const RenderMeshDataID& id, const Asset::SubMesh& sub_mesh_asset, const Mat4& model_transform)
     : m_id(id)
@@ -68,7 +67,7 @@ void RenderMeshData::updateRenderMaterialData(const Asset::Material& material_as
 
 void RenderMeshData::create_instancing(void* instancing_data, int instancing_data_size)
 {
-    Rhi* rhi = GetApp().renderSystem()->rhi();
+    const auto& rhi = RenderSourceData::rhi;
 
     RhiBuffer* inst_buf = rhi->newBuffer(RhiBuffer::Immutable, RhiBuffer::VertexBuffer, instancing_data, instancing_data_size);
     inst_buf->create();
@@ -88,7 +87,7 @@ void RenderMeshData::create_instancing(void* instancing_data, int instancing_dat
 
 void RenderMeshData::create()
 {
-    Rhi* rhi = GetApp().renderSystem()->rhi();
+    const auto& rhi = RenderSourceData::rhi;
 
     RhiBuffer* vbuf = rhi->newBuffer(RhiBuffer::Immutable, RhiBuffer::VertexBuffer, (void*)(&(m_mesh_data->vertices()[0])), m_mesh_data->vertices().size() * sizeof(Vertex));
     vbuf->create();
@@ -127,7 +126,7 @@ void RenderMeshData::create()
 
 RenderTextureData::RenderTextureData(const Asset::Texture& texture_asset)
 {
-    Rhi* rhi = GetApp().renderSystem()->rhi();
+    const auto& rhi = RenderSourceData::rhi;
 
     std::string filepath = texture_asset.texture_filepath;
     int width, height, nrComponents;

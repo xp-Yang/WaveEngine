@@ -1,6 +1,7 @@
 #include "Window.hpp"
 
 #include <GLFW/glfw3.h>
+#include "GUI/Platform/Windows/WindowsFileDialog.hpp"
 
 #include <assert.h>
 #include <utility>
@@ -9,7 +10,7 @@ static void drop_file_callback(GLFWwindow* window, int count, const char** paths
 {
 	for (int i = 0; i < count; i++) {
 		//std::string filepath = paths[i];
-		//GetApp().getSceneHierarchy()->loadModel(filepath);
+		//getSceneHierarchy()->loadModel(filepath);
 	}
 }
 
@@ -86,4 +87,13 @@ int Window::getHeight() const
 float Window::getAspectRatio() const
 {
 	return (float)m_width / (float)m_height;
+}
+
+FileDialog* Window::createFileDialog()
+{
+	WindowsFileDialog* file_dialog = new WindowsFileDialog(this);
+#ifdef __LINUX__
+	auto file_dialog;
+#endif
+	return file_dialog;
 }

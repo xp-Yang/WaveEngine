@@ -5,10 +5,10 @@
 
 class GObject;
 class Light;
-class Scene;
+class ImGuiEditor;
 class ImGuiSceneHierarchy {
 public:
-	ImGuiSceneHierarchy();
+	ImGuiSceneHierarchy(ImGuiEditor* parent) : m_parent(parent) {}
 	void init();
 	void render();
 
@@ -19,7 +19,7 @@ protected:
 
 private:
 	std::unordered_map<std::string, std::function<void(std::string, void*)>> m_widget_creator;
-	Scene* m_ref_scene;
+	ImGuiEditor* m_parent;
 };
 
 #endif

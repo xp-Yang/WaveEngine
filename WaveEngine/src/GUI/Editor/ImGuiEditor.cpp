@@ -9,28 +9,17 @@
 #include <GLFW/glfw3.h>
 
 #include "GUI/FileDialog.hpp"
+#include "Gui/Window.hpp"
 #include "Render/RenderSystem.hpp"
 #include "Logical/FrameWork/Scene.hpp"
 
-#include "EngineAPI.hpp"
-
 ImGuiEditor::ImGuiEditor()
-    : m_main_canvas(std::make_unique<MainCanvas>())
+    : m_main_canvas(std::make_unique<MainCanvas>(this))
     , m_context_menu(std::make_unique<ImGuiContextMenu>())
-    , m_scene_hierarchy_window(std::make_unique<ImGuiSceneHierarchy>())
-    , m_global_console_window(std::make_unique<ImGuiGlobalConsole>())
-    , m_debug_window(std::make_unique<ImGuiDebugWindow>())
+    , m_scene_hierarchy_window(std::make_unique<ImGuiSceneHierarchy>(this))
+    , m_global_console_window(std::make_unique<ImGuiGlobalConsole>(this))
+    , m_debug_window(std::make_unique<ImGuiDebugWindow>(this))
 {
-    if (!ImGui::GetCurrentContext() || !ImGui::GetCurrentContext()->Initialized) {
-        // setup imgui
-        IMGUI_CHECKVERSION();
-        ImGui::CreateContext();
-        ImGuiIO& io = ImGui::GetIO();
-        io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;         // Enable Docking
-        io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;       // Enable Multi-Viewport / Platform Windows
-        ImGui_ImplGlfw_InitForOpenGL((GLFWwindow*)GetApp().window()->getNativeWindowHandle(), true);
-        ImGui_ImplOpenGL3_Init("#version 330");
-    }
 }
 
 ImGuiEditor::~ImGuiEditor()
@@ -40,8 +29,23 @@ ImGuiEditor::~ImGuiEditor()
     ImGui::DestroyContext();
 }
 
-void ImGuiEditor::init()
+void ImGuiEditor::init(std::shared_ptr<Window> window, std::shared_ptr<RenderSystem> render_system, std::shared_ptr<Scene> scene)
 {
+    ref_window = window;
+    ref_render_system = render_system;
+    ref_scene = scene;
+
+    if (!ImGui::GetCurrentContext() || !ImGui::GetCurrentContext()->Initialized) {
+        // setup imgui
+        IMGUI_CHECKVERSION();
+        ImGui::CreateContext();
+        ImGuiIO& io = ImGui::GetIO();
+        io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;         // Enable Docking
+        io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;       // Enable Multi-Viewport / Platform Windows
+        ImGui_ImplGlfw_InitForOpenGL((GLFWwindow*)ref_window->getNativeWindowHandle(), true);
+        ImGui_ImplOpenGL3_Init("#version 330");
+    }
+
     configUIStyle();
 
     m_scene_hierarchy_window->init();
@@ -92,7 +96,7 @@ Viewport ImGuiEditor::getMainViewport() const
 
 void ImGuiEditor::popUpMenu()
 {
-    ContextType context = GetApp().scene()->getPickedObjects().empty() ? ContextType::Void : ContextType::Object;
+    ContextType context = ref_scene->getPickedObjects().empty() ? ContextType::Void : ContextType::Object;
     m_context_menu->popUp(context);
 }
 
@@ -108,14 +112,14 @@ void ImGuiEditor::renderMenuBar()
         if (ImGui::BeginMenu("File"))
         {
             if (ImGui::MenuItem("Open", "Ctrl+O")) {
-                FileDialog* file_dlg = FileDialog::create();
+                FileDialog* file_dlg = ref_window->createFileDialog();
                 auto filepath = file_dlg->OpenFile("");
                 if (!filepath.empty()) {
-                    GetApp().scene()->loadModel(filepath);
+                    ref_scene->loadModel(filepath);
                 }
             }
             if (ImGui::MenuItem("Save As..", "Ctrl+S")) {
-                FileDialog* file_dlg = FileDialog::create();
+                FileDialog* file_dlg = ref_window->createFileDialog();
                 auto filepath = file_dlg->SaveFile("");
                 // TODO
             }
@@ -152,7 +156,7 @@ void ImGuiEditor::renderEmptyMainDockerSpaceWindow()
     renderMenuBar();
     ImGui::End();
     if (!show) {
-        glfwSetWindowShouldClose((GLFWwindow*)GetApp().window()->getNativeWindowHandle(), true);
+        glfwSetWindowShouldClose((GLFWwindow*)ref_window->getNativeWindowHandle(), true);
     }
 #else
     ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_MenuBar |
