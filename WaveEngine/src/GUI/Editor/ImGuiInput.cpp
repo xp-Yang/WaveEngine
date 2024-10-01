@@ -18,7 +18,8 @@ bool GUIInput::refreshState()
 
 	auto main_viewport = ref_editor->getMainViewport();
 	if (!(main_viewport.x <= io.MousePos.x && io.MousePos.x <= main_viewport.x + main_viewport.width &&
-		main_viewport.y <= io.MousePos.y && io.MousePos.y <= main_viewport.y + main_viewport.height))
+		main_viewport.y <= io.MousePos.y && io.MousePos.y <= main_viewport.y + main_viewport.height) ||
+		io.WantCaptureMouse)
 		return false;
 
 	m_mouse_button = MouseButton::None;

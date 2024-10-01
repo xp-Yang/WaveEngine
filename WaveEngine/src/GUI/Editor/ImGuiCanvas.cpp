@@ -35,6 +35,8 @@ void MainCanvas::render()
         auto cursor_pos = ImGui::GetCursorPos();
         ImGui::Image(scene_tex_id, content_size, ImVec2(0, 1), ImVec2(1, 0)); // https://github.com/ocornut/imgui/wiki/Image-Loading-and-Displaying-Examples#about-texture-coordinates
         ImGuiIO& io = ImGui::GetIO();
+        if (ImGui::IsItemHovered())
+            ImGui::CaptureMouseFromApp(false);
         ImGui::SetCursorPos(cursor_pos);
         ImGui::Text("FPS %.1f", io.Framerate);
         setViewPort({ (int)content_pos.x, (int)content_pos.y, (int)content_size.x, (int)content_size.y });
