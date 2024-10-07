@@ -49,7 +49,7 @@ bool OpenGLFrameBuffer::create()
 
     int status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
     if (status != GL_FRAMEBUFFER_COMPLETE) {
-        printf(" ::ENGINE:: FBO Creation Failed! glError: %i\n", status);
+        printf("FBO Creation Failed! glError: %i\n", status);
         assert(false);
         return false;
     }

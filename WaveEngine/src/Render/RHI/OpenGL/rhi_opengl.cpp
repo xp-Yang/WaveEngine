@@ -17,6 +17,10 @@ RhiOpenGL::RhiOpenGL()
 
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+	glEnable(GL_CULL_FACE);
+	glCullFace(GL_BACK);
+	glFrontFace(GL_CCW);
 }
 
 void RhiOpenGL::drawIndexed(unsigned int vao_id, size_t indices_count, int inst_amount)

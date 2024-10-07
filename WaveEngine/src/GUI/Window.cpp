@@ -30,7 +30,7 @@ Window::Window(int width, int height)
 	glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
 #endif
 
-	m_window = glfwCreateWindow(width, height, "RenderEngine", nullptr, nullptr);
+	m_window = glfwCreateWindow(width, height, "WaveEngine", nullptr, nullptr);
 	if (m_window == nullptr)
 	{
 		assert(false);

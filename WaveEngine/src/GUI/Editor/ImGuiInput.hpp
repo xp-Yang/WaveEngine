@@ -4,8 +4,10 @@
 #include "Logical/Input/InputEnums.hpp"
 #include "Core/Common.hpp"
 #include "Logical/Input/CameraManipulator.hpp"
+#include <Logical/Framework/Object/GObject.hpp>
 
 class ImGuiEditor;
+class PickSolver;
 class GUIInput {
 public:
 	void init(std::shared_ptr<ImGuiEditor> editor);
@@ -31,7 +33,22 @@ protected:
 	float m_frame_time;
 
 	std::shared_ptr<CameraManipulator> m_camera_manipulator;
+	std::unique_ptr<PickSolver> m_pick_solver;
 
+	std::shared_ptr<ImGuiEditor> ref_editor;
+};
+
+class PickSolver {
+public:
+	PickSolver(std::shared_ptr<ImGuiEditor> editor);
+
+signals:
+	Signal<std::vector<GObjectID>, std::vector<GObjectID>> pickedChanged;
+
+public slots:
+	void onPicking(float mouse_x, float mouse_y, bool retain_old = false);
+
+private:
 	std::shared_ptr<ImGuiEditor> ref_editor;
 };
 

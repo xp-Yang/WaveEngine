@@ -1,6 +1,9 @@
 #ifndef Window_hpp
 #define Window_hpp
 
+static inline constexpr float DEFAULT_WINDOW_WIDTH = 1920.0f;
+static inline constexpr float DEFAULT_WINDOW_HEIGHT = 1080.0f;
+
 struct GLFWwindow;
 class FileDialog;
 class Window {

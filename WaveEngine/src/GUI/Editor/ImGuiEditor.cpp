@@ -150,7 +150,7 @@ void ImGuiEditor::renderEmptyMainDockerSpaceWindow()
         ImGuiWindowFlags_MenuBar;
     ImGui::SetNextWindowSize(ImVec2(1920, 1080), ImGuiCond_Appearing);
     static bool show = true;
-    ImGui::Begin("Engine", &show, window_flags);
+    ImGui::Begin("WaveEngine", &show, window_flags);
     ImGuiID main_dock_id = ImGui::GetID("Main Dock");
     ImGui::DockSpace(main_dock_id);
     renderMenuBar();
@@ -168,7 +168,7 @@ void ImGuiEditor::renderEmptyMainDockerSpaceWindow()
     ImGui::SetNextWindowPos(viewport->WorkPos);
     ImGui::SetNextWindowSize(viewport->WorkSize);
     ImGui::SetNextWindowViewport(viewport->ID);
-    ImGui::Begin("Engine", nullptr, window_flags);
+    ImGui::Begin("WaveEngine", nullptr, window_flags);
     ImGuiID main_dock_id = ImGui::GetID("Main Dock");
     ImGui::DockSpace(main_dock_id);
     renderMenuBar();

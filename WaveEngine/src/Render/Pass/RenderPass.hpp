@@ -5,8 +5,6 @@
 
 static inline constexpr float DEFAULT_RENDER_RESOLUTION_X = 1920.0f;
 static inline constexpr float DEFAULT_RENDER_RESOLUTION_Y = 1080.0f;
-static inline constexpr float DEFAULT_WINDOW_WIDTH = 1920.0f;
-static inline constexpr float DEFAULT_WINDOW_HEIGHT = 1080.0f;
 
 // Interface class
 // each RenderPass corresponds to a framebuffer
