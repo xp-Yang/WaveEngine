@@ -15,7 +15,7 @@
 
 ImGuiEditor::ImGuiEditor()
     : m_main_canvas(std::make_unique<MainCanvas>(this))
-    , m_context_menu(std::make_unique<ImGuiContextMenu>())
+    , m_context_menu(std::make_unique<ImGuiContextMenu>(this))
     , m_scene_hierarchy_window(std::make_unique<ImGuiSceneHierarchy>(this))
     , m_global_console_window(std::make_unique<ImGuiGlobalConsole>(this))
     , m_debug_window(std::make_unique<ImGuiDebugWindow>(this))
@@ -98,11 +98,6 @@ void ImGuiEditor::popUpMenu()
 {
     ContextType context = ref_scene->getPickedObjects().empty() ? ContextType::Void : ContextType::Object;
     m_context_menu->popUp(context);
-}
-
-void ImGuiEditor::dismissMenu()
-{
-    m_context_menu->dismiss();
 }
 
 void ImGuiEditor::renderMenuBar()

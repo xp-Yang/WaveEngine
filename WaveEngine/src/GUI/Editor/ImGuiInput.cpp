@@ -73,12 +73,8 @@ bool GUIInput::refreshState()
 bool GUIInput::onUpdate()
 {
 	if (!refreshState()) {
-		ref_editor->dismissMenu();
 		return false;
 	}
-
-	if (m_mouse_state == MouseState::Clicked)
-		ref_editor->dismissMenu();
 
 	if (m_last_mouse_state == MouseState::Holding && m_mouse_state == MouseState::Released) {
 		m_pick_solver->onPicking(m_mouse_x, m_mouse_y, KeysDown[Key_LeftCtrl]);

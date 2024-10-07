@@ -21,7 +21,6 @@ public:
 	void endFrame();
 	Viewport getMainViewport() const;
 	void popUpMenu();
-	void dismissMenu();
 
 protected:
 	void renderMenuBar();

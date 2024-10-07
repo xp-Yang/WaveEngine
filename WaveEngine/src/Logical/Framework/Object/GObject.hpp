@@ -45,6 +45,8 @@ public:
 	GObjectID ID() const { return m_id; }
 	const std::string& name() const { return m_name; }
 	void setName(const std::string& name) { m_name = name; }
+	bool visible() const { return m_visible; }
+	void setVisible(bool visible) { m_visible = visible; }
 
 	const std::vector<std::shared_ptr<Component>>& getComponents() const { return m_components; }
 
@@ -89,6 +91,7 @@ protected:
 	std::vector<GObject*> m_children;
 	GObjectID m_id;
 	std::string m_name;
+	bool m_visible{ true };
 	std::vector<std::shared_ptr<Component>> m_components;
 };
 

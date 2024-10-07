@@ -330,12 +330,22 @@ void RenderSystem::updateRenderSourceData()
     for (const auto& object : objects) {
         auto& sub_meshes = object->getComponent<MeshComponent>()->sub_meshes;
         auto& model_matrix = object->getComponent<TransformComponent>()->transform();
+        bool visible = object->visible();
         for (const auto& sub_mesh : sub_meshes) {
             auto render_mesh_data_id = RenderMeshDataID(object->ID(), sub_mesh.sub_mesh_idx);
-            if (m_render_source_data->render_mesh_data_hash.find(render_mesh_data_id) != m_render_source_data->render_mesh_data_hash.end())
-                m_render_source_data->render_mesh_data_hash[render_mesh_data_id]->updateTransform(model_matrix * sub_mesh.local_transform);
+            auto it = m_render_source_data->render_mesh_data_hash.find(render_mesh_data_id);
+            if (!visible) {
+                if (it != m_render_source_data->render_mesh_data_hash.end())
+                    m_render_source_data->render_mesh_data_hash.erase(render_mesh_data_id);
+            }
             else {
-                m_render_source_data->render_mesh_data_hash.insert_or_assign(render_mesh_data_id, std::make_shared<RenderMeshData>(render_mesh_data_id, sub_mesh, model_matrix));
+                if (it != m_render_source_data->render_mesh_data_hash.end()) {
+                    m_render_source_data->render_mesh_data_hash[render_mesh_data_id]->updateTransform(model_matrix * sub_mesh.local_transform);
+                }
+                else {
+                    m_render_source_data->render_mesh_data_hash.insert_or_assign(render_mesh_data_id,
+                        std::make_shared<RenderMeshData>(render_mesh_data_id, sub_mesh, model_matrix));
+                }
             }
         }
     }
