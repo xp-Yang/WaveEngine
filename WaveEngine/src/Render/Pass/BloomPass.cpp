@@ -53,7 +53,7 @@ void BloomPass::blur()
 
     static RenderShaderObject* blur_shader = RenderShaderObject::getShaderObject(Asset::ShaderType::GaussianBlur);
     bool horizontal = true;
-    unsigned int amount = 16;
+    unsigned int amount = 8;
     blur_shader->start_using();
     for (unsigned int i = 0; i < amount; i++)
     {

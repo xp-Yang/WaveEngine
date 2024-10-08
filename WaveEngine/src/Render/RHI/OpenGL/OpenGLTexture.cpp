@@ -24,12 +24,11 @@ bool OpenGLTexture::create()
     case RhiTexture::Format::RGB16F: {
         glGenTextures(1, &textureID);
         glBindTexture(GL_TEXTURE_2D, textureID);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, (int)m_pixelSize.x, (int)m_pixelSize.y, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, (int)m_pixelSize.x, (int)m_pixelSize.y, 0, GL_RGB, GL_FLOAT, NULL);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
         break;
     }
-    case RhiTexture::Format::RGBA32F:
     case RhiTexture::Format::RGBA16F: {
         if (m_sampleCount > 1) {
             glGenTextures(1, &textureID);
@@ -41,7 +40,7 @@ bool OpenGLTexture::create()
         else {
             glGenTextures(1, &textureID);
             glBindTexture(GL_TEXTURE_2D, textureID);
-            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, (int)m_pixelSize.x, (int)m_pixelSize.y, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, (int)m_pixelSize.x, (int)m_pixelSize.y, 0, GL_RGBA, GL_FLOAT, NULL);
             //使用GL_FLOAT和GL_UNSIGNED_BYTE区别
             //glTexImage2D 是旧接口，可以使用glTexStorage2D(GL_TEXTURE_2D, 1, format, width, height);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
@@ -116,17 +115,19 @@ bool OpenGLTexture::create()
     if (m_data)
     {
         GLenum format;
-        if (m_format == R8 || m_format == R16 || m_format == R16F || m_format == R32F)
+        if (m_format == R8 || m_format == R16 || m_format == R16F)
             format = GL_RED;
         else if (m_format == RGB16F)
-            format = GL_RGB;
-        else if (m_format == RGBA8 || m_format == RGBA16F || m_format == RGBA32F)
+            format = GL_RGB16F;
+        else if (m_format == RGBA8)
             format = GL_RGBA;
+        else if (m_format == RGBA16F)
+            format = GL_RGBA16F;
         else
             assert(false);
 
         glBindTexture(GL_TEXTURE_2D, textureID);
-        glTexImage2D(GL_TEXTURE_2D, 0, format, (int)m_pixelSize.x, (int)m_pixelSize.y, 0, format, GL_UNSIGNED_BYTE, m_data);
+        glTexImage2D(GL_TEXTURE_2D, 0, format, (int)m_pixelSize.x, (int)m_pixelSize.y, 0, format, GL_FLOAT, m_data);
         glGenerateMipmap(GL_TEXTURE_2D);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);

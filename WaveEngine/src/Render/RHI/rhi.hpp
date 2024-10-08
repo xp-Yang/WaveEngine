@@ -98,9 +98,7 @@ public:
         RGB16F,
 
         RGBA16F,
-        RGBA32F,
         R16F,
-        R32F,
 
         DEPTH24STENCIL8, // Usage
         DEPTH,

@@ -17,6 +17,7 @@ uniform sampler2D specular_map;
 void main()
 {    
     gPosition = vec4(fs_in.fragWorldPos, 1.0);
+    gPosition.a = LinearizeDepth(gl_FragCoord.z);
     gNormal = vec4(normalize(fs_in.fragWorldNormal), 1.0);
     gDiffuse = vec4(texture(diffuse_map, fs_in.fragUV).rgb, 1.0);
     gSpecular = vec4(texture(specular_map, fs_in.fragUV).rgb, 1.0);
