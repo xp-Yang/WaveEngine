@@ -21,6 +21,14 @@ bool OpenGLTexture::create()
     unsigned int textureID;
     switch (m_format)
     {
+    case RhiTexture::Format::RGB8: {
+        glGenTextures(1, &textureID);
+        glBindTexture(GL_TEXTURE_2D, textureID);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, (int)m_pixelSize.x, (int)m_pixelSize.y, 0, GL_RGB, GL_FLOAT, NULL);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        break;
+    }
     case RhiTexture::Format::RGB16F: {
         glGenTextures(1, &textureID);
         glBindTexture(GL_TEXTURE_2D, textureID);
@@ -28,6 +36,13 @@ bool OpenGLTexture::create()
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
         break;
+    }
+    case RhiTexture::Format::RGBA8: {
+        glGenTextures(1, &textureID);
+        glBindTexture(GL_TEXTURE_2D, textureID);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, (int)m_pixelSize.x, (int)m_pixelSize.y, 0, GL_RGBA, GL_FLOAT, NULL);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     }
     case RhiTexture::Format::RGBA16F: {
         if (m_sampleCount > 1) {
@@ -114,20 +129,29 @@ bool OpenGLTexture::create()
 
     if (m_data)
     {
-        GLenum format;
-        if (m_format == R8 || m_format == R16 || m_format == R16F)
-            format = GL_RED;
+        GLenum internal_format;
+        if (m_format == R8)
+            internal_format = GL_RED;
+        else if (m_format == RGB8)
+            internal_format = GL_RGB;
         else if (m_format == RGB16F)
-            format = GL_RGB16F;
+            internal_format = GL_RGB16F;
         else if (m_format == RGBA8)
-            format = GL_RGBA;
+            internal_format = GL_RGBA;
         else if (m_format == RGBA16F)
-            format = GL_RGBA16F;
+            internal_format = GL_RGBA16F;
         else
             assert(false);
 
         glBindTexture(GL_TEXTURE_2D, textureID);
-        glTexImage2D(GL_TEXTURE_2D, 0, format, (int)m_pixelSize.x, (int)m_pixelSize.y, 0, format, GL_FLOAT, m_data);
+        if (m_format == R8)
+            glTexImage2D(GL_TEXTURE_2D, 0, internal_format, (int)m_pixelSize.x, (int)m_pixelSize.y, 0, GL_RED, GL_UNSIGNED_BYTE, m_data);
+        else if (m_format == RGB8 || m_format == RGB16F)
+            glTexImage2D(GL_TEXTURE_2D, 0, internal_format, (int)m_pixelSize.x, (int)m_pixelSize.y, 0, GL_RGB, GL_UNSIGNED_BYTE, m_data);
+        else if (m_format == RGBA8 || m_format == RGBA16F)
+            glTexImage2D(GL_TEXTURE_2D, 0, internal_format, (int)m_pixelSize.x, (int)m_pixelSize.y, 0, GL_RGBA, GL_UNSIGNED_BYTE, m_data);
+        else
+            assert(false);
         glGenerateMipmap(GL_TEXTURE_2D);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);

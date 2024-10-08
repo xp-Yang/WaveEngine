@@ -138,9 +138,9 @@ RenderTextureData::RenderTextureData(const Asset::Texture& texture_asset)
         if (nrComponents == 1)
             format = RhiTexture::Format::R8;
         else if (nrComponents == 3)
-            format = RhiTexture::Format::RGB16F;
+            format = RhiTexture::Format::RGB8;
         else if (nrComponents == 4)
-            format = RhiTexture::Format::RGBA16F;
+            format = RhiTexture::Format::RGBA8;
 
         RhiTexture* texture = rhi->newTexture(format, Vec2(width, height), 1, RhiTexture::Flag::sRGB, data);
         texture->create();

@@ -91,14 +91,13 @@ public:
     enum Format {
         UnknownFormat,
 
-        RGBA8,
         R8,
-        R16,
 
+        RGB8,
         RGB16F,
 
+        RGBA8,
         RGBA16F,
-        R16F,
 
         DEPTH24STENCIL8, // Usage
         DEPTH,

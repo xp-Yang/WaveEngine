@@ -95,10 +95,12 @@ void OpenGLFrameBuffer::blitTo(RhiFrameBuffer* dest, RhiTexture::Format format)
 {
     glBindFramebuffer(GL_READ_FRAMEBUFFER, m_id);
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, dest->id());
-    if (format == RhiTexture::Format::RGB16F || format == RhiTexture::Format::RGBA16F || format == RhiTexture::Format::RGBA32F || format == RhiTexture::Format::RGBA8)
+    if (format == RhiTexture::Format::RGB16F || format == RhiTexture::Format::RGBA16F || format == RhiTexture::Format::RGB8 || format == RhiTexture::Format::RGBA8)
         glBlitFramebuffer(0, 0, (int)m_pixelSize.x, (int)m_pixelSize.y, 0, 0, (int)dest->pixelSize().x, (int)dest->pixelSize().y, GL_COLOR_BUFFER_BIT, GL_NEAREST);
     if (format == RhiTexture::Format::DEPTH)
         glBlitFramebuffer(0, 0, (int)m_pixelSize.x, (int)m_pixelSize.y, 0, 0, (int)dest->pixelSize().x, (int)dest->pixelSize().y, GL_DEPTH_BUFFER_BIT, GL_NEAREST);
+    if (format == RhiTexture::Format::DEPTH24STENCIL8)
+        glBlitFramebuffer(0, 0, (int)m_pixelSize.x, (int)m_pixelSize.y, 0, 0, (int)dest->pixelSize().x, (int)dest->pixelSize().y, GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT, GL_NEAREST);
 }
 
 void OpenGLFrameBuffer::unBind()
