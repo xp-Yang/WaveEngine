@@ -122,7 +122,10 @@ RenderShaderObject* RenderShaderObject::getShaderObject(const Asset::ShaderType&
         shader_asset = Asset::Shader{ type, resource_dir + "/shader/pristineGrid.vs", resource_dir + "/shader/pristineGrid.fs" };
         break;
     case Asset::ShaderType::GBufferShader:
-        shader_asset = Asset::Shader{ type, resource_dir + "/shader/mesh.vs", resource_dir + "/shader/gBufferPass.fs" };
+        shader_asset = Asset::Shader{ type, resource_dir + "/shader/mesh.vs", resource_dir + "/shader/gBuffer_pbr.fs" };
+        break;
+    case Asset::ShaderType::GBufferPhongShader:
+        shader_asset = Asset::Shader{ type, resource_dir + "/shader/mesh.vs", resource_dir + "/shader/gBuffer_phong.fs" };
         break;
     case Asset::ShaderType::DeferredLightingShader:
         shader_asset = Asset::Shader{ type, resource_dir + "/shader/screenQuad.vs", resource_dir + "/shader/deferredLighting_pbr.fs" };

@@ -33,13 +33,16 @@ void DeferredLightingPass::draw()
 	lighting_shader->start_using();
 	lighting_shader->setTexture("gPosition", 0, g_position_map);
 	lighting_shader->setTexture("gNormal", 1, g_position_map + 1);
-	lighting_shader->setTexture("gDiffuse", 2, g_position_map + 2);
-	lighting_shader->setTexture("gSpecular", 3, g_position_map + 3);
-	// PBR
-	lighting_shader->setTexture("gAlbedo", 4, g_position_map + 4);
-	lighting_shader->setTexture("gMetallic", 5, g_position_map + 5);
-	lighting_shader->setTexture("gRoughness", 6, g_position_map + 6);
-	lighting_shader->setTexture("gAo", 7, g_position_map + 7);
+	if (m_pbr) {
+		lighting_shader->setTexture("gAlbedo", 2, g_position_map + 2);
+		lighting_shader->setTexture("gMetallic", 3, g_position_map + 3);
+		lighting_shader->setTexture("gRoughness", 4, g_position_map + 4);
+		lighting_shader->setTexture("gAo", 5, g_position_map + 5);
+	}
+	else {
+		lighting_shader->setTexture("gDiffuse", 2, g_position_map + 2);
+		lighting_shader->setTexture("gSpecular", 3, g_position_map + 3);
+	}
 
 	RhiFrameBuffer* shadow_framebuffer = m_input_passes[1]->getFrameBuffer();
 	m_dir_light_shadow_map = shadow_framebuffer->depthAttachment()->texture()->id();

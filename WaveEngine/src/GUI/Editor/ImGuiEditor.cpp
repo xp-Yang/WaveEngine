@@ -43,7 +43,7 @@ void ImGuiEditor::init(std::shared_ptr<Window> window, std::shared_ptr<RenderSys
         io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;         // Enable Docking
         io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;       // Enable Multi-Viewport / Platform Windows
         ImGui_ImplGlfw_InitForOpenGL((GLFWwindow*)ref_window->getNativeWindowHandle(), true);
-        ImGui_ImplOpenGL3_Init("#version 330");
+        ImGui_ImplOpenGL3_Init("#version 430");
     }
 
     configUIStyle();

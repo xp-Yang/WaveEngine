@@ -89,7 +89,9 @@ void DeferredRenderPath::render()
     else
         m_shadow_pass->clear();
 
-    m_gbuffer_pass->draw();
+    auto gbuffer_pass = static_cast<GBufferPass*>(m_gbuffer_pass.get());
+    gbuffer_pass->enablePBR(render_params.pbr);
+    gbuffer_pass->draw();
 
     auto lighting_pass = static_cast<DeferredLightingPass*>(m_lighting_pass.get());
     lighting_pass->enableSkybox(render_params.skybox);

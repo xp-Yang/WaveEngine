@@ -7,13 +7,9 @@ in vec2 fragUV;
 
 uniform sampler2D gPosition;
 uniform sampler2D gNormal;
+
 uniform sampler2D gDiffuse;
 uniform sampler2D gSpecular;
-// pbr
-uniform sampler2D gAlbedo;
-uniform sampler2D gMetallic;
-uniform sampler2D gRoughness;
-uniform sampler2D gAo;
 
 uniform vec3 cameraPos;
 

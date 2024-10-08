@@ -7,9 +7,7 @@ in vec2 fragUV;
 
 uniform sampler2D gPosition;
 uniform sampler2D gNormal;
-uniform sampler2D gDiffuse;
-uniform sampler2D gSpecular;
-// pbr
+
 uniform sampler2D gAlbedo;
 uniform sampler2D gMetallic;
 uniform sampler2D gRoughness;
@@ -24,8 +22,6 @@ void main()
     // retrieve data from gbuffer
     vec3 Position = texture(gPosition, fragUV).rgb;
     vec3 Normal = texture(gNormal, fragUV).rgb;
-    vec3 Diffuse = texture(gDiffuse, fragUV).rgb;
-    vec3 Specular = texture(gSpecular, fragUV).rgb;
 
     if (Normal.xyz == vec3(0.0)){
         // return if sample the blank area in GBuffer
@@ -33,7 +29,7 @@ void main()
         return;
     }
     
-    vec3 albedo = Diffuse;
+    vec3 albedo = texture(gAlbedo, fragUV).rgb;
     float metallic = texture(gMetallic, fragUV).r;
     float roughness = texture(gRoughness, fragUV).r;
     float ao = texture(gAo, fragUV).r;

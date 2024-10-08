@@ -250,19 +250,19 @@ void Scene::init()
 		m_objects.push_back(std::shared_ptr<GObject>(plane_obj));
 	}
 
-	{
-		GObject* nano_suit = loadModel(resource_dir + "/model/nanosuit/nanosuit.obj");
-		nano_suit->getComponent<TransformComponent>()->scale = Vec3(0.3f);
+	//{
+	//	GObject* nano_suit = loadModel(resource_dir + "/model/nanosuit/nanosuit.obj");
+	//	nano_suit->getComponent<TransformComponent>()->scale = Vec3(0.3f);
 
-		GObject* vampire = loadModel(resource_dir + "/model/vampire/dancing_vampire.dae");
-		vampire->getComponent<TransformComponent>()->scale = Vec3(0.02f);
-		vampire->getComponent<TransformComponent>()->translation = Vec3(5.0f, 0.0f, 0.0f);
+	//	GObject* vampire = loadModel(resource_dir + "/model/vampire/dancing_vampire.dae");
+	//	vampire->getComponent<TransformComponent>()->scale = Vec3(0.02f);
+	//	vampire->getComponent<TransformComponent>()->translation = Vec3(5.0f, 0.0f, 0.0f);
 
-		GObject* bunny_obj = loadModel(resource_dir + "/model/bunny.obj");
-		auto bunny_transform = bunny_obj->getComponent<TransformComponent>();
-		bunny_transform->scale = Vec3(30.0f);
-		bunny_transform->translation = Vec3(-5.0f, 0.0f, 0.0f);
-	}
+	//	GObject* bunny_obj = loadModel(resource_dir + "/model/bunny.obj");
+	//	auto bunny_transform = bunny_obj->getComponent<TransformComponent>();
+	//	bunny_transform->scale = Vec3(30.0f);
+	//	bunny_transform->translation = Vec3(-5.0f, 0.0f, 0.0f);
+	//}
 }
 
 void Scene::onUpdate(float delta_time)

@@ -9,6 +9,7 @@ enum class ShaderType {
 	None,
 	PristineGridShader,
 	GBufferShader,
+	GBufferPhongShader,
 	DeferredLightingShader,
 	DeferredLightingPhongShader,
 	OneColorShader,

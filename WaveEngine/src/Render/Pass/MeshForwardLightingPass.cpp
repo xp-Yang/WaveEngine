@@ -14,14 +14,6 @@ void MeshForwardLightingPass::init()
     m_framebuffer = std::unique_ptr<RhiFrameBuffer>(fb);
 }
 
-//void MeshForwardLightingPass::prepare(FrameBuffer* framebuffer)
-//{
-//    if (framebuffer)
-//        m_shadow_map = framebuffer->getFirstAttachmentOf(AttachmentType::DEPTH).getMap();
-//    else
-//        m_shadow_map = 0;
-//}
-
 void MeshForwardLightingPass::configShader(bool skybox, bool reflection, bool normal_debug, bool wireframe)
 {
     //config shader ²ÎÊý
