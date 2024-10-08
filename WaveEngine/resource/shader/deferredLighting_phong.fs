@@ -46,9 +46,9 @@ void main()
         vec3 lightDir = normalize(Position - pointLights[i].position);
         float distance = length(Position - pointLights[i].position);
         float attenuation = PointLightAttenuation(distance, pointLights[i].radius);
-        lightingByPointLights[i] = BlinnPhong(pointLights[i].color.xyz, Normal, viewDir, -lightDir, Diffuse, Specular);
+        lightingByPointLights[i] = BlinnPhong(pointLights[i].color.xyz * attenuation, Normal, viewDir, -lightDir, Diffuse, Specular);
         // Point Light Shadow:
-        float pointShadowFactor = 1.;//OmnidirectionalShadowCalculation(Position - pointLights[i].position, cube_shadow_maps[i], pointLights[i].radius);
+        float pointShadowFactor = OmnidirectionalShadowCalculation(Position - pointLights[i].position, cube_shadow_maps[i], pointLights[i].radius);
         lightingByPointLights[i] *= pointShadowFactor;
         lightingByPointLight += lightingByPointLights[i];
     }
