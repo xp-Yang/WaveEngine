@@ -126,8 +126,12 @@ void ImGuiSceneHierarchy::renderNodes(const std::vector<GObject*>& nodes)
             node_flags &= ~ImGuiTreeNodeFlags_Selected;
 
         bool node_open = ImGui::TreeNodeEx((void*)(intptr_t)(i+ std::hash<std::string>()(child_name)), node_flags, display_text.c_str());
-        if (ImGui::IsItemClicked() && !ImGui::IsItemToggledOpen()) {
+        if (ImGui::IsItemClicked(ImGuiMouseButton_Left)) {
             m_parent->ref_scene->onPickedChanged({ child_id }, original_picked_ids);
+        }
+        if (ImGui::IsItemClicked(ImGuiMouseButton_Right)) {
+            m_parent->ref_scene->onPickedChanged({ child_id }, original_picked_ids);
+            m_parent->popUpMenu();
         }
         if (node_open)
         {
@@ -161,8 +165,12 @@ void ImGuiSceneHierarchy::renderNodes(const std::vector<Light*>& nodes)
             node_flags &= ~ImGuiTreeNodeFlags_Selected;
 
         bool node_open = ImGui::TreeNodeEx((void*)(intptr_t)(i + std::hash<std::string>()(child_name)), node_flags, display_text.c_str());
-        if (ImGui::IsItemClicked() && !ImGui::IsItemToggledOpen()) {
+        if (ImGui::IsItemClicked(ImGuiMouseButton_Left)) {
             m_parent->ref_scene->onPickedChanged(child_id);
+        }
+        if (ImGui::IsItemClicked(ImGuiMouseButton_Right)) {
+            m_parent->ref_scene->onPickedChanged(child_id);
+            m_parent->popUpMenu();
         }
         if (node_open)
         {

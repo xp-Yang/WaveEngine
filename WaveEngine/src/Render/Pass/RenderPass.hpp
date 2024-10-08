@@ -19,6 +19,7 @@ public:
 		Shadow,
 		GBuffer,
 		DeferredLighting,
+		Transparent,
 
 		// post process
 		Bloom,

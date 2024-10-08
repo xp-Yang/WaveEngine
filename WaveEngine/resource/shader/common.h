@@ -43,8 +43,8 @@ float ShadowCalculation(vec4 fragPosLightSpace, sampler2D shadow_map)
 
 float PointLightAttenuation(float distance, float radius)
 {
-    float k_quadratic = 1.0;
-    float attenuation = step(radius, distance) * (1.0 / (1.0 + k_quadratic * distance * distance));
+    float k_quadratic = 0.2 / radius;
+    float attenuation = step(distance, radius) * (1.0 / (1.0 + k_quadratic * distance * distance));
     return attenuation;
 }
 

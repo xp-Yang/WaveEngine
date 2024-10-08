@@ -43,9 +43,11 @@ void GBufferPass::draw()
     g_shader->setMatrix("projection", 1, m_render_source_data->proj_matrix);
     for (const auto& pair : m_render_source_data->render_mesh_data_hash) {
         const auto& render_sub_mesh_data = pair.second;
+        if (render_sub_mesh_data->renderMaterialData().alpha != 1.0f)
+            continue;
+
         g_shader->setMatrix("model", 1, render_sub_mesh_data->transform());
         auto& material = render_sub_mesh_data->renderMaterialData();
-        g_shader->start_using();
         if (m_pbr) {
             g_shader->setFloat3("albedo", material.albedo);
             g_shader->setFloat("metallic", material.metallic);

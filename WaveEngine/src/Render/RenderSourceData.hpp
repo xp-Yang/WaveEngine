@@ -33,6 +33,8 @@ struct RenderMaterialData {
     GL_RESOURCE_HANLE specular_map{ 0 };
     GL_RESOURCE_HANLE normal_map{ 0 };
     GL_RESOURCE_HANLE height_map{ 0 };
+
+    float alpha{ 1.0f };
 };
 
 struct RenderMeshDataID {

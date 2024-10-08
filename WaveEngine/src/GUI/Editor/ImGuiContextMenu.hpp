@@ -6,6 +6,7 @@
 enum class ContextType {
 	Void,
 	Object,
+	Light,
 };
 
 class ImGuiEditor;

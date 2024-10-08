@@ -11,7 +11,7 @@ enum class RenderPathType {
 };
 
 struct RenderParams {
-    int     msaa_sample_count = 4;
+    int     msaa_sample_count = 1;
     bool    skybox = false;
     bool    shadow = true;
     int     shadow_map_sample_count = 1;

@@ -30,6 +30,8 @@ struct Material {
     Texture specular_texture;
     Texture normal_texture;
     Texture height_texture;
+
+    float alpha{ 1.0f };
 };
 
 }

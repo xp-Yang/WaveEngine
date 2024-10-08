@@ -48,6 +48,7 @@ void RenderMeshData::updateTransform(const Mat4& transform)
 
 void RenderMeshData::updateRenderMaterialData(const Asset::Material& material_asset)
 {
+    m_material.alpha = material_asset.alpha;
     // temp
     m_material.albedo = material_asset.albedo;
     m_material.metallic = material_asset.metallic;
@@ -55,14 +56,22 @@ void RenderMeshData::updateRenderMaterialData(const Asset::Material& material_as
     m_material.ao = material_asset.ao;
 
     // TODO 贴图更新了，texture数据的释放和加载
-    unsigned int diffuse_map = RenderTextureData(material_asset.diffuse_texture).id;
-    m_material.diffuse_map = diffuse_map;
-    unsigned int specular_map = RenderTextureData(material_asset.specular_texture).id;
-    m_material.specular_map = specular_map;
-    unsigned int normal_map = RenderTextureData(material_asset.normal_texture).id;
-    m_material.normal_map = normal_map;
-    unsigned int height_map = RenderTextureData(material_asset.height_texture).id;
-    m_material.height_map = height_map;
+    if (m_material.diffuse_map == 0) {
+        unsigned int diffuse_map = RenderTextureData(material_asset.diffuse_texture).id;
+        m_material.diffuse_map = diffuse_map;
+    }
+    if (m_material.specular_map == 0) {
+        unsigned int specular_map = RenderTextureData(material_asset.specular_texture).id;
+        m_material.specular_map = specular_map;
+    }
+    if (m_material.normal_map == 0) {
+        unsigned int normal_map = RenderTextureData(material_asset.normal_texture).id;
+        m_material.normal_map = normal_map;
+    }
+    if (m_material.height_map == 0) {
+        unsigned int height_map = RenderTextureData(material_asset.height_texture).id;
+        m_material.height_map = height_map;
+    }
 }
 
 void RenderMeshData::create_instancing(void* instancing_data, int instancing_data_size)

@@ -61,8 +61,7 @@ void main()
         vec3 L = normalize(pointLights[i].position - Position);
         vec3 H = normalize(V + L);
         float distance = length(pointLights[i].position - Position);
-        float k_quadratic = 0.2 / pointLights[i].radius;
-        float attenuation = step(0, (pointLights[i].radius - distance)) * (1.0 / (1.0 + k_quadratic * distance* distance));
+        float attenuation = PointLightAttenuation(distance, pointLights[i].radius);
         vec3 radiance = pointLights[i].color.xyz * attenuation;  
 
         // Point Light Shadow:

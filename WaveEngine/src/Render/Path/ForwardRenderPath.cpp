@@ -64,5 +64,12 @@ unsigned int ForwardRenderPath::getPickingFBO()
 
 RhiTexture* ForwardRenderPath::renderPassTexture(RenderPass::Type render_pass_type)
 {
+    if (render_pass_type == RenderPass::Type::Picking)
+        return m_picking_pass->getFrameBuffer()->colorAttachmentAt(0)->texture();
+    if (render_pass_type == RenderPass::Type::Shadow)
+        return m_shadow_pass->getFrameBuffer()->depthAttachment()->texture();
+    if (render_pass_type == RenderPass::Type::Combined)
+        return m_combine_pass->getFrameBuffer()->colorAttachmentAt(0)->texture();
+
     return nullptr;
 }

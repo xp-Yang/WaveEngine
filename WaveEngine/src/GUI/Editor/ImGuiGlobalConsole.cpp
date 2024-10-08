@@ -67,19 +67,19 @@ void ImGuiGlobalConsole::render() {
     ImGui::Text("Params:");
     if (m_parent->ref_render_system->getRenderPathType() == RenderPathType::Forward) {
         ImGui::PushItemWidth(50.0f);
-        static unsigned int curr_item = 1;
-        if (ImGui::BeginCombo("MSAA", (std::to_string((int)std::pow(4, curr_item)) + "x").c_str())) {
-            for (int i = 0; i < 3; i++) {
-                bool selected = curr_item == i;
-                std::string label = std::to_string((int)std::pow(4, i)) + "x";
-                if (ImGui::Selectable(label.c_str(), selected)) {
-                    curr_item = i;
-                    render_params.msaa_sample_count = (int)std::pow(4, i);
-                }
-            }
-            ImGui::EndCombo();
-        }
-        ImGui::SameLine();
+        //static unsigned int curr_item = 1;
+        //if (ImGui::BeginCombo("MSAA", (std::to_string((int)std::pow(4, curr_item)) + "x").c_str())) {
+        //    for (int i = 0; i < 3; i++) {
+        //        bool selected = curr_item == i;
+        //        std::string label = std::to_string((int)std::pow(4, i)) + "x";
+        //        if (ImGui::Selectable(label.c_str(), selected)) {
+        //            curr_item = i;
+        //            render_params.msaa_sample_count = (int)std::pow(4, i);
+        //        }
+        //    }
+        //    ImGui::EndCombo();
+        //}
+        //ImGui::SameLine();
         static unsigned int shadow_curr_item = 0;
         if (ImGui::BeginCombo("Shadow Map Resolution", (std::to_string((int)std::pow(4, shadow_curr_item)) + "x").c_str())) {
             for (int i = 0; i < 3; i++) {

@@ -85,7 +85,8 @@ unsigned int RenderSystem::getPickingFBO()
 
 unsigned int RenderSystem::renderPassTexture(RenderPass::Type render_pass_type)
 {
-    return m_curr_path->renderPassTexture(render_pass_type)->id();
+    RhiTexture* texture = m_curr_path->renderPassTexture(render_pass_type);
+    return texture ? texture->id() : 0;
 }
 
 #if ENABLE_ECS
@@ -341,6 +342,7 @@ void RenderSystem::updateRenderSourceData()
             else {
                 if (it != m_render_source_data->render_mesh_data_hash.end()) {
                     m_render_source_data->render_mesh_data_hash[render_mesh_data_id]->updateTransform(model_matrix * sub_mesh.local_transform);
+                    m_render_source_data->render_mesh_data_hash[render_mesh_data_id]->updateRenderMaterialData(sub_mesh.material);
                 }
                 else {
                     m_render_source_data->render_mesh_data_hash.insert_or_assign(render_mesh_data_id,
