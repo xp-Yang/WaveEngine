@@ -10,8 +10,7 @@ enum CanvasType : unsigned int {
     Shadow,
     GBuffer,
     Lighting,
-    Bright,
-    Blurred,
+    Bloom,
     RayTracing,
 };
 
@@ -65,15 +64,9 @@ public:
     void render() override;
 };
 
-class BlurredCanvas : public ImGuiCanvas {
+class BloomCanvas : public ImGuiCanvas {
 public:
-    BlurredCanvas(ImGuiEditor* parent) : ImGuiCanvas(parent) { m_type = CanvasType::Bright; }
-    void render() override;
-};
-
-class BrightCanvas : public ImGuiCanvas {
-public:
-    BrightCanvas(ImGuiEditor* parent) : ImGuiCanvas(parent) { m_type = CanvasType::Blurred; }
+    BloomCanvas(ImGuiEditor* parent) : ImGuiCanvas(parent) { m_type = CanvasType::Bloom; }
     void render() override;
 };
 

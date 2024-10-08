@@ -14,8 +14,7 @@ ImGuiDebugWindow::ImGuiDebugWindow(ImGuiEditor* parent)
     m_shadow_canvas = std::make_unique<ShadowCanvas>(m_parent);
     m_gbuffer_canvas = std::make_unique<GBufferCanvas>(m_parent);
     m_lighting_canvas = std::make_unique<LightingCanvas>(m_parent);
-    m_bright_canvas = std::make_unique<BrightCanvas>(m_parent);
-    m_blurred_canvas = std::make_unique<BlurredCanvas>(m_parent);
+    m_bloom_canvas = std::make_unique<BloomCanvas>(m_parent);
 }
 
 void ImGuiDebugWindow::render()
@@ -31,8 +30,7 @@ void ImGuiDebugWindow::render()
     m_shadow_canvas->render();
     m_gbuffer_canvas->render();
     m_lighting_canvas->render();
-    m_bright_canvas->render();
-    m_blurred_canvas->render();
+    m_bloom_canvas->render();
 
     ImGui::Begin("Main Camera Info", nullptr, ImGuiWindowFlags_NoCollapse);
     auto& camera = m_parent->ref_scene->getMainCamera();

@@ -14,8 +14,7 @@ protected:
 	void extractBright();
 	void blur();
 
-	std::unique_ptr<RhiFrameBuffer> m_pingpong_framebuffer_1;
-	std::unique_ptr<RhiFrameBuffer> m_pingpong_framebuffer_2;
+	std::unique_ptr<RhiFrameBuffer> m_pingpong_framebuffer;
 };
 
 #endif

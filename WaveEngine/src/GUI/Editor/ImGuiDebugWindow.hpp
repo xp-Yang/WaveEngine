@@ -15,8 +15,7 @@ protected:
 	std::unique_ptr<ImGuiCanvas> m_shadow_canvas;
 	std::unique_ptr<ImGuiCanvas> m_gbuffer_canvas;
 	std::unique_ptr<ImGuiCanvas> m_lighting_canvas;
-	std::unique_ptr<ImGuiCanvas> m_bright_canvas;
-	std::unique_ptr<ImGuiCanvas> m_blurred_canvas;
+	std::unique_ptr<ImGuiCanvas> m_bloom_canvas;
 
 protected:
 	ImGuiEditor* m_parent;
