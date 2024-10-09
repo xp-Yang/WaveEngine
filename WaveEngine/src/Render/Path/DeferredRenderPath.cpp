@@ -107,15 +107,15 @@ void DeferredRenderPath::render()
     lighting_pass->setInputPasses({ m_gbuffer_pass.get(), m_shadow_pass.get()});
     lighting_pass->draw();
 
-    auto transparent_pass = static_cast<TransparentPass*>(m_transparent_pass.get());
-    transparent_pass->setInputPasses({ m_lighting_pass.get() }); // draw above the lighting pass framebuffer
-    transparent_pass->draw();
-
     if (render_params.skybox) {
         auto skybox_pass = static_cast<SkyBoxPass*>(m_skybox_pass.get());
         skybox_pass->setInputPasses({ m_lighting_pass.get() }); // draw above the lighting pass framebuffer
         skybox_pass->draw();
     }
+
+    auto transparent_pass = static_cast<TransparentPass*>(m_transparent_pass.get());
+    transparent_pass->setInputPasses({ m_lighting_pass.get() }); // draw above the lighting pass framebuffer
+    transparent_pass->draw();
 
     if (render_params.bloom) {
         m_bloom_pass->setInputPasses({ m_lighting_pass.get() });

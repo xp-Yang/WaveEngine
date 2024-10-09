@@ -339,7 +339,7 @@ void RenderSystem::updateRenderSourceData()
             resource_dir + "/images/skybox/front.jpg",
             resource_dir + "/images/skybox/back.jpg");
         m_render_source_data->render_skybox_data.skybox_cube_map = RenderTextureData(skybox_cube_texture).id;
-        m_render_source_data->render_skybox_data.render_sub_mesh_data = std::make_shared<RenderMeshData>(RenderMeshDataID(-2, -1), skybox_mesh, Mat4(1.0f));
+        m_render_source_data->render_skybox_data.render_sub_mesh_data = std::make_shared<RenderMeshData>(RenderMeshDataID(-2, -1), skybox_mesh, Math::Scale(Vec3(1.0f)));
     }
 
     const auto& objects = m_scene->getObjects();
