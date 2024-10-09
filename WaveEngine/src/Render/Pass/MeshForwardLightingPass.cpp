@@ -14,13 +14,10 @@ void MeshForwardLightingPass::init()
     m_framebuffer = std::unique_ptr<RhiFrameBuffer>(fb);
 }
 
-void MeshForwardLightingPass::configShader(bool skybox, bool reflection, bool normal_debug, bool wireframe)
+void MeshForwardLightingPass::enableReflection(bool reflection)
 {
     //config shader ²ÎÊý
-    m_skybox = skybox;
     m_reflection = reflection;
-    m_normal_debug = normal_debug;
-    m_wireframe = wireframe;
 }
 
 void MeshForwardLightingPass::configSamples(int samples)
@@ -82,17 +79,4 @@ void MeshForwardLightingPass::draw()
         m_rhi->drawIndexed(render_sub_mesh_data->getVAO(), render_sub_mesh_data->indicesCount());
     }
     shader->stop_using();
-    
-    static RenderShaderObject* skybox_shader = RenderShaderObject::getShaderObject(Asset::ShaderType::SkyboxShader);
-    if (m_skybox) {
-        const auto& render_skybox_sub_mesh_data = m_render_source_data->render_skybox_data.render_sub_mesh_data;
-        auto& material = render_skybox_sub_mesh_data->renderMaterialData();
-        skybox_shader->start_using();
-        skybox_shader->setMatrix("model", 1, render_skybox_sub_mesh_data->transform());
-        skybox_shader->setMatrix("view", 1, Mat4(Mat3(m_render_source_data->view_matrix)));
-        skybox_shader->setMatrix("projection", 1, m_render_source_data->proj_matrix);
-        skybox_shader->setCubeTexture("skybox", 4, m_render_source_data->render_skybox_data.skybox_cube_map);
-        m_rhi->drawIndexed(render_skybox_sub_mesh_data->getVAO(), render_skybox_sub_mesh_data->indicesCount());
-        skybox_shader->stop_using();
-    }
 }

@@ -327,6 +327,21 @@ void RenderSystem::updateRenderSourceData()
         }
     }
 
+    if (!m_initialized) {
+        Asset::SubMesh skybox_mesh;
+        skybox_mesh.mesh_file_ref = { Asset::MeshFileType::CustomCube, "" };
+        const std::string resource_dir = RESOURCE_DIR;
+        Asset::CubeTexture skybox_cube_texture = Asset::CubeTexture(
+            resource_dir + "/images/skybox/right.jpg",
+            resource_dir + "/images/skybox/left.jpg",
+            resource_dir + "/images/skybox/top.jpg",
+            resource_dir + "/images/skybox/bottom.jpg",
+            resource_dir + "/images/skybox/front.jpg",
+            resource_dir + "/images/skybox/back.jpg");
+        m_render_source_data->render_skybox_data.skybox_cube_map = RenderTextureData(skybox_cube_texture).id;
+        m_render_source_data->render_skybox_data.render_sub_mesh_data = std::make_shared<RenderMeshData>(RenderMeshDataID(-2, -1), skybox_mesh, Mat4(1.0f));
+    }
+
     const auto& objects = m_scene->getObjects();
     for (const auto& object : objects) {
         auto& sub_meshes = object->getComponent<MeshComponent>()->sub_meshes;

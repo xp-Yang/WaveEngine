@@ -96,26 +96,7 @@ void DeferredLightingPass::draw()
 	m_rhi->drawIndexed(m_render_source_data->render_point_light_inst_mesh->getVAO(), m_render_source_data->render_point_light_inst_mesh->indicesCount(), m_render_source_data->point_light_inst_amount);
 	point_light_instancing_shader->stop_using();
 
-	// skybox
-	static RenderShaderObject* skybox_shader = RenderShaderObject::getShaderObject(Asset::ShaderType::SkyboxShader);
-	if (m_skybox) {
-		const auto& render_skybox_sub_mesh_data = m_render_source_data->render_skybox_data.render_sub_mesh_data;
-		auto& material = render_skybox_sub_mesh_data->renderMaterialData();
-		skybox_shader->start_using();
-		skybox_shader->setMatrix("model", 1, render_skybox_sub_mesh_data->transform());
-		skybox_shader->setMatrix("view", 1, Mat4(Mat3(m_render_source_data->view_matrix)));
-		skybox_shader->setMatrix("projection", 1, m_render_source_data->proj_matrix);
-		skybox_shader->setCubeTexture("skybox", 4, m_render_source_data->render_skybox_data.skybox_cube_map);
-		m_rhi->drawIndexed(render_skybox_sub_mesh_data->getVAO(), render_skybox_sub_mesh_data->indicesCount());
-		skybox_shader->stop_using();
-	}
-
 	m_framebuffer->unBind();
-}
-
-void DeferredLightingPass::enableSkybox(bool enable)
-{
-	m_skybox = enable;
 }
 
 void DeferredLightingPass::enablePBR(bool enable)

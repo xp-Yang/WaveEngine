@@ -7,6 +7,7 @@
 #include "../Pass/GBufferPass.hpp"
 #include "../Pass/DeferredLightingPass.hpp"
 #include "../Pass/TransparentPass.hpp"
+#include "../Pass/SkyBoxPass.hpp"
 #include "../Pass/BloomPass.hpp"
 #include "../Pass/PickingPass.hpp"
 #include "../Pass/OutlinePass.hpp"
@@ -24,6 +25,7 @@ DeferredRenderPath::DeferredRenderPath(RenderSystem* render_system)
     m_gbuffer_pass = std::make_unique<GBufferPass>();
     m_lighting_pass = std::make_unique<DeferredLightingPass>();
     m_transparent_pass = std::make_unique<TransparentPass>();
+    m_skybox_pass = std::make_unique<SkyBoxPass>();
     m_bloom_pass = std::make_unique<BloomPass>();
     m_outline_pass = std::make_unique<OutlinePass>();
     m_combine_pass = std::make_unique<CombinePass>();
@@ -41,6 +43,7 @@ void DeferredRenderPath::init()
     m_gbuffer_pass->init();
     m_lighting_pass->init();
     m_transparent_pass->init();
+    m_skybox_pass->init();
     m_bloom_pass->init();
     m_outline_pass->init();
     m_combine_pass->init();
@@ -56,6 +59,7 @@ void DeferredRenderPath::prepareRenderSourceData(const std::shared_ptr<RenderSou
     m_gbuffer_pass->prepareRenderSourceData(render_source_data);
     m_lighting_pass->prepareRenderSourceData(render_source_data);
     m_transparent_pass->prepareRenderSourceData(render_source_data);
+    m_skybox_pass->prepareRenderSourceData(render_source_data);
     m_bloom_pass->prepareRenderSourceData(render_source_data);
     m_outline_pass->prepareRenderSourceData(render_source_data);
     m_combine_pass->prepareRenderSourceData(render_source_data);
@@ -98,7 +102,6 @@ void DeferredRenderPath::render()
     gbuffer_pass->draw();
 
     auto lighting_pass = static_cast<DeferredLightingPass*>(m_lighting_pass.get());
-    lighting_pass->enableSkybox(render_params.skybox);
     lighting_pass->enablePBR(render_params.pbr);
     lighting_pass->setCubeMaps(static_cast<ShadowPass*>(m_shadow_pass.get())->getCubeMaps());
     lighting_pass->setInputPasses({ m_gbuffer_pass.get(), m_shadow_pass.get()});
@@ -107,6 +110,12 @@ void DeferredRenderPath::render()
     auto transparent_pass = static_cast<TransparentPass*>(m_transparent_pass.get());
     transparent_pass->setInputPasses({ m_lighting_pass.get() }); // draw above the lighting pass framebuffer
     transparent_pass->draw();
+
+    if (render_params.skybox) {
+        auto skybox_pass = static_cast<SkyBoxPass*>(m_skybox_pass.get());
+        skybox_pass->setInputPasses({ m_lighting_pass.get() }); // draw above the lighting pass framebuffer
+        skybox_pass->draw();
+    }
 
     if (render_params.bloom) {
         m_bloom_pass->setInputPasses({ m_lighting_pass.get() });

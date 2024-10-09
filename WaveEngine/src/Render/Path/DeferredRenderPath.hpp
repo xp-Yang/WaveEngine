@@ -22,6 +22,7 @@ protected:
     std::unique_ptr<RenderPass> m_gbuffer_pass;
     std::unique_ptr<RenderPass> m_lighting_pass;
     std::unique_ptr<RenderPass> m_transparent_pass;
+    std::unique_ptr<RenderPass> m_skybox_pass;
     std::unique_ptr<RenderPass> m_bloom_pass;
     std::unique_ptr<RenderPass> m_outline_pass;
     std::unique_ptr<RenderPass> m_combine_pass;

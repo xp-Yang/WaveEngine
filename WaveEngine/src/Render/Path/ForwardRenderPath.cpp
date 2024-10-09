@@ -48,7 +48,7 @@ void ForwardRenderPath::render()
 
     m_main_camera_pass->setInputPasses({ m_shadow_pass.get() });
 
-    static_cast<MeshForwardLightingPass*>(m_main_camera_pass.get())->configShader(render_params.skybox, render_params.reflection, render_params.normal_debug, render_params.wireframe);
+    static_cast<MeshForwardLightingPass*>(m_main_camera_pass.get())->enableReflection(render_params.reflection);
     static_cast<MeshForwardLightingPass*>(m_main_camera_pass.get())->configSamples(render_params.msaa_sample_count);
     static_cast<MeshForwardLightingPass*>(m_main_camera_pass.get())->setCubeMaps(static_cast<ShadowPass*>(m_shadow_pass.get())->getCubeMaps());
     m_main_camera_pass->draw();

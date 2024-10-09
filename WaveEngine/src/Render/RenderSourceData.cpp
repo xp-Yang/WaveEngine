@@ -1,6 +1,8 @@
 #include "RenderSourceData.hpp"
 #include "Render/RHI/rhi.hpp"
 #include "stb_image.h"
+// TODO remove
+#include <glad/glad.h>
 
 RenderMeshData::RenderMeshData(const RenderMeshDataID& id, const Asset::SubMesh& sub_mesh_asset, const Mat4& model_transform)
     : m_id(id)
@@ -167,32 +169,32 @@ RenderTextureData::RenderTextureData(const Asset::Texture& texture_asset)
 
 RenderTextureData::RenderTextureData(const Asset::CubeTexture& cube_texture_asset)
 {
-    //unsigned int textureID;
-    //glGenTextures(1, &textureID);
-    //glBindTexture(GL_TEXTURE_CUBE_MAP, textureID);
+    unsigned int textureID;
+    glGenTextures(1, &textureID);
+    glBindTexture(GL_TEXTURE_CUBE_MAP, textureID);
 
-    //int width, height, nrChannels;
-    //for (unsigned int i = 0; i < cube_texture_asset.cube_texture_filepath.size(); i++)
-    //{
-    //    unsigned char* data = stbi_load(cube_texture_asset.cube_texture_filepath[i].c_str(), &width, &height, &nrChannels, 0);
-    //    if (data)
-    //    {
-    //        glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
-    //        stbi_image_free(data);
-    //    }
-    //    else
-    //    {
-    //        assert(false);
-    //        stbi_image_free(data);
-    //    }
-    //}
-    //glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    //glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    //glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    //glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    //glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+    int width, height, nrChannels;
+    for (unsigned int i = 0; i < cube_texture_asset.cube_texture_filepath.size(); i++)
+    {
+        unsigned char* data = stbi_load(cube_texture_asset.cube_texture_filepath[i].c_str(), &width, &height, &nrChannels, 0);
+        if (data)
+        {
+            glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+            stbi_image_free(data);
+        }
+        else
+        {
+            assert(false);
+            stbi_image_free(data);
+        }
+    }
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
 
-    //map = textureID;
+    id = textureID;
 }
 
 RenderTextureData& RenderTextureData::defaultTexture()
