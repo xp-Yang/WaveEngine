@@ -146,7 +146,7 @@ RenderShaderObject* RenderShaderObject::getShaderObject(const Asset::ShaderType&
         shader_asset = Asset::Shader{ type, resource_dir + "/shader/mesh.vs", resource_dir + "/shader/normal.fs", resource_dir + "/shader/normal.gs" };
         break;
     case Asset::ShaderType::WireframeShader:
-        shader_asset = Asset::Shader{ type, resource_dir + "/shader/mesh.vs", resource_dir + "/shader/wireframe.fs", resource_dir + "/shader/wireframe.gs" };
+        shader_asset = Asset::Shader{ type, resource_dir + "/shader/wireframe2.vs", resource_dir + "/shader/wireframe2.fs" };
         break;
     case Asset::ShaderType::CheckerboardShader:
         shader_asset = Asset::Shader{ type, resource_dir + "/shader/checkerboard.vs", resource_dir + "/shader/checkerboard.fs" };
