@@ -7,7 +7,6 @@
 class LightID : public IDAllocator<LightID> {
 public:
 	LightID() = default;
-	LightID(int id) : IDAllocator<LightID>(id) {}
 };
 
 class Light {

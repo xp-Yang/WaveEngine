@@ -140,7 +140,12 @@ void PickSolver::onPicking(float mouse_x, float mouse_y, bool retain_old)
 	glReadBuffer(GL_COLOR_ATTACHMENT0);
 	glReadPixels(x, y, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, data);
 	int picked_id = (int)data[0] + (((int)data[1]) << 8) + (((int)data[2]) << 16);
-	emit pickedChanged({ picked_id }, retain_old ? std::vector<GObjectID>() : ref_editor->ref_scene->getPickedObjectIDs());
+	const auto& scene_objects = ref_editor->ref_scene->getObjects();
+	auto it = std::find_if(scene_objects.begin(), scene_objects.end(), [picked_id](const std::shared_ptr<GObject>& obj) {
+		return obj->ID().id == picked_id;
+		});
+	if (it != scene_objects.end())
+		emit pickedChanged({ (*it)->ID() }, retain_old ? std::vector<GObjectID>() : ref_editor->ref_scene->getPickedObjectIDs());
 
 	Logger::debug("PickSolver::onPicking(), picking({}, {}), mouse({}, {}), picked_id:{}", x, y, mouse_x, mouse_y, picked_id);
 }

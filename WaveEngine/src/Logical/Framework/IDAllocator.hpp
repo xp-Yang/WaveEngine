@@ -5,7 +5,6 @@ template<typename T>
 class IDAllocator {
 public:
 	IDAllocator() : id(++global_id) {}
-	IDAllocator(int id) : id(id) {} // TODO remove
 	bool operator==(const IDAllocator& rhs) const {
 		return id == rhs.id;
 	}

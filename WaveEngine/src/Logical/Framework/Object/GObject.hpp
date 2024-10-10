@@ -22,7 +22,6 @@ namespace Meta {
 class GObjectID : public IDAllocator<GObjectID> {
 public:
 	GObjectID() = default;
-	GObjectID(int id) : IDAllocator<GObjectID>(id) {}
 };
 
 class GObject {
