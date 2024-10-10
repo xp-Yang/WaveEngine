@@ -37,27 +37,18 @@ void ImGuiGlobalConsole::render() {
     separator();
 
     ImGui::Text("Choose Shader:");
-    if (ImGui::RadioButton("BlinnPhong", !render_params.wireframe && !render_params.checkerboard && !render_params.pbr)) {
+    if (ImGui::RadioButton("BlinnPhong", !render_params.checkerboard && !render_params.pbr)) {
         render_params.pbr = false;
-        render_params.wireframe = false;
         render_params.checkerboard = false;
     }
     ImGui::SameLine();
     if (ImGui::RadioButton("PBR", render_params.pbr)) {
         render_params.pbr = true;
-        render_params.wireframe = false;
-        render_params.checkerboard = false;
-    }
-    ImGui::SameLine();
-    if (ImGui::RadioButton("Wireframe", render_params.wireframe)) {
-        render_params.pbr = false;
-        render_params.wireframe = true;
         render_params.checkerboard = false;
     }
     ImGui::SameLine();
     if (ImGui::RadioButton("Checkerboard", render_params.checkerboard)) {
         render_params.pbr = false;
-        render_params.wireframe = false;
         render_params.checkerboard = true;
     }
     //ImGui::SliderInt("pixel style", &render_params.pixelate_level, 1, 16);
@@ -98,6 +89,7 @@ void ImGuiGlobalConsole::render() {
     ImGui::Checkbox("skybox", &render_params.skybox); ImGui::SameLine();
     ImGui::Checkbox("shadow", &render_params.shadow); ImGui::SameLine();
     //ImGui::Checkbox("reflection", &render_params.reflection); ImGui::SameLine();
+    ImGui::Checkbox("wireframe", &render_params.wireframe); ImGui::SameLine();
     ImGui::Checkbox("normal", &render_params.normal_debug); ImGui::SameLine();
     ImGui::Checkbox("bloom", &render_params.bloom);
 

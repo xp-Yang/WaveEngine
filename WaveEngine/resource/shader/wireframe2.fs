@@ -4,12 +4,16 @@ in vec3 barycentric_coords;
 
 out vec4 outColor;
 
-float edgeFactor(float pixelWidth) {
-    vec3 a3 = smoothstep(vec3(0.0), fwidth(barycentric_coords) * pixelWidth, barycentric_coords);
-    return min(min(a3.x, a3.y), a3.z);
+float edge(float pixelWidth) {
+    float min_t = min(min(barycentric_coords.x, barycentric_coords.y), barycentric_coords.z);
+    return smoothstep(-fwidth(min_t) * pixelWidth, 0.0, min_t) -
+        smoothstep(0.0, fwidth(min_t) * pixelWidth, min_t);
 }
 
 void main() {
-    vec4 wireframeColor = vec4(0.18, 0.18, 0.18, 1.0);
-    outColor = mix(wireframeColor, vec4(0.0), edgeFactor(1.0));
+    float t = edge(2.0);
+    if (t <= 0)
+        discard;
+    else
+        outColor = t * vec4(0.18, 0.18, 0.18, 1.0);
 }

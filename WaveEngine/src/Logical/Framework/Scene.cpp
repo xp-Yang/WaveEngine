@@ -171,8 +171,6 @@ void Scene::init()
 		sphere_renderable.sub_meshes.push_back(sub_mesh);
 		//world.addComponent<ExplosionComponent>(sphere_entity);
 
-		i++;
-
 		updateSpheresPosition(i);
 
 		//Meta::Serialization::Serializer::saveToJsonFile(asset_dir + "/sphere.json", world.getComponent<TransformComponent>(sphere_entity));
@@ -233,6 +231,26 @@ void Scene::init()
 		m_objects.push_back(std::shared_ptr<GObject>(cube_obj));
 	}
 
+	size_t spheres_count = 4;
+	size_t s_row_count = std::sqrt(spheres_count);
+	size_t s_col_count = spheres_count / row_count;
+	for (int i = 0; i < spheres_count; i++) {
+		auto sphere_obj = GObject::create(nullptr, "Sphere");
+		MeshComponent& mesh = sphere_obj->addComponent<MeshComponent>();
+		Asset::SubMesh sphere_sub_mesh;
+		sphere_sub_mesh.mesh_file_ref = { Asset::MeshFileType::CustomSphere, "" };
+		sphere_sub_mesh.material.albedo = Vec3(1.0f);
+		sphere_sub_mesh.material.metallic = 1.0;
+		sphere_sub_mesh.material.roughness = 0.5;
+		sphere_sub_mesh.material.ao = 0.01;
+		mesh.sub_meshes.push_back(sphere_sub_mesh);
+
+		TransformComponent& transform = sphere_obj->addComponent<TransformComponent>();
+		transform.translation = { 1.5f * (i % s_col_count), 0.5f + 1.5f * (i / s_row_count), -5.0f };
+
+		m_objects.push_back(std::shared_ptr<GObject>(sphere_obj));
+	}
+
 	{
 		GObject* plane_obj = GObject::create(nullptr, "Ground");
 		MeshComponent& plane_mesh = plane_obj->addComponent<MeshComponent>();
@@ -250,19 +268,19 @@ void Scene::init()
 		m_objects.push_back(std::shared_ptr<GObject>(plane_obj));
 	}
 
-	//{
-	//	GObject* nano_suit = loadModel(resource_dir + "/model/nanosuit/nanosuit.obj");
-	//	nano_suit->getComponent<TransformComponent>()->scale = Vec3(0.3f);
+	{
+		//GObject* nano_suit = loadModel(resource_dir + "/model/nanosuit/nanosuit.obj");
+		//nano_suit->getComponent<TransformComponent>()->scale = Vec3(0.3f);
 
-	//	GObject* vampire = loadModel(resource_dir + "/model/vampire/dancing_vampire.dae");
-	//	vampire->getComponent<TransformComponent>()->scale = Vec3(0.02f);
-	//	vampire->getComponent<TransformComponent>()->translation = Vec3(5.0f, 0.0f, 0.0f);
+		//GObject* vampire = loadModel(resource_dir + "/model/vampire/dancing_vampire.dae");
+		//vampire->getComponent<TransformComponent>()->scale = Vec3(0.02f);
+		//vampire->getComponent<TransformComponent>()->translation = Vec3(5.0f, 0.0f, 0.0f);
 
-	//	GObject* bunny_obj = loadModel(resource_dir + "/model/bunny.obj");
-	//	auto bunny_transform = bunny_obj->getComponent<TransformComponent>();
-	//	bunny_transform->scale = Vec3(30.0f);
-	//	bunny_transform->translation = Vec3(-5.0f, 0.0f, 0.0f);
-	//}
+		GObject* bunny_obj = loadModel(resource_dir + "/model/bunny.obj");
+		auto bunny_transform = bunny_obj->getComponent<TransformComponent>();
+		bunny_transform->scale = Vec3(30.0f);
+		bunny_transform->translation = Vec3(-5.0f, 0.0f, 0.0f);
+	}
 }
 
 void Scene::onUpdate(float delta_time)

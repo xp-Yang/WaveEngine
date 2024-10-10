@@ -7,6 +7,7 @@ in vec2 fragUV;
 uniform sampler2D Texture;
 //uniform sampler2DMS Texture;
 uniform sampler2D normalMap;
+uniform sampler2D wireframeMap;
 uniform sampler2D bloomMap;
 uniform sampler2D outlineMap;
 
@@ -24,6 +25,9 @@ void main()
 
     vec3 normalColor = texture(normalMap, fragUV).rgb;
     hdrColor += normalColor;
+
+    vec3 wireframeColor = texture(wireframeMap, fragUV).rgb;
+    hdrColor += wireframeColor;
 
     // tone mapping
     vec3 result = ToneMapping(hdrColor, 1.0);

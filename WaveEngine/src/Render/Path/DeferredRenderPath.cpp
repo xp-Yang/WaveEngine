@@ -73,19 +73,20 @@ void DeferredRenderPath::render()
 
     m_picking_pass->draw();
 
+    // TODO 深度需要拷贝到normal_pass和wireframe_pass
     if (render_params.normal_debug)
         m_normal_pass->draw();
     else
         m_normal_pass->clear();
     if (render_params.wireframe) {
         m_wireframe_pass->draw();
-        combine_pass->setInputPasses({ m_wireframe_pass.get(), m_normal_pass.get() });
-        combine_pass->draw();
-        return;
     }
+    else
+        m_wireframe_pass->clear();
+
     if (render_params.checkerboard) {
         m_checkerboard_pass->draw();
-        combine_pass->setInputPasses({ m_checkerboard_pass.get(), m_normal_pass.get() });
+        combine_pass->setInputPasses({ m_checkerboard_pass.get(), m_normal_pass.get(), m_wireframe_pass.get() });
         combine_pass->draw();
         return;
     }
@@ -127,7 +128,7 @@ void DeferredRenderPath::render()
     m_outline_pass->setInputPasses({ m_lighting_pass.get() }); // need the depth from the lighting pass
     m_outline_pass->draw();
 
-    combine_pass->setInputPasses({ m_lighting_pass.get(), m_normal_pass.get(), m_bloom_pass.get(), m_outline_pass.get() });
+    combine_pass->setInputPasses({ m_lighting_pass.get(), m_normal_pass.get(), m_wireframe_pass.get(), m_bloom_pass.get(), m_outline_pass.get() });
     combine_pass->draw();
 }
 
