@@ -48,16 +48,16 @@ void MeshForwardLightingPass::draw()
         k++;
     }
     shader->setInt("point_lights_size", k);
-    for (const auto& pair : m_render_source_data->render_mesh_data_hash) {
-        const auto& render_sub_mesh_data = pair.second;
-        auto& material = render_sub_mesh_data->renderMaterialData();
+    for (const auto& pair : m_render_source_data->render_mesh_nodes) {
+        const auto& render_node = pair.second;
+        auto& material = render_node->material;
         // temp
         shader->setFloat3("albedo", material.albedo);
         shader->setFloat("metallic", material.metallic);
         shader->setFloat("roughness", material.roughness);
         shader->setFloat("ao", material.ao);
 
-        shader->setMatrix("model", 1, render_sub_mesh_data->transform());
+        shader->setMatrix("model", 1, render_node->model_matrix);
         shader->setMatrix("view", 1, m_render_source_data->view_matrix);
         shader->setMatrix("projection", 1, m_render_source_data->proj_matrix);
         shader->setFloat3("cameraPos", m_render_source_data->camera_position);
@@ -65,7 +65,7 @@ void MeshForwardLightingPass::draw()
         shader->setFloat3("directionalLight.direction", light_direction);
         shader->setFloat4("directionalLight.color", light_color);
 
-        shader->setCubeTexture("skybox", 4, m_render_source_data->render_skybox_data.skybox_cube_map);
+        shader->setCubeTexture("skybox", 4, m_render_source_data->render_skybox_node.skybox_cube_map);
         shader->setBool("enable_skybox_sample", m_reflection);
         if (m_shadow_map != 0) {
             shader->setMatrix("lightSpaceMatrix", 1, light_ref_matrix);
@@ -76,7 +76,7 @@ void MeshForwardLightingPass::draw()
                 shader->setCubeTexture(cube_map_id, 6 + i, m_cube_maps[i]);
             }
         }
-        m_rhi->drawIndexed(render_sub_mesh_data->getVAO(), render_sub_mesh_data->indicesCount());
+        m_rhi->drawIndexed(render_node->mesh.getVAO(), render_node->mesh.indicesCount());
     }
     shader->stop_using();
 }

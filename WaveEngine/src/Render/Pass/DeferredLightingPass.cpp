@@ -87,14 +87,14 @@ void DeferredLightingPass::draw()
 	//	point_light_shader->stop_using();
 	//}
 	// instancing lights
-	static RenderShaderObject* point_light_instancing_shader = RenderShaderObject::getShaderObject(Asset::ShaderType::InstancingShader);
-	m_render_source_data->render_point_light_inst_mesh;
-	point_light_instancing_shader->start_using();
-	point_light_instancing_shader->setFloat4("color", Color4(0.5, 0.843, 0.12, 1.0));
-	point_light_instancing_shader->setMatrix("view", 1, m_render_source_data->view_matrix);
-	point_light_instancing_shader->setMatrix("projection", 1, m_render_source_data->proj_matrix);
-	m_rhi->drawIndexed(m_render_source_data->render_point_light_inst_mesh->getVAO(), m_render_source_data->render_point_light_inst_mesh->indicesCount(), m_render_source_data->point_light_inst_amount);
-	point_light_instancing_shader->stop_using();
+	//static RenderShaderObject* point_light_instancing_shader = RenderShaderObject::getShaderObject(Asset::ShaderType::InstancingShader);
+	//m_render_source_data->render_point_light_inst_mesh;
+	//point_light_instancing_shader->start_using();
+	//point_light_instancing_shader->setFloat4("color", Color4(0.5, 0.843, 0.12, 1.0));
+	//point_light_instancing_shader->setMatrix("view", 1, m_render_source_data->view_matrix);
+	//point_light_instancing_shader->setMatrix("projection", 1, m_render_source_data->proj_matrix);
+	//m_rhi->drawIndexed(m_render_source_data->render_point_light_inst_mesh->getVAO(), m_render_source_data->render_point_light_inst_mesh->indicesCount(), m_render_source_data->point_light_inst_amount);
+	//point_light_instancing_shader->stop_using();
 
 	m_framebuffer->unBind();
 }

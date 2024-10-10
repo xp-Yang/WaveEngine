@@ -49,21 +49,21 @@ void OutlinePass::draw()
         one_color_shader->setMatrix("view", 1, m_render_source_data->view_matrix);
         one_color_shader->setMatrix("projection", 1, m_render_source_data->proj_matrix);
 
-        auto it = std::find_if(m_render_source_data->render_mesh_data_hash.begin(), m_render_source_data->render_mesh_data_hash.end(),
-            [picked_id](const std::pair<const RenderMeshDataID, std::shared_ptr<RenderMeshData>>& pair) {
-                return pair.second->ID().object_id == picked_id;
+        auto it = std::find_if(m_render_source_data->render_mesh_nodes.begin(), m_render_source_data->render_mesh_nodes.end(),
+            [picked_id](const std::pair<const RenderMeshNodeID, std::shared_ptr<RenderMeshNode>>& pair) {
+                return pair.second->node_id.object_id == picked_id;
             }
         );
-        if (it != m_render_source_data->render_mesh_data_hash.end()) {
-            const auto& render_sub_mesh_data = it->second;
-            one_color_shader->setMatrix("model", 1, render_sub_mesh_data->transform());
+        if (it != m_render_source_data->render_mesh_nodes.end()) {
+            const auto& render_node = it->second;
+            one_color_shader->setMatrix("model", 1, render_node->model_matrix);
             int id = picked_id;
             int r = (id & 0x000000FF) >> 0;
             int g = (id & 0x0000FF00) >> 8;
             int b = (id & 0x00FF0000) >> 16;
             Color4 color(r / 255.0f, g / 255.0f, b / 255.0f, 1.0f);
             one_color_shader->setFloat4("color", color);
-            m_rhi->drawIndexed(render_sub_mesh_data->getVAO(), render_sub_mesh_data->indicesCount());
+            m_rhi->drawIndexed(render_node->mesh.getVAO(), render_node->mesh.indicesCount());
         }
     }
     auto source_map = m_source_framebuffer->colorAttachmentAt(0)->texture()->id();

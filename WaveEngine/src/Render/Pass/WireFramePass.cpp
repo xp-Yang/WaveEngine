@@ -28,9 +28,9 @@ void WireFramePass::draw()
     wireframe_shader->start_using();
     wireframe_shader->setMatrix("view", 1, m_render_source_data->view_matrix);
     wireframe_shader->setMatrix("projection", 1, m_render_source_data->proj_matrix);
-    for (const auto& pair : m_render_source_data->render_mesh_data_hash) {
-        const auto& render_sub_mesh_data = pair.second;
-        wireframe_shader->setMatrix("model", 1, render_sub_mesh_data->transform());
-        m_rhi->drawIndexed(render_sub_mesh_data->getVAO(), render_sub_mesh_data->indicesCount());
+    for (const auto& pair : m_render_source_data->render_mesh_nodes) {
+        const auto& render_node = pair.second;
+        wireframe_shader->setMatrix("model", 1, render_node->model_matrix);
+        m_rhi->drawIndexed(render_node->mesh.getVAO(), render_node->mesh.indicesCount());
     }
 }

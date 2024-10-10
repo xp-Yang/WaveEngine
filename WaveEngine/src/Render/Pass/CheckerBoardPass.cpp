@@ -28,15 +28,15 @@ void CheckerBoardPass::draw()
     shader->start_using();
     shader->setMatrix("view", 1, m_render_source_data->view_matrix);
     shader->setMatrix("projection", 1, m_render_source_data->proj_matrix);
-    for (const auto& pair : m_render_source_data->render_mesh_data_hash) {
-        const auto& render_sub_mesh_data = pair.second;
+    for (const auto& pair : m_render_source_data->render_mesh_nodes) {
+        const auto& render_node = pair.second;
         Mat4 modelScale;
         Mat4 modelRotation;
         Mat4 modelTranslation;
-        Math::DecomposeMatrix(render_sub_mesh_data->transform(), modelTranslation, modelRotation, modelScale);
+        Math::DecomposeMatrix(render_node->model_matrix, modelTranslation, modelRotation, modelScale);
         shader->setMatrix("modelScale", 1, modelScale);
-        shader->setMatrix("model", 1, render_sub_mesh_data->transform());
-        m_rhi->drawIndexed(render_sub_mesh_data->getVAO(), render_sub_mesh_data->indicesCount());
+        shader->setMatrix("model", 1, render_node->model_matrix);
+        m_rhi->drawIndexed(render_node->mesh.getVAO(), render_node->mesh.indicesCount());
     }
     shader->stop_using();
 }

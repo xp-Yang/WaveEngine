@@ -70,13 +70,13 @@ void ShadowPass::drawDirectionalLightShadowMap()
     depth_shader->start_using();
     Mat4 light_view = m_render_source_data->render_directional_light_data_list.front().lightViewMatrix;
     Mat4 light_proj = m_render_source_data->render_directional_light_data_list.front().lightProjMatrix;
-    for (const auto& pair : m_render_source_data->render_mesh_data_hash) {
-        const auto& render_sub_mesh_data = pair.second;
-        depth_shader->setMatrix("model", 1, render_sub_mesh_data->transform());
+    for (const auto& pair : m_render_source_data->render_mesh_nodes) {
+        const auto& render_node = pair.second;
+        depth_shader->setMatrix("model", 1, render_node->model_matrix);
         depth_shader->setMatrix("view", 1, light_view);
         depth_shader->setMatrix("projection", 1, light_proj);
         depth_shader->setFloat4("color", Color4(1.0));
-        m_rhi->drawIndexed(render_sub_mesh_data->getVAO(), render_sub_mesh_data->indicesCount());
+        m_rhi->drawIndexed(render_node->mesh.getVAO(), render_node->mesh.indicesCount());
     }
 }
 
@@ -110,14 +110,14 @@ void ShadowPass::drawPointLightShadowMap()
             glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
-            for (const auto& pair : m_render_source_data->render_mesh_data_hash) {
-                const auto& render_sub_mesh_data = pair.second;
-                depth_shader->setMatrix("model", 1, render_sub_mesh_data->transform());
+            for (const auto& pair : m_render_source_data->render_mesh_nodes) {
+                const auto& render_node = pair.second;
+                depth_shader->setMatrix("model", 1, render_node->model_matrix);
                 depth_shader->setMatrix("view", 1, light_view[cube_map_id][i]);
                 depth_shader->setMatrix("projection", 1, light_proj[cube_map_id]);
                 depth_shader->setFloat3("lightPos", light_pos[cube_map_id]);
                 depth_shader->setFloat("far_plane", light_radius[cube_map_id]);
-                m_rhi->drawIndexed(render_sub_mesh_data->getVAO(), render_sub_mesh_data->indicesCount());
+                m_rhi->drawIndexed(render_node->mesh.getVAO(), render_node->mesh.indicesCount());
             }
         }
     }

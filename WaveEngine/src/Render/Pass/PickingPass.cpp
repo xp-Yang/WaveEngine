@@ -32,16 +32,16 @@ void PickingPass::draw()
     picking_shader->setMatrix("projection", 1, m_render_source_data->proj_matrix);
 
     // TODO Unpickable
-    for (const auto& pair : m_render_source_data->render_mesh_data_hash) {
-        const auto& render_sub_mesh_data = pair.second;
-        picking_shader->setMatrix("model", 1, render_sub_mesh_data->transform());
-        int id = render_sub_mesh_data->ID().object_id;
+    for (const auto& pair : m_render_source_data->render_mesh_nodes) {
+        const auto& render_node = pair.second;
+        picking_shader->setMatrix("model", 1, render_node->model_matrix);
+        int id = render_node->node_id.object_id;
         int r = (id & 0x000000FF) >> 0;
         int g = (id & 0x0000FF00) >> 8;
         int b = (id & 0x00FF0000) >> 16;
         Color4 color(r / 255.0f, g / 255.0f, b / 255.0f, 1.0f);
         picking_shader->setFloat4("color", color);
-        m_rhi->drawIndexed(render_sub_mesh_data->getVAO(), render_sub_mesh_data->indicesCount());
+        m_rhi->drawIndexed(render_node->mesh.getVAO(), render_node->mesh.indicesCount());
     }
 
     m_framebuffer->unBind();

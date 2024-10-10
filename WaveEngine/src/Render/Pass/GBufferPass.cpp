@@ -41,13 +41,13 @@ void GBufferPass::draw()
     g_shader->start_using();
     g_shader->setMatrix("view", 1, m_render_source_data->view_matrix);
     g_shader->setMatrix("projection", 1, m_render_source_data->proj_matrix);
-    for (const auto& pair : m_render_source_data->render_mesh_data_hash) {
-        const auto& render_sub_mesh_data = pair.second;
-        if (render_sub_mesh_data->renderMaterialData().alpha != 1.0f)
+    for (const auto& pair : m_render_source_data->render_mesh_nodes) {
+        const auto& render_node = pair.second;
+        if (render_node->material.alpha != 1.0f)
             continue;
 
-        g_shader->setMatrix("model", 1, render_sub_mesh_data->transform());
-        auto& material = render_sub_mesh_data->renderMaterialData();
+        g_shader->setMatrix("model", 1, render_node->model_matrix);
+        auto& material = render_node->material;
         if (m_pbr) {
             g_shader->setFloat3("albedo", material.albedo);
             g_shader->setFloat("metallic", material.metallic);
@@ -58,7 +58,7 @@ void GBufferPass::draw()
             g_shader->setTexture("diffuse_map", 0, material.diffuse_map);
             g_shader->setTexture("specular_map", 1, material.specular_map);
         }
-        m_rhi->drawIndexed(render_sub_mesh_data->getVAO(), render_sub_mesh_data->indicesCount());
+        m_rhi->drawIndexed(render_node->mesh.getVAO(), render_node->mesh.indicesCount());
     }
     g_shader->stop_using();
 

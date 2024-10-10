@@ -28,14 +28,14 @@ void TransparentPass::draw()
     shader->start_using();
     shader->setMatrix("view", 1, m_render_source_data->view_matrix);
     shader->setMatrix("projection", 1, m_render_source_data->proj_matrix);
-    for (const auto& pair : m_render_source_data->render_mesh_data_hash) {
-        const auto& render_sub_mesh_data = pair.second;
-        if (render_sub_mesh_data->renderMaterialData().alpha == 1.0f)
+    for (const auto& pair : m_render_source_data->render_mesh_nodes) {
+        const auto& render_node = pair.second;
+        if (render_node->material.alpha == 1.0f)
             continue;
 
-        shader->setMatrix("model", 1, render_sub_mesh_data->transform());
+        shader->setMatrix("model", 1, render_node->model_matrix);
 
-        auto& material = render_sub_mesh_data->renderMaterialData();
+        auto& material = render_node->material;
 
         shader->setTexture("material.diffuse_map", 0, material.diffuse_map);
         shader->setTexture("material.specular_map", 1, material.specular_map);
@@ -48,7 +48,7 @@ void TransparentPass::draw()
 
         shader->setFloat("alpha", material.alpha);
 
-        m_rhi->drawIndexed(render_sub_mesh_data->getVAO(), render_sub_mesh_data->indicesCount());
+        m_rhi->drawIndexed(render_node->mesh.getVAO(), render_node->mesh.indicesCount());
     }
     shader->stop_using();
 
