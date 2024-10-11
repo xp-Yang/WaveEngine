@@ -20,38 +20,38 @@ void Scene::save()
 
 GObject* Scene::loadModel(const std::string& filepath)
 {
-//	ResourceImporter model_importer;
-//	model_importer.load(filepath);
-//	std::vector<int> obj_sub_meshes_idx = model_importer.getSubMeshesIds();
-//	if (obj_sub_meshes_idx.empty()) {
-//		//Logger::error("Model datas is empty. File loading fails. Please check if the filepath is all English.");
-//		return nullptr;
-//	}
-//	std::string name = filepath.substr(filepath.find_last_of("/\\") + 1, filepath.find_last_of('.') - filepath.find_last_of("/\\") - 1);
-//
-//#if ENABLE_ECS
-//	auto& world = ecs::World::get();
-//	auto entity = world.create_entity();
-//	world.addComponent<ecs::NameComponent>(entity).name = name;
-//	world.addComponent<TransformComponent>(entity);
-//	world.addComponent<ExplosionComponent>(entity);
-//	auto& renderable = world.addComponent<ecs::RenderableComponent>(entity);
-//	for (int idx : obj_sub_meshes_idx) {
-//		renderable.sub_meshes.push_back(Mesh{ idx, MeshFileRef{ MeshFileType::OBJ, filepath}, {}, Mat4(1.0f) });
-//	}
-//	auto res = GObject::create(nullptr, entity);
-//#else
-//	auto res = GObject::create(nullptr, name);
-//	res->addComponent<TransformComponent>();
-//	MeshComponent& mesh = res->addComponent<MeshComponent>();
-//	for (int idx : obj_sub_meshes_idx) {
-//		std::shared_ptr<Mesh> sub_mesh = model_importer.meshDataOfNode(idx);
-//		mesh.sub_meshes.push_back(sub_mesh);
-//	}
-//	m_objects.push_back(std::shared_ptr<GObject>(res));
-//#endif
-//
-//	return res;
+	ResourceImporter model_importer;
+	model_importer.load(filepath);
+	std::vector<int> obj_sub_meshes_idx = model_importer.getSubMeshesIds();
+	if (obj_sub_meshes_idx.empty()) {
+		//Logger::error("Model datas is empty. File loading fails. Please check if the filepath is all English.");
+		return nullptr;
+	}
+	std::string name = filepath.substr(filepath.find_last_of("/\\") + 1, filepath.find_last_of('.') - filepath.find_last_of("/\\") - 1);
+
+#if ENABLE_ECS
+	auto& world = ecs::World::get();
+	auto entity = world.create_entity();
+	world.addComponent<ecs::NameComponent>(entity).name = name;
+	world.addComponent<TransformComponent>(entity);
+	world.addComponent<ExplosionComponent>(entity);
+	auto& renderable = world.addComponent<ecs::RenderableComponent>(entity);
+	for (int idx : obj_sub_meshes_idx) {
+		renderable.sub_meshes.push_back(Mesh{ idx, MeshFileRef{ MeshFileType::OBJ, filepath}, {}, Mat4(1.0f) });
+	}
+	auto res = GObject::create(nullptr, entity);
+#else
+	auto res = GObject::create(nullptr, name);
+	res->addComponent<TransformComponent>();
+	MeshComponent& mesh = res->addComponent<MeshComponent>();
+	for (int idx : obj_sub_meshes_idx) {
+		std::shared_ptr<Mesh> sub_mesh = model_importer.meshDataOfNode(idx);
+		mesh.sub_meshes.push_back(sub_mesh);
+	}
+	m_objects.push_back(std::shared_ptr<GObject>(res));
+#endif
+
+	return res;
 	return nullptr;
 }
 
@@ -281,10 +281,10 @@ void Scene::init()
 		//vampire->getComponent<TransformComponent>()->scale = Vec3(0.02f);
 		//vampire->getComponent<TransformComponent>()->translation = Vec3(5.0f, 0.0f, 0.0f);
 
-		//GObject* bunny_obj = loadModel(resource_dir + "/model/bunny.obj");
-		//auto bunny_transform = bunny_obj->getComponent<TransformComponent>();
-		//bunny_transform->scale = Vec3(30.0f);
-		//bunny_transform->translation = Vec3(-5.0f, 0.0f, 0.0f);
+		GObject* bunny_obj = loadModel(resource_dir + "/model/bunny.obj");
+		auto bunny_transform = bunny_obj->getComponent<TransformComponent>();
+		bunny_transform->scale = Vec3(30.0f);
+		bunny_transform->translation = Vec3(-5.0f, 0.0f, 0.0f);
 	}
 }
 
