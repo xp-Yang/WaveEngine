@@ -1,13 +1,13 @@
 #ifndef AssetManager_hpp
 #define AssetManager_hpp
 
-#include "MeshData.hpp"
-#include "Mesh.hpp"
-#include "Material.hpp"
-#include "Shader.hpp"
-#include "Texture.hpp"
+#include "Structure/MeshData.hpp"
+#include "Structure/Mesh.hpp"
+#include "Structure/Material.hpp"
+#include "Structure/Shader.hpp"
+#include "Structure/Texture.hpp"
 
-#include "ObjImporter.hpp"
+#include "AssetLoader.hpp"
 
 // 资产类设计原则：一个资产类对应一个资产文件
 // 1. 方便序列化/反序列化

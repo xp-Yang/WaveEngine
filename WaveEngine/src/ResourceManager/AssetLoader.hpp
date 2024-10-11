@@ -1,8 +1,8 @@
 #ifndef ObjImporter_hpp
 #define ObjImporter_hpp
 
-#include "MeshData.hpp"
-#include "Material.hpp"
+#include "Structure/MeshData.hpp"
+#include "Structure/Material.hpp"
 
 class aiNode;
 class aiScene;

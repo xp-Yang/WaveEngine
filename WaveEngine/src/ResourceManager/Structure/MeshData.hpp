@@ -5,6 +5,25 @@
 
 namespace Asset {
 
+#define MAX_BONE_INFLUENCE 100
+struct Vertex {
+	Vec3 position;
+	Vec3 normal;
+	Vec2 texture_uv;
+
+	std::vector<int> m_BoneIDs = std::vector<int>(MAX_BONE_INFLUENCE, -1);
+	std::vector<float> m_Weights = std::vector<float>(MAX_BONE_INFLUENCE, 0.0f);
+};
+
+struct Triangle {
+	Triangle(const Vec3& pos1, const Vec3& pos2, const Vec3& pos3) {
+		vertices[0].position = pos1;
+		vertices[1].position = pos2;
+		vertices[2].position = pos3;
+	}
+	std::array<Vertex, 3> vertices;
+};
+
 class MeshData {
 public:
 	static std::shared_ptr<MeshData> create_cube_mesh();
