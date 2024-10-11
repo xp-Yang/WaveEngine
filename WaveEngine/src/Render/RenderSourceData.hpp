@@ -2,7 +2,8 @@
 #define RenderSourceData_hpp
 
 #include "Core/Common.hpp"
-#include "ResourceManager/AssetManager.hpp"
+#include "Logical/Texture.hpp"
+#include "Logical/Mesh.hpp"
 #include "Logical/Framework/Object/GObject.hpp"
 #include "RenderShaderObject.hpp"
 #include "Render/RHI/rhi.hpp"
@@ -10,8 +11,8 @@
 using GL_RESOURCE_HANLE = unsigned int;
 
 struct RenderTextureData {
-    RenderTextureData(const Asset::Texture& texture_asset);
-    RenderTextureData(const Asset::CubeTexture& cube_texture_asset);
+    RenderTextureData(const Texture& texture_);
+    RenderTextureData(const CubeTexture& cube_texture_);
 
     GL_RESOURCE_HANLE id;
 
@@ -19,7 +20,7 @@ struct RenderTextureData {
 };
 
 struct RenderMaterialData {
-    RenderMaterialData(const Asset::Material& material_asset);
+    RenderMaterialData(std::shared_ptr<Material> material_);
 
     GL_RESOURCE_HANLE albedo_map{ 0 };
     GL_RESOURCE_HANLE metallic_map{ 0 };
@@ -41,7 +42,7 @@ struct RenderMaterialData {
 
 class RenderMeshData {
 public:
-    RenderMeshData(const Asset::SubMesh& sub_mesh_asset);
+    RenderMeshData(std::shared_ptr<Mesh> mesh_data);
     ~RenderMeshData() { reset(); }
 
     void reset();
@@ -107,7 +108,7 @@ struct RenderMeshNode {
     RenderMaterialData material;
     Mat4 model_matrix;
 
-    void updateRenderMaterialData(const Asset::Material& material_asset);
+    void updateRenderMaterialData(std::shared_ptr<Material> material_);
 };
 
 struct RenderSkyboxNode {

@@ -3,8 +3,6 @@
 
 #include "Core/Math/Math.hpp"
 
-namespace Asset {
-
 enum class ShaderType {
 	None,
 	PristineGridShader,
@@ -28,13 +26,13 @@ enum class ShaderType {
 };
 
 struct Shader {
-	ShaderType shader_type{ ShaderType::None };
-	std::string vshader_filepath;
-	std::string fshader_filepath;
-	std::string gshader_filepath;
-};
+	Shader(const std::string& vs_filepath, const std::string& fs_filepath);
+	Shader(const std::string& vs_filepath, const std::string& fs_filepath, const std::string& gs_filepath);
 
-}
+	std::string vsCode;
+	std::string fsCode;
+	std::string gsCode;
+};
 
 #endif
 

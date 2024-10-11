@@ -24,7 +24,7 @@ void CheckerBoardPass::draw()
     m_framebuffer->bind();
     m_framebuffer->clear();
 
-    static RenderShaderObject* shader = RenderShaderObject::getShaderObject(Asset::ShaderType::CheckerboardShader);
+    static RenderShaderObject* shader = RenderShaderObject::getShaderObject(ShaderType::CheckerboardShader);
     shader->start_using();
     shader->setMatrix("view", 1, m_render_source_data->view_matrix);
     shader->setMatrix("projection", 1, m_render_source_data->proj_matrix);

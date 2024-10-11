@@ -25,8 +25,8 @@ void DeferredLightingPass::draw()
 	m_framebuffer->clear();
 
 	// deferred lighting
-	static RenderShaderObject* lighting_pbr_shader = RenderShaderObject::getShaderObject(Asset::ShaderType::DeferredLightingShader);
-	static RenderShaderObject* lighting_phong_shader = RenderShaderObject::getShaderObject(Asset::ShaderType::DeferredLightingPhongShader);
+	static RenderShaderObject* lighting_pbr_shader = RenderShaderObject::getShaderObject(ShaderType::DeferredLightingShader);
+	static RenderShaderObject* lighting_phong_shader = RenderShaderObject::getShaderObject(ShaderType::DeferredLightingPhongShader);
 	RenderShaderObject* lighting_shader = m_pbr ? lighting_pbr_shader : lighting_phong_shader;
 	RhiFrameBuffer* gbuffer_framebuffer = m_input_passes[0]->getFrameBuffer();
 	unsigned int g_position_map = gbuffer_framebuffer->colorAttachmentAt(0)->texture()->id();
@@ -75,7 +75,7 @@ void DeferredLightingPass::draw()
 	gbuffer_framebuffer->blitTo(m_framebuffer.get(), RhiTexture::Format::DEPTH);
 
 	// lights
-	//static RenderShaderObject* point_light_shader = RenderShaderObject::getShaderObject(Asset::ShaderType::OneColorShader);
+	//static RenderShaderObject* point_light_shader = RenderShaderObject::getShaderObject(ShaderType::OneColorShader);
 	//for (const auto& render_point_light_data : m_render_source_data->render_point_light_data_list) {
 	//	const auto& render_point_light_sub_mesh_data = render_point_light_data.render_sub_mesh_data;
 	//	point_light_shader->start_using();
@@ -87,7 +87,7 @@ void DeferredLightingPass::draw()
 	//	point_light_shader->stop_using();
 	//}
 	// instancing lights
-	//static RenderShaderObject* point_light_instancing_shader = RenderShaderObject::getShaderObject(Asset::ShaderType::InstancingShader);
+	//static RenderShaderObject* point_light_instancing_shader = RenderShaderObject::getShaderObject(ShaderType::InstancingShader);
 	//m_render_source_data->render_point_light_inst_mesh;
 	//point_light_instancing_shader->start_using();
 	//point_light_instancing_shader->setFloat4("color", Color4(0.5, 0.843, 0.12, 1.0));

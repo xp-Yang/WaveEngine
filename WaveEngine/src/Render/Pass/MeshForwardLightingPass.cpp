@@ -37,7 +37,7 @@ void MeshForwardLightingPass::draw()
     Vec3 light_direction = m_render_source_data->render_directional_light_data_list.front().direction;
     Vec4 light_color = m_render_source_data->render_directional_light_data_list.front().color;
 
-    static RenderShaderObject* shader = RenderShaderObject::getShaderObject(Asset::ShaderType::PBRShader);
+    static RenderShaderObject* shader = RenderShaderObject::getShaderObject(ShaderType::PBRShader);
     shader->start_using();
     int k = 0;
     for (const auto& render_point_light_data : m_render_source_data->render_point_light_data_list) {

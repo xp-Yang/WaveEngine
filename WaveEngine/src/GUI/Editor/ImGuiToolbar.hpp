@@ -2,7 +2,6 @@
 #define ImGuiToolbar_hpp
 
 #include "Core/Common.hpp"
-#include "ResourceManager/Texture.hpp"
 
 enum class ToolbarType : int {
     Translate,

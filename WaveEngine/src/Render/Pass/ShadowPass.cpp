@@ -20,7 +20,7 @@ void ShadowPass::init()
     fb->create();
     m_framebuffer = std::unique_ptr<RhiFrameBuffer>(fb);
 
-    size_t max_point_light_count = Asset::maxPointLightCount;
+    size_t max_point_light_count = 8;
     reinit_cube_maps(max_point_light_count);
 
     glGenFramebuffers(1, &m_cube_map_fbo);
@@ -66,7 +66,7 @@ void ShadowPass::drawDirectionalLightShadowMap()
     m_framebuffer->bind();
     m_framebuffer->clear();
 
-    static RenderShaderObject* depth_shader = RenderShaderObject::getShaderObject(Asset::ShaderType::OneColorShader);
+    static RenderShaderObject* depth_shader = RenderShaderObject::getShaderObject(ShaderType::OneColorShader);
     depth_shader->start_using();
     Mat4 light_view = m_render_source_data->render_directional_light_data_list.front().lightViewMatrix;
     Mat4 light_proj = m_render_source_data->render_directional_light_data_list.front().lightProjMatrix;
@@ -85,7 +85,7 @@ void ShadowPass::drawPointLightShadowMap()
     glBindFramebuffer(GL_FRAMEBUFFER, m_cube_map_fbo);
     glViewport(0, 0, DEFAULT_RENDER_RESOLUTION_Y, DEFAULT_RENDER_RESOLUTION_Y); // TODO 显然窗口大小变化后不是default大小
 
-    static RenderShaderObject* depth_shader = RenderShaderObject::getShaderObject(Asset::ShaderType::CubeMapShader);
+    static RenderShaderObject* depth_shader = RenderShaderObject::getShaderObject(ShaderType::CubeMapShader);
 
     depth_shader->start_using();
 

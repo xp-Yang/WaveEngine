@@ -17,8 +17,8 @@ void TransparentPass::draw()
 
     glDepthMask(GL_FALSE);
 
-    auto shader_asset = Asset::Shader{ Asset::ShaderType::None, std::string(RESOURCE_DIR) + "/shader/mesh.vs", std::string(RESOURCE_DIR) + "/shader/transparent.fs"};
-    static RenderShaderObject* shader = new RenderShaderObject(shader_asset);
+    auto shader_ = Shader{ std::string(RESOURCE_DIR) + "/shader/mesh.vs", std::string(RESOURCE_DIR) + "/shader/transparent.fs"};
+    static RenderShaderObject* shader = new RenderShaderObject(shader_);
 
     Mat4 light_ref_matrix = m_render_source_data->render_directional_light_data_list.front().lightProjMatrix *
         m_render_source_data->render_directional_light_data_list.front().lightViewMatrix;

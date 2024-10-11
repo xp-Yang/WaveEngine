@@ -25,7 +25,7 @@ void PickingPass::draw()
     m_framebuffer->bind();
     m_framebuffer->clear();
 
-    static RenderShaderObject* picking_shader = RenderShaderObject::getShaderObject(Asset::ShaderType::OneColorShader);
+    static RenderShaderObject* picking_shader = RenderShaderObject::getShaderObject(ShaderType::OneColorShader);
     picking_shader->start_using();
 
     picking_shader->setMatrix("view", 1, m_render_source_data->view_matrix);

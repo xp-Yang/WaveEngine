@@ -19,7 +19,7 @@ void RayTracingPass::draw()
 	m_framebuffer->bind();
 	m_framebuffer->clear();
 
-	static RenderShaderObject* rt_shader = RenderShaderObject::getShaderObject(Asset::ShaderType::RayTracingShader);
+	static RenderShaderObject* rt_shader = RenderShaderObject::getShaderObject(ShaderType::RayTracingShader);
 	auto camera = m_render_source_data->render_camera;
 
 	{

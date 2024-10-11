@@ -3,8 +3,7 @@
 
 #include <string>
 #include <vector>
-
-namespace Asset {
+#include <array>
 
 enum class TextureType {
 	None,
@@ -24,11 +23,13 @@ struct Texture {
 
 	TextureType texture_type{ TextureType::None };
 	std::string texture_filepath;
-	size_t width{ 0 };
-	size_t height{ 0 };
-	size_t channel_count{ 0 };
+	int width{ 0 };
+	int height{ 0 };
+	int channel_count{ 0 };
 	unsigned char* data;
 	bool gamma{ false };
+
+	void freeData();
 };
 
 struct CubeTexture {
@@ -42,7 +43,5 @@ struct CubeTexture {
 
 	std::array<std::string, 6> cube_texture_filepath;
 };
-
-}
 
 #endif

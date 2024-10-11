@@ -24,7 +24,7 @@ void WireFramePass::draw()
     m_framebuffer->bind();
     m_framebuffer->clear();
 
-    static RenderShaderObject* wireframe_shader = RenderShaderObject::getShaderObject(Asset::ShaderType::WireframeShader);
+    static RenderShaderObject* wireframe_shader = RenderShaderObject::getShaderObject(ShaderType::WireframeShader);
     wireframe_shader->start_using();
     wireframe_shader->setMatrix("view", 1, m_render_source_data->view_matrix);
     wireframe_shader->setMatrix("projection", 1, m_render_source_data->proj_matrix);

@@ -4,7 +4,7 @@
 #include "Core/Meta/Meta.hpp"
 #include "AllSerializer.hpp"
 
-#include "ResourceManager/AssetManager.hpp"
+#include "Logical/Mesh.hpp"
 
 #if ENABLE_ECS
 #include "Logical/Framework/ECS/Components.hpp"
@@ -43,13 +43,11 @@ inline void allMetaRegister()
 	// Mat4
 	registerClass<Mat4>();
 
-	registerClass<Asset::MeshData>();
-	registerClass<Asset::MeshFileRef>();
-	registerClass<Asset::SubMesh>();
-	registerClass<Asset::Material>();
-	registerClass<Asset::Shader>();
-	registerClass<Asset::Texture>();
-	registerClass<Asset::CubeTexture>();
+	registerClass<Mesh>();
+	registerClass<Material>();
+	registerClass<Shader>();
+	registerClass<Texture>();
+	registerClass<CubeTexture>();
 
 #if ENABLE_ECS
 	// Name

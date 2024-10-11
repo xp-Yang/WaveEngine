@@ -36,7 +36,7 @@ void BloomPass::extractBright()
     m_framebuffer->clear();
 
     auto lighted_map = m_input_passes[0]->getFrameBuffer()->colorAttachmentAt(0)->texture()->id();
-    static RenderShaderObject* extract_bright_shader = RenderShaderObject::getShaderObject(Asset::ShaderType::ExtractBrightShader);
+    static RenderShaderObject* extract_bright_shader = RenderShaderObject::getShaderObject(ShaderType::ExtractBrightShader);
     extract_bright_shader->start_using();
     extract_bright_shader->setTexture("Texture", 0, lighted_map);
     m_rhi->drawIndexed(m_render_source_data->screen_quad->getVAO(), m_render_source_data->screen_quad->indicesCount());
@@ -51,7 +51,7 @@ void BloomPass::blur()
     auto bright_map = m_framebuffer->colorAttachmentAt(0)->texture()->id();
     unsigned int map = m_pingpong_framebuffer->colorAttachmentAt(0)->texture()->id();
 
-    static RenderShaderObject* blur_shader = RenderShaderObject::getShaderObject(Asset::ShaderType::GaussianBlur);
+    static RenderShaderObject* blur_shader = RenderShaderObject::getShaderObject(ShaderType::GaussianBlur);
     bool horizontal = true;
     unsigned int amount = 8;
     blur_shader->start_using();

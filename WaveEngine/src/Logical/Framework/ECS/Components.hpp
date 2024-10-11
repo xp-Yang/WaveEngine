@@ -4,7 +4,6 @@
 #if ENABLE_ECS
 
 #include "World.hpp"
-#include "ResourceManager/AssetManager.hpp"
 #include "Logical/Input/CameraManipulator.hpp"
 
 namespace ecs {
@@ -71,18 +70,18 @@ enum class PrimitiveType {
 };
 
 struct RenderableComponent {
-	std::vector<Asset::SubMesh> sub_meshes;
+	std::vector<SubMesh> sub_meshes;
 };
 
 struct SkyboxComponent {
-	Asset::CubeTexture cube_texture;
-	Asset::SubMesh mesh;
+	CubeTexture cube_texture;
+	SubMesh mesh;
 };
 
 struct PointLightComponent {
 	Color4 luminousColor = { 1.0f, 1.0f, 1.0f, 1.0f };
 	float radius;
-	Asset::SubMesh mesh;
+	SubMesh mesh;
 	Vec3 position() {
 		auto& world = World::get();
 		for (auto entity : world.entityView<PointLightComponent>()) {

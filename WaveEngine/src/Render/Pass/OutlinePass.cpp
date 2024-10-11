@@ -44,7 +44,7 @@ void OutlinePass::draw()
     }
     for (auto picked_id : m_render_source_data->picked_ids) {
         // render the picked one
-        static RenderShaderObject* one_color_shader = RenderShaderObject::getShaderObject(Asset::ShaderType::OneColorShader);
+        static RenderShaderObject* one_color_shader = RenderShaderObject::getShaderObject(ShaderType::OneColorShader);
         one_color_shader->start_using();
         one_color_shader->setMatrix("view", 1, m_render_source_data->view_matrix);
         one_color_shader->setMatrix("projection", 1, m_render_source_data->proj_matrix);
@@ -73,7 +73,7 @@ void OutlinePass::draw()
     m_framebuffer->clear();
     m_input_passes[0]->getFrameBuffer()->blitTo(m_framebuffer.get(), RhiTexture::Format::DEPTH);
     auto obj_depth_map = m_source_framebuffer->depthAttachment()->texture()->id();
-    static RenderShaderObject* edge_shader = RenderShaderObject::getShaderObject(Asset::ShaderType::OutlineShader);
+    static RenderShaderObject* edge_shader = RenderShaderObject::getShaderObject(ShaderType::OutlineShader);
     edge_shader->start_using();
     edge_shader->setTexture("objMap", 0, source_map);
     edge_shader->setTexture("objDepthMap", 1, obj_depth_map);

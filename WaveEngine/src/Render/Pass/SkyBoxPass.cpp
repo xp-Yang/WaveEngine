@@ -17,7 +17,7 @@ void SkyBoxPass::draw()
 
     glFrontFace(GL_CW);
 
-    static RenderShaderObject* skybox_shader = RenderShaderObject::getShaderObject(Asset::ShaderType::SkyboxShader);
+    static RenderShaderObject* skybox_shader = RenderShaderObject::getShaderObject(ShaderType::SkyboxShader);
     const auto& render_skybox_sub_mesh_data = m_render_source_data->render_skybox_node.mesh;
     skybox_shader->start_using();
     skybox_shader->setMatrix("model", 1, Mat4(1.0f));

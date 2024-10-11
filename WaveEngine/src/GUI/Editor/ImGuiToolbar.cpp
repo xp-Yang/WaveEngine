@@ -1,5 +1,6 @@
 #include "ImGuiToolbar.hpp"
 #include "ImGuiCanvas.hpp"
+#include "Logical/Texture.hpp"
 #include "Logical/Framework/Scene.hpp"
 #include "Render/RenderSourceData.hpp"
 
@@ -10,9 +11,9 @@
 ImGuiToolbar::ImGuiToolbar(ImGuiCanvas* parent)
     : m_parent(parent)
 {
-    auto tranlate_icon = Asset::Texture(Asset::TextureType::Custom, std::string(RESOURCE_DIR) + "/images/toolbar_translation.png", false);
-    auto rotate_icon = Asset::Texture(Asset::TextureType::Custom, std::string(RESOURCE_DIR) + "/images/toolbar_rotate.png", false);
-    auto scale_icon = Asset::Texture(Asset::TextureType::Custom, std::string(RESOURCE_DIR) + "/images/toolbar_scale.png", false);
+    auto tranlate_icon = Texture(TextureType::Custom, std::string(RESOURCE_DIR) + "/images/toolbar_translation.png", false);
+    auto rotate_icon = Texture(TextureType::Custom, std::string(RESOURCE_DIR) + "/images/toolbar_rotate.png", false);
+    auto scale_icon = Texture(TextureType::Custom, std::string(RESOURCE_DIR) + "/images/toolbar_scale.png", false);
 
     m_tranlate_icon_id = RenderTextureData(tranlate_icon).id;
     m_rotate_icon_id = RenderTextureData(rotate_icon).id;

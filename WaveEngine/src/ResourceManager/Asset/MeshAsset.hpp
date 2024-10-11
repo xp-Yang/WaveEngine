@@ -1,10 +1,9 @@
-#ifndef Mesh_hpp
-#define Mesh_hpp
+#ifndef MeshAsset_hpp
+#define MeshAsset_hpp
 
 #include <Core/Math/Math.hpp>
-#include "Material.hpp"
 
-namespace Asset {
+namespace Asset{
 
 enum class MeshFileType {
 	None,
@@ -22,10 +21,10 @@ struct MeshFileRef {
 	std::string mesh_filepath;
 };
 
-struct SubMesh {
+struct MeshAssetDescriptor {
 	int sub_mesh_idx{ 0 };
 	MeshFileRef mesh_file_ref;
-	Material material;
+	//Material material;
 	Mat4 local_transform = Mat4(1.0f);
 };
 

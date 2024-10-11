@@ -4,7 +4,7 @@
 #include "Logical/Framework/Component/MeshComponent.hpp"
 #include "Logical/Framework/Component/TransformComponent.hpp"
 
-#include "ResourceManager/AssetManager.hpp"
+#include "ResourceManager/ResourceImporter.hpp"
 
 #include "Core/Logger/Logger.hpp"
 
@@ -20,37 +20,39 @@ void Scene::save()
 
 GObject* Scene::loadModel(const std::string& filepath)
 {
-	Asset::ObjImporter obj_importer;
-	obj_importer.load(filepath);
-	std::vector<int> obj_sub_meshes_idx = obj_importer.getSubMeshesIds();
-	if (obj_sub_meshes_idx.empty()) {
-		//Logger::error("Model datas is empty. File loading fails. Please check if the filepath is all English.");
-		return nullptr;
-	}
-	std::string name = filepath.substr(filepath.find_last_of("/\\") + 1, filepath.find_last_of('.') - filepath.find_last_of("/\\") - 1);
-
-#if ENABLE_ECS
-	auto& world = ecs::World::get();
-	auto entity = world.create_entity();
-	world.addComponent<ecs::NameComponent>(entity).name = name;
-	world.addComponent<TransformComponent>(entity);
-	world.addComponent<ExplosionComponent>(entity);
-	auto& renderable = world.addComponent<ecs::RenderableComponent>(entity);
-	for (int idx : obj_sub_meshes_idx) {
-		renderable.sub_meshes.push_back(Asset::SubMesh{ idx, Asset::MeshFileRef{ Asset::MeshFileType::OBJ, filepath}, {}, Mat4(1.0f) });
-	}
-	auto res = GObject::create(nullptr, entity);
-#else
-	auto res = GObject::create(nullptr, name);
-	res->addComponent<TransformComponent>();
-	MeshComponent& mesh = res->addComponent<MeshComponent>();
-	for (int idx : obj_sub_meshes_idx) {
-		mesh.sub_meshes.push_back(Asset::SubMesh{ idx, Asset::MeshFileRef{ Asset::MeshFileType::OBJ, filepath}, obj_importer.materialOfNode(idx), Mat4(1.0f) });
-	}
-	m_objects.push_back(std::shared_ptr<GObject>(res));
-#endif
-
-	return res;
+//	ResourceImporter model_importer;
+//	model_importer.load(filepath);
+//	std::vector<int> obj_sub_meshes_idx = model_importer.getSubMeshesIds();
+//	if (obj_sub_meshes_idx.empty()) {
+//		//Logger::error("Model datas is empty. File loading fails. Please check if the filepath is all English.");
+//		return nullptr;
+//	}
+//	std::string name = filepath.substr(filepath.find_last_of("/\\") + 1, filepath.find_last_of('.') - filepath.find_last_of("/\\") - 1);
+//
+//#if ENABLE_ECS
+//	auto& world = ecs::World::get();
+//	auto entity = world.create_entity();
+//	world.addComponent<ecs::NameComponent>(entity).name = name;
+//	world.addComponent<TransformComponent>(entity);
+//	world.addComponent<ExplosionComponent>(entity);
+//	auto& renderable = world.addComponent<ecs::RenderableComponent>(entity);
+//	for (int idx : obj_sub_meshes_idx) {
+//		renderable.sub_meshes.push_back(Mesh{ idx, MeshFileRef{ MeshFileType::OBJ, filepath}, {}, Mat4(1.0f) });
+//	}
+//	auto res = GObject::create(nullptr, entity);
+//#else
+//	auto res = GObject::create(nullptr, name);
+//	res->addComponent<TransformComponent>();
+//	MeshComponent& mesh = res->addComponent<MeshComponent>();
+//	for (int idx : obj_sub_meshes_idx) {
+//		std::shared_ptr<Mesh> sub_mesh = model_importer.meshDataOfNode(idx);
+//		mesh.sub_meshes.push_back(sub_mesh);
+//	}
+//	m_objects.push_back(std::shared_ptr<GObject>(res));
+//#endif
+//
+//	return res;
+	return nullptr;
 }
 
 std::vector<GObjectID> Scene::getPickedObjectIDs() const
@@ -79,15 +81,15 @@ void Scene::init()
 	world.addComponent<ecs::NameComponent>(skybox_entity).name = "Skybox";
 	world.addComponent<ecs::TransformComponent>(skybox_entity);
 	auto& skybox_com = world.addComponent<ecs::SkyboxComponent>(skybox_entity);
-	skybox_com.cube_texture = Asset::CubeTexture(
+	skybox_com.cube_texture = CubeTexture(
 		resource_dir + "/images/skybox/right.jpg",
 		resource_dir + "/images/skybox/left.jpg",
 		resource_dir + "/images/skybox/top.jpg",
 		resource_dir + "/images/skybox/bottom.jpg",
 		resource_dir + "/images/skybox/front.jpg",
 		resource_dir + "/images/skybox/back.jpg");
-	Asset::SubMesh sub_mesh;
-	sub_mesh.mesh_file_ref = { Asset::MeshFileType::CustomCube, "" };
+	SubMesh sub_mesh;
+	sub_mesh.mesh_file_ref = { MeshFileType::CustomCube, "" };
 	skybox_com.mesh = sub_mesh;
 
 	//createDirectionalLight
@@ -115,8 +117,8 @@ void Scene::init()
 		auto& point_light_com = world.addComponent<ecs::PointLightComponent>(point_light_entity);
 		point_light_com.radius = (point_light_transform.scale[0]) * 100.0f;
 		point_light_com.luminousColor = i == 0 ? Color4(2.0f, 2.0f, 2.0f, 1.0f) : Color4{ randomUnit(), randomUnit(), randomUnit(), 1.0f };
-		Asset::SubMesh sub_mesh;
-		sub_mesh.mesh_file_ref = { Asset::MeshFileType::CustomSphere, "" };
+		SubMesh sub_mesh;
+		sub_mesh.mesh_file_ref = { MeshFileType::CustomSphere, "" };
 		point_light_com.mesh = sub_mesh;
 	}
 
@@ -162,8 +164,8 @@ void Scene::init()
 		world.addComponent<TransformComponent>(sphere_entity);
 
 		auto& sphere_renderable = world.addComponent<ecs::RenderableComponent>(sphere_entity);
-		Asset::SubMesh sub_mesh;
-		sub_mesh.mesh_file_ref = { Asset::MeshFileType::CustomSphere, "" };
+		SubMesh sub_mesh;
+		sub_mesh.mesh_file_ref = { MeshFileType::CustomSphere, "" };
 		sub_mesh.material.albedo = Vec3(1.0f, 1.0f, 1.0f);
 		sub_mesh.material.metallic = 1.0;
 		sub_mesh.material.roughness = (1.0f / 64) * (i + 1);
@@ -186,9 +188,9 @@ void Scene::init()
 	auto& ground_transform = world.addComponent<ecs::TransformComponent>(ground_entity);
 	ground_transform.scale = Vec3(1.0f);
 	auto& ground_renderable = world.addComponent<ecs::RenderableComponent>(ground_entity);
-	Asset::SubMesh sub_mesh;
-	sub_mesh.mesh_file_ref = { Asset::MeshFileType::CustomGround, "" };
-	std::shared_ptr<Asset::Material> ground_material = std::make_shared<Asset::Material>();
+	SubMesh sub_mesh;
+	sub_mesh.mesh_file_ref = { MeshFileType::CustomGround, "" };
+	std::shared_ptr<Material> ground_material = Material::create_default_material();
 	sub_mesh.material.albedo = Vec3(1.0f, 1.0f, 1.0f);
 	sub_mesh.material.metallic = 0.0f;
 	sub_mesh.material.roughness = 1.0f;
@@ -217,12 +219,13 @@ void Scene::init()
 	for (int i = 0; i < cubes_count; i++) {
 		GObject* cube_obj = GObject::create(nullptr, "Cube");
 		MeshComponent& mesh = cube_obj->addComponent<MeshComponent>();
-		Asset::SubMesh cube_sub_mesh;
-		cube_sub_mesh.mesh_file_ref = { Asset::MeshFileType::CustomCube, "" };
-		cube_sub_mesh.material.albedo = Vec3(1.0f);
-		cube_sub_mesh.material.metallic = 1.0;
-		cube_sub_mesh.material.roughness = 0.5;
-		cube_sub_mesh.material.ao = 0.01;
+		std::shared_ptr<Mesh> cube_sub_mesh = Mesh::create_cube_mesh();
+		std::shared_ptr<Material> cube_material = Material::create_default_material();
+		cube_material->albedo = Vec3(1.0f);
+		cube_material->metallic = 1.0;
+		cube_material->roughness = 0.5;
+		cube_material->ao = 0.01;
+		cube_sub_mesh->material = cube_material;
 		mesh.sub_meshes.push_back(cube_sub_mesh);
 
 		TransformComponent& transform = cube_obj->addComponent<TransformComponent>();
@@ -237,12 +240,13 @@ void Scene::init()
 	for (int i = 0; i < spheres_count; i++) {
 		auto sphere_obj = GObject::create(nullptr, "Sphere");
 		MeshComponent& mesh = sphere_obj->addComponent<MeshComponent>();
-		Asset::SubMesh sphere_sub_mesh;
-		sphere_sub_mesh.mesh_file_ref = { Asset::MeshFileType::CustomSphere, "" };
-		sphere_sub_mesh.material.albedo = Vec3(1.0f);
-		sphere_sub_mesh.material.metallic = 1.0;
-		sphere_sub_mesh.material.roughness = 0.5;
-		sphere_sub_mesh.material.ao = 0.01;
+		std::shared_ptr<Mesh> sphere_sub_mesh = Mesh::create_icosphere_mesh(0.5f, 4);
+		std::shared_ptr<Material> sphere_material = Material::create_default_material();
+		sphere_material->albedo = Vec3(1.0f);
+		sphere_material->metallic = 1.0;
+		sphere_material->roughness = 0.5;
+		sphere_material->ao = 0.01;
+		sphere_sub_mesh->material = sphere_material;
 		mesh.sub_meshes.push_back(sphere_sub_mesh);
 
 		TransformComponent& transform = sphere_obj->addComponent<TransformComponent>();
@@ -254,12 +258,13 @@ void Scene::init()
 	{
 		GObject* plane_obj = GObject::create(nullptr, "Ground");
 		MeshComponent& plane_mesh = plane_obj->addComponent<MeshComponent>();
-		Asset::SubMesh plane_sub_mesh;
-		plane_sub_mesh.mesh_file_ref = { Asset::MeshFileType::CustomGround, "" };
-		plane_sub_mesh.material.albedo = Vec3(0.25f, 0.25f, 0.25f);
-		plane_sub_mesh.material.metallic = 0.0f;
-		plane_sub_mesh.material.roughness = 1.0f;
-		plane_sub_mesh.material.ao = 0.01;
+		std::shared_ptr<Mesh> plane_sub_mesh = Mesh::create_complex_quad_mesh(Vec2(1.0f));
+		std::shared_ptr<Material> plane_material = Material::create_default_material();
+		plane_material->albedo = Vec3(0.25f, 0.25f, 0.25f);
+		plane_material->metallic = 0.0f;
+		plane_material->roughness = 1.0f;
+		plane_material->ao = 0.01;
+		plane_sub_mesh->material = plane_material;
 		plane_mesh.sub_meshes.push_back(plane_sub_mesh);
 
 		TransformComponent& plane_transform = plane_obj->addComponent<TransformComponent>();
@@ -276,10 +281,10 @@ void Scene::init()
 		//vampire->getComponent<TransformComponent>()->scale = Vec3(0.02f);
 		//vampire->getComponent<TransformComponent>()->translation = Vec3(5.0f, 0.0f, 0.0f);
 
-		GObject* bunny_obj = loadModel(resource_dir + "/model/bunny.obj");
-		auto bunny_transform = bunny_obj->getComponent<TransformComponent>();
-		bunny_transform->scale = Vec3(30.0f);
-		bunny_transform->translation = Vec3(-5.0f, 0.0f, 0.0f);
+		//GObject* bunny_obj = loadModel(resource_dir + "/model/bunny.obj");
+		//auto bunny_transform = bunny_obj->getComponent<TransformComponent>();
+		//bunny_transform->scale = Vec3(30.0f);
+		//bunny_transform->translation = Vec3(-5.0f, 0.0f, 0.0f);
 	}
 }
 

@@ -276,9 +276,9 @@ void RenderSystem::updateRenderSourceData()
 void RenderSystem::updateRenderSourceData()
 {
     if (!m_initialized) {
-        Asset::SubMesh m_screen_quad_sub_mesh;
-        m_screen_quad_sub_mesh.mesh_file_ref = { Asset::MeshFileType::CustomScreen, "" };
-        m_render_source_data->screen_quad = std::make_shared<RenderMeshData>(m_screen_quad_sub_mesh);
+        std::shared_ptr<Mesh> screen_quad_sub_mesh;
+        screen_quad_sub_mesh = Mesh::create_screen_mesh();
+        m_render_source_data->screen_quad = std::make_shared<RenderMeshData>(screen_quad_sub_mesh);
     }
 
     if (!m_initialized) {
@@ -300,9 +300,8 @@ void RenderSystem::updateRenderSourceData()
             point_light_inst_data[i].inst_color = point_lights[i]->luminousColor;
         }
 
-        Asset::SubMesh point_light_mesh;
-        point_light_mesh.mesh_file_ref = { Asset::MeshFileType::CustomSphere, "" };
-        //m_render_source_data->render_point_light_inst_mesh = std::make_shared<RenderMeshData>(RenderMeshDataID(-99999, 0), point_light_mesh, Mat4(1.0));
+        //std::shared_ptr<Mesh> point_light_mesh = Mesh::create_icosphere_mesh(0.05f, 4);
+        //m_render_source_data->render_point_light_inst_mesh = std::make_shared<RenderMeshNode>(RenderMeshDataID(-99999, 0), point_light_mesh, Mat4(1.0));
         //m_render_source_data->render_point_light_inst_mesh->create_instancing(point_light_inst_data, point_lights.size() * sizeof(inst_data));
         m_render_source_data->point_light_inst_amount = point_lights.size();
     }
@@ -319,8 +318,6 @@ void RenderSystem::updateRenderSourceData()
             it->position = point_light->position;
         }
         else {
-            Asset::SubMesh point_light_mesh;
-            point_light_mesh.mesh_file_ref = { Asset::MeshFileType::CustomSphere, "" };
             m_render_source_data->render_point_light_data_list.emplace_back(
                 RenderPointLightData{ point_light_id, point_light->luminousColor, point_light->position, point_light->radius,
                 point_light->lightViewMatrix(), point_light->lightProjMatrix() });
@@ -328,10 +325,9 @@ void RenderSystem::updateRenderSourceData()
     }
 
     if (!m_initialized) {
-        Asset::SubMesh skybox_mesh;
-        skybox_mesh.mesh_file_ref = { Asset::MeshFileType::CustomCube, "" };
+        std::shared_ptr<Mesh> skybox_mesh = Mesh::create_cube_mesh();
         const std::string resource_dir = RESOURCE_DIR;
-        Asset::CubeTexture skybox_cube_texture = Asset::CubeTexture(
+        CubeTexture skybox_cube_texture = CubeTexture(
             resource_dir + "/images/skybox/right.jpg",
             resource_dir + "/images/skybox/left.jpg",
             resource_dir + "/images/skybox/top.jpg",
@@ -348,7 +344,7 @@ void RenderSystem::updateRenderSourceData()
         auto& model_matrix = object->getComponent<TransformComponent>()->transform();
         bool visible = object->visible();
         for (const auto& sub_mesh : sub_meshes) {
-            auto render_mesh_data_id = RenderMeshNodeID(object->ID(), sub_mesh.sub_mesh_idx);
+            auto render_mesh_data_id = RenderMeshNodeID(object->ID(), sub_mesh->sub_mesh_idx);
             auto it = m_render_source_data->render_mesh_nodes.find(render_mesh_data_id);
             if (!visible) {
                 if (it != m_render_source_data->render_mesh_nodes.end())
@@ -356,12 +352,12 @@ void RenderSystem::updateRenderSourceData()
             }
             else {
                 if (it != m_render_source_data->render_mesh_nodes.end()) {
-                    m_render_source_data->render_mesh_nodes[render_mesh_data_id]->model_matrix = (model_matrix * sub_mesh.local_transform);
-                    m_render_source_data->render_mesh_nodes[render_mesh_data_id]->updateRenderMaterialData(sub_mesh.material);
+                    m_render_source_data->render_mesh_nodes[render_mesh_data_id]->model_matrix = (model_matrix * sub_mesh->local_transform);
+                    m_render_source_data->render_mesh_nodes[render_mesh_data_id]->updateRenderMaterialData(sub_mesh->material);
                 }
                 else {
                     m_render_source_data->render_mesh_nodes.insert_or_assign(render_mesh_data_id,
-                        std::make_shared<RenderMeshNode>(render_mesh_data_id, RenderMeshData(sub_mesh), RenderMaterialData(sub_mesh.material), model_matrix));
+                        std::make_shared<RenderMeshNode>(render_mesh_data_id, RenderMeshData(sub_mesh), RenderMaterialData(sub_mesh->material), model_matrix));
                 }
             }
         }

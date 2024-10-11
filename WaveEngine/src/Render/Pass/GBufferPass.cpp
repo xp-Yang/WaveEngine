@@ -36,7 +36,7 @@ void GBufferPass::draw()
     m_framebuffer->bind();
     m_framebuffer->clear();
 
-    static RenderShaderObject* g_shader = RenderShaderObject::getShaderObject(Asset::ShaderType::GBufferShader);
+    static RenderShaderObject* g_shader = RenderShaderObject::getShaderObject(ShaderType::GBufferShader);
 
     g_shader->start_using();
     g_shader->setMatrix("view", 1, m_render_source_data->view_matrix);

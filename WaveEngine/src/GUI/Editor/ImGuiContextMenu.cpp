@@ -33,7 +33,7 @@ void ImGuiContextMenu::render()
             bool obj_transparent = false;
             auto& sub_meshes = (*context_objs.begin())->getComponent<MeshComponent>()->sub_meshes;
             for (auto& sub_mesh : sub_meshes) {
-                if (sub_mesh.material.alpha < 1.0f) {
+                if (sub_mesh->material->alpha < 1.0f) {
                     obj_transparent = true;
                     break;
                 }
@@ -41,7 +41,7 @@ void ImGuiContextMenu::render()
             if (ImGui::MenuItem("Transparent", "", obj_transparent, true)) {
                 auto& sub_meshes = (*context_objs.begin())->getComponent<MeshComponent>()->sub_meshes;
                 for (auto& sub_mesh : sub_meshes) {
-                    sub_mesh.material.alpha = obj_transparent ? 1.f : 0.3f;
+                    sub_mesh->material->alpha = obj_transparent ? 1.f : 0.3f;
                 }
             }
         }

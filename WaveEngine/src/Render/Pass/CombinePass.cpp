@@ -36,7 +36,7 @@ void CombinePass::draw()
 	m_framebuffer->clear();
 
 	// post processing
-	static RenderShaderObject* combine_shader = RenderShaderObject::getShaderObject(Asset::ShaderType::CombineShader);
+	static RenderShaderObject* combine_shader = RenderShaderObject::getShaderObject(ShaderType::CombineShader);
 	unsigned int default_map = RenderTextureData::defaultTexture().id;
 	combine_shader->start_using();
 	m_lighted_map = m_input_passes[0]->getFrameBuffer()->colorAttachmentAt(0)->texture()->id();
@@ -69,7 +69,7 @@ void CombinePass::draw()
 
 	// pristine grid
 	m_input_passes[0]->getFrameBuffer()->blitTo(m_framebuffer.get(), RhiTexture::Format::DEPTH);
-	static RenderShaderObject* grid_shader = RenderShaderObject::getShaderObject(Asset::ShaderType::PristineGridShader);
+	static RenderShaderObject* grid_shader = RenderShaderObject::getShaderObject(ShaderType::PristineGridShader);
 	grid_shader->start_using();
 	grid_shader->setMatrix("view", 1, m_render_source_data->view_matrix);
 	grid_shader->setMatrix("proj", 1, m_render_source_data->proj_matrix);

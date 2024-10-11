@@ -24,7 +24,7 @@ void NormalPass::draw()
     m_framebuffer->bind();
     m_framebuffer->clear();
 
-    static RenderShaderObject* normal_shader = RenderShaderObject::getShaderObject(Asset::ShaderType::NormalShader);
+    static RenderShaderObject* normal_shader = RenderShaderObject::getShaderObject(ShaderType::NormalShader);
     normal_shader->start_using();
     normal_shader->setMatrix("view", 1, m_render_source_data->view_matrix);
     normal_shader->setMatrix("projection", 1, m_render_source_data->proj_matrix);
