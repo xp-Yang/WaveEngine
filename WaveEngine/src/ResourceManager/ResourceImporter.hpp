@@ -29,9 +29,9 @@ public:
 	ResourceImporter() = default;
 	~ResourceImporter();
 	bool load(const std::string& obj_file_path);
-	std::shared_ptr<Mesh> meshDataOfNode(int ai_mesh_idx);
+	std::shared_ptr<Mesh> meshOfNode(int ai_mesh_idx);
 	std::shared_ptr<Material> materialOfNode(int ai_mesh_idx);
-	const std::vector<int>& getSubMeshesIds() const { return m_ai_meshes_ids; }
+	std::vector<int> getSubMeshesIds() const;
 	const std::map<std::string, BoneInfo>& getBoneInfoMap() const { return m_BoneInfoMap; }
 	int getBoneCount() const { return m_BoneCounter; }
 
@@ -45,8 +45,6 @@ private:
 	static std::unordered_map<std::string, Assimp::Importer*> m_importers;
 
 	const aiScene* m_scene{ nullptr };
-	std::vector<aiMesh*> m_ai_meshes;
-	std::vector<int> m_ai_meshes_ids;
 	std::map<std::string, BoneInfo> m_BoneInfoMap;
 	int m_BoneCounter;
 

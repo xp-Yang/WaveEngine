@@ -45,7 +45,7 @@ GObject* Scene::loadModel(const std::string& filepath)
 	res->addComponent<TransformComponent>();
 	MeshComponent& mesh = res->addComponent<MeshComponent>();
 	for (int idx : obj_sub_meshes_idx) {
-		std::shared_ptr<Mesh> sub_mesh = model_importer.meshDataOfNode(idx);
+		std::shared_ptr<Mesh> sub_mesh = model_importer.meshOfNode(idx);
 		mesh.sub_meshes.push_back(sub_mesh);
 	}
 	m_objects.push_back(std::shared_ptr<GObject>(res));
@@ -274,12 +274,12 @@ void Scene::init()
 	}
 
 	{
-		//GObject* nano_suit = loadModel(resource_dir + "/model/nanosuit/nanosuit.obj");
-		//nano_suit->getComponent<TransformComponent>()->scale = Vec3(0.3f);
+		GObject* nano_suit = loadModel(resource_dir + "/model/nanosuit/nanosuit.obj");
+		nano_suit->getComponent<TransformComponent>()->scale = Vec3(0.3f);
 
-		//GObject* vampire = loadModel(resource_dir + "/model/vampire/dancing_vampire.dae");
-		//vampire->getComponent<TransformComponent>()->scale = Vec3(0.02f);
-		//vampire->getComponent<TransformComponent>()->translation = Vec3(5.0f, 0.0f, 0.0f);
+		GObject* vampire = loadModel(resource_dir + "/model/vampire/dancing_vampire.dae");
+		vampire->getComponent<TransformComponent>()->scale = Vec3(0.02f);
+		vampire->getComponent<TransformComponent>()->translation = Vec3(5.0f, 0.0f, 0.0f);
 
 		GObject* bunny_obj = loadModel(resource_dir + "/model/bunny.obj");
 		auto bunny_transform = bunny_obj->getComponent<TransformComponent>();

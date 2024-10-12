@@ -31,43 +31,52 @@ bool ResourceImporter::load(const std::string& file_path)
         ResourceImporter::m_importers.insert({ file_path, importer });
     }
 
-    collect_ai_meshes();
-
     return true;
 }
 
-std::shared_ptr<Mesh> ResourceImporter::meshDataOfNode(int ai_mesh_idx)
+std::shared_ptr<Mesh> ResourceImporter::meshOfNode(int ai_mesh_idx)
 {
-    auto ai_mesh = m_ai_meshes[ai_mesh_idx];
+    aiMesh* ai_mesh = m_scene->mMeshes[ai_mesh_idx];
     std::shared_ptr<Mesh> res = load_sub_mesh_data(ai_mesh);
     res->sub_mesh_idx = ai_mesh_idx;
-    res->material = materialOfNode(ai_mesh_idx);
+    aiMaterial* ai_material = m_scene->mMaterials[ai_mesh->mMaterialIndex];
+    res->material = load_material(ai_material);
     return res;
 }
 
 std::shared_ptr<Material> ResourceImporter::materialOfNode(int ai_mesh_idx)
 {
-    auto ai_mesh = m_ai_meshes[ai_mesh_idx];
+    auto ai_mesh = m_scene->mMeshes[ai_mesh_idx];
     assert(ai_mesh->mMaterialIndex >= 0);
     aiMaterial* material = m_scene->mMaterials[ai_mesh->mMaterialIndex];
     return load_material(material);
 }
 
+std::vector<int> ResourceImporter::getSubMeshesIds() const
+{
+    std::vector<int> res;
+    for (int i = 0; i < m_scene->mNumMeshes; i++) {
+        res.push_back(i);
+    }
+    return res;
+}
+
 std::vector<aiMesh*> ResourceImporter::collect_ai_meshes()
 {
+    std::vector<aiMesh*> res;
+
     std::vector<aiNode*> nodes{ m_scene->mRootNode };
     while (!nodes.empty()) {
         aiNode* node = nodes.front();
         nodes.erase(nodes.begin());
         for (int i = 0; i < node->mNumMeshes; i++) {
-            m_ai_meshes_ids.push_back(node->mMeshes[i]);
-            m_ai_meshes.push_back(m_scene->mMeshes[node->mMeshes[i]]);
+            res.push_back(m_scene->mMeshes[node->mMeshes[i]]);
         }
         for (int i = 0; i < node->mNumChildren; i++) {
             nodes.push_back(node->mChildren[i]);
         }
     }
-    return m_ai_meshes;
+    return res;
 }
 
 std::shared_ptr<Mesh> ResourceImporter::load_sub_mesh_data(aiMesh* mesh)
