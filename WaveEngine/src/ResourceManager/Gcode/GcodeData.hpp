@@ -2,6 +2,7 @@
 #define GcodeData_hpp
 
 #include "Core/Common.hpp"
+#include "fast_float/fast_float.h"
 #include <charconv>
 
 using Vec3f = Math::Vec3;
@@ -24,6 +25,173 @@ static inline const std::vector<std::string> Reserved_Tags = {
     "_GP_LAST_LINE_M73_PLACEHOLDER",
     "_GP_ESTIMATED_PRINTING_TIME_PLACEHOLDER",
     "_GP_TOTAL_LAYER_NUMBER_PLACEHOLDER"
+};
+
+enum class ETags : unsigned char
+{
+    Role,
+    Wipe_Start,
+    Wipe_End,
+    Height,
+    Width,
+    Layer_Change,
+    Color_Change,
+    Pause_Print,
+    Custom_Code,
+    First_Line_M73_Placeholder,
+    Last_Line_M73_Placeholder,
+    Estimated_Printing_Time_Placeholder,
+    Total_Layer_Number_Placeholder
+};
+
+enum GCodeFlavor : unsigned char {
+    gcfMarlinLegacy, gcfKlipper, gcfRepRapSprinter, gcfRepRapFirmware, gcfRepetier, gcfTeacup, gcfMakerWare, gcfMarlinFirmware, gcfSailfish, gcfMach3, gcfMachinekit,
+    gcfSmoothie, gcfNoExtrusion
+};
+
+namespace CustomGCode {
+    enum Type
+    {
+        ColorChange,
+        PausePrint,
+        ToolChange,
+        Template,
+        Custom,
+        Unknown,
+    };
+
+    struct Item
+    {
+        bool operator<(const Item& rhs) const { return this->print_z < rhs.print_z; }
+        bool operator==(const Item& rhs) const
+        {
+            return (rhs.print_z == this->print_z) &&
+                (rhs.type == this->type) &&
+                (rhs.extruder == this->extruder) &&
+                (rhs.color == this->color) &&
+                (rhs.extra == this->extra);
+        }
+        bool operator!=(const Item& rhs) const { return !(*this == rhs); }
+
+        double      print_z;
+        Type        type;
+        int         extruder;   // Informative value for ColorChangeCode and ToolChangeCode
+        // "gcode" == ColorChangeCode   => M600 will be applied for "extruder" extruder
+        // "gcode" == ToolChangeCode    => for whole print tool will be switched to "extruder" extruder
+        std::string color;      // if gcode is equal to PausePrintCode, 
+        // this field is used for save a short message shown on Printer display 
+        std::string extra;      // this field is used for the extra data like :
+        // - G-code text for the Type::Custom 
+        // - message text for the Type::PausePrint
+    };
+}
+
+enum Axis {
+    X = 0,
+    Y,
+    Z,
+    E,
+    F,
+    //BBS: add I, J, P axis
+    I,
+    J,
+    P,
+    NUM_AXES,
+    // For the GCodeReader to mark a parsed axis, which is not in "XYZEF", it was parsed correctly.
+    UNKNOWN_AXIS = NUM_AXES,
+    NUM_AXES_WITH_UNKNOWN,
+};
+
+enum class EUnits : unsigned char
+{
+    Millimeters,
+    Inches
+};
+
+enum class EPositioningType : unsigned char
+{
+    Absolute,
+    Relative
+};
+
+enum class EProducer
+{
+    Unknown,
+    BambuStudio,
+    Slic3rPE,
+    Slic3r,
+    SuperSlicer,
+    Cura,
+    Simplify3D,
+    CraftWare,
+    ideaMaker,
+    KissSlicer
+};
+
+enum class EMoveType : unsigned char
+{
+    Noop,
+    Retract,
+    Unretract,
+    Seam,
+    Tool_change,
+    Color_change,
+    Pause_Print,
+    Custom_GCode,
+    Travel,
+    Wipe,
+    Extrude,
+    Count
+};
+
+enum ExtrusionRole : uint8_t {
+    erNone,
+    erPerimeter,
+    erExternalPerimeter,
+    erOverhangPerimeter,
+    erInternalInfill,
+    erSolidInfill,
+    erTopSolidInfill,
+    erBottomSurface,
+    erIroning,
+    erBridgeInfill,
+    erGapFill,
+    erSkirt,
+    erBrim,
+    erSupportMaterial,
+    erSupportMaterialInterface,
+    erSupportTransition,
+    erWipeTower,
+    erCustom,
+    // Extrusion role for a collection with multiple extrusion roles.
+    erMixed,
+    erCount
+};
+
+enum class EMovePathType : unsigned char
+{
+    Noop_move,
+    Linear_move,
+    Arc_move_cw,
+    Arc_move_ccw,
+    Count
+};
+
+enum NozzleType {
+    ntUndefine = 0,
+    ntHardenedSteel,
+    ntStainlessSteel,
+    ntBrass,
+    ntCount
+};
+
+enum BedType {
+    btDefault = 0,
+    btPC,
+    btEP,
+    btPEI,
+    btPTE,
+    btCount
 };
 
 static inline const float DEFAULT_TOOLPATH_WIDTH = 0.4f;
@@ -54,7 +222,48 @@ static inline bool         is_end_of_word(char c) { return is_whitespace(c) || i
 static inline const char* skip_whitespaces(const char* c) { for (; is_whitespace(*c); ++c); return c; }
 static inline const char* skip_word(const char* c) { for (; !is_end_of_word(*c); ++c); return c; }
 static inline bool is_decimal_separator_point() { char str[5] = ""; sprintf(str, "%.1f", 0.5f); return str[1] == '.'; }
-static const std::string& reserved_tag(ETags tag) { return Reserved_Tags[static_cast<unsigned char>(tag)]; }
+static inline const std::string& reserved_tag(ETags tag) { return Reserved_Tags[static_cast<unsigned char>(tag)]; }
+static inline ExtrusionRole string_to_extrusion_role(const std::string_view role)
+{
+    if (role == ("Inner wall"))
+        return erPerimeter;
+    else if (role == ("Outer wall"))
+        return erExternalPerimeter;
+    else if (role == ("Overhang wall"))
+        return erOverhangPerimeter;
+    else if (role == ("Sparse infill"))
+        return erInternalInfill;
+    else if (role == ("Internal solid infill"))
+        return erSolidInfill;
+    else if (role == ("Top surface"))
+        return erTopSolidInfill;
+    else if (role == ("Bottom surface"))
+        return erBottomSurface;
+    else if (role == ("Ironing"))
+        return erIroning;
+    else if (role == ("Bridge"))
+        return erBridgeInfill;
+    else if (role == ("Gap infill"))
+        return erGapFill;
+    else if (role == ("Skirt"))
+        return erSkirt;
+    else if (role == ("Brim"))
+        return erBrim;
+    else if (role == ("Support"))
+        return erSupportMaterial;
+    else if (role == ("Support interface"))
+        return erSupportMaterialInterface;
+    else if (role == ("Support transition"))
+        return erSupportTransition;
+    else if (role == ("Prime tower"))
+        return erWipeTower;
+    else if (role == ("Custom"))
+        return erCustom;
+    else if (role == ("Multiple"))
+        return erMixed;
+    else
+        return erNone;
+}
 static inline std::string get_time_dhms(float time_in_secs)
 {
     int days = (int)(time_in_secs / 86400.0f);
@@ -212,172 +421,6 @@ static inline float acceleration_time_from_distance(float initial_feedrate, floa
     return (acceleration != 0.0f) ? (speed_from_distance(initial_feedrate, distance, acceleration) - initial_feedrate) / acceleration : 0.0f;
 }
 
-enum class ETags : unsigned char
-{
-    Role,
-    Wipe_Start,
-    Wipe_End,
-    Height,
-    Width,
-    Layer_Change,
-    Color_Change,
-    Pause_Print,
-    Custom_Code,
-    First_Line_M73_Placeholder,
-    Last_Line_M73_Placeholder,
-    Estimated_Printing_Time_Placeholder,
-    Total_Layer_Number_Placeholder
-};
-
-enum GCodeFlavor : unsigned char {
-    gcfMarlinLegacy, gcfKlipper, gcfRepRapSprinter, gcfRepRapFirmware, gcfRepetier, gcfTeacup, gcfMakerWare, gcfMarlinFirmware, gcfSailfish, gcfMach3, gcfMachinekit,
-    gcfSmoothie, gcfNoExtrusion
-};
-
-namespace CustomGCode {
-enum Type
-{
-    ColorChange,
-    PausePrint,
-    ToolChange,
-    Template,
-    Custom,
-    Unknown,
-};
-
-struct Item
-{
-    bool operator<(const Item& rhs) const { return this->print_z < rhs.print_z; }
-    bool operator==(const Item& rhs) const
-    {
-        return (rhs.print_z == this->print_z) &&
-            (rhs.type == this->type) &&
-            (rhs.extruder == this->extruder) &&
-            (rhs.color == this->color) &&
-            (rhs.extra == this->extra);
-    }
-    bool operator!=(const Item& rhs) const { return !(*this == rhs); }
-
-    double      print_z;
-    Type        type;
-    int         extruder;   // Informative value for ColorChangeCode and ToolChangeCode
-    // "gcode" == ColorChangeCode   => M600 will be applied for "extruder" extruder
-    // "gcode" == ToolChangeCode    => for whole print tool will be switched to "extruder" extruder
-    std::string color;      // if gcode is equal to PausePrintCode, 
-    // this field is used for save a short message shown on Printer display 
-    std::string extra;      // this field is used for the extra data like :
-    // - G-code text for the Type::Custom 
-    // - message text for the Type::PausePrint
-};
-}
-
-enum Axis {
-    X = 0,
-    Y,
-    Z,
-    E,
-    F,
-    //BBS: add I, J, P axis
-    I,
-    J,
-    P,
-    NUM_AXES,
-    // For the GCodeReader to mark a parsed axis, which is not in "XYZEF", it was parsed correctly.
-    UNKNOWN_AXIS = NUM_AXES,
-    NUM_AXES_WITH_UNKNOWN,
-};
-
-enum class EUnits : unsigned char
-{
-    Millimeters,
-    Inches
-};
-
-enum class EPositioningType : unsigned char
-{
-    Absolute,
-    Relative
-};
-
-enum class EProducer
-{
-    Unknown,
-    BambuStudio,
-    Slic3rPE,
-    Slic3r,
-    SuperSlicer,
-    Cura,
-    Simplify3D,
-    CraftWare,
-    ideaMaker,
-    KissSlicer
-};
-
-enum class EMoveType : unsigned char
-{
-    Noop,
-    Retract,
-    Unretract,
-    Seam,
-    Tool_change,
-    Color_change,
-    Pause_Print,
-    Custom_GCode,
-    Travel,
-    Wipe,
-    Extrude,
-    Count
-};
-
-enum ExtrusionRole : uint8_t {
-    erNone,
-    erPerimeter,
-    erExternalPerimeter,
-    erOverhangPerimeter,
-    erInternalInfill,
-    erSolidInfill,
-    erTopSolidInfill,
-    erBottomSurface,
-    erIroning,
-    erBridgeInfill,
-    erGapFill,
-    erSkirt,
-    erBrim,
-    erSupportMaterial,
-    erSupportMaterialInterface,
-    erSupportTransition,
-    erWipeTower,
-    erCustom,
-    // Extrusion role for a collection with multiple extrusion roles.
-    erMixed,
-    erCount
-};
-
-enum class EMovePathType : unsigned char
-{
-    Noop_move,
-    Linear_move,
-    Arc_move_cw,
-    Arc_move_ccw,
-    Count
-};
-
-enum NozzleType {
-    ntUndefine = 0,
-    ntHardenedSteel,
-    ntStainlessSteel,
-    ntBrass,
-    ntCount
-};
-
-enum BedType {
-    btDefault = 0,
-    btPC,
-    btEP,
-    btPEI,
-    btPTE,
-    btCount
-};
 
 struct PrintEstimatedStatistics
 {
@@ -681,43 +724,6 @@ public:
 
     bool is_active() const { return m_active; }
     bool has_first_vertex() const { return m_first_vertex.has_value(); }
-};
-
-// Helper class used to fix the z for color change, pause print and
-// custom gcode markes
-class OptionsZCorrector
-{
-    GCodeProcessorResult& m_result;
-    std::optional<size_t> m_move_id;
-    std::optional<size_t> m_custom_gcode_per_print_z_id;
-
-public:
-    explicit OptionsZCorrector(GCodeProcessorResult& result) : m_result(result) {
-    }
-
-    void set() {
-        m_move_id = m_result.moves.size() - 1;
-        m_custom_gcode_per_print_z_id = m_result.custom_gcode_per_print_z.size() - 1;
-    }
-
-    void update(float height) {
-        if (!m_move_id.has_value() || !m_custom_gcode_per_print_z_id.has_value())
-            return;
-
-        const Vec3f position = m_result.moves.back().position;
-
-        MoveVertex& move = m_result.moves.emplace_back(m_result.moves[*m_move_id]);
-        move.position = position;
-        move.height = height;
-        m_result.moves.erase(m_result.moves.begin() + *m_move_id);
-        m_result.custom_gcode_per_print_z[*m_custom_gcode_per_print_z_id].print_z = position.z;
-        reset();
-    }
-
-    void reset() {
-        m_move_id.reset();
-        m_custom_gcode_per_print_z_id.reset();
-    }
 };
 
 //class Circle {

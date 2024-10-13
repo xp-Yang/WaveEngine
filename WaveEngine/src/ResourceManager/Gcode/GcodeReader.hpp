@@ -3,80 +3,7 @@
 
 #include "GcodeData.hpp"  
 
-class GCodeLine {
-public:
-    GCodeLine() { reset(); }
-    void reset() { m_mask = 0; memset(m_axis, 0, sizeof(m_axis)); m_raw.clear(); }
-
-    const std::string& raw() const { return m_raw; }
-    const std::string_view  cmd() const {
-        const char* cmd = skip_whitespaces(m_raw.c_str());
-        return std::string_view(cmd, skip_word(cmd) - cmd);
-    }
-    const std::string_view  comment() const
-    {
-        size_t pos = m_raw.find(';'); return (pos == std::string::npos) ? std::string_view() : std::string_view(m_raw).substr(pos + 1);
-    }
-
-    bool  has(Axis axis) const { return (m_mask & (1 << int(axis))) != 0; }
-    float value(Axis axis) const { return m_axis[axis]; }
-    bool  has(char axis) const;
-    bool  has_value(char axis, float& value) const;
-    float new_X(const GCodeReader& reader) const { return this->has(X) ? this->x() : reader.x(); }
-    float new_Y(const GCodeReader& reader) const { return this->has(Y) ? this->y() : reader.y(); }
-    float new_Z(const GCodeReader& reader) const { return this->has(Z) ? this->z() : reader.z(); }
-    float new_E(const GCodeReader& reader) const { return this->has(E) ? this->e() : reader.e(); }
-    float new_F(const GCodeReader& reader) const { return this->has(F) ? this->f() : reader.f(); }
-    float dist_X(const GCodeReader& reader) const { return this->has(X) ? (this->x() - reader.x()) : 0; }
-    float dist_Y(const GCodeReader& reader) const { return this->has(Y) ? (this->y() - reader.y()) : 0; }
-    float dist_Z(const GCodeReader& reader) const { return this->has(Z) ? (this->z() - reader.z()) : 0; }
-    float dist_E(const GCodeReader& reader) const { return this->has(E) ? (this->e() - reader.e()) : 0; }
-    float dist_XY(const GCodeReader& reader) const {
-        float x = this->has(X) ? (this->x() - reader.x()) : 0;
-        float y = this->has(Y) ? (this->y() - reader.y()) : 0;
-        return sqrt(x * x + y * y);
-    }
-    bool cmd_is(const char* cmd_test)          const { return cmd_is(m_raw, cmd_test); }
-    //BBS: modify to support G2 and G3
-    bool extruding(const GCodeReader& reader)  const { return (this->cmd_is("G1") || this->cmd_is("G2") || this->cmd_is("G3")) && this->dist_E(reader) > 0; }
-    bool retracting(const GCodeReader& reader) const { return (this->cmd_is("G1") || this->cmd_is("G2") || this->cmd_is("G3")) && this->dist_E(reader) < 0; }
-    bool travel()     const { return (this->cmd_is("G1") || this->cmd_is("G2") || this->cmd_is("G3")) && !this->has(E); }
-    void set(const GCodeReader& reader, const Axis axis, const float new_value, const int decimal_digits = 3);
-
-    bool  has_x() const { return this->has(X); }
-    bool  has_y() const { return this->has(Y); }
-    bool  has_z() const { return this->has(Z); }
-    bool  has_e() const { return this->has(E); }
-    bool  has_f() const { return this->has(F); }
-    // BBS: add I J P axis
-    bool  has_i() const { return this->has(I); }
-    bool  has_j() const { return this->has(J); }
-    bool  has_p() const { return this->has(P); }
-
-    bool  has_unknown_axis() const { return this->has(UNKNOWN_AXIS); }
-    float x() const { return m_axis[X]; }
-    float y() const { return m_axis[Y]; }
-    float z() const { return m_axis[Z]; }
-    float e() const { return m_axis[E]; }
-    float f() const { return m_axis[F]; }
-    // BBS: add I J P axis
-    float i() const { return m_axis[I]; }
-    float j() const { return m_axis[J]; }
-    float p() const { return m_axis[P]; }
-
-    static bool cmd_is(const std::string& gcode_line, const char* cmd_test) {
-        const char* cmd = skip_whitespaces(gcode_line.c_str());
-        size_t len = strlen(cmd_test);
-        return strncmp(cmd, cmd_test, len) == 0 && is_end_of_word(cmd[len]);
-    }
-
-private:
-    std::string      m_raw;
-    float            m_axis[NUM_AXES];
-    uint32_t         m_mask;
-    friend class GCodeReader;
-};
-
+class GCodeLine;
 class GCodeReader {
 public:
     typedef std::function<void(GCodeReader&, const GCodeLine&)> callback_t;
@@ -159,6 +86,80 @@ private:
     bool        m_verbose;
     // To be set by the callback to stop parsing.
     bool        m_parsing{ false };
+};
+
+class GCodeLine {
+public:
+    GCodeLine() { reset(); }
+    void reset() { m_mask = 0; memset(m_axis, 0, sizeof(m_axis)); m_raw.clear(); }
+
+    const std::string& raw() const { return m_raw; }
+    const std::string_view  cmd() const {
+        const char* cmd = skip_whitespaces(m_raw.c_str());
+        return std::string_view(cmd, skip_word(cmd) - cmd);
+    }
+    const std::string_view  comment() const
+    {
+        size_t pos = m_raw.find(';'); return (pos == std::string::npos) ? std::string_view() : std::string_view(m_raw).substr(pos + 1);
+    }
+
+    bool  has(Axis axis) const { return (m_mask & (1 << int(axis))) != 0; }
+    float value(Axis axis) const { return m_axis[axis]; }
+    bool  has(char axis) const;
+    bool  has_value(char axis, float& value) const;
+    float new_X(const GCodeReader& reader) const { return this->has(X) ? this->x() : reader.x(); }
+    float new_Y(const GCodeReader& reader) const { return this->has(Y) ? this->y() : reader.y(); }
+    float new_Z(const GCodeReader& reader) const { return this->has(Z) ? this->z() : reader.z(); }
+    float new_E(const GCodeReader& reader) const { return this->has(E) ? this->e() : reader.e(); }
+    float new_F(const GCodeReader& reader) const { return this->has(F) ? this->f() : reader.f(); }
+    float dist_X(const GCodeReader& reader) const { return this->has(X) ? (this->x() - reader.x()) : 0; }
+    float dist_Y(const GCodeReader& reader) const { return this->has(Y) ? (this->y() - reader.y()) : 0; }
+    float dist_Z(const GCodeReader& reader) const { return this->has(Z) ? (this->z() - reader.z()) : 0; }
+    float dist_E(const GCodeReader& reader) const { return this->has(E) ? (this->e() - reader.e()) : 0; }
+    float dist_XY(const GCodeReader& reader) const {
+        float x = this->has(X) ? (this->x() - reader.x()) : 0;
+        float y = this->has(Y) ? (this->y() - reader.y()) : 0;
+        return sqrt(x * x + y * y);
+    }
+    bool cmd_is(const char* cmd_test)          const { return cmd_is(m_raw, cmd_test); }
+    //BBS: modify to support G2 and G3
+    bool extruding(const GCodeReader& reader)  const { return (this->cmd_is("G1") || this->cmd_is("G2") || this->cmd_is("G3")) && this->dist_E(reader) > 0; }
+    bool retracting(const GCodeReader& reader) const { return (this->cmd_is("G1") || this->cmd_is("G2") || this->cmd_is("G3")) && this->dist_E(reader) < 0; }
+    bool travel()     const { return (this->cmd_is("G1") || this->cmd_is("G2") || this->cmd_is("G3")) && !this->has(E); }
+    void set(const GCodeReader& reader, const Axis axis, const float new_value, const int decimal_digits = 3);
+
+    bool  has_x() const { return this->has(X); }
+    bool  has_y() const { return this->has(Y); }
+    bool  has_z() const { return this->has(Z); }
+    bool  has_e() const { return this->has(E); }
+    bool  has_f() const { return this->has(F); }
+    // BBS: add I J P axis
+    bool  has_i() const { return this->has(I); }
+    bool  has_j() const { return this->has(J); }
+    bool  has_p() const { return this->has(P); }
+
+    bool  has_unknown_axis() const { return this->has(UNKNOWN_AXIS); }
+    float x() const { return m_axis[X]; }
+    float y() const { return m_axis[Y]; }
+    float z() const { return m_axis[Z]; }
+    float e() const { return m_axis[E]; }
+    float f() const { return m_axis[F]; }
+    // BBS: add I J P axis
+    float i() const { return m_axis[I]; }
+    float j() const { return m_axis[J]; }
+    float p() const { return m_axis[P]; }
+
+    static bool cmd_is(const std::string& gcode_line, const char* cmd_test) {
+        const char* cmd = skip_whitespaces(gcode_line.c_str());
+        size_t len = strlen(cmd_test);
+        return strncmp(cmd, cmd_test, len) == 0 && is_end_of_word(cmd[len]);
+    }
+
+private:
+    std::string      m_raw;
+    float            m_axis[NUM_AXES];
+    uint32_t         m_mask;
+    friend class GCodeReader;
 };
 
 #endif

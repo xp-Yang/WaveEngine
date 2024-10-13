@@ -2,7 +2,6 @@
 
 #include <float.h>
 #include <assert.h>
-#include <charconv>
 #include <utility>
 #include <chrono>
 
@@ -226,10 +225,10 @@ void GCodeProcessor::process_file(const std::string& filename, std::function<voi
             config.load_from_gcode_file(filename, ForwardCompatibilitySubstitutionRule::EnableSilent);
             apply_config(config);
         }
-        else if (m_producer == EProducer::Simplify3D)
-            apply_config_simplify3d(filename);
-        else if (m_producer == EProducer::SuperSlicer)
-            apply_config_superslicer(filename);
+        //else if (m_producer == EProducer::Simplify3D)
+        //    apply_config_simplify3d(filename);
+        //else if (m_producer == EProducer::SuperSlicer)
+        //    apply_config_superslicer(filename);
     }
 
     // process gcode
@@ -371,139 +370,11 @@ std::vector<std::pair<ExtrusionRole, float>> GCodeProcessor::get_roles_time(Prin
     return ret;
 }
 
-ConfigSubstitutions load_from_superslicer_gcode_file(const std::string& filename, DynamicPrintConfig& config, ForwardCompatibilitySubstitutionRule compatibility_rule)
-{
-    // for reference, see: ConfigBase::load_from_gcode_file()
-
-    boost::nowide::ifstream ifs(filename);
-
-    auto                      header_end_pos = ifs.tellg();
-    ConfigSubstitutionContext substitutions_ctxt(compatibility_rule);
-    size_t                    key_value_pairs = 0;
-
-    ifs.seekg(0, ifs.end);
-    auto file_length = ifs.tellg();
-    auto data_length = std::min<std::fstream::pos_type>(65535, file_length - header_end_pos);
-    ifs.seekg(file_length - data_length, ifs.beg);
-    std::vector<char> data(size_t(data_length) + 1, 0);
-    ifs.read(data.data(), data_length);
-    ifs.close();
-    key_value_pairs = ConfigBase::load_from_gcode_string_legacy(config, data.data(), substitutions_ctxt);
-
-    if (key_value_pairs < 80)
-        throw Slic3r::RuntimeError(format("Suspiciously low number of configuration values extracted from %1%: %2%", filename, key_value_pairs));
-
-    return std::move(substitutions_ctxt.substitutions);
-}
-
-void GCodeProcessor::apply_config_superslicer(const std::string& filename)
-{
-    DynamicPrintConfig config;
-    config.apply(FullPrintConfig::defaults());
-    load_from_superslicer_gcode_file(filename, config, ForwardCompatibilitySubstitutionRule::EnableSilent);
-    apply_config(config);
-}
-
 std::vector<float> GCodeProcessor::get_layers_time(PrintEstimatedStatistics::ETimeMode mode) const
 {
     return (mode < PrintEstimatedStatistics::ETimeMode::Count) ?
         m_time_processor.machines[static_cast<size_t>(mode)].layers_time :
         std::vector<float>();
-}
-
-void GCodeProcessor::apply_config_simplify3d(const std::string& filename)
-{
-    struct BedSize
-    {
-        double x{ 0.0 };
-        double y{ 0.0 };
-
-        bool is_defined() const { return x > 0.0 && y > 0.0; }
-    };
-
-    BedSize bed_size;
-    bool    producer_detected = false;
-
-    m_parser.parse_file_raw(filename, [this, &bed_size, &producer_detected](GCodeReader& reader, const char* begin, const char* end) {
-
-        auto extract_double = [](const std::string_view cmt, const std::string& key, double& out) {
-            size_t pos = cmt.find(key);
-            if (pos != cmt.npos) {
-                pos = cmt.find(',', pos);
-                if (pos != cmt.npos) {
-                    out = string_to_double_decimal_point(cmt.substr(pos + 1));
-                    return true;
-                }
-            }
-            return false;
-        };
-
-        auto extract_floats = [](const std::string_view cmt, const std::string& key, std::vector<float>& out) {
-            size_t pos = cmt.find(key);
-            if (pos != cmt.npos) {
-                pos = cmt.find(',', pos);
-                if (pos != cmt.npos) {
-                    const std::string_view data_str = cmt.substr(pos + 1);
-                    std::vector<std::string> values_str;
-                    boost::split(values_str, data_str, boost::is_any_of("|,"), boost::token_compress_on);
-                    for (const std::string& s : values_str) {
-                        out.emplace_back(static_cast<float>(string_to_double_decimal_point(s)));
-                    }
-                    return true;
-                }
-            }
-            return false;
-        };
-
-        begin = skip_whitespaces(begin, end);
-        end = remove_eols(begin, end);
-        if (begin != end) {
-            if (*begin == ';') {
-                // Comment.
-                begin = skip_whitespaces(++begin, end);
-                if (begin != end) {
-                    std::string_view comment(begin, end - begin);
-                    if (producer_detected) {
-                        if (bed_size.x == 0.0 && comment.find("strokeXoverride") != comment.npos)
-                            extract_double(comment, "strokeXoverride", bed_size.x);
-                        else if (bed_size.y == 0.0 && comment.find("strokeYoverride") != comment.npos)
-                            extract_double(comment, "strokeYoverride", bed_size.y);
-                        else if (comment.find("filamentDiameters") != comment.npos) {
-                            m_result.filament_diameters.clear();
-                            extract_floats(comment, "filamentDiameters", m_result.filament_diameters);
-                        }
-                        else if (comment.find("filamentDensities") != comment.npos) {
-                            m_result.filament_densities.clear();
-                            extract_floats(comment, "filamentDensities", m_result.filament_densities);
-                        }
-                        else if (comment.find("extruderDiameter") != comment.npos) {
-                            std::vector<float> extruder_diameters;
-                            extract_floats(comment, "extruderDiameter", extruder_diameters);
-                            m_result.extruders_count = extruder_diameters.size();
-                        }
-                    }
-                    else if (boost::starts_with(comment, "G-Code generated by Simplify3D(R)"))
-                        producer_detected = true;
-                }
-            }
-            else {
-                // Some non-empty G-code line detected, stop parsing config comments.
-                reader.quit_parsing();
-            }
-        }
-        });
-
-    if (m_result.extruders_count == 0)
-        m_result.extruders_count = std::max<size_t>(1, std::min(m_result.filament_diameters.size(), m_result.filament_densities.size()));
-
-    if (bed_size.is_defined()) {
-        m_result.printable_area = {
-            { 0.0, 0.0 },
-            { bed_size.x, 0.0 },
-            { bed_size.x, bed_size.y },
-            { 0.0, bed_size.y }
-        };
-    }
 }
 
 void GCodeProcessor::process_gcode_line(const GCodeLine& line, bool producers_enabled)
@@ -863,7 +734,7 @@ void GCodeProcessor::process_tags(const std::string_view comment, bool producers
 
     // extrusion role tag
     if (boost::starts_with(comment, reserved_tag(ETags::Role))) {
-        set_extrusion_role(ExtrusionEntity::string_to_role(comment.substr(reserved_tag(ETags::Role).length())));
+        set_extrusion_role(string_to_extrusion_role(comment.substr(reserved_tag(ETags::Role).length())));
         if (m_extrusion_role == erExternalPerimeter)
             m_seams_detector.activate(true);
         m_processing_start_custom_gcode = (m_extrusion_role == erCustom && m_g1_line_id == 0);
@@ -1593,7 +1464,7 @@ void GCodeProcessor::process_G1(const GCodeLine& line)
             m_width = static_cast<float>(m_result.filament_diameters[m_extruder_id]) * std::sqrt(delta_pos[E] / delta_xyz);
         else
             // cross section: rectangle + 2 semicircles
-            m_width = delta_pos[E] * static_cast<float>(Math::Constant::PI * sqr(filament_radius)) / (delta_xyz * m_height) + static_cast<float>(1.0 - 0.25 * Math::Constant::Math::Constant::PI) * m_height;
+            m_width = delta_pos[E] * static_cast<float>(Math::Constant::PI * sqr(filament_radius)) / (delta_xyz * m_height) + static_cast<float>(1.0 - 0.25 * Math::Constant::PI) * m_height;
 
         if (m_width == 0.0f)
             m_width = DEFAULT_TOOLPATH_WIDTH;
@@ -1660,14 +1531,14 @@ void GCodeProcessor::process_G1(const GCodeLine& line)
 
         //BBS: limite the cruise according to centripetal acceleration
         //Only need to handle when both prev and curr segment has movement in x-y plane
-        if ((prev.exit_direction(0) != 0.0f || prev.exit_direction(1) != 0.0f) &&
-            (curr.enter_direction(0) != 0.0f || curr.enter_direction(1) != 0.0f)) {
+        if ((prev.exit_direction.x != 0.0f || prev.exit_direction.y != 0.0f) &&
+            (curr.enter_direction.x != 0.0f || curr.enter_direction.y != 0.0f)) {
             Vec3f v1 = prev.exit_direction;
             v1(2, 0) = 0.0f;
-            v1.normalize();
+            Math::Normalize(v1);
             Vec3f v2 = curr.enter_direction;
             v2(2, 0) = 0.0f;
-            v2.normalize();
+            Math::Normalize(v2);
             float norm_diff = (v2 - v1).norm();
             //BBS: don't need to consider limitation of centripetal acceleration
             //when angle changing is larger than 28.96 degree or two lines are almost collinear.
@@ -2039,7 +1910,7 @@ void  GCodeProcessor::process_G2_G3(const GCodeLine& line)
             m_width = static_cast<float>(m_result.filament_diameters[m_extruder_id]) * std::sqrt(delta_pos[E] / delta_xyz);
         else
             //BBS: cross section: rectangle + 2 semicircles
-            m_width = delta_pos[E] * static_cast<float>(Math::Constant::PI * sqr(filament_radius)) / (delta_xyz * m_height) + static_cast<float>(1.0 - 0.25 * Math::Constant::Math::Constant::PI) * m_height;
+            m_width = delta_pos[E] * static_cast<float>(Math::Constant::PI * sqr(filament_radius)) / (delta_xyz * m_height) + static_cast<float>(1.0 - 0.25 * Math::Constant::PI) * m_height;
 
         if (m_width == 0.0f)
             m_width = DEFAULT_TOOLPATH_WIDTH;

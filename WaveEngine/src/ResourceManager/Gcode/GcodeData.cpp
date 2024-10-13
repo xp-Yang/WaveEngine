@@ -329,14 +329,13 @@ void TimeProcessor::post_process(const std::string& filename, std::vector<MoveVe
 {
     FilePtr in{ boost::nowide::fopen(filename.c_str(), "rb") };
     if (in.f == nullptr)
-        throw Slic3r::RuntimeError(std::string("Time estimator post process export failed.\nCannot open file for reading.\n"));
+        assert(false);// throw Slic3r::RuntimeError(std::string("Time estimator post process export failed.\nCannot open file for reading.\n"));
 
-    BOOST_LOG_TRIVIAL(info) << __FUNCTION__ << boost::format(":  before process %1%") % filename.c_str();
     // temporary file to contain modified gcode
     std::string out_path = filename + ".postprocess";
     FilePtr out{ boost::nowide::fopen(out_path.c_str(), "wb") };
     if (out.f == nullptr) {
-        throw Slic3r::RuntimeError(std::string("Time estimator post process export failed.\nCannot open file for writing.\n"));
+        assert(false);//throw Slic3r::RuntimeError(std::string("Time estimator post process export failed.\nCannot open file for writing.\n"));
     }
 
     auto time_in_minutes = [](float time_in_seconds) {
@@ -552,7 +551,7 @@ void TimeProcessor::post_process(const std::string& filename, std::vector<MoveVe
             if (ferror(out.f)) {
                 out.close();
                 boost::nowide::remove(out_path.c_str());
-                throw RuntimeError(std::string("Time estimator post process export failed.\nIs the disk full?\n"));
+                assert(false);//throw RuntimeError(std::string("Time estimator post process export failed.\nIs the disk full?\n"));
             }
             for (size_t i = 0; i < export_line.size(); ++i)
                 if (export_line[i] == '\n')
@@ -572,7 +571,7 @@ void TimeProcessor::post_process(const std::string& filename, std::vector<MoveVe
             for (;;) {
                 size_t cnt_read = ::fread(buffer.data(), 1, buffer.size(), in.f);
                 if (::ferror(in.f))
-                    throw RuntimeError(std::string("Time estimator post process export failed.\nError while reading from file.\n"));
+                    assert(false);//throw RuntimeError(std::string("Time estimator post process export failed.\nError while reading from file.\n"));
                 bool eof = cnt_read == 0;
                 auto it = buffer.begin();
                 auto it_bufend = buffer.begin() + cnt_read;
@@ -624,7 +623,6 @@ void TimeProcessor::post_process(const std::string& filename, std::vector<MoveVe
 
         out.close();
         in.close();
-        BOOST_LOG_TRIVIAL(info) << __FUNCTION__ << boost::format(":  after process %1%") % filename.c_str();
 
         // updates moves' gcode ids which have been modified by the insertion of the M73 lines
         unsigned int curr_offset_id = 0;
