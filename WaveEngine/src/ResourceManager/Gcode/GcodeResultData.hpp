@@ -4,26 +4,8 @@
 #include "Core/Common.hpp"
 #include "GcodeData.hpp"
 
-struct ConflictResult
-{
-    std::string        _objName1;
-    std::string        _objName2;
-    float             _height;
-    const void* _obj1; // nullptr means wipe tower
-    const void* _obj2;
-    int                layer = -1;
-    ConflictResult(const std::string& objName1, const std::string& objName2, float height, const void* obj1, const void* obj2)
-        : _objName1(objName1), _objName2(objName2), _height(height), _obj1(obj1), _obj2(obj2)
-    {}
-    ConflictResult() = default;
-};
-
-using ConflictResultOpt = std::optional<ConflictResult>;
-
 struct GCodeProcessorResult
 {
-    ConflictResultOpt conflict_result;
-
     struct SettingsIds
     {
         std::string print;
@@ -67,42 +49,16 @@ struct GCodeProcessorResult
     PrintEstimatedStatistics print_statistics;
     std::vector<CustomGCode::Item> custom_gcode_per_print_z;
     std::vector<std::pair<float, std::pair<size_t, size_t>>> spiral_vase_layers;
-    //BBS
     std::vector<SliceWarning> warnings;
     int nozzle_hrc;
     BedType bed_type = BedType::btCount;
 
     void reset();
 
-    //BBS: add mutex for protection of gcode result
-    mutable std::mutex result_mutex;
-
-    void  lock() const { result_mutex.lock(); }
-    void  unlock() const { result_mutex.unlock(); }
-
-    GCodeProcessorResult& operator=(const GCodeProcessorResult& other)
-    {
-        filename = other.filename;
-        id = other.id;
-        moves = other.moves;
-        lines_ends = other.lines_ends;
-        printable_area = other.printable_area;
-        bed_exclude_area = other.bed_exclude_area;
-        toolpath_outside = other.toolpath_outside;
-        label_object_enabled = other.label_object_enabled;
-        printable_height = other.printable_height;
-        settings_ids = other.settings_ids;
-        extruders_count = other.extruders_count;
-        extruder_colors = other.extruder_colors;
-        filament_diameters = other.filament_diameters;
-        filament_densities = other.filament_densities;
-        print_statistics = other.print_statistics;
-        custom_gcode_per_print_z = other.custom_gcode_per_print_z;
-        spiral_vase_layers = other.spiral_vase_layers;
-        warnings = other.warnings;
-        bed_type = other.bed_type;
-        return *this;
-    }
+    ////BBS: add mutex for protection of gcode result
+    //mutable std::mutex result_mutex;
+    //void  lock() const { result_mutex.lock(); }
+    //void  unlock() const { result_mutex.unlock(); }
 };
 
 // Helper class used to fix the z for color change, pause print and

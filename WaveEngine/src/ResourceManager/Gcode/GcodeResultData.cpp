@@ -1,7 +1,7 @@
 #include "GcodeResultData.hpp"
 
 void GCodeProcessorResult::reset() {
-    lock();
+    //lock();
 
     moves.clear();
     lines_ends.clear();
@@ -23,5 +23,5 @@ void GCodeProcessorResult::reset() {
     spiral_vase_layers = std::vector<std::pair<float, std::pair<size_t, size_t>>>();
     warnings.clear();
 
-    unlock();
+    //unlock();
 }

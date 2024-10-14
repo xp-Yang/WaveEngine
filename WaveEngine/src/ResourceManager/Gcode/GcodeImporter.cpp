@@ -2223,7 +2223,7 @@ void GCodeProcessor::process_T(const std::string_view command)
 
             // T-1 is a valid gcode line for RepRap Firmwares (used to deselects all tools)
             if ((m_flavor != gcfRepRapFirmware && m_flavor != gcfRepRapSprinter) || eid != -1)
-                assert(false); //BOOST_LOG_TRIVIAL(error) << "Invalid T command (" << command << ").";
+                ;// assert(false); //BOOST_LOG_TRIVIAL(error) << "Invalid T command (" << command << ").";
         }
         else {
             unsigned char id = static_cast<unsigned char>(eid);
@@ -2236,9 +2236,9 @@ void GCodeProcessor::process_T(const std::string_view command)
                     m_extruder_id = id;
                     m_cp_color.current = m_extruder_colors[id];
                     //BBS: increase filament change times
-                    m_result.lock();
+                    //m_result.lock();
                     m_result.print_statistics.total_filamentchanges++;
-                    m_result.unlock();
+                    //m_result.unlock();
 
                     // Specific to the MK3 MMU2:
                     // The initial value of extruder_unloaded is set to true indicating
