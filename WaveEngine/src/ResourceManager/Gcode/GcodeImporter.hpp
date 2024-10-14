@@ -10,9 +10,6 @@ class GCodeProcessor
     using ExtruderColors = std::vector<unsigned char>;
     using ExtruderTemps = std::vector<float>;
 
-    static inline const std::string Flush_Start_Tag = " FLUSH_START";
-    static inline const std::string Flush_End_Tag = " FLUSH_END";
-
 public:
     // checks the given gcode for reserved tags and returns true when finding the 1st (which is returned into found_tag)
     static bool contains_reserved_tag(const std::string& gcode, std::string& found_tag);
@@ -23,17 +20,15 @@ public:
     static int get_gcode_last_filament(const std::string& gcode_str);
     static bool get_last_z_from_gcode(const std::string& gcode_str, double& z);
 
+    static inline const std::string Flush_Start_Tag = " FLUSH_START";
+    static inline const std::string Flush_End_Tag = " FLUSH_END";
+
     static inline const float Wipe_Width = 0.05f;
     static inline const float Wipe_Height = 0.05f;
 
 public:
     GCodeProcessor();
 
-    void enable_stealth_time_estimator(bool enabled);
-    bool is_stealth_time_estimator_enabled() const {
-        return m_time_processor.machines[static_cast<size_t>(PrintEstimatedStatistics::ETimeMode::Stealth)].enabled;
-    }
-    void enable_machine_envelope_processing(bool enabled) { m_time_processor.machine_envelope_processing_enabled = enabled; }
     void reset();
 
     const GCodeProcessorResult& get_result() const { return m_result; }
@@ -48,21 +43,41 @@ public:
     void process_buffer(const std::string& buffer);
     void finalize(bool post_process);
 
-    float get_time(PrintEstimatedStatistics::ETimeMode mode) const;
-    float get_prepare_time(PrintEstimatedStatistics::ETimeMode mode) const;
-    std::string get_time_dhm(PrintEstimatedStatistics::ETimeMode mode) const;
-    std::vector<std::pair<CustomGCode::Type, std::pair<float, float>>> get_custom_gcode_times(PrintEstimatedStatistics::ETimeMode mode, bool include_remaining) const;
-
-    std::vector<std::pair<EMoveType, float>> get_moves_time(PrintEstimatedStatistics::ETimeMode mode) const;
-    std::vector<std::pair<ExtrusionRole, float>> get_roles_time(PrintEstimatedStatistics::ETimeMode mode) const;
-    std::vector<float> get_layers_time(PrintEstimatedStatistics::ETimeMode mode) const;
-
     //BBS: set offset for gcode writer
     void set_xy_offset(double x, double y) { m_x_offset = x; m_y_offset = y; }
 
+    //// TimeProcessor related
+    //void enable_stealth_time_estimator(bool enabled);
+    //bool is_stealth_time_estimator_enabled() const;
+    //void enable_machine_envelope_processing(bool enabled);
+    //float get_time(PrintEstimatedStatistics::ETimeMode mode) const;
+    //float get_prepare_time(PrintEstimatedStatistics::ETimeMode mode) const;
+    //std::string get_time_dhm(PrintEstimatedStatistics::ETimeMode mode) const;
+    //std::vector<std::pair<CustomGCode::Type, std::pair<float, float>>> get_custom_gcode_times(PrintEstimatedStatistics::ETimeMode mode, bool include_remaining) const;
+    //std::vector<std::pair<EMoveType, float>> get_moves_time(PrintEstimatedStatistics::ETimeMode mode) const;
+    //std::vector<std::pair<ExtrusionRole, float>> get_roles_time(PrintEstimatedStatistics::ETimeMode mode) const;
+    //std::vector<float> get_layers_time(PrintEstimatedStatistics::ETimeMode mode) const;
+    //// protected:
+    //float minimum_feedrate(PrintEstimatedStatistics::ETimeMode mode, float feedrate) const;
+    //float minimum_travel_feedrate(PrintEstimatedStatistics::ETimeMode mode, float feedrate) const;
+    //float get_axis_max_feedrate(PrintEstimatedStatistics::ETimeMode mode, Axis axis) const;
+    //float get_axis_max_acceleration(PrintEstimatedStatistics::ETimeMode mode, Axis axis) const;
+    //float get_axis_max_jerk(PrintEstimatedStatistics::ETimeMode mode, Axis axis) const;
+    //Vec3f get_xyz_max_jerk(PrintEstimatedStatistics::ETimeMode mode) const;
+    //float get_retract_acceleration(PrintEstimatedStatistics::ETimeMode mode) const;
+    //void  set_retract_acceleration(PrintEstimatedStatistics::ETimeMode mode, float value);
+    //float get_acceleration(PrintEstimatedStatistics::ETimeMode mode) const;
+    //void  set_acceleration(PrintEstimatedStatistics::ETimeMode mode, float value);
+    //float get_travel_acceleration(PrintEstimatedStatistics::ETimeMode mode) const;
+    //void  set_travel_acceleration(PrintEstimatedStatistics::ETimeMode mode, float value);
+    //float get_filament_load_time(size_t extruder_id);
+    //float get_filament_unload_time(size_t extruder_id);
+    //// Simulates firmware st_synchronize() call
+    //void simulate_st_synchronize(float additional_time = 0.0f);
+
 protected:
     //void apply_config(const PrintConfig& config);
-    //void apply_config(const DynamicPrintConfig& config);
+    void apply_config(/*default const DynamicPrintConfig& config*/);
     //void apply_config_simplify3d(const std::string& filename);
     //void apply_config_superslicer(const std::string& filename);
     void process_gcode_line(const GCodeLine& line, bool producers_enabled);
@@ -160,25 +175,9 @@ protected:
     //different path_type is only used for arc move
     void store_move_vertex(EMoveType type, EMovePathType path_type = EMovePathType::Noop_move);
     void set_extrusion_role(ExtrusionRole role);
-    float minimum_feedrate(PrintEstimatedStatistics::ETimeMode mode, float feedrate) const;
-    float minimum_travel_feedrate(PrintEstimatedStatistics::ETimeMode mode, float feedrate) const;
-    float get_axis_max_feedrate(PrintEstimatedStatistics::ETimeMode mode, Axis axis) const;
-    float get_axis_max_acceleration(PrintEstimatedStatistics::ETimeMode mode, Axis axis) const;
-    float get_axis_max_jerk(PrintEstimatedStatistics::ETimeMode mode, Axis axis) const;
-    Vec3f get_xyz_max_jerk(PrintEstimatedStatistics::ETimeMode mode) const;
-    float get_retract_acceleration(PrintEstimatedStatistics::ETimeMode mode) const;
-    void  set_retract_acceleration(PrintEstimatedStatistics::ETimeMode mode, float value);
-    float get_acceleration(PrintEstimatedStatistics::ETimeMode mode) const;
-    void  set_acceleration(PrintEstimatedStatistics::ETimeMode mode, float value);
-    float get_travel_acceleration(PrintEstimatedStatistics::ETimeMode mode) const;
-    void  set_travel_acceleration(PrintEstimatedStatistics::ETimeMode mode, float value);
-    float get_filament_load_time(size_t extruder_id);
-    float get_filament_unload_time(size_t extruder_id);
     int   get_filament_vitrification_temperature(size_t extrude_id);
     void process_custom_gcode_time(CustomGCode::Type code);
     void process_filaments(CustomGCode::Type code);
-    // Simulates firmware st_synchronize() call
-    void simulate_st_synchronize(float additional_time = 0.0f);
     void update_estimated_times_stats();
     void update_slice_warnings();
 
@@ -244,7 +243,8 @@ private:
     };
     EProducer m_producer;
 
-    TimeProcessor m_time_processor;
+    //TimeProcessor m_time_processor;
+
     UsedFilaments m_used_filaments;
 
     GCodeProcessorResult m_result;

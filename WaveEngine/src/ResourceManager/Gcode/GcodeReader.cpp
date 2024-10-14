@@ -152,7 +152,7 @@ const char* GCodeReader::parse_line_internal(const char* ptr, const char* end, G
         }
     }
 
-    if (gline.has(E) /* TODO && m_config.use_relative_e_distances*/)
+    if (gline.has(E) /* (true) m_config.use_relative_e_distances*/)
         m_position[E] = 0;
 
     // Skip the rest of the line.

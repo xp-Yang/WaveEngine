@@ -6,6 +6,7 @@
 #include <charconv>
 
 using Vec3f = Math::Vec3;
+using Vec2f = Math::Vec2;
 using Pointfs = std::vector<Math::Vec2>;
 using AxisCoords = std::array<double, 4>;
 
@@ -377,19 +378,6 @@ IntegerOnly<I, std::vector<T, Args...>> reserve_vector(I capacity)
     return ret;
 }
 
-// 参数1 option 都是从time_processor传过来的
-static inline void set_option_value(ConfigOptionFloats& option, size_t id, float value)
-{
-    if (id < option.values.size())
-        option.values[id] = static_cast<double>(value);
-};
-
-static inline float get_option_value(const ConfigOptionFloats& option, size_t id)
-{
-    return option.values.empty() ? 0.0f :
-        ((id < option.values.size()) ? static_cast<float>(option.values[id]) : static_cast<float>(option.values.back()));
-}
-
 static inline float estimated_acceleration_distance(float initial_rate, float target_rate, float acceleration)
 {
     return (acceleration == 0.0f) ? 0.0f : (sqr(target_rate) - sqr(initial_rate)) / (2.0f * acceleration);
@@ -529,18 +517,6 @@ struct CpColor
     void reset();
 };
 
-struct Trapezoid
-{
-    float accelerate_until{ 0.0f }; // mm
-    float decelerate_after{ 0.0f }; // mm
-    float cruise_feedrate{ 0.0f }; // mm/sec
-
-    float acceleration_time(float entry_feedrate, float acceleration) const;
-    float cruise_time() const;
-    float deceleration_time(float distance, float acceleration) const;
-    float cruise_distance() const;
-};
-
 struct UsedFilaments  // filaments per ColorChange
 {
     double color_change_cache;
@@ -568,142 +544,168 @@ struct UsedFilaments  // filaments per ColorChange
     friend class GCodeProcessor;
 };
 
-struct TimeBlock
-{
-    struct Flags
-    {
-        bool recalculate{ false };
-        bool nominal_length{ false };
-        bool prepare_stage{ false };
-    };
+// TimeProcessor 相关
 
-    struct FeedrateProfile
-    {
-        float entry{ 0.0f }; // mm/s
-        float cruise{ 0.0f }; // mm/s
-        float exit{ 0.0f }; // mm/s
-    };
+//static inline void set_option_value(ConfigOptionFloats& option, size_t id, float value)
+//{
+//    if (id < option.values.size())
+//        option.values[id] = static_cast<double>(value);
+//};
+//
+//static inline float get_option_value(const ConfigOptionFloats& option, size_t id)
+//{
+//    return option.values.empty() ? 0.0f :
+//        ((id < option.values.size()) ? static_cast<float>(option.values[id]) : static_cast<float>(option.values.back()));
+//}
 
-    EMoveType move_type{ EMoveType::Noop };
-    ExtrusionRole role{ erNone };
-    unsigned int g1_line_id{ 0 };
-    unsigned int layer_id{ 0 };
-    float distance{ 0.0f }; // mm
-    float acceleration{ 0.0f }; // mm/s^2
-    float max_entry_speed{ 0.0f }; // mm/s
-    float safe_feedrate{ 0.0f }; // mm/s
-    Flags flags;
-    FeedrateProfile feedrate_profile;
-    Trapezoid trapezoid;
+//struct TimeBlock
+//{
+//    struct Flags
+//    {
+//        bool recalculate{ false };
+//        bool nominal_length{ false };
+//        bool prepare_stage{ false };
+//    };
+//
+//    struct FeedrateProfile
+//    {
+//        float entry{ 0.0f }; // mm/s
+//        float cruise{ 0.0f }; // mm/s
+//        float exit{ 0.0f }; // mm/s
+//    };
+//
+//    struct Trapezoid
+//    {
+//        float accelerate_until{ 0.0f }; // mm
+//        float decelerate_after{ 0.0f }; // mm
+//        float cruise_feedrate{ 0.0f }; // mm/sec
+//
+//        float acceleration_time(float entry_feedrate, float acceleration) const;
+//        float cruise_time() const;
+//        float deceleration_time(float distance, float acceleration) const;
+//        float cruise_distance() const;
+//    };
+//
+//    EMoveType move_type{ EMoveType::Noop };
+//    ExtrusionRole role{ erNone };
+//    unsigned int g1_line_id{ 0 };
+//    unsigned int layer_id{ 0 };
+//    float distance{ 0.0f }; // mm
+//    float acceleration{ 0.0f }; // mm/s^2
+//    float max_entry_speed{ 0.0f }; // mm/s
+//    float safe_feedrate{ 0.0f }; // mm/s
+//    Flags flags;
+//    FeedrateProfile feedrate_profile;
+//    Trapezoid trapezoid;
+//
+//    // Calculates this block's trapezoid
+//    void calculate_trapezoid();
+//
+//    float time() const;
+//};
 
-    // Calculates this block's trapezoid
-    void calculate_trapezoid();
+//struct TimeMachine
+//{
+//    struct State
+//    {
+//        float feedrate; // mm/s
+//        float safe_feedrate; // mm/s
+//        //BBS: feedrate of X-Y-Z-E axis. But when the move is G2 and G3, X-Y will be
+//        //same value which means feedrate in X-Y plane.
+//        AxisCoords axis_feedrate; // mm/s
+//        AxisCoords abs_axis_feedrate; // mm/s
+//
+//        //BBS: unit vector of enter speed and exit speed in x-y-z space.
+//        //For line move, there are same. For arc move, there are different.
+//        Vec3f enter_direction;
+//        Vec3f exit_direction;
+//
+//        void reset();
+//    };
+//
+//    struct CustomGCodeTime
+//    {
+//        bool needed;
+//        float cache;
+//        std::vector<std::pair<CustomGCode::Type, float>> times;
+//
+//        void reset();
+//    };
+//
+//    struct G1LinesCacheItem
+//    {
+//        unsigned int id;
+//        float elapsed_time;
+//    };
+//
+//    bool enabled;
+//    float acceleration; // mm/s^2
+//    // hard limit for the acceleration, to which the firmware will clamp.
+//    float max_acceleration; // mm/s^2
+//    float retract_acceleration; // mm/s^2
+//    // hard limit for the acceleration, to which the firmware will clamp.
+//    float max_retract_acceleration; // mm/s^2
+//    float travel_acceleration; // mm/s^2
+//    // hard limit for the travel acceleration, to which the firmware will clamp.
+//    float max_travel_acceleration; // mm/s^2
+//    float extrude_factor_override_percentage;
+//    float time; // s
+//    struct StopTime
+//    {
+//        unsigned int g1_line_id;
+//        float elapsed_time;
+//    };
+//    std::vector<StopTime> stop_times;
+//    std::string line_m73_main_mask;
+//    std::string line_m73_stop_mask;
+//    State curr;
+//    State prev;
+//    CustomGCodeTime gcode_time;
+//    std::vector<TimeBlock> blocks;
+//    std::vector<G1LinesCacheItem> g1_times_cache;
+//    std::array<float, static_cast<size_t>(EMoveType::Count)> moves_time;
+//    std::array<float, static_cast<size_t>(ExtrusionRole::erCount)> roles_time;
+//    std::vector<float> layers_time;
+//    //BBS: prepare stage time before print model, including start gcode time and mostly same with start gcode time
+//    float prepare_time;
+//
+//    void reset();
+//
+//    // Simulates firmware st_synchronize() call
+//    void simulate_st_synchronize(float additional_time = 0.0f);
+//    void calculate_time(size_t keep_last_n_blocks = 0, float additional_time = 0.0f);
+//};
 
-    float time() const;
-};
-
-struct TimeMachine
-{
-    struct State
-    {
-        float feedrate; // mm/s
-        float safe_feedrate; // mm/s
-        //BBS: feedrate of X-Y-Z-E axis. But when the move is G2 and G3, X-Y will be
-        //same value which means feedrate in X-Y plane.
-        AxisCoords axis_feedrate; // mm/s
-        AxisCoords abs_axis_feedrate; // mm/s
-
-        //BBS: unit vector of enter speed and exit speed in x-y-z space.
-        //For line move, there are same. For arc move, there are different.
-        Vec3f enter_direction;
-        Vec3f exit_direction;
-
-        void reset();
-    };
-
-    struct CustomGCodeTime
-    {
-        bool needed;
-        float cache;
-        std::vector<std::pair<CustomGCode::Type, float>> times;
-
-        void reset();
-    };
-
-    struct G1LinesCacheItem
-    {
-        unsigned int id;
-        float elapsed_time;
-    };
-
-    bool enabled;
-    float acceleration; // mm/s^2
-    // hard limit for the acceleration, to which the firmware will clamp.
-    float max_acceleration; // mm/s^2
-    float retract_acceleration; // mm/s^2
-    // hard limit for the acceleration, to which the firmware will clamp.
-    float max_retract_acceleration; // mm/s^2
-    float travel_acceleration; // mm/s^2
-    // hard limit for the travel acceleration, to which the firmware will clamp.
-    float max_travel_acceleration; // mm/s^2
-    float extrude_factor_override_percentage;
-    float time; // s
-    struct StopTime
-    {
-        unsigned int g1_line_id;
-        float elapsed_time;
-    };
-    std::vector<StopTime> stop_times;
-    std::string line_m73_main_mask;
-    std::string line_m73_stop_mask;
-    State curr;
-    State prev;
-    CustomGCodeTime gcode_time;
-    std::vector<TimeBlock> blocks;
-    std::vector<G1LinesCacheItem> g1_times_cache;
-    std::array<float, static_cast<size_t>(EMoveType::Count)> moves_time;
-    std::array<float, static_cast<size_t>(ExtrusionRole::erCount)> roles_time;
-    std::vector<float> layers_time;
-    //BBS: prepare stage time before print model, including start gcode time and mostly same with start gcode time
-    float prepare_time;
-
-    void reset();
-
-    // Simulates firmware st_synchronize() call
-    void simulate_st_synchronize(float additional_time = 0.0f);
-    void calculate_time(size_t keep_last_n_blocks = 0, float additional_time = 0.0f);
-};
-
-struct TimeProcessor
-{
-    struct Planner
-    {
-        // Size of the firmware planner queue. The old 8-bit Marlins usually just managed 16 trapezoidal blocks.
-        // Let's be conservative and plan for newer boards with more memory.
-        static constexpr size_t queue_size = 64;
-        // The firmware recalculates last planner_queue_size trapezoidal blocks each time a new block is added.
-        // We are not simulating the firmware exactly, we calculate a sequence of blocks once a reasonable number of blocks accumulate.
-        static constexpr size_t refresh_threshold = queue_size * 4;
-    };
-
-    // extruder_id is currently used to correctly calculate filament load / unload times into the total print time.
-    // This is currently only really used by the MK3 MMU2:
-    // extruder_unloaded = true means no filament is loaded yet, all the filaments are parked in the MK3 MMU2 unit.
-    bool extruder_unloaded;
-    // allow to skip the lines M201/M203/M204/M205 generated by GCode::print_machine_envelope() for non-Normal time estimate mode
-    bool machine_envelope_processing_enabled;
-    MachineEnvelopeConfig machine_limits;
-    // Additional load / unload times for a filament exchange sequence.
-    float filament_load_times;
-    float filament_unload_times;
-    std::array<TimeMachine, static_cast<size_t>(PrintEstimatedStatistics::ETimeMode::Count)> machines;
-
-    void reset();
-
-    // post process the file with the given filename to add remaining time lines M73
-    // and updates moves' gcode ids accordingly
-    void post_process(const std::string& filename, std::vector<MoveVertex>& moves, std::vector<size_t>& lines_ends, size_t total_layer_num);
-};
+//struct TimeProcessor
+//{
+//    struct Planner
+//    {
+//        // Size of the firmware planner queue. The old 8-bit Marlins usually just managed 16 trapezoidal blocks.
+//        // Let's be conservative and plan for newer boards with more memory.
+//        static constexpr size_t queue_size = 64;
+//        // The firmware recalculates last planner_queue_size trapezoidal blocks each time a new block is added.
+//        // We are not simulating the firmware exactly, we calculate a sequence of blocks once a reasonable number of blocks accumulate.
+//        static constexpr size_t refresh_threshold = queue_size * 4;
+//    };
+//
+//    // extruder_id is currently used to correctly calculate filament load / unload times into the total print time.
+//    // This is currently only really used by the MK3 MMU2:
+//    // extruder_unloaded = true means no filament is loaded yet, all the filaments are parked in the MK3 MMU2 unit.
+//    bool extruder_unloaded;
+//    // allow to skip the lines M201/M203/M204/M205 generated by GCode::print_machine_envelope() for non-Normal time estimate mode
+//    bool machine_envelope_processing_enabled;
+//    MachineEnvelopeConfig machine_limits;
+//    // Additional load / unload times for a filament exchange sequence.
+//    float filament_load_times;
+//    float filament_unload_times;
+//    std::array<TimeMachine, static_cast<size_t>(PrintEstimatedStatistics::ETimeMode::Count)> machines;
+//
+//    void reset();
+//
+//    // post process the file with the given filename to add remaining time lines M73
+//    // and updates moves' gcode ids accordingly
+//    void post_process(const std::string& filename, std::vector<MoveVertex>& moves, std::vector<size_t>& lines_ends, size_t total_layer_num);
+//};
 
 class SeamsDetector
 {
