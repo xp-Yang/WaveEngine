@@ -42,6 +42,57 @@ private:
 
 };
 
+float calc_arc_radian(Vec3f start_pos, Vec3f end_pos, Vec3f center_pos, bool is_ccw)
+{
+    Vec3f delta1 = center_pos - start_pos;
+    Vec3f delta2 = center_pos - end_pos;
+    // only consider arc in x-y plane, so clean z distance
+    delta1.z = 0;
+    delta2.z = 0;
+
+    float radian;
+    if (Math::Length(delta1 - delta2) < 1e-6) {
+        // start_pos is same with end_pos, we think it's a full circle
+        radian = 2 * Math::Constant::PI;
+    }
+    else {
+        double dot = Math::Dot(delta1,delta2);
+        double cross = (double)delta1.x * (double)delta2.y - (double)delta1.y * (double)delta2.x;
+        radian = atan2(cross, dot);
+        if (is_ccw)
+            radian = (radian < 0) ? 2 * Math::Constant::PI + radian : radian;
+        else
+            radian = (radian < 0) ? abs(radian) : 2 * Math::Constant::PI - radian;
+    }
+    return radian;
+}
+
+float calc_arc_radius(Vec3f start_pos, Vec3f center_pos)
+{
+    Vec3f delta1 = center_pos - start_pos;
+    delta1.z = 0;
+    return Math::Length(delta1);
+}
+
+float calc_arc_length(Vec3f start_pos, Vec3f end_pos, Vec3f center_pos, bool is_ccw)
+{
+    return calc_arc_radius(start_pos, center_pos) * calc_arc_radian(start_pos, end_pos, center_pos, is_ccw);
+}
+
+Vec3f calc_tangential_vector(const Vec3f& pos, const Vec3f& center_pos, const bool is_ccw)
+{
+    Vec3f dir = center_pos - pos;
+    dir.z = 0;
+    Math::Normalize(dir);
+    Vec3f res;
+    if (is_ccw)
+        res = { dir.y, -dir.x, 0.0f };
+    else
+        res = { -dir.y, dir.x, 0.0f };
+    return res;
+}
+
+
 bool GCodeProcessor::contains_reserved_tag(const std::string& gcode, std::string& found_tag)
 {
     bool ret = false;
@@ -1670,14 +1721,14 @@ void  GCodeProcessor::process_G2_G3(const GCodeLine& line)
     };
 
     auto arc_interpolation = [this](const Vec3f& start_pos, const Vec3f& end_pos, const Vec3f& center_pos, const bool is_ccw) {
-        float radius = ArcSegment::calc_arc_radius(start_pos, center_pos);
+        float radius = calc_arc_radius(start_pos, center_pos);
         //BBS: radius is too small to draw
         if (radius <= DRAW_ARC_TOLERANCE) {
             m_interpolation_points.resize(0);
             return;
         }
         float radian_step = 2 * acos((radius - DRAW_ARC_TOLERANCE) / radius);
-        float num = ArcSegment::calc_arc_radian(start_pos, end_pos, center_pos, is_ccw) / radian_step;
+        float num = calc_arc_radian(start_pos, end_pos, center_pos, is_ccw) / radian_step;
         float z_step = (num < 1) ? end_pos.z - start_pos.z : (end_pos.z - start_pos.z) / num;
         radian_step = is_ccw ? radian_step : -radian_step;
         int interpolation_num = floor(num);
@@ -1718,14 +1769,14 @@ void  GCodeProcessor::process_G2_G3(const GCodeLine& line)
     Vec3f end_point = Vec3f(m_end_position[X], m_end_position[Y], m_end_position[Z]);
     float arc_length;
     if (!line.has(P))
-        arc_length = ArcSegment::calc_arc_length(start_point, end_point, m_arc_center, (m_move_path_type == EMovePathType::Arc_move_ccw));
+        arc_length = calc_arc_length(start_point, end_point, m_arc_center, (m_move_path_type == EMovePathType::Arc_move_ccw));
     else
-        arc_length = ((int)line.p()) * 2 * Math::Constant::PI * (start_point - m_arc_center).norm();
+        arc_length = ((int)line.p()) * 2 * Math::Constant::PI * Math::Length(start_point - m_arc_center);
     //BBS: Attention! arc_onterpolation does not support P mode while P is not 1.
     arc_interpolation(start_point, end_point, m_arc_center, (m_move_path_type == EMovePathType::Arc_move_ccw));
-    float radian = ArcSegment::calc_arc_radian(start_point, end_point, m_arc_center, (m_move_path_type == EMovePathType::Arc_move_ccw));
-    Vec3f start_dir = Circle::calc_tangential_vector(start_point, m_arc_center, (m_move_path_type == EMovePathType::Arc_move_ccw));
-    Vec3f end_dir = Circle::calc_tangential_vector(end_point, m_arc_center, (m_move_path_type == EMovePathType::Arc_move_ccw));
+    float radian = calc_arc_radian(start_point, end_point, m_arc_center, (m_move_path_type == EMovePathType::Arc_move_ccw));
+    Vec3f start_dir = calc_tangential_vector(start_point, m_arc_center, (m_move_path_type == EMovePathType::Arc_move_ccw));
+    Vec3f end_dir = calc_tangential_vector(end_point, m_arc_center, (m_move_path_type == EMovePathType::Arc_move_ccw));
 
     //BBS: updates feedrate from line, if present
     if (line.has_f())
@@ -1793,7 +1844,7 @@ void  GCodeProcessor::process_G2_G3(const GCodeLine& line)
     //BBS: time estimate section
     assert(delta_xyz != 0.0f);
     float inv_distance = 1.0f / delta_xyz;
-    float radius = ArcSegment::calc_arc_radius(start_point, m_arc_center);
+    float radius = calc_arc_radius(start_point, m_arc_center);
 
     //BBS: seam detector
     Vec3f plate_offset = { (float)m_x_offset, (float)m_y_offset, 0.0f };
@@ -2240,7 +2291,7 @@ void GCodeProcessor::store_move_vertex(EMoveType type, EMovePathType path_type)
         static_cast<float>(m_layer_id), //layer_duration: set later
         //BBS: add arc move related data
         path_type,
-        Vec3f(m_arc_center(0, 0) + m_x_offset, m_arc_center(1, 0) + m_y_offset, m_arc_center(2, 0)) + m_extruder_offsets[m_extruder_id],
+        Vec3f(m_arc_center.x + m_x_offset, m_arc_center.y + m_y_offset, m_arc_center.z) + m_extruder_offsets[m_extruder_id],
         m_interpolation_points,
         });
 }

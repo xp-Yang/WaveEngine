@@ -13,6 +13,9 @@
 
 #include "Core/Signal/Signal.hpp"
 
+#include "ResourceManager/Gcode/GcodeImporter.hpp"
+
+class GCodeProcessorResult;
 class Scene {
 public:
 	void load();
@@ -22,6 +25,7 @@ public:
 
 	void onUpdate(float delta_time);
 	GObject* loadModel(const std::string& filepath);
+	GCodeProcessorResult&& loadGcodeFile(const std::string& filepath);
 #if ENABLE_ECS
 	GObject* object(const Entity& entity) { return m_root_object->find(entity); }
 #else

@@ -5,6 +5,7 @@
 #include "Logical/Framework/Component/TransformComponent.hpp"
 
 #include "ResourceManager/ResourceImporter.hpp"
+#include "ResourceManager/Gcode/GcodeImporter.hpp"
 
 #include "Core/Logger/Logger.hpp"
 
@@ -52,7 +53,15 @@ GObject* Scene::loadModel(const std::string& filepath)
 #endif
 
 	return res;
-	return nullptr;
+}
+
+GCodeProcessorResult&& Scene::loadGcodeFile(const std::string& filepath)
+{
+	GCodeProcessor gcode_importer;
+	gcode_importer.process_file(filepath);
+	GCodeProcessorResult&& result = std::move(gcode_importer.extract_result());
+	result.warnings;
+	return std::move(result);
 }
 
 std::vector<GObjectID> Scene::getPickedObjectIDs() const
@@ -236,7 +245,7 @@ void Scene::init()
 
 	size_t spheres_count = 4;
 	size_t s_row_count = std::sqrt(spheres_count);
-	size_t s_col_count = spheres_count / row_count;
+	size_t s_col_count = spheres_count / s_row_count;
 	for (int i = 0; i < spheres_count; i++) {
 		auto sphere_obj = GObject::create(nullptr, "Sphere");
 		MeshComponent& mesh = sphere_obj->addComponent<MeshComponent>();
@@ -274,12 +283,12 @@ void Scene::init()
 	}
 
 	{
-		GObject* nano_suit = loadModel(resource_dir + "/model/nanosuit/nanosuit.obj");
-		nano_suit->getComponent<TransformComponent>()->scale = Vec3(0.3f);
+		//GObject* nano_suit = loadModel(resource_dir + "/model/nanosuit/nanosuit.obj");
+		//nano_suit->getComponent<TransformComponent>()->scale = Vec3(0.3f);
 
-		GObject* vampire = loadModel(resource_dir + "/model/vampire/dancing_vampire.dae");
-		vampire->getComponent<TransformComponent>()->scale = Vec3(0.02f);
-		vampire->getComponent<TransformComponent>()->translation = Vec3(5.0f, 0.0f, 0.0f);
+		//GObject* vampire = loadModel(resource_dir + "/model/vampire/dancing_vampire.dae");
+		//vampire->getComponent<TransformComponent>()->scale = Vec3(0.02f);
+		//vampire->getComponent<TransformComponent>()->translation = Vec3(5.0f, 0.0f, 0.0f);
 
 		GObject* bunny_obj = loadModel(resource_dir + "/model/bunny.obj");
 		auto bunny_transform = bunny_obj->getComponent<TransformComponent>();

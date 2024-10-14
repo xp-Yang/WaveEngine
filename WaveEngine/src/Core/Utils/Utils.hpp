@@ -13,20 +13,20 @@ inline std::string trim(const std::string& str, const std::string& spaces = " \t
     return str.substr(a, b - a);
 }
 
-bool starts_with(const std::string& str, const std::string& prefix) {
+inline bool starts_with(const std::string& str, const std::string& prefix) {
     if (prefix.size() > str.size()) {
         return false;
     }
     return str.compare(0, prefix.size(), prefix) == 0;
 }
-bool starts_with(const std::string_view& str, const std::string_view& prefix) {
+inline bool starts_with(const std::string_view& str, const std::string_view& prefix) {
     if (prefix.size() > str.size()) {
         return false;
     }
     return str.compare(0, prefix.size(), prefix) == 0;
 }
 
-bool iequals(const std::string& str1, const std::string& str2) {
+inline bool iequals(const std::string& str1, const std::string& str2) {
     if (str1.size() != str2.size()) {
         return false;
     }
@@ -34,7 +34,7 @@ bool iequals(const std::string& str1, const std::string& str2) {
     return std::equal(str1.begin(), str1.end(), str2.begin(),
         [](char a, char b) { return tolower(a) == tolower(b); });
 }
-bool iequals(const std::string_view& str1, const std::string_view& str2) {
+inline bool iequals(const std::string_view& str1, const std::string_view& str2) {
     if (str1.size() != str2.size()) {
         return false;
     }
@@ -43,7 +43,7 @@ bool iequals(const std::string_view& str1, const std::string_view& str2) {
         [](char a, char b) { return tolower(a) == tolower(b); });
 }
 
-std::vector<std::string> split(std::vector<std::string>& output, const std::string& str, char delimiter, bool compress) {
+inline std::vector<std::string> split(std::vector<std::string>& output, const std::string& str, char delimiter, bool compress) {
     if (compress) {
         size_t start = 0;
         size_t end = 0;

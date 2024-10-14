@@ -79,6 +79,30 @@ struct GCodeProcessorResult
 
     void  lock() const { result_mutex.lock(); }
     void  unlock() const { result_mutex.unlock(); }
+
+    GCodeProcessorResult& operator=(const GCodeProcessorResult& other)
+    {
+        filename = other.filename;
+        id = other.id;
+        moves = other.moves;
+        lines_ends = other.lines_ends;
+        printable_area = other.printable_area;
+        bed_exclude_area = other.bed_exclude_area;
+        toolpath_outside = other.toolpath_outside;
+        label_object_enabled = other.label_object_enabled;
+        printable_height = other.printable_height;
+        settings_ids = other.settings_ids;
+        extruders_count = other.extruders_count;
+        extruder_colors = other.extruder_colors;
+        filament_diameters = other.filament_diameters;
+        filament_densities = other.filament_densities;
+        print_statistics = other.print_statistics;
+        custom_gcode_per_print_z = other.custom_gcode_per_print_z;
+        spiral_vase_layers = other.spiral_vase_layers;
+        warnings = other.warnings;
+        bed_type = other.bed_type;
+        return *this;
+    }
 };
 
 // Helper class used to fix the z for color change, pause print and
