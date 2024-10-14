@@ -1,5 +1,6 @@
 #include "DeferredRenderPath.hpp"
 
+#include "../Pass/ZPrePass.hpp"
 #include "../Pass/ShadowPass.hpp"
 #include "../Pass/WireFramePass.hpp"
 #include "../Pass/CheckerBoardPass.hpp"
@@ -17,6 +18,7 @@
 
 DeferredRenderPath::DeferredRenderPath(RenderSystem* render_system)
 {
+    m_z_pre_pass = std::make_unique<ZPrePass>();
     m_picking_pass = std::make_unique<PickingPass>();
     m_wireframe_pass = std::make_unique<WireFramePass>();
     m_checkerboard_pass = std::make_unique<CheckerBoardPass>();
@@ -35,6 +37,7 @@ DeferredRenderPath::DeferredRenderPath(RenderSystem* render_system)
 
 void DeferredRenderPath::init()
 {
+    m_z_pre_pass->init();
     m_picking_pass->init();
     m_wireframe_pass->init();
     m_checkerboard_pass->init();
@@ -51,6 +54,7 @@ void DeferredRenderPath::init()
 
 void DeferredRenderPath::prepareRenderSourceData(const std::shared_ptr<RenderSourceData>& render_source_data)
 {
+    m_z_pre_pass->prepareRenderSourceData(render_source_data);
     m_picking_pass->prepareRenderSourceData(render_source_data);
     m_wireframe_pass->prepareRenderSourceData(render_source_data);
     m_checkerboard_pass->prepareRenderSourceData(render_source_data);
@@ -70,6 +74,8 @@ void DeferredRenderPath::render()
     const auto& render_params = ref_render_system->renderParams();
 
     auto combine_pass = static_cast<CombinePass*>(m_combine_pass.get());
+
+    //m_z_pre_pass->draw();
 
     m_picking_pass->draw();
 

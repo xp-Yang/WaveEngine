@@ -14,6 +14,7 @@ public:
     RhiTexture* renderPassTexture(RenderPass::Type render_pass_type) override;
 
 protected:
+    std::unique_ptr<RenderPass> m_z_pre_pass;
     std::unique_ptr<RenderPass> m_picking_pass;
     std::unique_ptr<RenderPass> m_shadow_pass;
     std::unique_ptr<RenderPass> m_wireframe_pass;

@@ -15,6 +15,7 @@ static inline constexpr float DEFAULT_RENDER_RESOLUTION_Y = 1080.0f;
 class RenderPass {
 public:
 	enum class Type {
+		ZPre,
 		Picking,
 		Shadow,
 		GBuffer,
