@@ -52,7 +52,7 @@ bool GCodeProcessor::contains_reserved_tag(const std::string& gcode, std::string
         if (comment.length() > 2 && comment.front() == ';') {
             comment = comment.substr(1);
             for (const std::string& s : Reserved_Tags) {
-                if (boost::starts_with(comment, s)) {
+                if (Utils::starts_with(comment, s)) {
                     ret = true;
                     found_tag = comment;
                     parser.quit_parsing();
@@ -79,7 +79,7 @@ bool GCodeProcessor::contains_reserved_tags(const std::string& gcode, unsigned i
         if (comment.length() > 2 && comment.front() == ';') {
             comment = comment.substr(1);
             for (const std::string& s : Reserved_Tags) {
-                if (boost::starts_with(comment, s)) {
+                if (Utils::starts_with(comment, s)) {
                     ret = true;
                     found_tag.push_back(comment);
                     if (found_tag.size() == max_count) {
@@ -477,7 +477,7 @@ void GCodeProcessor::process_gcode_line(const GCodeLine& line, bool producers_en
     //OrcaSlicer
     if (m_flavor == gcfKlipper)
     {
-        if (boost::iequals(cmd, "SET_VELOCITY_LIMIT"))
+        if (Utils::iequals(std::string(cmd), "SET_VELOCITY_LIMIT"))
         {
             process_SET_VELOCITY_LIMIT(line);
             return;
@@ -820,7 +820,7 @@ void GCodeProcessor::process_tags(const std::string_view comment, bool producers
         return;
 
     // extrusion role tag
-    if (boost::starts_with(comment, reserved_tag(ETags::Role))) {
+    if (Utils::starts_with(comment, reserved_tag(ETags::Role))) {
         set_extrusion_role(string_to_extrusion_role(comment.substr(reserved_tag(ETags::Role).length())));
         if (m_extrusion_role == erExternalPerimeter)
             m_seams_detector.activate(true);
@@ -829,38 +829,38 @@ void GCodeProcessor::process_tags(const std::string_view comment, bool producers
     }
 
     // wipe start tag
-    if (boost::starts_with(comment, reserved_tag(ETags::Wipe_Start))) {
+    if (Utils::starts_with(comment, reserved_tag(ETags::Wipe_Start))) {
         m_wiping = true;
         return;
     }
 
     // wipe end tag
-    if (boost::starts_with(comment, reserved_tag(ETags::Wipe_End))) {
+    if (Utils::starts_with(comment, reserved_tag(ETags::Wipe_End))) {
         m_wiping = false;
         return;
     }
 
     //BBS: flush start tag
-    if (boost::starts_with(comment, GCodeProcessor::Flush_Start_Tag)) {
+    if (Utils::starts_with(comment, GCodeProcessor::Flush_Start_Tag)) {
         m_flushing = true;
         return;
     }
 
     //BBS: flush end tag
-    if (boost::starts_with(comment, GCodeProcessor::Flush_End_Tag)) {
+    if (Utils::starts_with(comment, GCodeProcessor::Flush_End_Tag)) {
         m_flushing = false;
         return;
     }
 
     if (!producers_enabled || m_producer == EProducer::BambuStudio) {
         // height tag
-        if (boost::starts_with(comment, reserved_tag(ETags::Height))) {
+        if (Utils::starts_with(comment, reserved_tag(ETags::Height))) {
             if (!parse_number(comment.substr(reserved_tag(ETags::Height).size()), m_forced_height))
                 assert(false); //BOOST_LOG_TRIVIAL(error) << "GCodeProcessor encountered an invalid value for Height (" << comment << ").";
             return;
         }
         // width tag
-        if (boost::starts_with(comment, reserved_tag(ETags::Width))) {
+        if (Utils::starts_with(comment, reserved_tag(ETags::Width))) {
             if (!parse_number(comment.substr(reserved_tag(ETags::Width).size()), m_forced_width))
                 assert(false); //BOOST_LOG_TRIVIAL(error) << "GCodeProcessor encountered an invalid value for Width (" << comment << ").";
             return;
@@ -868,7 +868,7 @@ void GCodeProcessor::process_tags(const std::string_view comment, bool producers
     }
 
     // color change tag
-    if (boost::starts_with(comment, reserved_tag(ETags::Color_Change))) {
+    if (Utils::starts_with(comment, reserved_tag(ETags::Color_Change))) {
         unsigned char extruder_id = 0;
         static std::vector<std::string> Default_Colors = {
             "#0B2C7A", // { 0.043f, 0.173f, 0.478f }, // bluish
@@ -897,7 +897,7 @@ void GCodeProcessor::process_tags(const std::string_view comment, bool producers
         };
 
         std::vector<std::string> tokens;
-        boost::split(tokens, comment, boost::is_any_of(","), boost::token_compress_on);
+        Utils::split(tokens, std::string(comment), ',', true);
         if (tokens.size() > 1) {
             if (tokens[1][0] == 'T') {
                 int eid;
@@ -1604,7 +1604,7 @@ void GCodeProcessor::process_G1(const GCodeLine& line)
             const std::optional<Vec3f> first_vertex = m_seams_detector.get_first_vertex();
             // the threshold value = 0.0625f == 0.25 * 0.25 is arbitrary, we may find some smarter condition later
 
-            if ((new_pos - *first_vertex).squaredNorm() < 0.0625f) {
+            if (Math::Dot(new_pos - *first_vertex, new_pos - *first_vertex) < 0.0625f) {
                 set_end_position(0.5f * (new_pos + *first_vertex));
                 store_move_vertex(EMoveType::Seam);
                 set_end_position(curr_pos);
@@ -1813,7 +1813,7 @@ void  GCodeProcessor::process_G2_G3(const GCodeLine& line)
             const std::optional<Vec3f> first_vertex = m_seams_detector.get_first_vertex();
             //BBS: the threshold value = 0.0625f == 0.25 * 0.25 is arbitrary, we may find some smarter condition later
 
-            if ((new_pos - *first_vertex).squaredNorm() < 0.0625f) {
+            if (Math::Dot(new_pos - *first_vertex, new_pos - *first_vertex) < 0.0625f) {
                 set_end_position(0.5f * (new_pos + *first_vertex));
                 store_move_vertex(EMoveType::Seam);
                 set_end_position(curr_pos);

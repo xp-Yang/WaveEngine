@@ -13,6 +13,63 @@ inline std::string trim(const std::string& str, const std::string& spaces = " \t
     return str.substr(a, b - a);
 }
 
+bool starts_with(const std::string& str, const std::string& prefix) {
+    if (prefix.size() > str.size()) {
+        return false;
+    }
+    return str.compare(0, prefix.size(), prefix) == 0;
+}
+bool starts_with(const std::string_view& str, const std::string_view& prefix) {
+    if (prefix.size() > str.size()) {
+        return false;
+    }
+    return str.compare(0, prefix.size(), prefix) == 0;
+}
+
+bool iequals(const std::string& str1, const std::string& str2) {
+    if (str1.size() != str2.size()) {
+        return false;
+    }
+    // 使用 std::equal 比较两个字符串的每个字符
+    return std::equal(str1.begin(), str1.end(), str2.begin(),
+        [](char a, char b) { return tolower(a) == tolower(b); });
+}
+bool iequals(const std::string_view& str1, const std::string_view& str2) {
+    if (str1.size() != str2.size()) {
+        return false;
+    }
+    // 使用 std::equal 比较两个字符串的每个字符
+    return std::equal(str1.begin(), str1.end(), str2.begin(),
+        [](char a, char b) { return tolower(a) == tolower(b); });
+}
+
+std::vector<std::string> split(std::vector<std::string>& output, const std::string& str, char delimiter, bool compress) {
+    if (compress) {
+        size_t start = 0;
+        size_t end = 0;
+        while ((end = str.find(delimiter, start)) != std::string::npos) {
+            if (end > start) { // 连续的delimiter将被跳过
+                output.push_back(str.substr(start, end - start));
+            }
+            start = end + 1;
+        }
+
+        // 处理最后一个子字符串
+        if (start < str.length()) {
+            output.push_back(str.substr(start));
+        }
+    }
+    else {
+        std::stringstream ss(str);
+        std::string token;
+        while (std::getline(ss, token, delimiter)) {
+            output.push_back(token);
+        }
+    }
+
+    return output;
+}
+
 inline std::string mat4ToStr(const Mat4& mat, int indentation = 0)
 {
     std::string tab_str = "";
