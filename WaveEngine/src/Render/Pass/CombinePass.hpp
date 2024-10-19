@@ -14,7 +14,6 @@ private:
 
     unsigned int m_lighted_map;
     unsigned int m_blurred_bright_map;
-    unsigned int m_border_map;
 };
 
 #endif

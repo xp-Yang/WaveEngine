@@ -42,29 +42,12 @@ void CombinePass::draw()
 	m_lighted_map = m_input_passes[0]->getFrameBuffer()->colorAttachmentAt(0)->texture()->id();
 	combine_shader->setTexture("Texture", 0, m_lighted_map);
 	if (m_input_passes.size() > 1) {
-		auto normal_map = m_input_passes[1]->getFrameBuffer()->colorAttachmentAt(0)->texture()->id();
-		combine_shader->setTexture("normalMap", 1, normal_map);
+		m_blurred_bright_map = m_input_passes[1]->getFrameBuffer()->colorAttachmentAt(0)->texture()->id();
+		combine_shader->setTexture("bloomMap", 1, m_blurred_bright_map);
 	}
 	else
-		combine_shader->setTexture("normalMap", 1, default_map);
-	if (m_input_passes.size() > 2) {
-		auto wireframe_map = m_input_passes[2]->getFrameBuffer()->colorAttachmentAt(0)->texture()->id();
-		combine_shader->setTexture("wireframeMap", 2, wireframe_map);
-	}
-	else
-		combine_shader->setTexture("wireframeMap", 2, default_map);
-	if (m_input_passes.size() > 3) {
-		m_blurred_bright_map = m_input_passes[3]->getFrameBuffer()->colorAttachmentAt(0)->texture()->id();
-		combine_shader->setTexture("bloomMap", 3, m_blurred_bright_map);
-	}
-	else
-		combine_shader->setTexture("bloomMap", 3, default_map);
-	if (m_input_passes.size() > 4) { // TODO frame graph
-		m_border_map = m_input_passes[4]->getFrameBuffer()->colorAttachmentAt(0)->texture()->id();
-		combine_shader->setTexture("outlineMap", 4, m_border_map);
-	}
-	else
-		combine_shader->setTexture("outlineMap", 4, default_map);
+		combine_shader->setTexture("bloomMap", 1, default_map);
+
 	m_rhi->drawIndexed(m_render_source_data->screen_quad->getVAO(), m_render_source_data->screen_quad->indicesCount());
 
 	// pristine grid

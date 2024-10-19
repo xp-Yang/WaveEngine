@@ -31,6 +31,8 @@ struct Mesh {
 	static std::shared_ptr<Mesh> create_complex_quad_mesh(const Vec2& size);
 	static std::shared_ptr<Mesh> create_screen_mesh();
 
+	static std::shared_ptr<Mesh> merge(const std::vector<std::shared_ptr<Mesh>>& meshes);
+
 	Mesh() = delete;
 	Mesh(const std::vector<Vertex>& vertices, const std::vector<int>& indices);
 	//Mesh(const std::vector<Triangle>& triangles);

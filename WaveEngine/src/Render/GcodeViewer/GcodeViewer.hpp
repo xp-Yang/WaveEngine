@@ -16,7 +16,13 @@ struct Layer {
 	int end_move_id;
 };
 
-struct Segment {};
+struct Segment {
+	std::shared_ptr<Mesh> merged_mesh;
+	std::vector<std::shared_ptr<Mesh>> sub_meshes;
+	int begin_move_id;
+	int end_move_id;
+	ExtrusionRole role_type;
+};
 
 struct RenderSegment {};
 
@@ -85,6 +91,7 @@ private:
 	unsigned int m_line_type;
 	ViewType m_view_type;
 
+	std::vector<Segment> m_segments;
 	std::vector<std::shared_ptr<Mesh>> m_meshes;
 };
 

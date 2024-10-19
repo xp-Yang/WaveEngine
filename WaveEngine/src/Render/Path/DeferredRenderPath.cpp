@@ -83,65 +83,70 @@ void DeferredRenderPath::render()
 
     m_picking_pass->draw();
 
-    // TODO 深度需要拷贝到normal_pass和wireframe_pass
-    if (render_params.normal_debug)
-        m_normal_pass->draw();
-    else
-        m_normal_pass->clear();
-    if (render_params.wireframe) {
-        m_wireframe_pass->draw();
-    }
-    else
-        m_wireframe_pass->clear();
+    std::vector<RenderPass*> combine_input_passes;
+    RenderPass* main_light_pass;
 
     if (render_params.checkerboard) {
         m_checkerboard_pass->draw();
-        combine_pass->setInputPasses({ m_checkerboard_pass.get(), m_normal_pass.get(), m_wireframe_pass.get() });
-        combine_pass->draw();
-        return;
-    }
-
-    if (render_params.shadow) {
-        //static_cast<ShadowPass*>(m_shadow_pass.get())->configSamples(render_params.shadow_map_sample_count);
-        m_shadow_pass->draw();
-    }
-    else
-        m_shadow_pass->clear();
-
-    auto gbuffer_pass = static_cast<GBufferPass*>(m_gbuffer_pass.get());
-    gbuffer_pass->enablePBR(render_params.pbr);
-    gbuffer_pass->draw();
-
-    auto lighting_pass = static_cast<DeferredLightingPass*>(m_lighting_pass.get());
-    lighting_pass->enablePBR(render_params.pbr);
-    lighting_pass->setCubeMaps(static_cast<ShadowPass*>(m_shadow_pass.get())->getCubeMaps());
-    lighting_pass->setInputPasses({ m_gbuffer_pass.get(), m_shadow_pass.get()});
-    lighting_pass->draw();
-
-    if (render_params.skybox) {
-        auto skybox_pass = static_cast<SkyBoxPass*>(m_skybox_pass.get());
-        skybox_pass->setInputPasses({ m_lighting_pass.get() }); // draw above the lighting pass framebuffer
-        skybox_pass->draw();
-    }
-
-    auto transparent_pass = static_cast<TransparentPass*>(m_transparent_pass.get());
-    transparent_pass->setInputPasses({ m_lighting_pass.get() }); // draw above the lighting pass framebuffer
-    transparent_pass->draw();
-
-    m_gcode_pass->setInputPasses({ m_lighting_pass.get() }); // draw above the lighting pass framebuffer
-    m_gcode_pass->draw();
-
-    if (render_params.bloom) {
-        m_bloom_pass->setInputPasses({ m_lighting_pass.get() }); // need extract bright
-        m_bloom_pass->draw();
+        combine_input_passes = { m_checkerboard_pass.get()};
+        main_light_pass = m_checkerboard_pass.get();
     }
     else {
-        m_bloom_pass->clear();
+        if (render_params.shadow) {
+            //static_cast<ShadowPass*>(m_shadow_pass.get())->configSamples(render_params.shadow_map_sample_count);
+            m_shadow_pass->draw();
+        }
+        else
+            m_shadow_pass->clear();
+
+        auto gbuffer_pass = static_cast<GBufferPass*>(m_gbuffer_pass.get());
+        gbuffer_pass->enablePBR(render_params.pbr);
+        gbuffer_pass->draw();
+
+        auto lighting_pass = static_cast<DeferredLightingPass*>(m_lighting_pass.get());
+        lighting_pass->enablePBR(render_params.pbr);
+        lighting_pass->setCubeMaps(static_cast<ShadowPass*>(m_shadow_pass.get())->getCubeMaps());
+        lighting_pass->setInputPasses({ m_gbuffer_pass.get(), m_shadow_pass.get() });
+        lighting_pass->draw();
+
+        if (render_params.skybox) {
+            auto skybox_pass = static_cast<SkyBoxPass*>(m_skybox_pass.get());
+            skybox_pass->setInputPasses({ m_lighting_pass.get() }); // draw above the lighting pass framebuffer
+            skybox_pass->draw();
+        }
+
+        auto transparent_pass = static_cast<TransparentPass*>(m_transparent_pass.get());
+        transparent_pass->setInputPasses({ m_lighting_pass.get() }); // draw above the lighting pass framebuffer
+        transparent_pass->draw();
+
+        if (render_params.bloom) {
+            m_bloom_pass->setInputPasses({ m_lighting_pass.get() }); // need extract bright
+            m_bloom_pass->draw();
+        }
+        else {
+            m_bloom_pass->clear();
+        }
+
+        combine_input_passes = { m_lighting_pass.get(), m_bloom_pass.get() };
+        main_light_pass = m_lighting_pass.get();
     }
-    m_outline_pass->setInputPasses({ m_lighting_pass.get() }); // draw above the lighting pass framebuffer
+
+    if (render_params.normal_debug) {
+        m_normal_pass->setInputPasses({ main_light_pass }); // draw above the main light pass framebuffer
+        m_normal_pass->draw();
+    }
+    if (render_params.wireframe) {
+        m_wireframe_pass->setInputPasses({ main_light_pass }); // draw above the main light pass framebuffer
+        m_wireframe_pass->draw();
+    }
+
+    m_gcode_pass->setInputPasses({ main_light_pass }); // draw above the main light pass framebuffer
+    m_gcode_pass->draw();
+
+    m_outline_pass->setInputPasses({ main_light_pass }); // draw above the main light pass framebuffer
     m_outline_pass->draw();
 
-    combine_pass->setInputPasses({ m_lighting_pass.get(), m_normal_pass.get(), m_wireframe_pass.get(), m_bloom_pass.get() });
+    combine_pass->setInputPasses(combine_input_passes);
     combine_pass->draw();
 }
 

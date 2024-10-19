@@ -305,3 +305,27 @@ std::shared_ptr<Mesh> Mesh::create_screen_mesh()
 {
     return create_quad_mesh(Point3(-1.0f, -1.0f, 0.0f), Vec3(2.0f, 0.0f, 0.0f), Vec3(0.0f, 2.0f, 0.0f));
 }
+
+std::shared_ptr<Mesh> Mesh::merge(const std::vector<std::shared_ptr<Mesh>>& meshes)
+{
+    std::vector<Vertex> vertices;
+    std::vector<int> indices;
+
+    for (auto& mesh : meshes) {
+        vertices.insert(vertices.end(), mesh->vertices.begin(), mesh->vertices.end());
+    }
+
+    int indices_offset = 0;
+    for (int i = 0; i < meshes.size(); i++) {
+        std::vector<int> indices_i(meshes[i]->indices.size());
+        std::transform(meshes[i]->indices.begin(), meshes[i]->indices.end(), indices_i.begin(), [indices_offset](const auto& index) {
+            return index + indices_offset;
+            });
+        indices.insert(indices.end(), indices_i.begin(), indices_i.end());
+        indices_offset += meshes[i]->vertices.size();
+    }
+
+    std::shared_ptr<Mesh> res = std::make_shared<Mesh>(vertices, indices);
+
+    return res;
+}

@@ -66,16 +66,33 @@ void GcodeViewer::parse_moves(std::vector<MoveVertex> moves)
 			else
 				m_layers.back().end_move_id = move_id;
 
-			if (curr.extrusion_role == ExtrusionRole::erSolidInfill ||
-				curr.extrusion_role == ExtrusionRole::erInternalInfill) {
-
+			ExtrusionRole last_role = m_segments.empty() ? ExtrusionRole::erNone : m_segments.back().role_type;
+			ExtrusionRole curr_role = curr.extrusion_role;
+			if (last_role != curr_role)
+			{
 				auto mesh = generate_cuboid_from_move(prev, curr);
-				mesh->sub_mesh_idx = ColorToInt(Extrusion_Role_Colors[curr.extrusion_role]);
-				m_meshes.push_back(mesh);
+				Segment seg;
+				seg.sub_meshes.push_back(mesh);
+				seg.begin_move_id = move_id;
+				seg.end_move_id = move_id;
+				seg.role_type = curr.extrusion_role;
+				m_segments.push_back(seg);
+			}
+			else {
+				m_segments.back().end_move_id = move_id;
+				auto mesh = generate_cuboid_from_move(prev, curr);
+				m_segments.back().sub_meshes.push_back(mesh);
 			}
 		}
 
 		move_id++;
+	}
+
+	for (auto& seg : m_segments) {
+		seg.merged_mesh = Mesh::merge(seg.sub_meshes);
+		seg.merged_mesh->material = Material::create_default_material();
+		seg.merged_mesh->material->albedo = Vec3(Extrusion_Role_Colors[seg.role_type]);
+		m_meshes.push_back(seg.merged_mesh);
 	}
 
 	m_layer_ranges = { 0, static_cast<unsigned int>(m_layers.size() - 1) };
