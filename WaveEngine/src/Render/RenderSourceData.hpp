@@ -11,7 +11,7 @@
 using GL_RESOURCE_HANLE = unsigned int;
 
 struct RenderTextureData {
-    RenderTextureData(const Texture& texture_);
+    RenderTextureData(std::shared_ptr<Texture> texture_);
     RenderTextureData(const CubeTexture& cube_texture_);
 
     GL_RESOURCE_HANLE id;

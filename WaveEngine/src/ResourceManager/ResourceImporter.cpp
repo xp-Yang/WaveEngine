@@ -134,22 +134,22 @@ std::shared_ptr<Material> ResourceImporter::load_material(aiMaterial* material) 
     aiString str;
     if (material->GetTextureCount(aiTextureType_DIFFUSE)) {
         material->GetTexture(aiTextureType_DIFFUSE, 0, &str);
-        res->diffuse_texture = Texture(TextureType::Diffuse, m_directory + '/' + std::string(str.C_Str()), false);
+        res->diffuse_texture = std::make_shared<Texture>(TextureType::Diffuse, m_directory + '/' + std::string(str.C_Str()), false);
     }
 
     if (material->GetTextureCount(aiTextureType_SPECULAR)) {
         material->GetTexture(aiTextureType_SPECULAR, 0, &str);
-        res->specular_texture = Texture(TextureType::Specular, m_directory + '/' + std::string(str.C_Str()), false);
+        res->specular_texture = std::make_shared<Texture>(TextureType::Specular, m_directory + '/' + std::string(str.C_Str()), false);
     }
 
     if (material->GetTextureCount(aiTextureType_NORMALS)) {
         material->GetTexture(aiTextureType_NORMALS, 0, &str);
-        res->normal_texture = Texture(TextureType::Normal, m_directory + '/' + std::string(str.C_Str()), false);
+        res->normal_texture = std::make_shared<Texture>(TextureType::Normal, m_directory + '/' + std::string(str.C_Str()), false);
     }
 
     if (material->GetTextureCount(aiTextureType_HEIGHT)) {
         material->GetTexture(aiTextureType_HEIGHT, 0, &str);
-        res->height_texture = Texture(TextureType::Height, m_directory + '/' + std::string(str.C_Str()), false);
+        res->height_texture = std::make_shared<Texture>(TextureType::Height, m_directory + '/' + std::string(str.C_Str()), false);
     }
 
     return res;

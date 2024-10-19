@@ -228,7 +228,7 @@ void Scene::init()
 		GObject* cube_obj = GObject::create(nullptr, "Cube");
 		MeshComponent& mesh = cube_obj->addComponent<MeshComponent>();
 		std::shared_ptr<Mesh> cube_sub_mesh = Mesh::create_cube_mesh();
-		std::shared_ptr<Material> cube_material = Material::create_default_material();
+		std::shared_ptr<Material> cube_material = Material::create_complete_default_material();
 		cube_material->albedo = Vec3(1.0f);
 		cube_material->metallic = 1.0;
 		cube_material->roughness = 0.5;
@@ -249,7 +249,7 @@ void Scene::init()
 		auto sphere_obj = GObject::create(nullptr, "Sphere");
 		MeshComponent& mesh = sphere_obj->addComponent<MeshComponent>();
 		std::shared_ptr<Mesh> sphere_sub_mesh = Mesh::create_icosphere_mesh(0.5f, 4);
-		std::shared_ptr<Material> sphere_material = Material::create_default_material();
+		std::shared_ptr<Material> sphere_material = Material::create_complete_default_material();
 		sphere_material->albedo = Vec3(1.0f);
 		sphere_material->metallic = 1.0;
 		sphere_material->roughness = 0.5;
@@ -267,7 +267,7 @@ void Scene::init()
 		GObject* plane_obj = GObject::create(nullptr, "Ground");
 		MeshComponent& plane_mesh = plane_obj->addComponent<MeshComponent>();
 		std::shared_ptr<Mesh> plane_sub_mesh = Mesh::create_complex_quad_mesh(Vec2(1.0f));
-		std::shared_ptr<Material> plane_material = Material::create_default_material();
+		std::shared_ptr<Material> plane_material = Material::create_complete_default_material();
 		plane_material->albedo = Vec3(0.25f, 0.25f, 0.25f);
 		plane_material->metallic = 0.0f;
 		plane_material->roughness = 1.0f;

@@ -90,7 +90,7 @@ void GcodeViewer::parse_moves(std::vector<MoveVertex> moves)
 
 	for (auto& seg : m_segments) {
 		seg.merged_mesh = Mesh::merge(seg.sub_meshes);
-		seg.merged_mesh->material = Material::create_default_material();
+		seg.merged_mesh->material = std::make_shared<Material>();
 		seg.merged_mesh->material->albedo = Vec3(Extrusion_Role_Colors[seg.role_type]);
 		m_meshes.push_back(seg.merged_mesh);
 	}

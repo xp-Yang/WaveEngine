@@ -4,22 +4,27 @@
 #include <glad/glad.h>// TODO remove
 #include "stb_image.h"// TODO remove
 
-RenderTextureData::RenderTextureData(const Texture& texture_)
+RenderTextureData::RenderTextureData(std::shared_ptr<Texture> texture_)
 {
+    if (texture_.get() == nullptr) {
+        *this = RenderTextureData::defaultTexture();
+        return;
+    }
+
     const auto& rhi = RenderSourceData::rhi;
 
-    unsigned char* data = texture_.data;
+    unsigned char* data = texture_->data;
     if (data)
     {
         RhiTexture::Format format;
-        if (texture_.channel_count == 1)
+        if (texture_->channel_count == 1)
             format = RhiTexture::Format::R8;
-        else if (texture_.channel_count == 3)
+        else if (texture_->channel_count == 3)
             format = RhiTexture::Format::RGB8;
-        else if (texture_.channel_count == 4)
+        else if (texture_->channel_count == 4)
             format = RhiTexture::Format::RGBA8;
 
-        RhiTexture* texture = rhi->newTexture(format, Vec2(texture_.width, texture_.height), 1, RhiTexture::Flag::sRGB, data);
+        RhiTexture* texture = rhi->newTexture(format, Vec2(texture_->width, texture_->height), 1, RhiTexture::Flag::sRGB, data);
         texture->create();
 
         id = texture->id();
@@ -62,7 +67,7 @@ RenderTextureData::RenderTextureData(const CubeTexture& cube_texture_)
 
 RenderTextureData& RenderTextureData::defaultTexture()
 {
-    static Texture diffuse_texture(TextureType::Custom, std::string(RESOURCE_DIR) + "/images/default_map.png", false);
+    static std::shared_ptr<Texture> diffuse_texture = std::make_shared<Texture>(TextureType::Custom, std::string(RESOURCE_DIR) + "/images/default_map.png", false);
     static RenderTextureData texture(diffuse_texture);
     return texture;
 }
