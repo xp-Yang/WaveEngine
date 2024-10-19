@@ -55,13 +55,12 @@ GObject* Scene::loadModel(const std::string& filepath)
 	return res;
 }
 
-GCodeProcessorResult&& Scene::loadGcodeFile(const std::string& filepath)
+GCodeProcessorResult Scene::loadGcodeFile(const std::string& filepath)
 {
 	GCodeProcessor gcode_importer;
 	gcode_importer.process_file(filepath);
 	GCodeProcessorResult&& result = std::move(gcode_importer.extract_result());
-	result.warnings;
-	return std::move(result);
+	return result;
 }
 
 std::vector<GObjectID> Scene::getPickedObjectIDs() const
@@ -277,7 +276,7 @@ void Scene::init()
 		plane_mesh.sub_meshes.push_back(plane_sub_mesh);
 
 		TransformComponent& plane_transform = plane_obj->addComponent<TransformComponent>();
-		plane_transform.scale = Vec3(50.f, 1.f, 50.f);
+		plane_transform.scale = Vec3(50.0f, 1.f, 50.0f);
 
 		m_objects.push_back(std::shared_ptr<GObject>(plane_obj));
 	}

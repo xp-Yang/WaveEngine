@@ -111,8 +111,10 @@ void ImGuiEditor::renderMenuBar()
             if (ImGui::MenuItem("Open", "Ctrl+O")) {
                 FileDialog* file_dlg = ref_window->createFileDialog();
                 auto filepath = file_dlg->OpenFile("");
-                if (filepath.find(".gcode") != std::string::npos)
-                    ref_scene->loadGcodeFile(filepath);
+                if (filepath.find(".gcode") != std::string::npos) {
+                    const GCodeProcessorResult& result = ref_scene->loadGcodeFile(filepath);
+                    ref_render_system->gcodeViewer()->load(result);
+                }
                 else if (!filepath.empty()) {
                     ref_scene->loadModel(filepath);
                 }

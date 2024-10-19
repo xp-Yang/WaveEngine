@@ -22,7 +22,7 @@ void DeferredLightingPass::init()
 void DeferredLightingPass::draw()
 {
 	m_framebuffer->bind();
-	m_framebuffer->clear();
+	m_framebuffer->clear(Color4(0.046, 0.046, 0.046, 1.0));
 
 	// deferred lighting
 	static RenderShaderObject* lighting_pbr_shader = RenderShaderObject::getShaderObject(ShaderType::DeferredLightingShader);

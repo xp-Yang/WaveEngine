@@ -15,68 +15,89 @@ void Mesh::reset()
 }
 
 std::shared_ptr<Mesh> Mesh::create_cube_mesh() {
-    std::vector<Vertex> vertices;
+    //float cubeVertices[] =
+    //{
+    //    // pos                  // normal              // uv           
+    //    -0.5f,  0.5f,  0.5f,    0.0f,  0.0f,  1.0f,    0.0f, 1.0f,    // 0  前面 左上 (从前面看)
+    //    -0.5f, -0.5f,  0.5f,    0.0f,  0.0f,  1.0f,    0.0f, 0.0f,    // 1  前面 左下
+    //     0.5f, -0.5f,  0.5f,    0.0f,  0.0f,  1.0f,    1.0f, 0.0f,    // 2  前面 右下
+    //     0.5f,  0.5f,  0.5f,    0.0f,  0.0f,  1.0f,    1.0f, 1.0f,    // 3  前面 右上
+
+    //     0.5f,  0.5f, -0.5f,    0.0f,  0.0f, -1.0f,    0.0f, 1.0f,    // 4  后面 左上 (从后面看)
+    //     0.5f, -0.5f, -0.5f,    0.0f,  0.0f, -1.0f,    0.0f, 0.0f,    // 5  后面 左下
+    //    -0.5f, -0.5f, -0.5f,    0.0f,  0.0f, -1.0f,    1.0f, 0.0f,    // 6  后面 右下
+    //    -0.5f,  0.5f, -0.5f,    0.0f,  0.0f, -1.0f,    1.0f, 1.0f,    // 7  后面 右上
+
+    //    -0.5f,  0.5f, -0.5f,   -1.0f,  0.0f,  0.0f,    0.0f, 1.0f,    // 8  左面 左上 (从左面看)
+    //    -0.5f, -0.5f, -0.5f,   -1.0f,  0.0f,  0.0f,    0.0f, 0.0f,    // 9  左面 左下
+    //    -0.5f, -0.5f,  0.5f,   -1.0f,  0.0f,  0.0f,    1.0f, 0.0f,    // 10 左面 右下
+    //    -0.5f,  0.5f,  0.5f,   -1.0f,  0.0f,  0.0f,    1.0f, 1.0f,    // 11 左面 右上
+
+    //     0.5f,  0.5f,  0.5f,    1.0f,  0.0f,  0.0f,    0.0f, 1.0f,    // 12 右面 左上 (从右面看)
+    //     0.5f, -0.5f,  0.5f,    1.0f,  0.0f,  0.0f,    0.0f, 0.0f,    // 13 右面 左下
+    //     0.5f, -0.5f, -0.5f,    1.0f,  0.0f,  0.0f,    1.0f, 0.0f,    // 14 右面 右下
+    //     0.5f,  0.5f, -0.5f,    1.0f,  0.0f,  0.0f,    1.0f, 1.0f,    // 15 右面 右上
+
+    //    -0.5f, -0.5f,  0.5f,    0.0f, -1.0f,  0.0f,    0.0f, 1.0f,    // 16 下面 左上 (从下面看)
+    //    -0.5f, -0.5f, -0.5f,    0.0f, -1.0f,  0.0f,    0.0f, 0.0f,    // 17 下面 左下
+    //     0.5f, -0.5f, -0.5f,    0.0f, -1.0f,  0.0f,    1.0f, 0.0f,    // 18 下面 右下
+    //     0.5f, -0.5f,  0.5f,    0.0f, -1.0f,  0.0f,    1.0f, 1.0f,    // 19 下面 右上
+
+    //    -0.5f,  0.5f, -0.5f,    0.0f,  1.0f,  0.0f,    0.0f, 1.0f,    // 20 上面 左上 (从上面看)
+    //    -0.5f,  0.5f,  0.5f,    0.0f,  1.0f,  0.0f,    0.0f, 0.0f,    // 21 上面 左下
+    //     0.5f,  0.5f,  0.5f,    0.0f,  1.0f,  0.0f,    1.0f, 0.0f,    // 22 上面 右下
+    //     0.5f,  0.5f, -0.5f,    0.0f,  1.0f,  0.0f,    1.0f, 1.0f,    // 23 上面 右上
+    //};
+
+    std::array<Vec3, 8> vertex_positions;
+    vertex_positions[0] = Vec3(-0.5f, 0.5f, 0.5f);
+    vertex_positions[1] = Vec3(-0.5f, -0.5f, 0.5f);
+    vertex_positions[2] = Vec3(0.5f, -0.5f, 0.5f);
+    vertex_positions[3] = Vec3(0.5f, 0.5f, 0.5f);
+    vertex_positions[4] = Vec3(0.5f, 0.5f, -0.5f);
+    vertex_positions[5] = Vec3(0.5f, -0.5f, -0.5f);
+    vertex_positions[6] = Vec3(-0.5f, -0.5f, -0.5f);
+    vertex_positions[7] = Vec3(-0.5f, 0.5f, -0.5f);
+    return create_cuboid_mesh(vertex_positions);
+}
+
+std::shared_ptr<Mesh> Mesh::create_cuboid_mesh(const std::array<Vec3, 8> vertex_positions)
+{
+    std::vector<Vertex> vertices(24);
     std::vector<int> indices;
-
-    float cubeVertices[] =
-    {
-        // 如果只有位置，只需要8个顶点就行，但是每个面的法向量不同，所以相同位置的顶点有三个不同的法向量属性，一共需要24个各不相同的顶点
-        // pos                  // normal              // uv           
-        -0.5f,  0.5f,  0.5f,    0.0f,  0.0f,  1.0f,    0.0f, 1.0f,    // 0  前面 左上 (从前面看)
-        -0.5f, -0.5f,  0.5f,    0.0f,  0.0f,  1.0f,    0.0f, 0.0f,    // 1  前面 左下
-         0.5f, -0.5f,  0.5f,    0.0f,  0.0f,  1.0f,    1.0f, 0.0f,    // 2  前面 右下
-         0.5f,  0.5f,  0.5f,    0.0f,  0.0f,  1.0f,    1.0f, 1.0f,    // 3  前面 右上
-
-         0.5f,  0.5f, -0.5f,    0.0f,  0.0f, -1.0f,    1.0f, 1.0f,    // 4  后面 左上 (从后面看)
-         0.5f, -0.5f, -0.5f,    0.0f,  0.0f, -1.0f,    1.0f, 0.0f,    // 5  后面 左下
-        -0.5f, -0.5f, -0.5f,    0.0f,  0.0f, -1.0f,    0.0f, 0.0f,    // 6  后面 右下
-        -0.5f,  0.5f, -0.5f,    0.0f,  0.0f, -1.0f,    0.0f, 1.0f,    // 7  后面 右上
-
-        -0.5f,  0.5f, -0.5f,   -1.0f,  0.0f,  0.0f,    1.0f, 0.0f,    // 8  左面 左上 (从左面看)
-        -0.5f, -0.5f, -0.5f,   -1.0f,  0.0f,  0.0f,    0.0f, 0.0f,    // 9  左面 左下
-        -0.5f, -0.5f,  0.5f,   -1.0f,  0.0f,  0.0f,    0.0f, 1.0f,    // 10 左面 右下
-        -0.5f,  0.5f,  0.5f,   -1.0f,  0.0f,  0.0f,    1.0f, 1.0f,    // 11 左面 右上
-
-         0.5f,  0.5f,  0.5f,    1.0f,  0.0f,  0.0f,    1.0f, 1.0f,    // 12 右面 左上 (从右面看)
-         0.5f, -0.5f,  0.5f,    1.0f,  0.0f,  0.0f,    0.0f, 1.0f,    // 13 右面 左下
-         0.5f, -0.5f, -0.5f,    1.0f,  0.0f,  0.0f,    0.0f, 0.0f,    // 14 右面 右下
-         0.5f,  0.5f, -0.5f,    1.0f,  0.0f,  0.0f,    1.0f, 0.0f,    // 15 右面 右上
-
-        -0.5f, -0.5f,  0.5f,    0.0f, -1.0f,  0.0f,    0.0f, 1.0f,    // 16 下面 左上 (从下面看)
-        -0.5f, -0.5f, -0.5f,    0.0f, -1.0f,  0.0f,    0.0f, 0.0f,    // 17 下面 左下
-         0.5f, -0.5f, -0.5f,    0.0f, -1.0f,  0.0f,    1.0f, 0.0f,    // 18 下面 右下
-         0.5f, -0.5f,  0.5f,    0.0f, -1.0f,  0.0f,    1.0f, 1.0f,    // 19 下面 右上
-
-        -0.5f,  0.5f, -0.5f,    0.0f,  1.0f,  0.0f,    0.0f, 0.0f,    // 20 上面 左上 (从上面看)
-        -0.5f,  0.5f,  0.5f,    0.0f,  1.0f,  0.0f,    0.0f, 1.0f,    // 21 上面 左下
-         0.5f,  0.5f,  0.5f,    0.0f,  1.0f,  0.0f,    1.0f, 1.0f,    // 22 上面 右下
-         0.5f,  0.5f, -0.5f,    0.0f,  1.0f,  0.0f,    1.0f, 0.0f,    // 23 上面 右上
+    
+    std::array<int, 24> vertex_position_indices = {
+        0, 1, 2, 3,//前面
+        4, 5, 6, 7,//后面
+        7, 6, 1, 0,//左面
+        3, 2, 5, 4,//右面
+        1, 6, 5, 2,//下面
+        7, 0, 3, 4,//上面
     };
 
-    for (int i = 0; i < sizeof(cubeVertices) / sizeof(cubeVertices[0]); i += 8) {
-        Vertex vertex;
+    Vec3 front_normal = Math::Normalize(vertex_positions[0] - vertex_positions[7]);
+    Vec3 back_normal = -front_normal;
+    Vec3 left_normal = Math::Normalize(vertex_positions[0] - vertex_positions[3]);
+    Vec3 right_normal = -left_normal;
+    Vec3 bottom_normal = Math::Normalize(vertex_positions[1] - vertex_positions[0]);
+    Vec3 top_normal = -bottom_normal;
+    std::array<Vec3, 6> face_normals = {
+        front_normal,
+        back_normal,
+        left_normal,
+        right_normal,
+        bottom_normal,
+        top_normal,
+    };
 
-        Vec3 position;
-        position.x = cubeVertices[0 + i];
-        position.y = cubeVertices[1 + i];
-        position.z = cubeVertices[2 + i];
-        vertex.position = position;
-
-        Vec3 normal;
-        normal.x = cubeVertices[3 + i];
-        normal.y = cubeVertices[4 + i];
-        normal.z = cubeVertices[5 + i];
-        vertex.normal = normal;
-
-        Vec2 vec;
-        vec.x = cubeVertices[6 + i];
-        vec.y = cubeVertices[7 + i];
-        vertex.texture_uv = vec;
-
-        vertices.push_back(vertex);
+    for (int i = 0; i < vertices.size(); i += 4) {
+        vertices[i + 0] = { vertex_positions[vertex_position_indices[i + 0]], face_normals[i / 4], {0.0f, 1.0f} };
+        vertices[i + 1] = { vertex_positions[vertex_position_indices[i + 1]], face_normals[i / 4], {0.0f, 0.0f} };
+        vertices[i + 2] = { vertex_positions[vertex_position_indices[i + 2]], face_normals[i / 4], {1.0f, 0.0f} };
+        vertices[i + 3] = { vertex_positions[vertex_position_indices[i + 3]], face_normals[i / 4], {1.0f, 1.0f} };
     }
 
-    int cubeIndices[] =
+    int cuboidIndices[] =
     {
         0 , 1 , 2 , 0 , 2 , 3 , //前
         4 , 5 , 6 , 4 , 6 , 7 , //后
@@ -86,8 +107,8 @@ std::shared_ptr<Mesh> Mesh::create_cube_mesh() {
         20, 21, 22, 20, 22, 23, //上
     };
 
-    for (int i = 0; i < sizeof(cubeIndices) / sizeof(cubeIndices[0]); i++) {
-        indices.push_back(cubeIndices[i]);
+    for (int i = 0; i < sizeof(cuboidIndices) / sizeof(cuboidIndices[0]); i++) {
+        indices.push_back(cuboidIndices[i]);
     }
 
     return std::make_shared<Mesh>(vertices, indices);

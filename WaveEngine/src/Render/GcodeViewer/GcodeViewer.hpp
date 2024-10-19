@@ -2,16 +2,23 @@
 #define GcodeViewer_hpp
 
 #include "ResourceManager/Gcode/GcodeResultData.hpp"
+#include "Logical/Mesh.hpp"
+#include "../Pass/RenderPass.hpp"
 
 struct Layer {
-	float z;
+	Layer(float height_, int begin_move_id_, int end_move_id_)
+		: height(height_)
+		, begin_move_id(begin_move_id_)
+		, end_move_id(end_move_id_)
+	{}
+	float height;
 	int begin_move_id;
 	int end_move_id;
 };
 
-struct Path {};
+struct Segment {};
 
-struct RenderPath {};
+struct RenderSegment {};
 
 enum LineType : unsigned int {
 	// EXTRUDE TYPE
@@ -56,9 +63,12 @@ enum class ViewType {
 class GcodeViewer {
 public:
 	void load(const GCodeProcessorResult& result);
+	const std::vector<std::shared_ptr<Mesh>>& meshes() const { return m_meshes; };
 
 protected:
-	void generate_vertices_from_moves(std::vector<MoveVertex> moves);
+	void parse_moves(std::vector<MoveVertex> moves);
+
+	std::shared_ptr<Mesh> generate_cuboid_from_move(const MoveVertex& prev, const MoveVertex& curr);
 
 private:
 	std::vector<Layer> m_layers;
@@ -74,6 +84,8 @@ private:
 
 	unsigned int m_line_type;
 	ViewType m_view_type;
+
+	std::vector<std::shared_ptr<Mesh>> m_meshes;
 };
 
 #endif // !#define GcodeViewer_hpp

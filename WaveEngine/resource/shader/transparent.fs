@@ -33,7 +33,7 @@ void main()
     vec3 ambient_light = vec3(0);
 	
     // Directional Light Source:
-	vec3 lightDir = directionalLight.direction;
+	vec3 lightDir = normalize(directionalLight.direction);
 	vec3 lightingByDirectionalLight = BlinnPhong(directionalLight.color.xyz, normal, view_direction, -lightDir, diffuse_coef, specular_coef);
 	
 	// Point Light Source:

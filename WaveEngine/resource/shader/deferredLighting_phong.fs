@@ -32,7 +32,7 @@ void main()
     vec3 viewDir = normalize(cameraPos - Position);
 
     // Directional Light Source:
-    vec3 lightDir = directionalLight.direction;
+    vec3 lightDir = normalize(directionalLight.direction);
     vec3 lightingByDirectionalLight = BlinnPhong(directionalLight.color.xyz * 0.0157, Normal, viewDir, -lightDir, Diffuse, Specular);
     // Directional Light Shadow:
     vec4 fragPosLightSpace = lightSpaceMatrix * vec4(Position, 1.0);

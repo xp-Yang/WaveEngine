@@ -163,12 +163,16 @@ RenderShaderObject* RenderShaderObject::getShaderObject(const ShaderType& type)
         Shader shader = Shader{ resource_dir + "/shader/screenQuad.vs", resource_dir + "/shader/deferredLighting_phong.fs" };
         return new RenderShaderObject(shader);
     }
-    case ShaderType::OneColorShader: {
-        Shader shader = Shader{ resource_dir + "/shader/mesh.vs", resource_dir + "/shader/oneColor.fs" };
+    case ShaderType::BlinnPhongShader: {
+        Shader shader = Shader{ resource_dir + "/shader/mesh.vs", resource_dir + "/shader/fowardLighting_phong.fs" };
         return new RenderShaderObject(shader);
     }
     case ShaderType::PBRShader: {
         Shader shader = Shader{ resource_dir + "/shader/mesh.vs", resource_dir + "/shader/fowardLighting_pbr.fs" };
+        return new RenderShaderObject(shader);
+    }
+    case ShaderType::OneColorShader: {
+        Shader shader = Shader{ resource_dir + "/shader/mesh.vs", resource_dir + "/shader/oneColor.fs" };
         return new RenderShaderObject(shader);
     }
     case ShaderType::SkyboxShader: {

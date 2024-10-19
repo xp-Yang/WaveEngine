@@ -35,6 +35,8 @@ void RenderSystem::init(std::shared_ptr<Scene> scene)
 
     setRenderPathType(RenderPathType::Deferred);
 
+    m_gcode_viewer = std::make_shared<GcodeViewer>();
+
 #if ENABLE_ECS
     connect(&(ecs::World::get()), &ecs::World::get().componentInserted, this, &RenderSystem::onComponentInserted);
     connect(&(ecs::World::get()), &ecs::World::get().componentRemoved, this, &RenderSystem::onComponentRemoved);
@@ -383,5 +385,8 @@ void RenderSystem::updateRenderSourceData()
     m_render_source_data->render_camera->rightDirection = camera.getRightDirection();
 
     m_initialized = true;
+
+    if (m_render_source_data->gcode_mesh_data.empty() && !m_gcode_viewer->meshes().empty())
+        m_render_source_data->gcode_mesh_data = m_gcode_viewer->meshes();
 }
 #endif // ENABLE_ECS

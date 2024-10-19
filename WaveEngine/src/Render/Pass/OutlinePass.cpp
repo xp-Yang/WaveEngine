@@ -69,9 +69,7 @@ void OutlinePass::draw()
     auto source_map = m_source_framebuffer->colorAttachmentAt(0)->texture()->id();
 
 
-    m_framebuffer->bind();
-    m_framebuffer->clear();
-    m_input_passes[0]->getFrameBuffer()->blitTo(m_framebuffer.get(), RhiTexture::Format::DEPTH);
+    m_input_passes[0]->getFrameBuffer()->bind();
     auto obj_depth_map = m_source_framebuffer->depthAttachment()->texture()->id();
     static RenderShaderObject* edge_shader = RenderShaderObject::getShaderObject(ShaderType::OutlineShader);
     edge_shader->start_using();

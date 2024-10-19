@@ -5,7 +5,7 @@ in vec2 fragUV;
 uniform sampler2D objMap;
 uniform sampler2D objDepthMap;
 
-out vec4 FragColor;
+out vec4 outColor;
 
 void main()
 {
@@ -33,6 +33,9 @@ void main()
 
     float edge = sqrt(dot(horizontal, horizontal) + dot(vertical, vertical));
 
-    FragColor = vec4(step(0.01, edge) * vec3(1.0, 1.0, 1.0), 1.0);
+    if (fwidth(edge) <= 0)
+        discard;
+    
+    outColor = vec4(1.0, 1.0, 1.0, 1.0);
     gl_FragDepth = texture(objDepthMap, fragUV).r;
 }

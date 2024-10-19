@@ -4,6 +4,8 @@
 #include "Core/Signal/Signal.hpp"
 #include "Path/RenderPath.hpp"
 
+#include "GcodeViewer/GcodeViewer.hpp"
+
 enum class RenderPathType {
     Forward,
     Deferred,
@@ -38,6 +40,7 @@ public:
     void onUpdate();
     unsigned int getPickingFBO();
     unsigned int renderPassTexture(RenderPass::Type render_pass_type);
+    std::shared_ptr<GcodeViewer> gcodeViewer() const { return m_gcode_viewer; }
 
 public slots:
     void onComponentInserted(int entt_id, int pool_id);
@@ -64,6 +67,8 @@ private:
     int m_need_remove_id{ -1 };
 
     std::shared_ptr<Scene> m_scene;
+
+    std::shared_ptr<GcodeViewer> m_gcode_viewer;
 };
 
 #endif // !RenderSystem_hpp

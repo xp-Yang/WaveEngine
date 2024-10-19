@@ -15,6 +15,9 @@ struct Material {
     sampler2D specular_map;
     sampler2D normal_map;
     sampler2D height_map;
+
+    vec3 diffuse;
+    vec3 specular;
 };
 
 uniform Material material;
@@ -29,12 +32,16 @@ void main()
     vec3 normal = normalize(fs_in.fragWorldNormal);
     vec3 view_direction = normalize(cameraPos - fs_in.fragWorldPos);
     vec3 diffuse_coef = vec3(texture(material.diffuse_map, fs_in.fragUV));
+    //if (diffuse_coef.xyz == vec3(1.0))
+        diffuse_coef = material.diffuse;
     vec3 specular_coef = vec3(texture(material.specular_map, fs_in.fragUV));
+    //if (specular_coef.xyz == vec3(1.0))
+        specular_coef = material.specular;
 
-    vec3 ambient_light = vec3(0);
+    vec3 ambient_light = vec3(material.ambient);
 	
     // Directional Light Source:
-	vec3 lightDir = directionalLight.direction;
+	vec3 lightDir = normalize(directionalLight.direction);
 	vec3 lightingByDirectionalLight = BlinnPhong(directionalLight.color.xyz, normal, view_direction, -lightDir, diffuse_coef, specular_coef);
 	
 	// Point Light Source:
@@ -51,11 +58,11 @@ void main()
     vec3 result = ambient_light + shadowFactor * lightingByDirectionalLight + lightingByPointLight;
     gl_FragColor = vec4(result, 1.0);
 
-    if(enable_skybox_sample){
-        vec3 I = normalize(fs_in.fragWorldPos - cameraPos);
-        vec3 R = reflect(I, normalize(normal));
-        gl_FragColor = 0.33 * gl_FragColor + 0.66 * vec4(texture(skybox, R).rgb, 1.0);
-    }
+    // if(enable_skybox_sample){
+    //     vec3 I = normalize(fs_in.fragWorldPos - cameraPos);
+    //     vec3 R = reflect(I, normalize(normal));
+    //     gl_FragColor = 0.33 * gl_FragColor + 0.66 * vec4(texture(skybox, R).rgb, 1.0);
+    // }
 
     //debug
     //gl_FragColor = vec4((ambient_light + diffuse_light + specular_light), 1.0);

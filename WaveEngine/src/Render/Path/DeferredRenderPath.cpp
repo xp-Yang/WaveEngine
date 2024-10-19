@@ -8,6 +8,7 @@
 #include "../Pass/GBufferPass.hpp"
 #include "../Pass/DeferredLightingPass.hpp"
 #include "../Pass/TransparentPass.hpp"
+#include "../GcodeViewer/GcodeViewerPass.hpp"
 #include "../Pass/SkyBoxPass.hpp"
 #include "../Pass/BloomPass.hpp"
 #include "../Pass/PickingPass.hpp"
@@ -27,6 +28,7 @@ DeferredRenderPath::DeferredRenderPath(RenderSystem* render_system)
     m_gbuffer_pass = std::make_unique<GBufferPass>();
     m_lighting_pass = std::make_unique<DeferredLightingPass>();
     m_transparent_pass = std::make_unique<TransparentPass>();
+    m_gcode_pass = std::make_unique<GcodeViewerPass>();
     m_skybox_pass = std::make_unique<SkyBoxPass>();
     m_bloom_pass = std::make_unique<BloomPass>();
     m_outline_pass = std::make_unique<OutlinePass>();
@@ -46,6 +48,7 @@ void DeferredRenderPath::init()
     m_gbuffer_pass->init();
     m_lighting_pass->init();
     m_transparent_pass->init();
+    m_gcode_pass->init();
     m_skybox_pass->init();
     m_bloom_pass->init();
     m_outline_pass->init();
@@ -63,6 +66,7 @@ void DeferredRenderPath::prepareRenderSourceData(const std::shared_ptr<RenderSou
     m_gbuffer_pass->prepareRenderSourceData(render_source_data);
     m_lighting_pass->prepareRenderSourceData(render_source_data);
     m_transparent_pass->prepareRenderSourceData(render_source_data);
+    m_gcode_pass->prepareRenderSourceData(render_source_data);
     m_skybox_pass->prepareRenderSourceData(render_source_data);
     m_bloom_pass->prepareRenderSourceData(render_source_data);
     m_outline_pass->prepareRenderSourceData(render_source_data);
@@ -124,17 +128,20 @@ void DeferredRenderPath::render()
     transparent_pass->setInputPasses({ m_lighting_pass.get() }); // draw above the lighting pass framebuffer
     transparent_pass->draw();
 
+    m_gcode_pass->setInputPasses({ m_lighting_pass.get() }); // draw above the lighting pass framebuffer
+    m_gcode_pass->draw();
+
     if (render_params.bloom) {
-        m_bloom_pass->setInputPasses({ m_lighting_pass.get() });
+        m_bloom_pass->setInputPasses({ m_lighting_pass.get() }); // need extract bright
         m_bloom_pass->draw();
     }
     else {
         m_bloom_pass->clear();
     }
-    m_outline_pass->setInputPasses({ m_lighting_pass.get() }); // need the depth from the lighting pass
+    m_outline_pass->setInputPasses({ m_lighting_pass.get() }); // draw above the lighting pass framebuffer
     m_outline_pass->draw();
 
-    combine_pass->setInputPasses({ m_lighting_pass.get(), m_normal_pass.get(), m_wireframe_pass.get(), m_bloom_pass.get(), m_outline_pass.get() });
+    combine_pass->setInputPasses({ m_lighting_pass.get(), m_normal_pass.get(), m_wireframe_pass.get(), m_bloom_pass.get() });
     combine_pass->draw();
 }
 

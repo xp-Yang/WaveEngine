@@ -2,5 +2,6 @@
 
 std::shared_ptr<Material> Material::create_default_material()
 {
-	return std::make_shared<Material>();
+	auto default_material = std::make_shared<Material>();
+	return default_material;
 }

@@ -20,6 +20,11 @@ void MeshForwardLightingPass::enableReflection(bool reflection)
     m_reflection = reflection;
 }
 
+void MeshForwardLightingPass::enablePBR(bool pbr)
+{
+    m_pbr = pbr;
+}
+
 void MeshForwardLightingPass::configSamples(int samples)
 {
     //config FrameBuffer
@@ -30,14 +35,16 @@ void MeshForwardLightingPass::configSamples(int samples)
 void MeshForwardLightingPass::draw()
 {
     m_framebuffer->bind();
-    m_framebuffer->clear();
+    m_framebuffer->clear(Color4(0.046, 0.046, 0.046, 1.0));
 
     Mat4 light_ref_matrix = m_render_source_data->render_directional_light_data_list.front().lightProjMatrix * 
         m_render_source_data->render_directional_light_data_list.front().lightViewMatrix;
     Vec3 light_direction = m_render_source_data->render_directional_light_data_list.front().direction;
     Vec4 light_color = m_render_source_data->render_directional_light_data_list.front().color;
 
-    static RenderShaderObject* shader = RenderShaderObject::getShaderObject(ShaderType::PBRShader);
+    static RenderShaderObject* pbr_shader = RenderShaderObject::getShaderObject(ShaderType::PBRShader);
+    static RenderShaderObject* blinn_phong_shader = RenderShaderObject::getShaderObject(ShaderType::BlinnPhongShader);
+    RenderShaderObject* shader = m_pbr ? pbr_shader : blinn_phong_shader;
     shader->start_using();
     int k = 0;
     for (const auto& render_point_light_data : m_render_source_data->render_point_light_data_list) {
@@ -52,10 +59,18 @@ void MeshForwardLightingPass::draw()
         const auto& render_node = pair.second;
         auto& material = render_node->material;
         // temp
-        shader->setFloat3("albedo", material.albedo);
-        shader->setFloat("metallic", material.metallic);
-        shader->setFloat("roughness", material.roughness);
-        shader->setFloat("ao", material.ao);
+        if (m_pbr) {
+            shader->setFloat3("albedo", material.albedo);
+            shader->setFloat("metallic", material.metallic);
+            shader->setFloat("roughness", material.roughness);
+            shader->setFloat("ao", material.ao);
+        }
+        else {
+            shader->setTexture("material.diffuse_map", 0, material.diffuse_map);
+            shader->setTexture("material.specular_map", 1, material.specular_map);
+            shader->setTexture("material.normal_map", 2, material.normal_map);
+            shader->setTexture("material.height_map", 3, material.height_map);
+        }
 
         shader->setMatrix("model", 1, render_node->model_matrix);
         shader->setMatrix("view", 1, m_render_source_data->view_matrix);

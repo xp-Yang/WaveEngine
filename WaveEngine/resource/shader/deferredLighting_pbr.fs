@@ -25,8 +25,7 @@ void main()
 
     if (Normal.xyz == vec3(0.0)){
         // return if sample the blank area in GBuffer
-        FragColor = vec4(0.046, 0.046, 0.046, 1.0);
-        return;
+        discard;
     }
     
     vec3 albedo = texture(gAlbedo, fragUV).rgb;
