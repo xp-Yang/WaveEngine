@@ -3,11 +3,10 @@
 
 #include "Vector.hpp"
 
-namespace Math {
-
 using Mat3 = glm::mat3;
 using Mat4 = glm::mat4;
 
+namespace Math {
 
 inline Mat4 LookAt(const Vec3& eye, const Vec3& center, const Vec3& up) {
     return glm::lookAt(eye, center, up);

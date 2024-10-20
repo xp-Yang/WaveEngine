@@ -206,13 +206,13 @@ std::shared_ptr<Mesh> Mesh::create_icosphere_mesh(float radius, int regression_d
     std::vector<Vertex> all_vertices;
     for (auto& triangle : m_triangles) {
         for (auto& vertex : triangle.vertices) {
-            vertex.position = m_center + radius * Normalize(vertex.position - m_center);
+            vertex.position = m_center + radius * Math::Normalize(vertex.position - m_center);
         }
         for (auto& vertex : triangle.vertices) {
             //Vec3 a = triangle.vertices[0] - triangle.vertices[1];
             //Vec3 b = triangle.vertices[0] - triangle.vertices[2];
             //Vec3 normal = Normalize(Cross(a, b));
-            Vec3 normal = Normalize(vertex.position - m_center);
+            Vec3 normal = Math::Normalize(vertex.position - m_center);
 
             Vertex v;
             v.position = vertex.position;
@@ -238,7 +238,7 @@ std::shared_ptr<Mesh> Mesh::create_quad_mesh(const Point3& origin, const Vec3& p
     std::vector<Vertex> vertices;
     std::vector<int> indices;
 
-    Vec3 normal = Normalize(Cross(positive_dir_u, positive_dir_v));
+    Vec3 normal = Math::Normalize(Math::Cross(positive_dir_u, positive_dir_v));
     Point3 origin_p = origin;
     Point3 right_p = origin_p + positive_dir_u;
     Point3 upper_right_p = origin_p + positive_dir_u + positive_dir_v;

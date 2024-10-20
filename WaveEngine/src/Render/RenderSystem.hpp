@@ -42,10 +42,6 @@ public:
     unsigned int renderPassTexture(RenderPass::Type render_pass_type);
     std::shared_ptr<GcodeViewer> gcodeViewer() const { return m_gcode_viewer; }
 
-public slots:
-    void onComponentInserted(int entt_id, int pool_id);
-    void onComponentRemoved(int entt_id, int pool_id);
-
 protected:
     void updateRenderSourceData();
 
@@ -61,10 +57,6 @@ private:
 
     std::shared_ptr<RenderSourceData> m_render_source_data;
     bool m_initialized{ false };
-    bool m_need_insert_source_data{ false };
-    bool m_need_remove_source_data{ false };
-    int m_need_insert_id{ -1 };
-    int m_need_remove_id{ -1 };
 
     std::shared_ptr<Scene> m_scene;
 

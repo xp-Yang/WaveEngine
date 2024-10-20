@@ -289,10 +289,10 @@ void Scene::init()
 		//vampire->getComponent<TransformComponent>()->scale = Vec3(0.02f);
 		//vampire->getComponent<TransformComponent>()->translation = Vec3(5.0f, 0.0f, 0.0f);
 
-		GObject* bunny_obj = loadModel(resource_dir + "/model/bunny.obj");
-		auto bunny_transform = bunny_obj->getComponent<TransformComponent>();
-		bunny_transform->scale = Vec3(30.0f);
-		bunny_transform->translation = Vec3(-5.0f, 0.0f, 0.0f);
+		//GObject* bunny_obj = loadModel(resource_dir + "/model/bunny.obj");
+		//auto bunny_transform = bunny_obj->getComponent<TransformComponent>();
+		//bunny_transform->scale = Vec3(30.0f);
+		//bunny_transform->translation = Vec3(-5.0f, 0.0f, 0.0f);
 	}
 }
 

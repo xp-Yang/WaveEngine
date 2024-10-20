@@ -6,8 +6,6 @@
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/quaternion.hpp>
 
-namespace Math {
-
 using Vec2 = glm::vec2;
 using Vec3 = glm::vec3;
 using Vec4 = glm::vec4;
@@ -18,6 +16,8 @@ using Points3 = std::vector<Point3>;
 using Points4 = std::vector<Point4>;
 
 using Color4 = glm::vec4;
+
+namespace Math {
 
 template<typename Vec>
 float Dot(const Vec& vec1, const Vec& vec2) {
@@ -45,8 +45,6 @@ Vec Reflect(Vec v, Vec n) {
 }
 
 }
-
-using namespace Math;
 
 #endif // !Vector_hpp
 

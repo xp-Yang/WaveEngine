@@ -14,11 +14,11 @@ struct TransformComponent : public Component {
 
 	Mat4 transform() const
 	{
-		glm::qua<float> rotation_qua = glm::qua<float>(Vec3(deg2rad(rotation.x), deg2rad(rotation.y), deg2rad(rotation.z)));
+		glm::qua<float> rotation_qua = glm::qua<float>(Vec3(Math::deg2rad(rotation.x), Math::deg2rad(rotation.y), Math::deg2rad(rotation.z)));
 		Mat4 rotation = glm::mat4_cast(rotation_qua);
-		Mat4 result = Translate(translation)
+		Mat4 result = Math::Translate(translation)
 			* rotation
-			* Scale(scale);
+			* Math::Scale(scale);
 		return result;
 	}
 };

@@ -40,7 +40,7 @@ void ImGuiDebugWindow::render()
     ImGui::Text(test_view.c_str());
     ImGui::NewLine();
     ImGui::Text("inverse view matrix:");
-    std::string inverse_view = Utils::mat4ToStr(Inverse(camera.view));
+    std::string inverse_view = Utils::mat4ToStr(Math::Inverse(camera.view));
     ImGui::Text(inverse_view.c_str());
     ImGui::NewLine();
     ImGui::Text("camera position:");

@@ -90,7 +90,7 @@ bool GUIInput::onUpdate()
 		m_camera_manipulator->onMouseUpdate(m_delta_mouse_x, m_delta_mouse_y, m_mouse_button);
 	}
 
-	if (!isApproxZero(m_mouse_wheel))
+	if (!Math::isApproxZero(m_mouse_wheel))
 		m_camera_manipulator->onMouseWheelUpdate(m_mouse_wheel, m_mouse_x, m_mouse_y);
 
 	if (KeysDown['W']) {

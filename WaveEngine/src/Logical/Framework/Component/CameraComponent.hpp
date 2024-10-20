@@ -25,16 +25,16 @@ struct CameraComponent : public Component {
 		float roll = 0.0f;
 	} fps_params;
 
-	float originFov = deg2rad(45.0f); //竖直fov
+	float originFov = Math::deg2rad(45.0f); //竖直fov
 
 	float zoom = 1.0f;
 	float fov = originFov / zoom;
 	float nearPlane = 0.1f;
 	float farPlane = 1000.0f;
-	Vec3 direction = Normalize(Vec3(0.0f, -0.2f, -0.98f));
-	Vec3 upDirection = Normalize(CameraManipulator::global_up - Dot(CameraManipulator::global_up, direction) * direction); // camera 的 y 轴
+	Vec3 direction = Math::Normalize(Vec3(0.0f, -0.2f, -0.98f));
+	Vec3 upDirection = Math::Normalize(CameraManipulator::global_up - Math::Dot(CameraManipulator::global_up, direction) * direction); // camera 的 y 轴
 	Vec3 getRightDirection() const { // camera 的 x 轴
-		return Cross(direction, upDirection);
+		return Math::Cross(direction, upDirection);
 	}
 	Vec3 pos = Vec3(0.0f) - 15.0f * direction;
 	Mat4 view = Math::LookAt(pos, pos + direction, CameraManipulator::global_up);

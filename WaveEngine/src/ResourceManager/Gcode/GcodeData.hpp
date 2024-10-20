@@ -5,9 +5,9 @@
 #include "fast_float/fast_float.h"
 #include <charconv>
 
-using Vec3f = Math::Vec3;
-using Vec2f = Math::Vec2;
-using Pointfs = std::vector<Math::Vec2>;
+using Vec3f = Vec3;
+using Vec2f = Vec2;
+using Pointfs = std::vector<Vec2>;
 using AxisCoords = std::array<double, 4>;
 
 class GCodeProcessor;
