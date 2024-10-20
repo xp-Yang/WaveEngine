@@ -42,6 +42,13 @@ struct CubeTexture {
 		const std::string& back_filepath);
 
 	std::array<std::string, 6> cube_texture_filepath;
+	int width{ 0 };
+	int height{ 0 };
+	int channel_count{ 0 };
+	std::array<unsigned char*, 6> datas;
+	bool gamma{ false };
+
+	void freeData();
 };
 
 #endif
