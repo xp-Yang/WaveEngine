@@ -8,6 +8,8 @@
 #include "ImGuiGlobalConsole.hpp"
 #include "ImGuiDebugWindow.hpp"
 
+#include "Gcode/ImGuiSlider.hpp"
+
 class Window;
 class RenderSystem;
 class Scene;
@@ -33,6 +35,8 @@ private:
 	std::unique_ptr<ImGuiSceneHierarchy> m_scene_hierarchy_window;
 	std::unique_ptr<ImGuiGlobalConsole> m_global_console_window;
 	std::unique_ptr<ImGuiDebugWindow> m_debug_window;
+	std::unique_ptr<ImGuiSlider> m_horizontal_slider;
+	std::unique_ptr<ImGuiSlider> m_vertical_slider;
 
 	bool m_show_debug{ false };
 

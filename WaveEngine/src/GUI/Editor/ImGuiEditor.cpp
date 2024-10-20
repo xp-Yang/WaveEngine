@@ -19,6 +19,8 @@ ImGuiEditor::ImGuiEditor()
     , m_scene_hierarchy_window(std::make_unique<ImGuiSceneHierarchy>(this))
     , m_global_console_window(std::make_unique<ImGuiGlobalConsole>(this))
     , m_debug_window(std::make_unique<ImGuiDebugWindow>(this))
+    , m_horizontal_slider(std::make_unique<ImGuiSlider>(this, Orientation::Horizontal))
+    , m_vertical_slider(std::make_unique<ImGuiSlider>(this, Orientation::Vertical))
 {
 }
 
@@ -64,6 +66,8 @@ void ImGuiEditor::onUpdate()
     m_context_menu->render();
     m_scene_hierarchy_window->render();
     m_global_console_window->render();
+    m_horizontal_slider->render();
+    m_vertical_slider->render();
 }
 
 void ImGuiEditor::beginFrame()
