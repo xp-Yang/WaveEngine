@@ -56,18 +56,30 @@ struct Layer {
 };
 
 struct Path {
-	struct SubPath {
+	struct Segment {
 		int begin_move_id;
 		int end_move_id;
 		std::shared_ptr<Mesh> mesh;
 	};
 
-	int begin_move_id = INT_MAX;
-	int end_move_id = -INT_MAX;
-	ExtrusionRole role_type;
+	struct SubPath {
+		int begin_move_id = INT_MAX;
+		int end_move_id = -INT_MAX;
+		std::vector<Segment> segments;
+
+		void append_segment(const Segment& segment);
+		Segment segment_of(int move_id) const;
+	};
+
 	std::vector<SubPath> sub_paths;
 
+	std::shared_ptr<Mesh> merged_mesh;
+
+	bool empty() const { return sub_paths.empty(); }
 	void append_sub_path(const SubPath& sub_path);
+	SubPath sub_path_of(int move_id) const;
+	int calculate_index_offset_of(int move_id) const;
+	int calculate_reverse_index_offset_of(int move_id) const;
 };
 
 struct VisualPath {
@@ -82,8 +94,6 @@ public:
 
 	void set_layer_scope(std::array<int, 2> layer_scope);
 	void set_move_scope(std::array<int, 2> move_scope);
-	void step_move(int steps, bool first);
-	void step_layer(int steps, bool first);
 	void set_visible(LineType type, bool visible);
 
 	const std::array<int, 2>& get_layer_range() const { return m_layer_range; }
@@ -114,8 +124,8 @@ private:
 	unsigned int m_line_type;
 	ViewType m_view_type;
 
-	std::vector<Path> m_paths;
-	std::array<std::shared_ptr<Mesh>, ExtrusionRole::erCount> m_merged_mesh;
+	std::array<Path, ExtrusionRole::erCount> m_paths;
+	std::array<std::shared_ptr<Mesh>, ExtrusionRole::erCount> m_visual_mesh;
 	std::vector<std::shared_ptr<Mesh>> m_meshes;
 
 	bool m_dirty = false;
