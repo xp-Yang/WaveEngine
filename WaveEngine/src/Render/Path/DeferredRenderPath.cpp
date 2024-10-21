@@ -8,7 +8,7 @@
 #include "../Pass/GBufferPass.hpp"
 #include "../Pass/DeferredLightingPass.hpp"
 #include "../Pass/TransparentPass.hpp"
-#include "../GcodeViewer/GcodeViewerPass.hpp"
+#include "../Gcode/GcodeViewerPass.hpp"
 #include "../Pass/SkyBoxPass.hpp"
 #include "../Pass/BloomPass.hpp"
 #include "../Pass/PickingPass.hpp"

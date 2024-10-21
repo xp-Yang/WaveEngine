@@ -24,17 +24,17 @@ public:
 
     int    GetMinValue() const { return m_value_range[0]; }
     int    GetMaxValue() const { return m_value_range[1]; }
-    double GetMinValueD() { return m_layer_values.empty() ? 0. : m_layer_values[m_value_range[0]]; }
-    double GetMaxValueD() { return m_layer_values.empty() ? 0. : m_layer_values[m_value_range[1]]; }
+    double GetMinLayerValue() { return m_layer_values.empty() ? 0. : m_layer_values[m_value_range[0]]; }
+    double GetMaxLayerValue() { return m_layer_values.empty() ? 0. : m_layer_values[m_value_range[1]]; }
     int    GetLowerValue() const { return m_value_scope[0]; }
     int    GetHigherValue() const { return m_value_scope[1]; }
-    double GetLowerValueD() { return m_layer_values.empty() ? 0. : m_layer_values[m_value_scope[0]]; }
-    double GetHigherValueD() { return m_layer_values.empty() ? 0. : m_layer_values[m_value_scope[1]]; }
+    double GetLowerLayerValue() { return m_layer_values.empty() ? 0. : m_layer_values[m_value_scope[0]]; }
+    double GetHigherLayerValue() { return m_layer_values.empty() ? 0. : m_layer_values[m_value_scope[1]]; }
 
-    void SetLowerValue(const int lower_val) { m_value_scope[0] = lower_val; }
-    void SetHigherValue(const int higher_val) { m_value_scope[1] = higher_val; }
-    void SetMaxValue(const int max_value) { m_value_range[1] = max_value; }
-    void SetSliderValues(const std::vector<double>& values) { m_layer_values = values; }
+    void initValueSpan(std::array<int, 2> span);
+    void SetLowerValue(const int lower_val);
+    void SetHigherValue(const int higher_val);
+    void SetSliderLayerValues(const std::vector<double>& values) { m_layer_values = values; }
 
     Orientation orientation() const { return m_orientation; }
     bool is_one_layer() const { return m_is_one_layer; }

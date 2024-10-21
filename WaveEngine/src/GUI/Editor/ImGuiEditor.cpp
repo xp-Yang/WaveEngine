@@ -118,6 +118,9 @@ void ImGuiEditor::renderMenuBar()
                 if (filepath.find(".gcode") != std::string::npos) {
                     const GCodeProcessorResult& result = ref_scene->loadGcodeFile(filepath);
                     ref_render_system->gcodeViewer()->load(result);
+
+                    //m_horizontal_slider->initValueSpan();
+                    m_vertical_slider->initValueSpan(ref_render_system->gcodeViewer()->get_layer_range());
                 }
                 else if (!filepath.empty()) {
                     ref_scene->loadModel(filepath);

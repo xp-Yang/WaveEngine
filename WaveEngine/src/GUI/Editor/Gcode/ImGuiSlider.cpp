@@ -1,5 +1,6 @@
 #include "ImGuiSlider.hpp"
 #include "../ImGuiEditor.hpp"
+#include "Render/RenderSystem.hpp"
 
 static const float  LEFT_MARGIN = 0.0f;
 static const float  HORIZONTAL_SLIDER_WINDOW_HEIGHT = 64.0f;
@@ -84,6 +85,36 @@ ImGuiSlider::ImGuiSlider(ImGuiEditor* parent, Orientation style)
     m_value_scope[0] = 0;
     m_value_scope[1] = 100;
     m_curr_handle = HandleType::Second;
+}
+
+void ImGuiSlider::initValueSpan(std::array<int, 2> span)
+{
+    m_value_range = span;
+    m_value_scope = m_value_range;
+}
+
+void ImGuiSlider::SetLowerValue(const int lower_val)
+{
+    m_value_scope[0] = lower_val;
+
+    if (m_parent->ref_render_system->gcodeViewer()->valid()) {
+        if (m_orientation == Orientation::Vertical)
+            m_parent->ref_render_system->gcodeViewer()->set_layer_scope(m_value_scope);
+        else
+            ;
+    }
+}
+
+void ImGuiSlider::SetHigherValue(const int higher_val)
+{
+    m_value_scope[1] = higher_val;
+
+    if (m_parent->ref_render_system->gcodeViewer()->valid()) {
+        if (m_orientation == Orientation::Vertical)
+            m_parent->ref_render_system->gcodeViewer()->set_layer_scope(m_value_scope);
+        else
+            ;
+    }
 }
 
 void ImGuiSlider::on_mouse_wheel()

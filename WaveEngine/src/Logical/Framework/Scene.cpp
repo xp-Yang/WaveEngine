@@ -221,47 +221,47 @@ void Scene::init()
 	m_light_manager = std::make_shared<LightManager>();
 	m_light_manager->init();
 
-	size_t cubes_count = 9;
-	size_t row_count = std::sqrt(cubes_count);
-	size_t col_count = cubes_count / row_count;
-	for (int i = 0; i < cubes_count; i++) {
-		GObject* cube_obj = GObject::create(nullptr, "Cube");
-		MeshComponent& mesh = cube_obj->addComponent<MeshComponent>();
-		std::shared_ptr<Mesh> cube_sub_mesh = Mesh::create_cube_mesh();
-		std::shared_ptr<Material> cube_material = Material::create_complete_default_material();
-		cube_material->albedo = Vec3(1.0f);
-		cube_material->metallic = 1.0;
-		cube_material->roughness = 0.5;
-		cube_material->ao = 0.01;
-		cube_sub_mesh->material = cube_material;
-		mesh.sub_meshes.push_back(cube_sub_mesh);
+	//size_t cubes_count = 9;
+	//size_t row_count = std::sqrt(cubes_count);
+	//size_t col_count = cubes_count / row_count;
+	//for (int i = 0; i < cubes_count; i++) {
+	//	GObject* cube_obj = GObject::create(nullptr, "Cube");
+	//	MeshComponent& mesh = cube_obj->addComponent<MeshComponent>();
+	//	std::shared_ptr<Mesh> cube_sub_mesh = Mesh::create_cube_mesh();
+	//	std::shared_ptr<Material> cube_material = Material::create_complete_default_material();
+	//	cube_material->albedo = Vec3(1.0f);
+	//	cube_material->metallic = 1.0;
+	//	cube_material->roughness = 0.5;
+	//	cube_material->ao = 0.01;
+	//	cube_sub_mesh->material = cube_material;
+	//	mesh.sub_meshes.push_back(cube_sub_mesh);
 
-		TransformComponent& transform = cube_obj->addComponent<TransformComponent>();
-		transform.translation = { 1.5f * (i % col_count), 0.5f + 1.5f * (i / row_count), -10.0f };
+	//	TransformComponent& transform = cube_obj->addComponent<TransformComponent>();
+	//	transform.translation = { 1.5f * (i % col_count), 0.5f + 1.5f * (i / row_count), -10.0f };
 
-		m_objects.push_back(std::shared_ptr<GObject>(cube_obj));
-	}
+	//	m_objects.push_back(std::shared_ptr<GObject>(cube_obj));
+	//}
 
-	size_t spheres_count = 4;
-	size_t s_row_count = std::sqrt(spheres_count);
-	size_t s_col_count = spheres_count / s_row_count;
-	for (int i = 0; i < spheres_count; i++) {
-		auto sphere_obj = GObject::create(nullptr, "Sphere");
-		MeshComponent& mesh = sphere_obj->addComponent<MeshComponent>();
-		std::shared_ptr<Mesh> sphere_sub_mesh = Mesh::create_icosphere_mesh(0.5f, 4);
-		std::shared_ptr<Material> sphere_material = Material::create_complete_default_material();
-		sphere_material->albedo = Vec3(1.0f);
-		sphere_material->metallic = 1.0;
-		sphere_material->roughness = 0.5;
-		sphere_material->ao = 0.01;
-		sphere_sub_mesh->material = sphere_material;
-		mesh.sub_meshes.push_back(sphere_sub_mesh);
+	//size_t spheres_count = 4;
+	//size_t s_row_count = std::sqrt(spheres_count);
+	//size_t s_col_count = spheres_count / s_row_count;
+	//for (int i = 0; i < spheres_count; i++) {
+	//	auto sphere_obj = GObject::create(nullptr, "Sphere");
+	//	MeshComponent& mesh = sphere_obj->addComponent<MeshComponent>();
+	//	std::shared_ptr<Mesh> sphere_sub_mesh = Mesh::create_icosphere_mesh(0.5f, 4);
+	//	std::shared_ptr<Material> sphere_material = Material::create_complete_default_material();
+	//	sphere_material->albedo = Vec3(1.0f);
+	//	sphere_material->metallic = 1.0;
+	//	sphere_material->roughness = 0.5;
+	//	sphere_material->ao = 0.01;
+	//	sphere_sub_mesh->material = sphere_material;
+	//	mesh.sub_meshes.push_back(sphere_sub_mesh);
 
-		TransformComponent& transform = sphere_obj->addComponent<TransformComponent>();
-		transform.translation = { 1.5f * (i % s_col_count), 0.5f + 1.5f * (i / s_row_count), -5.0f };
+	//	TransformComponent& transform = sphere_obj->addComponent<TransformComponent>();
+	//	transform.translation = { 1.5f * (i % s_col_count), 0.5f + 1.5f * (i / s_row_count), -5.0f };
 
-		m_objects.push_back(std::shared_ptr<GObject>(sphere_obj));
-	}
+	//	m_objects.push_back(std::shared_ptr<GObject>(sphere_obj));
+	//}
 
 	{
 		GObject* plane_obj = GObject::create(nullptr, "Ground");

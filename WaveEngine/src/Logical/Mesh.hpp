@@ -10,8 +10,8 @@ struct Vertex {
 	Vec3 normal;
 	Vec2 texture_uv;
 
-	std::vector<int> m_BoneIDs = std::vector<int>(MAX_BONE_INFLUENCE, -1);
-	std::vector<float> m_Weights = std::vector<float>(MAX_BONE_INFLUENCE, 0.0f);
+	//std::vector<int> m_BoneIDs = std::vector<int>(MAX_BONE_INFLUENCE, -1);
+	//std::vector<float> m_Weights = std::vector<float>(MAX_BONE_INFLUENCE, 0.0f);
 };
 
 struct Triangle {

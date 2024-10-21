@@ -4,7 +4,7 @@
 #include "Core/Signal/Signal.hpp"
 #include "Path/RenderPath.hpp"
 
-#include "GcodeViewer/GcodeViewer.hpp"
+#include "Logical/Gcode/GcodeViewer.hpp"
 
 enum class RenderPathType {
     Forward,

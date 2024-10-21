@@ -155,7 +155,8 @@ struct RenderSourceData {
         picked_ids.clear();
     }
 
-    std::vector<std::shared_ptr<Mesh>> gcode_mesh_data;
+    std::vector<std::shared_ptr<RenderMeshData>> gcode_render_mesh;
+    std::vector<std::shared_ptr<RenderMaterialData>> gcode_render_materials;
 };
 
 #endif // !RenderSourceData_hpp

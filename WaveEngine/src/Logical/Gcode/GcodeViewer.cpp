@@ -38,14 +38,73 @@ static Color4 IntToColor(int color) {
 	return Color4(r, g, b, a);
 }
 
+void Path::append_sub_path(const SubPath& sub_path)
+{
+	if (sub_path.begin_move_id < begin_move_id)
+		begin_move_id = sub_path.begin_move_id;
+
+	if (sub_path.end_move_id > end_move_id)
+		end_move_id = sub_path.end_move_id;
+	else
+		assert(false);
+
+	sub_paths.push_back(sub_path);
+}
+
 void GcodeViewer::load(const GCodeProcessorResult& result)
 {
+	reset();
+
 	parse_moves(result.moves);
+
+	m_valid = true;
+}
+
+const std::vector<std::shared_ptr<Mesh>>& GcodeViewer::meshes() const
+{
+	return m_meshes;
+}
+
+void GcodeViewer::set_layer_scope(std::array<int, 2> layer_scope)
+{
+	m_layer_scope = layer_scope;
+	refresh();
+}
+
+void GcodeViewer::set_move_scope(std::array<int, 2> move_scope)
+{
+	m_move_scope = move_scope;
+	refresh();
+}
+
+void GcodeViewer::step_move(int steps, bool first)
+{
+	if (first)
+		m_move_scope[0] += steps;
+	else
+		m_move_scope[1] += steps;
+
+	refresh();
+}
+
+void GcodeViewer::step_layer(int steps, bool first)
+{
+	if (first)
+		m_layer_scope[0] += steps;
+	else
+		m_layer_scope[1] += steps;
+
+	refresh();
+}
+
+void GcodeViewer::reset()
+{
+	*this = GcodeViewer();
 }
 
 void GcodeViewer::parse_moves(std::vector<MoveVertex> moves)
 {
-	size_t move_id = 1;
+	int move_id = 1;
 	int point_count = 0;
 	for (size_t i = 1; i < moves.size() - 1; i++) {
 		const MoveVertex& prev = moves[i - 1];
@@ -56,9 +115,8 @@ void GcodeViewer::parse_moves(std::vector<MoveVertex> moves)
 			continue;
 		}
 
-		EMoveType move_type = curr.type;
-		// parse layers
-		if (move_type == EMoveType::Extrude) {
+		if (curr.type == EMoveType::Extrude) {
+			// parse layers
 			float last_height = m_layers.empty() ? -FLT_MAX : m_layers.back().height;
 			float curr_height = curr.position.z;
 			if (last_height < curr_height)
@@ -66,38 +124,38 @@ void GcodeViewer::parse_moves(std::vector<MoveVertex> moves)
 			else
 				m_layers.back().end_move_id = move_id;
 
-			ExtrusionRole last_role = m_segments.empty() ? ExtrusionRole::erNone : m_segments.back().role_type;
+			// parse path
+			Path::SubPath sub_path;
+			sub_path.begin_move_id = move_id;
+			sub_path.end_move_id = move_id;
+			sub_path.mesh = generate_cuboid_from_move(prev, curr);
+
+			ExtrusionRole last_role = m_paths.empty() ? ExtrusionRole::erNone : m_paths.back().role_type;
 			ExtrusionRole curr_role = curr.extrusion_role;
 			if (last_role != curr_role)
 			{
-				auto mesh = generate_cuboid_from_move(prev, curr);
-				Segment seg;
-				seg.sub_meshes.push_back(mesh);
-				seg.begin_move_id = move_id;
-				seg.end_move_id = move_id;
-				seg.role_type = curr.extrusion_role;
-				m_segments.push_back(seg);
+				Path path;
+				path.role_type = curr.extrusion_role;
+				path.append_sub_path(sub_path);
+				m_paths.push_back(path);
 			}
 			else {
-				m_segments.back().end_move_id = move_id;
-				auto mesh = generate_cuboid_from_move(prev, curr);
-				m_segments.back().sub_meshes.push_back(mesh);
+				m_paths.back().append_sub_path(sub_path);
 			}
 		}
 
 		move_id++;
 	}
 
-	for (auto& seg : m_segments) {
-		seg.merged_mesh = Mesh::merge(seg.sub_meshes);
-		seg.merged_mesh->material = std::make_shared<Material>();
-		seg.merged_mesh->material->albedo = Vec3(Extrusion_Role_Colors[seg.role_type]);
-		m_meshes.push_back(seg.merged_mesh);
-	}
+	m_layer_range = { 0, (int)m_layers.size() - 1 };
+	m_layer_scope = m_layer_range;
+	m_move_range = { 0, move_id };
+	m_move_scope = m_move_range;
 
-	m_layer_ranges = { 0, static_cast<unsigned int>(m_layers.size() - 1) };
-	m_move_ranges[0] = 0;
-	m_move_ranges[1] = move_id;
+	if (m_paths.empty())
+		return;
+
+	refresh();
 }
 
 std::shared_ptr<Mesh> GcodeViewer::generate_cuboid_from_move(const MoveVertex& prev, const MoveVertex& curr)
@@ -119,4 +177,42 @@ std::shared_ptr<Mesh> GcodeViewer::generate_cuboid_from_move(const MoveVertex& p
 	vertices_positions[7] = curr.position + (prev.width / 2.0f) * left_dir;
 
 	return Mesh::create_cuboid_mesh(vertices_positions);
+}
+
+void GcodeViewer::refresh()
+{
+	m_meshes.clear();
+
+	int begin_move_id = m_layers[m_layer_scope[0]].begin_move_id;
+	int end_move_id = m_layers[m_layer_scope[1]].end_move_id;
+
+	for (int role_type = ExtrusionRole::erNone + 1; role_type < ExtrusionRole::erCount; role_type++) {
+		std::vector<std::shared_ptr<Mesh>> can_merge_meshes;
+		can_merge_meshes.reserve((m_paths.size() * m_paths.front().sub_paths.size()));
+
+		for (int path_id = 0; path_id < m_paths.size(); path_id++) {
+			const auto& path = m_paths[path_id];
+			if (path.role_type == role_type) {
+				if (path.begin_move_id < begin_move_id || path.end_move_id > end_move_id)
+					continue;
+
+				for (int sub_path_id = 0; sub_path_id < path.sub_paths.size(); sub_path_id++) {
+					const auto& sub_path = path.sub_paths[sub_path_id];
+					if (sub_path.begin_move_id < begin_move_id || sub_path.end_move_id > end_move_id)
+						continue;
+					can_merge_meshes.push_back(sub_path.mesh);
+				}
+			}
+		}
+
+		if (can_merge_meshes.size() > 0) {
+			m_merged_mesh[role_type] = Mesh::merge(can_merge_meshes);
+			m_merged_mesh[role_type]->material = std::make_shared<Material>();
+			m_merged_mesh[role_type]->material->albedo = Vec3(Extrusion_Role_Colors[role_type]);
+
+			m_meshes.push_back(m_merged_mesh[role_type]);
+		}
+	}
+
+	m_dirty = true;
 }

@@ -193,6 +193,13 @@ void RenderSystem::updateRenderSourceData()
 
     m_initialized = true;
 
-    if (m_render_source_data->gcode_mesh_data.empty() && !m_gcode_viewer->meshes().empty())
-        m_render_source_data->gcode_mesh_data = m_gcode_viewer->meshes();
+    if (m_gcode_viewer->valid() && m_gcode_viewer->dirty()) {
+        m_render_source_data->gcode_render_mesh.clear();
+        m_render_source_data->gcode_render_materials.clear();
+        for (const auto& mesh : m_gcode_viewer->meshes()) {
+            m_render_source_data->gcode_render_mesh.push_back(std::make_shared<RenderMeshData>(mesh));
+            m_render_source_data->gcode_render_materials.push_back(std::make_shared<RenderMaterialData>(mesh->material));
+        }
+        m_gcode_viewer->setDirty(false);
+    }
 }
