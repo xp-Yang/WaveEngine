@@ -1,27 +1,5 @@
 #include "GcodeViewer.hpp"
 
-const std::vector<Color4> Extrusion_Role_Colors{
-	{ 0.90f, 0.70f, 0.70f, 1.0f },   // erNone
-	{ 1.00f, 0.90f, 0.30f, 1.0f },   // erPerimeter
-	{ 1.00f, 0.49f, 0.22f, 1.0f },   // erExternalPerimeter
-	{ 0.12f, 0.12f, 1.00f, 1.0f },   // erOverhangPerimeter
-	{ 0.69f, 0.19f, 0.16f, 1.0f },   // erInternalInfill
-	{ 0.59f, 0.33f, 0.80f, 1.0f },   // erSolidInfill
-	{ 0.94f, 0.25f, 0.25f, 1.0f },   // erTopSolidInfill
-	{ 0.40f, 0.36f, 0.78f, 1.0f },   // erBottomSurface
-	{ 1.00f, 0.55f, 0.41f, 1.0f },   // erIroning
-	{ 0.30f, 0.50f, 0.73f, 1.0f },   // erBridgeInfill
-	{ 1.00f, 1.00f, 1.00f, 1.0f },   // erGapFill
-	{ 0.00f, 0.53f, 0.43f, 1.0f },   // erSkirt
-	{ 0.00f, 0.23f, 0.43f, 1.0f },   // erBrim
-	{ 0.00f, 1.00f, 0.00f, 1.0f },   // erSupportMaterial
-	{ 0.00f, 0.50f, 0.00f, 1.0f },   // erSupportMaterialInterface
-	{ 0.00f, 0.25f, 0.00f, 1.0f },   // erSupportTransition
-	{ 0.70f, 0.89f, 0.67f, 1.0f },   // erWipeTower
-	{ 0.37f, 0.82f, 0.58f, 1.0f },   // erCustom
-	{ 0.37f, 0.82f, 0.58f, 1.0f },   // erMixed
-};
-
 static int ColorToInt(Color4 color) {
 	int r = ((int)(color.x * 255)) << 24;
 	int g = ((int)(color.y * 255)) << 16;
@@ -132,6 +110,12 @@ void GcodeViewer::set_move_scope(std::array<int, 2> move_scope)
 	m_move_scope[0] = std::max(move_scope[0], m_move_range[0]);
 	m_move_scope[1] = std::min(move_scope[1], m_move_range[1]);
 
+	refresh();
+}
+
+void GcodeViewer::set_visible(ExtrusionRole role_type, bool visible)
+{
+	m_visual_mesh[role_type] = {};
 	refresh();
 }
 
