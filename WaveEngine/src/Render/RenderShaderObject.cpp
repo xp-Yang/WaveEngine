@@ -175,6 +175,10 @@ RenderShaderObject* RenderShaderObject::getShaderObject(const ShaderType& type)
         Shader shader = Shader{ resource_dir + "/shader/mesh.vs", resource_dir + "/shader/oneColor.fs" };
         return new RenderShaderObject(shader);
     }
+    case ShaderType::GcodeShader: {
+        Shader shader = Shader{ resource_dir + "/shader/mesh.vs", resource_dir + "/shader/gcode_phong.fs" };
+        return new RenderShaderObject(shader);
+    }
     case ShaderType::SkyboxShader: {
         Shader shader = Shader{ resource_dir + "/shader/skybox.vs", resource_dir + "/shader/skybox.fs" };
         return new RenderShaderObject(shader);

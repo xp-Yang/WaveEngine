@@ -82,15 +82,11 @@ void GcodeViewerPass::draw()
 	Vec3 light_direction = m_render_source_data->render_directional_light_data_list.front().direction;
 	Vec4 light_color = m_render_source_data->render_directional_light_data_list.front().color;
 
-	static RenderShaderObject* shader = RenderShaderObject::getShaderObject(ShaderType::BlinnPhongShader);
+	static RenderShaderObject* shader = RenderShaderObject::getShaderObject(ShaderType::GcodeShader);
 	shader->start_using();
-	shader->setInt("point_lights_size", 0);
-	shader->setFloat3("directionalLight.direction", light_direction);
-	shader->setFloat4("directionalLight.color", light_color);
 	shader->setMatrix("model", 1, Math::Rotate(-0.5 * Math::Constant::PI, Vec3(1, 0, 0)) * Math::Scale(Vec3(50.0f / 256.0f)) * Math::Translate(Vec3(-128.0f, -128.0f, 0.0f)));
 	shader->setMatrix("view", 1, m_render_source_data->view_matrix);
 	shader->setMatrix("projection", 1, m_render_source_data->proj_matrix);
-	shader->setFloat3("cameraPos", m_render_source_data->camera_position);
 	for (int i = 0; i < m_gcode_viewer->meshes().size(); i++) {
 		const auto& mesh = m_gcode_viewer->meshes()[i];
 		if (!mesh || mesh->indices.empty())
@@ -100,7 +96,7 @@ void GcodeViewerPass::draw()
 
 		shader->setFloat("material.ambient", 0.2f);
 		shader->setFloat3("material.diffuse", mesh->material->albedo);
-		shader->setFloat3("material.specular", Vec3(0.0f));
+		shader->setFloat3("material.specular", Vec3(0.2f));
 
 		m_rhi->drawIndexed(m_VAOs[i], mesh->indices.size());
 	}

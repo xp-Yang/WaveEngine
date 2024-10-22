@@ -15,9 +15,6 @@ struct Material {
     sampler2D specular_map;
     sampler2D normal_map;
     sampler2D height_map;
-
-    vec3 diffuse;
-    vec3 specular;
 };
 
 uniform Material material;
@@ -31,11 +28,7 @@ void main()
     vec3 normal = normalize(fs_in.fragWorldNormal);
     vec3 view_direction = normalize(cameraPos - fs_in.fragWorldPos);
     vec3 diffuse_coef = vec3(texture(material.diffuse_map, fs_in.fragUV));
-    //if (diffuse_coef.xyz == vec3(1.0))
-        diffuse_coef = material.diffuse;
     vec3 specular_coef = vec3(texture(material.specular_map, fs_in.fragUV));
-    //if (specular_coef.xyz == vec3(1.0))
-        specular_coef = material.specular;
 
     vec3 ambient_light = vec3(material.ambient);
 	
