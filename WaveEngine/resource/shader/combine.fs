@@ -20,6 +20,6 @@ void main()
     // tone mapping
     vec3 result = ToneMapping(hdrColor, 1.0);
     // gamma correct
-    result = GammaCorrection(result);
+    //result = GammaCorrection(result);
     FragColor = vec4(result, 1.0);
 }

@@ -103,6 +103,9 @@ public:
 	void setDirty(bool dirty) { m_dirty = dirty; }
 	bool valid() const { return m_valid; }
 
+signals:
+	Signal<GcodeViewer*> loaded;
+
 protected:
 	void reset();
 	void parse_moves(std::vector<MoveVertex> moves);

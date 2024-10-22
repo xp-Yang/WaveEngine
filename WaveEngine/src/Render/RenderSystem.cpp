@@ -17,6 +17,8 @@ void RenderSystem::init(std::shared_ptr<Scene> scene)
 
     m_render_source_data = std::make_shared<RenderSourceData>();
 
+    m_gcode_viewer = std::make_shared<GcodeViewer>();
+
     m_forward_path = std::make_shared<ForwardRenderPath>(this);
     m_forward_path->prepareRenderSourceData(m_render_source_data);
     m_forward_path->init();
@@ -30,8 +32,6 @@ void RenderSystem::init(std::shared_ptr<Scene> scene)
     m_ray_tracing_path->init();
 
     setRenderPathType(RenderPathType::Deferred);
-
-    m_gcode_viewer = std::make_shared<GcodeViewer>();
 }
 
 RenderPathType RenderSystem::getRenderPathType()
@@ -194,12 +194,8 @@ void RenderSystem::updateRenderSourceData()
     m_initialized = true;
 
     if (m_gcode_viewer->valid() && m_gcode_viewer->dirty()) {
-        m_render_source_data->gcode_render_mesh.clear();
-        m_render_source_data->gcode_render_materials.clear();
-        for (const auto& mesh : m_gcode_viewer->meshes()) {
-            m_render_source_data->gcode_render_mesh.push_back(std::make_shared<RenderMeshData>(mesh));
-            m_render_source_data->gcode_render_materials.push_back(std::make_shared<RenderMaterialData>(mesh->material));
-        }
+        m_render_source_data->gcode_meshes = m_gcode_viewer->meshes();
+        m_render_source_data->gcode_meshes_dirty = true;
         m_gcode_viewer->setDirty(false);
     }
 }

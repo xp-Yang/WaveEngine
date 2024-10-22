@@ -53,6 +53,8 @@ void DeferredRenderPath::init()
     m_bloom_pass->init();
     m_outline_pass->init();
     m_combine_pass->init();
+
+    connect(ref_render_system->gcodeViewer().get(), &(ref_render_system->gcodeViewer()->loaded), static_cast<GcodeViewerPass*>(m_gcode_pass.get()), &GcodeViewerPass::reload_mesh_data);
 }
 
 void DeferredRenderPath::prepareRenderSourceData(const std::shared_ptr<RenderSourceData>& render_source_data)

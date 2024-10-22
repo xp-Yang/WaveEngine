@@ -124,6 +124,8 @@ void GcodeViewer::load(const GCodeProcessorResult& result)
 
 	parse_moves(result.moves);
 
+	emit loaded(this);
+
 	m_valid = true;
 }
 
@@ -146,7 +148,13 @@ void GcodeViewer::set_move_scope(std::array<int, 2> move_scope)
 
 void GcodeViewer::reset()
 {
-	*this = GcodeViewer();
+	m_layers.clear();
+	m_paths = {};
+	m_visual_mesh = {};
+	m_meshes.clear();
+
+	m_dirty = false;
+	m_valid = false;
 }
 
 void GcodeViewer::parse_moves(std::vector<MoveVertex> moves)

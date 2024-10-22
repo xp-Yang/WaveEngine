@@ -75,6 +75,9 @@ void main()
     vec3 ambient = 0.3 * albedo * ao;
 
     vec3 color = ambient + Lo;
+    
+    // gamma correct
+    color = GammaCorrection(color);
 
     FragColor = vec4(color, 1.0);
 }

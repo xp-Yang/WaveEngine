@@ -35,7 +35,8 @@ void MeshForwardLightingPass::configSamples(int samples)
 void MeshForwardLightingPass::draw()
 {
     m_framebuffer->bind();
-    m_framebuffer->clear(Color4(0.046, 0.046, 0.046, 1.0));
+    //m_framebuffer->clear(Color4(0.046, 0.046, 0.046, 1.0)); // before gamma correction
+    m_framebuffer->clear(Color4(0.251, 0.251, 0.251, 1.0)); // after gamma correction
 
     Mat4 light_ref_matrix = m_render_source_data->render_directional_light_data_list.front().lightProjMatrix * 
         m_render_source_data->render_directional_light_data_list.front().lightViewMatrix;

@@ -17,16 +17,16 @@ public:
 
     void bind(const onFunc& func)
     {
-        m_slots.push_back(std::make_shared<Slot<Args...>>(func));
+        m_slots.push_back(std::make_unique<Slot<Args...>>(func));
     }
 
-    void operator()(Args&&... args) // 这里不是万能引用，Signal一声明，Args就确定了。万能引用发生在模板类型推导时
-    {
-        for (auto& iter : m_slots)
-        {
-            iter->exec(std::forward<Args>(args)...);
-        }
-    }
+    //void operator()(Args&&... args) // 这里不是万能引用，Signal一声明，Args就确定了。万能引用发生在模板类型推导时
+    //{
+    //    for (auto& iter : m_slots)
+    //    {
+    //        iter->exec(std::forward<Args>(args)...);
+    //    }
+    //}
 
     void operator()(const Args&... args)
     {
@@ -37,7 +37,7 @@ public:
     }
 
 private:
-    std::vector<std::shared_ptr<Slot<Args...>>> m_slots;
+    std::vector<std::unique_ptr<Slot<Args...>>> m_slots;
 };
 
 template<class Sender, typename... Args>

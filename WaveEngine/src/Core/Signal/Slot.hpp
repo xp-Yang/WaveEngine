@@ -14,10 +14,10 @@ public:
     {
     }
 
-    void exec(Args&&... args)
-    {
-        m_func(std::forward<Args>(args)...);
-    }
+    //void exec(Args&&... args)
+    //{
+    //    m_func(std::forward<Args>(args)...);
+    //}
 
     void exec(const Args&... args)
     {
