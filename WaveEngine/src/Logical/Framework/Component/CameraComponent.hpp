@@ -31,12 +31,12 @@ struct CameraComponent : public Component {
 	float fov = originFov / zoom;
 	float nearPlane = 0.1f;
 	float farPlane = 1000.0f;
-	Vec3 direction = Math::Normalize(Vec3(0.0f, -0.2f, -0.98f));
+	Vec3 direction = Math::Normalize(Vec3(0.0f, -0.6f, -0.8f));
 	Vec3 upDirection = Math::Normalize(CameraManipulator::global_up - Math::Dot(CameraManipulator::global_up, direction) * direction); // camera µÄ y Öá
 	Vec3 getRightDirection() const { // camera µÄ x Öá
 		return Math::Cross(direction, upDirection);
 	}
-	Vec3 pos = Vec3(0.0f) - 15.0f * direction;
+	Vec3 pos = Vec3(0.0f) - 115.0f * direction;
 	Mat4 view = Math::LookAt(pos, pos + direction, CameraManipulator::global_up);
 	float aspectRatio{ 16.0f / 9.0f }; // TODO should on window size change
 	Mat4 projection = projection_mode == CameraManipulator::Projection::Perspective ?

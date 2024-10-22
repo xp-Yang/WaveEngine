@@ -23,6 +23,8 @@ uniform vec3 cameraPos;
 
 uniform float alpha;
 
+out vec4 outColor;
+
 void main()
 {
     vec3 normal = normalize(fs_in.fragWorldNormal);
@@ -44,5 +46,5 @@ void main()
     // }    
     
     vec3 result = ambient_light + lightingByDirectionalLight + lightingByPointLight;
-    gl_FragColor = vec4(result, alpha);
+    outColor = vec4(result, alpha);
 }

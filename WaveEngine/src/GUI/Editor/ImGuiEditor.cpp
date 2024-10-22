@@ -15,12 +15,11 @@
 
 ImGuiEditor::ImGuiEditor()
     : m_main_canvas(std::make_unique<MainCanvas>(this))
+    , m_preview_canvas(std::make_unique<PreviewCanvas>(this))
     , m_context_menu(std::make_unique<ImGuiContextMenu>(this))
     , m_scene_hierarchy_window(std::make_unique<ImGuiSceneHierarchy>(this))
     , m_global_console_window(std::make_unique<ImGuiGlobalConsole>(this))
     , m_debug_window(std::make_unique<ImGuiDebugWindow>(this))
-    , m_horizontal_slider(std::make_unique<ImGuiSlider>(this, Orientation::Horizontal))
-    , m_vertical_slider(std::make_unique<ImGuiSlider>(this, Orientation::Vertical))
 {
 }
 
@@ -51,6 +50,8 @@ void ImGuiEditor::init(std::shared_ptr<Window> window, std::shared_ptr<RenderSys
     configUIStyle();
 
     m_scene_hierarchy_window->init();
+
+    connect(ref_render_system->gcodeViewer().get(), &(ref_render_system->gcodeViewer()->loaded), m_preview_canvas.get(), &PreviewCanvas::on_loaded_func);
 }
 
 void ImGuiEditor::onUpdate()
@@ -62,12 +63,11 @@ void ImGuiEditor::onUpdate()
     if (m_show_debug)
         m_debug_window->render(); // render first, the debug window need to be docked
     m_main_canvas->render();
+    m_preview_canvas->render();
     ImGui::PopStyleVar(3);
     m_context_menu->render();
     m_scene_hierarchy_window->render();
     m_global_console_window->render();
-    m_horizontal_slider->render();
-    m_vertical_slider->render();
 }
 
 void ImGuiEditor::beginFrame()
@@ -118,9 +118,6 @@ void ImGuiEditor::renderMenuBar()
                 if (filepath.find(".gcode") != std::string::npos) {
                     const GCodeProcessorResult& result = ref_scene->loadGcodeFile(filepath);
                     ref_render_system->gcodeViewer()->load(result);
-
-                    //m_horizontal_slider->initValueSpan();
-                    m_vertical_slider->initValueSpan(ref_render_system->gcodeViewer()->get_layer_range());
                 }
                 else if (!filepath.empty()) {
                     ref_scene->loadModel(filepath);

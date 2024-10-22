@@ -104,7 +104,7 @@ void ImGuiToolbar::renderGizmos()
     }
 
     ImVec2 air_window_size = ImVec2(128, 128);
-    ImVec2 air_window_pos = ImVec2(main_viewport.x + main_viewport.width - air_window_size.x, main_viewport.y);
+    ImVec2 air_window_pos = ImVec2(main_viewport.x, main_viewport.y);
     float camDistance = 8.f;
     ImGuizmo::ViewManipulate((float*)(&camera.view), camDistance, air_window_pos, air_window_size, 0x10101010);
 

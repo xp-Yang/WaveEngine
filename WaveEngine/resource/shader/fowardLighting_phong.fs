@@ -24,8 +24,7 @@ uniform Material material;
 
 uniform vec3 cameraPos;
 
-uniform samplerCube skybox;
-uniform bool enable_skybox_sample;
+out vec4 outColor;
 
 void main()
 {
@@ -56,14 +55,5 @@ void main()
     float shadowFactor = ShadowCalculation(fragPosLightSpace, shadow_map);       
     
     vec3 result = ambient_light + shadowFactor * lightingByDirectionalLight + lightingByPointLight;
-    gl_FragColor = vec4(result, 1.0);
-
-    // if(enable_skybox_sample){
-    //     vec3 I = normalize(fs_in.fragWorldPos - cameraPos);
-    //     vec3 R = reflect(I, normalize(normal));
-    //     gl_FragColor = 0.33 * gl_FragColor + 0.66 * vec4(texture(skybox, R).rgb, 1.0);
-    // }
-
-    //debug
-    //gl_FragColor = vec4((ambient_light + diffuse_light + specular_light), 1.0);
+    outColor = vec4(result, 1.0);
 }

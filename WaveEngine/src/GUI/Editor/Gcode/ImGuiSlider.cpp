@@ -1,5 +1,6 @@
 #include "ImGuiSlider.hpp"
 #include "../ImGuiEditor.hpp"
+#include "../ImGuiCanvas.hpp"
 #include "Render/RenderSystem.hpp"
 
 static const float  LEFT_MARGIN = 0.0f;
@@ -76,7 +77,7 @@ bool slider_behavior(ImGuiID id, const ImRect& region, const ImS32 v_min, const 
 }
 
 
-ImGuiSlider::ImGuiSlider(ImGuiEditor* parent, Orientation style)
+ImGuiSlider::ImGuiSlider(ImGuiCanvas* parent, Orientation style)
     : m_parent(parent)
     , m_orientation(style)
 {
@@ -97,11 +98,13 @@ void ImGuiSlider::SetLowerValue(const int lower_val)
 {
     m_value_scope[0] = lower_val;
 
-    if (m_parent->ref_render_system->gcodeViewer()->valid()) {
-        if (m_orientation == Orientation::Vertical)
-            m_parent->ref_render_system->gcodeViewer()->set_layer_scope(m_value_scope);
+    if (m_parent->parent()->ref_render_system->gcodeViewer()->valid()) {
+        if (m_orientation == Orientation::Vertical) {
+            m_parent->parent()->ref_render_system->gcodeViewer()->set_layer_scope(m_value_scope);
+            static_cast<PreviewCanvas*>(m_parent)->horizontal_slider()->initValueSpan(m_parent->parent()->ref_render_system->gcodeViewer()->get_move_range());
+        }
         else
-            ;
+            m_parent->parent()->ref_render_system->gcodeViewer()->set_move_scope(m_value_scope);
     }
 }
 
@@ -109,11 +112,13 @@ void ImGuiSlider::SetHigherValue(const int higher_val)
 {
     m_value_scope[1] = higher_val;
 
-    if (m_parent->ref_render_system->gcodeViewer()->valid()) {
-        if (m_orientation == Orientation::Vertical)
-            m_parent->ref_render_system->gcodeViewer()->set_layer_scope(m_value_scope);
+    if (m_parent->parent()->ref_render_system->gcodeViewer()->valid()) {
+        if (m_orientation == Orientation::Vertical) {
+            m_parent->parent()->ref_render_system->gcodeViewer()->set_layer_scope(m_value_scope);
+            static_cast<PreviewCanvas*>(m_parent)->horizontal_slider()->initValueSpan(m_parent->parent()->ref_render_system->gcodeViewer()->get_move_range());
+        }
         else
-            ;
+            m_parent->parent()->ref_render_system->gcodeViewer()->set_move_scope(m_value_scope);
     }
 }
 
@@ -171,31 +176,30 @@ bool ImGuiSlider::render()
     int windows_flag = ImGuiWindowFlags_NoTitleBar
         | ImGuiWindowFlags_NoCollapse
         | ImGuiWindowFlags_NoMove
+        | ImGuiWindowFlags_NoBackground
         | ImGuiWindowFlags_NoResize
         | ImGuiWindowFlags_NoScrollbar
         | ImGuiWindowFlags_NoScrollWithMouse;
 
-    int canvas_width = m_parent->getMainViewport().width;
-    int canvas_height = m_parent->getMainViewport().height;
-    ImVec2 canvas_pos = ImVec2(m_parent->getMainViewport().x, m_parent->getMainViewport().y);
+    int canvas_width = m_parent->getViewport().width;
+    int canvas_height = m_parent->getViewport().height;
+    ImVec2 canvas_pos = ImVec2(m_parent->getViewport().x, m_parent->getViewport().y);
 
     if (m_orientation == Orientation::Horizontal) {
         ImVec2 size = ImVec2(0.6f * canvas_width, HORIZONTAL_SLIDER_WINDOW_HEIGHT);
         ImGui::SetNextWindowPos(canvas_pos + ImVec2(0.2f * canvas_width, canvas_height - HORIZONTAL_SLIDER_WINDOW_HEIGHT));
-        ImGui::SetNextWindowSize(size);
-        ImGui::Begin("moves_slider", nullptr, windows_flag);
+        ImGui::BeginChild("moves_slider", size, 0, windows_flag);
         int value = GetHigherValue();
         if (horizontal_slider("moves_slider", &value, GetMinValue(), GetMaxValue(), size)) {
             result = true;
             SetHigherValue(value);
         }
-        ImGui::End();
+        ImGui::EndChild();
     }
     else {
         ImVec2 size = ImVec2(VERTICAL_SLIDER_WINDOW_WIDTH, 0.7f * canvas_height);
         ImGui::SetNextWindowPos(canvas_pos + ImVec2(canvas_width - VERTICAL_SLIDER_WINDOW_WIDTH, 0.15f * canvas_height));
-        ImGui::SetNextWindowSize(size);
-        ImGui::Begin("laysers_slider", nullptr, windows_flag);
+        ImGui::BeginChild("laysers_slider", size, 0, windows_flag);
 
         int higher_value = GetHigherValue();
         int lower_value = GetLowerValue();
@@ -211,7 +215,7 @@ bool ImGuiSlider::render()
                 SetLowerValue(lower_value);
             result = true;
         }
-        ImGui::End();
+        ImGui::EndChild();
     }
 
     ImGui::PopStyleVar(3);

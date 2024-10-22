@@ -9,7 +9,7 @@ public:
 	GcodeViewerPass();
 	void init() override;
 	void draw() override;
-	void reload_mesh_data(GcodeViewer* gcode_viewer);
+	void reload_mesh_data(std::vector<std::shared_ptr<Mesh>> gcode_meshes);
 
 private:
 	std::vector<unsigned int> m_VAOs;

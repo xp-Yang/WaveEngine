@@ -16,10 +16,10 @@ enum class HandleType {
     Second,
 };
 
-class ImGuiEditor;
+class ImGuiCanvas;
 class ImGuiSlider {
 public:
-    ImGuiSlider(ImGuiEditor* parent, Orientation style);
+    ImGuiSlider(ImGuiCanvas* parent, Orientation style);
     ~ImGuiSlider() {}
 
     int    GetMinValue() const { return m_value_range[0]; }
@@ -72,7 +72,7 @@ private:
 
     bool m_is_one_layer = false;
 
-    ImGuiEditor* m_parent;
+    ImGuiCanvas* m_parent;
 };
 
 #endif // !#define ImGuiSlider_hpp

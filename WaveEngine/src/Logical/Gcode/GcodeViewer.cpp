@@ -38,7 +38,7 @@ static Color4 IntToColor(int color) {
 	return Color4(r, g, b, a);
 }
 
-void Path::SubPath::append_segment(const Segment& segment)
+void LineCollection::Polyline::append_segment(const Segment& segment)
 {
 	if (segment.begin_move_id < begin_move_id)
 		begin_move_id = segment.begin_move_id;
@@ -49,42 +49,24 @@ void Path::SubPath::append_segment(const Segment& segment)
 	segments.push_back(segment);
 }
 
-Path::Segment Path::SubPath::segment_of(int move_id) const
+void LineCollection::append_polyline(const Polyline& polyline)
 {
-	for (const auto& seg : segments) {
-		if (seg.begin_move_id <= move_id && move_id <= seg.end_move_id)
-			return seg;
-	}
-	return Segment();
+	polylines.push_back(polyline);
 }
 
-void Path::append_sub_path(const SubPath& sub_path)
-{
-	sub_paths.push_back(sub_path);
-}
-
-Path::SubPath Path::sub_path_of(int move_id) const
-{
-	for (const auto& sub_path : sub_paths) {
-		if (sub_path.begin_move_id <= move_id && move_id <= sub_path.end_move_id)
-			return sub_path;
-	}
-	return SubPath();
-}
-
-int Path::calculate_index_offset_of(int move_id) const
+int LineCollection::calculate_index_offset_of(int move_id) const
 {
 	int index_offset = 0;
 	int single_segment_indices_count = 36;
-	for (int i = 0; i < sub_paths.size(); i++) {
-		const auto& sub_path = sub_paths[i];
-		if (sub_path.end_move_id < move_id) {
-			index_offset += sub_path.segments.size() * single_segment_indices_count;
+	for (int i = 0; i < polylines.size(); i++) {
+		const auto& polyline = polylines[i];
+		if (polyline.end_move_id < move_id) {
+			index_offset += polyline.segments.size() * single_segment_indices_count;
 			continue;
 		}
-		if (sub_path.begin_move_id <= move_id && move_id <= sub_path.end_move_id) {
-			for (int j = 0; j < sub_path.segments.size(); j++) {
-				const auto& segment = sub_path.segments[j];
+		if (polyline.begin_move_id <= move_id && move_id <= polyline.end_move_id) {
+			for (int j = 0; j < polyline.segments.size(); j++) {
+				const auto& segment = polyline.segments[j];
 				if (segment.begin_move_id <= move_id && move_id <= segment.end_move_id) {
 					index_offset += j * single_segment_indices_count;
 					return index_offset;
@@ -95,19 +77,19 @@ int Path::calculate_index_offset_of(int move_id) const
 	return index_offset;
 }
 
-int Path::calculate_reverse_index_offset_of(int move_id) const
+int LineCollection::calculate_reverse_index_offset_of(int move_id) const
 {
 	int index_offset = 0;
 	int single_segment_indices_count = 36;
-	for (int i = 0; i < sub_paths.size(); i++) {
-		const auto& sub_path = sub_paths[sub_paths.size() - 1 - i];
-		if (move_id < sub_path.begin_move_id) {
-			index_offset += sub_path.segments.size() * single_segment_indices_count;
+	for (int i = 0; i < polylines.size(); i++) {
+		const auto& polyline = polylines[polylines.size() - 1 - i];
+		if (move_id < polyline.begin_move_id) {
+			index_offset += polyline.segments.size() * single_segment_indices_count;
 			continue;
 		}
-		if (sub_path.begin_move_id <= move_id && move_id <= sub_path.end_move_id) {
-			for (int j = 0; j < sub_path.segments.size(); j++) {
-				const auto& segment = sub_path.segments[sub_path.segments.size() - 1 - j];
+		if (polyline.begin_move_id <= move_id && move_id <= polyline.end_move_id) {
+			for (int j = 0; j < polyline.segments.size(); j++) {
+				const auto& segment = polyline.segments[polyline.segments.size() - 1 - j];
 				if (segment.begin_move_id <= move_id && move_id <= segment.end_move_id) {
 					index_offset += j * single_segment_indices_count;
 					return index_offset;
@@ -124,7 +106,7 @@ void GcodeViewer::load(const GCodeProcessorResult& result)
 
 	parse_moves(result.moves);
 
-	emit loaded(this);
+	emit loaded(m_meshes);
 
 	m_valid = true;
 }
@@ -137,19 +119,26 @@ const std::vector<std::shared_ptr<Mesh>>& GcodeViewer::meshes() const
 void GcodeViewer::set_layer_scope(std::array<int, 2> layer_scope)
 {
 	m_layer_scope = layer_scope;
+
+	m_move_range[0] = m_layers[m_layer_scope[1]].begin_move_id;
+	m_move_range[1] = m_layers[m_layer_scope[1]].end_move_id;
+	m_move_scope = m_move_range;
+
 	refresh();
 }
 
 void GcodeViewer::set_move_scope(std::array<int, 2> move_scope)
 {
-	m_move_scope = move_scope;
+	m_move_scope[0] = std::max(move_scope[0], m_move_range[0]);
+	m_move_scope[1] = std::min(move_scope[1], m_move_range[1]);
+
 	refresh();
 }
 
 void GcodeViewer::reset()
 {
 	m_layers.clear();
-	m_paths = {};
+	m_line_collections = {};
 	m_visual_mesh = {};
 	m_meshes.clear();
 
@@ -180,8 +169,8 @@ void GcodeViewer::parse_moves(std::vector<MoveVertex> moves)
 			else
 				m_layers.back().end_move_id = move_id;
 
-			// parse path
-			Path::Segment segment;
+			// parse segment
+			LineCollection::Segment segment;
 			segment.begin_move_id = move_id;
 			segment.end_move_id = move_id;
 			segment.mesh = generate_cuboid_from_move(prev, curr);
@@ -189,12 +178,12 @@ void GcodeViewer::parse_moves(std::vector<MoveVertex> moves)
 			ExtrusionRole curr_role = curr.extrusion_role;
 			if (prev_role != curr_role) {
 				prev_role = curr_role;
-				Path::SubPath sub_path;
-				sub_path.append_segment(segment);
-				m_paths[curr_role].append_sub_path(sub_path);
+				LineCollection::Polyline polyline;
+				polyline.append_segment(segment);
+				m_line_collections[curr_role].append_polyline(polyline);
 			}
 			else {
-				m_paths[curr_role].sub_paths.back().append_segment(segment);
+				m_line_collections[curr_role].polylines.back().append_segment(segment);
 			}
 		}
 
@@ -203,18 +192,18 @@ void GcodeViewer::parse_moves(std::vector<MoveVertex> moves)
 
 	m_layer_range = { 0, (int)m_layers.size() - 1 };
 	m_layer_scope = m_layer_range;
-	m_move_range = { 0, move_id };
+	m_move_range = { m_layers[m_layer_scope[1]].begin_move_id, m_layers[m_layer_scope[1]].end_move_id };
 	m_move_scope = m_move_range;
 
-	for (auto& path : m_paths) {
+	for (auto& collection : m_line_collections) {
 		std::vector<std::shared_ptr<Mesh>> can_merge_meshes;
-		can_merge_meshes.reserve((m_paths.size() * m_paths.front().sub_paths.size()));
-		for (const auto& sub_path : path.sub_paths) {
-			for (const auto& seg : sub_path.segments) {
+		can_merge_meshes.reserve((m_line_collections.size() * m_line_collections.front().polylines.size()));
+		for (const auto& polyline : collection.polylines) {
+			for (const auto& seg : polyline.segments) {
 				can_merge_meshes.push_back(seg.mesh);
 			}
 		}
-		path.merged_mesh = Mesh::merge(can_merge_meshes);
+		collection.merged_mesh = Mesh::merge(can_merge_meshes);
 	}
 
 	refresh();
@@ -223,7 +212,7 @@ void GcodeViewer::parse_moves(std::vector<MoveVertex> moves)
 std::shared_ptr<Mesh> GcodeViewer::generate_cuboid_from_move(const MoveVertex& prev, const MoveVertex& curr)
 {
 	Vec3 dir = Math::Normalize(curr.position - prev.position);
-	Vec3 left_dir = Math::Cross(Vec3(0, 1, 0), dir);
+	Vec3 left_dir = Math::Cross(Vec3(0, 0, 1), dir);
 	Vec3 right_dir = -left_dir;
 	Vec3 up_dir = Math::Cross(dir, left_dir);
 	Vec3 down_dir = -up_dir;
@@ -238,7 +227,7 @@ std::shared_ptr<Mesh> GcodeViewer::generate_cuboid_from_move(const MoveVertex& p
 	vertices_positions[6] = curr.position + (prev.height / 2.0f) * down_dir;
 	vertices_positions[7] = curr.position + (prev.width / 2.0f) * left_dir;
 
-	return Mesh::create_cuboid_mesh(vertices_positions);
+	return Mesh::create_vertex_normal_cuboid_mesh(vertices_positions);
 }
 
 void GcodeViewer::refresh()
@@ -246,20 +235,21 @@ void GcodeViewer::refresh()
 	m_meshes.clear();
 
 	int begin_move_id = m_layers[m_layer_scope[0]].begin_move_id;
-	int end_move_id = m_layers[m_layer_scope[1]].end_move_id;
+	int end_move_id = m_move_scope[1];
+	end_move_id = end_move_id > begin_move_id ? end_move_id : begin_move_id + 1;
 
 	for (int role_type = ExtrusionRole::erNone + 1; role_type < ExtrusionRole::erCount; role_type++) {
-		const auto& path = m_paths[role_type];
-		if (path.empty())
+		const auto& collection = m_line_collections[role_type];
+		if (collection.empty())
 			continue;
 
-		int begin_index_offset = path.calculate_index_offset_of(begin_move_id);
-		int end_index_offset = path.calculate_reverse_index_offset_of(end_move_id);
+		int begin_index_offset = collection.calculate_index_offset_of(begin_move_id);
+		int end_index_offset = collection.calculate_reverse_index_offset_of(end_move_id);
 
-		auto old_indices = path.merged_mesh->indices;
+		auto old_indices = collection.merged_mesh->indices;
 		old_indices.erase(old_indices.begin(), old_indices.begin() + begin_index_offset);
 		old_indices.erase(old_indices.end() - end_index_offset, old_indices.end());
-		m_visual_mesh[role_type] = std::make_shared<Mesh>(*path.merged_mesh);
+		m_visual_mesh[role_type] = std::make_shared<Mesh>(*collection.merged_mesh);
 		m_visual_mesh[role_type]->indices = old_indices;
 		m_visual_mesh[role_type]->material = std::make_shared<Material>();
 		m_visual_mesh[role_type]->material->albedo = Vec3(Extrusion_Role_Colors[role_type]);

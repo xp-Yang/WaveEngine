@@ -20,13 +20,13 @@ void GcodeViewerPass::init()
 {
 }
 
-void GcodeViewerPass::reload_mesh_data(GcodeViewer* gcode_viewer)
+void GcodeViewerPass::reload_mesh_data(std::vector<std::shared_ptr<Mesh>> gcode_meshes)
 {
 	m_VAOs.clear();
 	m_VBOs.clear();
 	m_IBOs.clear();
-	for (int i = 0; i < gcode_viewer->meshes().size(); i++) {
-		const auto& mesh = gcode_viewer->meshes()[i];
+	for (int i = 0; i < gcode_meshes.size(); i++) {
+		const auto& mesh = gcode_meshes[i];
 
 		unsigned int VBO = 0;
 		glGenBuffers(1, &VBO);
@@ -77,7 +77,13 @@ void GcodeViewerPass::draw()
 
 	static RenderShaderObject* shader = RenderShaderObject::getShaderObject(ShaderType::BlinnPhongShader);
 	shader->start_using();
-
+	shader->setInt("point_lights_size", 0);
+	shader->setFloat3("directionalLight.direction", light_direction);
+	shader->setFloat4("directionalLight.color", light_color);
+	shader->setMatrix("model", 1, Math::Rotate(-0.5 * Math::Constant::PI, Vec3(1, 0, 0)) * Math::Scale(Vec3(50.0f / 256.0f)) * Math::Translate(Vec3(-128.0f, -128.0f, 0.0f)));
+	shader->setMatrix("view", 1, m_render_source_data->view_matrix);
+	shader->setMatrix("projection", 1, m_render_source_data->proj_matrix);
+	shader->setFloat3("cameraPos", m_render_source_data->camera_position);
 	for (int i = 0; i < m_render_source_data->gcode_meshes.size(); i++) {
 		const auto& mesh = m_render_source_data->gcode_meshes[i];
 		// temp
@@ -88,14 +94,6 @@ void GcodeViewerPass::draw()
 		//shader->setTexture("material.height_map", 3, m_render_materials[i]->height_map);
 		shader->setFloat3("material.diffuse", mesh->material->albedo);
 		shader->setFloat3("material.specular", Vec3(0.0f));
-
-		shader->setMatrix("model", 1, Math::Rotate(-0.5 * Math::Constant::PI, Vec3(1, 0, 0)) * Math::Scale(Vec3(50.0f / 256.0f)) * Math::Translate(Vec3(-128.0f, -128.0f, 0.0f)));
-		shader->setMatrix("view", 1, m_render_source_data->view_matrix);
-		shader->setMatrix("projection", 1, m_render_source_data->proj_matrix);
-		shader->setFloat3("cameraPos", m_render_source_data->camera_position);
-
-		shader->setFloat3("directionalLight.direction", light_direction);
-		shader->setFloat4("directionalLight.color", light_color);
 
 		m_rhi->drawIndexed(m_VAOs[i], mesh->indices.size());
 	}

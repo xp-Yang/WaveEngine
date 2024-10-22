@@ -55,36 +55,29 @@ struct Layer {
 	int end_move_id;
 };
 
-struct Path {
+struct LineCollection {
 	struct Segment {
 		int begin_move_id;
 		int end_move_id;
 		std::shared_ptr<Mesh> mesh;
 	};
 
-	struct SubPath {
+	struct Polyline {
 		int begin_move_id = INT_MAX;
 		int end_move_id = -INT_MAX;
 		std::vector<Segment> segments;
 
 		void append_segment(const Segment& segment);
-		Segment segment_of(int move_id) const;
 	};
 
-	std::vector<SubPath> sub_paths;
+	std::vector<Polyline> polylines;
 
 	std::shared_ptr<Mesh> merged_mesh;
 
-	bool empty() const { return sub_paths.empty(); }
-	void append_sub_path(const SubPath& sub_path);
-	SubPath sub_path_of(int move_id) const;
+	bool empty() const { return polylines.empty(); }
+	void append_polyline(const Polyline& polyline);
 	int calculate_index_offset_of(int move_id) const;
 	int calculate_reverse_index_offset_of(int move_id) const;
-};
-
-struct VisualPath {
-	int path_id;
-	int sub_path_id;
 };
 
 class GcodeViewer {
@@ -94,17 +87,18 @@ public:
 
 	void set_layer_scope(std::array<int, 2> layer_scope);
 	void set_move_scope(std::array<int, 2> move_scope);
-	void set_visible(LineType type, bool visible);
 
 	const std::array<int, 2>& get_layer_range() const { return m_layer_range; }
-	const std::array<int, 2>& get_curr_layer_move_range() const { return m_curr_layer_move_range; }
+	const std::array<int, 2>& get_move_range() const { return m_move_range; }
+
+	void set_visible(LineType type, bool visible);
 
 	bool dirty() const { return m_dirty; }
 	void setDirty(bool dirty) { m_dirty = dirty; }
 	bool valid() const { return m_valid; }
 
 signals:
-	Signal<GcodeViewer*> loaded;
+	Signal<std::vector<std::shared_ptr<Mesh>>> loaded;
 
 protected:
 	void reset();
@@ -115,10 +109,9 @@ protected:
 private:
 	std::vector<Layer> m_layers;
 
-	std::array<int, 2> m_move_range;
 	std::array<int, 2> m_layer_range;
-	std::array<int, 2> m_curr_layer_move_range;
 	std::array<int, 2> m_layer_scope;
+	std::array<int, 2> m_move_range;
 	std::array<int, 2> m_move_scope;
 
 	bool m_move_type_visible[static_cast<size_t>(EMoveType::Count)] = { false };
@@ -127,7 +120,7 @@ private:
 	unsigned int m_line_type;
 	ViewType m_view_type;
 
-	std::array<Path, ExtrusionRole::erCount> m_paths;
+	std::array<LineCollection, ExtrusionRole::erCount> m_line_collections;
 	std::array<std::shared_ptr<Mesh>, ExtrusionRole::erCount> m_visual_mesh;
 	std::vector<std::shared_ptr<Mesh>> m_meshes;
 

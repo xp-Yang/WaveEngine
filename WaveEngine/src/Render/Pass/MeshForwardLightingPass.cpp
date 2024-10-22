@@ -81,8 +81,6 @@ void MeshForwardLightingPass::draw()
         shader->setFloat3("directionalLight.direction", light_direction);
         shader->setFloat4("directionalLight.color", light_color);
 
-        shader->setCubeTexture("skybox", 4, m_render_source_data->render_skybox_node.skybox_cube_map);
-        shader->setBool("enable_skybox_sample", m_reflection);
         if (m_shadow_map != 0) {
             shader->setMatrix("lightSpaceMatrix", 1, light_ref_matrix);
             shader->setTexture("shadow_map", 5, m_shadow_map);
