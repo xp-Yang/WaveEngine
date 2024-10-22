@@ -1,7 +1,5 @@
 #include "GcodeViewerPass.hpp"
 
-#include "Logical/Gcode/GcodeViewer.hpp"
-
 #include <glad/glad.h>// TODO remove
 
 static Color4 IntToColor(int color) {
@@ -20,13 +18,19 @@ void GcodeViewerPass::init()
 {
 }
 
-void GcodeViewerPass::reload_mesh_data(std::vector<std::shared_ptr<Mesh>> gcode_meshes)
+void GcodeViewerPass::reload_mesh_data(std::array<std::shared_ptr<Mesh>, ExtrusionRole::erCount> gcode_meshes)
 {
 	m_VAOs.clear();
 	m_VBOs.clear();
 	m_IBOs.clear();
 	for (int i = 0; i < gcode_meshes.size(); i++) {
 		const auto& mesh = gcode_meshes[i];
+		if (!mesh || mesh->indices.empty()) {
+			m_VAOs.push_back(0);
+			m_VBOs.push_back(0);
+			m_IBOs.push_back(0);
+			continue;
+		}
 
 		unsigned int VBO = 0;
 		glGenBuffers(1, &VBO);
@@ -59,13 +63,16 @@ void GcodeViewerPass::reload_mesh_data(std::vector<std::shared_ptr<Mesh>> gcode_
 
 void GcodeViewerPass::draw()
 {
-	if (m_render_source_data->gcode_meshes_dirty) {
-		for (int i = 0; i < m_render_source_data->gcode_meshes.size(); i++) {
-			const auto& mesh = m_render_source_data->gcode_meshes[i];
+	if (m_gcode_viewer->dirty()) {
+		for (int i = 0; i < m_gcode_viewer->meshes().size(); i++) {
+			const auto& mesh = m_gcode_viewer->meshes()[i];
+			if (!mesh || mesh->indices.empty())
+				continue;
+
 			glBindBuffer(GL_ARRAY_BUFFER, m_IBOs[i]);
 			glBufferData(GL_ARRAY_BUFFER, mesh->indices.size() * sizeof(unsigned int), &(mesh->indices[0]), GL_DYNAMIC_DRAW);
 		}
-		m_render_source_data->gcode_meshes_dirty = false;
+		m_gcode_viewer->setDirty(false);
 	}
 
 	m_input_passes[0]->getFrameBuffer()->bind();
@@ -84,14 +91,14 @@ void GcodeViewerPass::draw()
 	shader->setMatrix("view", 1, m_render_source_data->view_matrix);
 	shader->setMatrix("projection", 1, m_render_source_data->proj_matrix);
 	shader->setFloat3("cameraPos", m_render_source_data->camera_position);
-	for (int i = 0; i < m_render_source_data->gcode_meshes.size(); i++) {
-		const auto& mesh = m_render_source_data->gcode_meshes[i];
-		// temp
-		shader->setFloat("material.ambient", 0.0f);
-		//shader->setTexture("material.diffuse_map", 0, m_render_materials[i]->diffuse_map);
-		//shader->setTexture("material.specular_map", 1, m_render_materials[i]->specular_map);
-		//shader->setTexture("material.normal_map", 2, m_render_materials[i]->normal_map);
-		//shader->setTexture("material.height_map", 3, m_render_materials[i]->height_map);
+	for (int i = 0; i < m_gcode_viewer->meshes().size(); i++) {
+		const auto& mesh = m_gcode_viewer->meshes()[i];
+		if (!mesh || mesh->indices.empty())
+			continue;
+		if (!m_gcode_viewer->is_visible(ExtrusionRole(i)))
+			continue;
+
+		shader->setFloat("material.ambient", 0.2f);
 		shader->setFloat3("material.diffuse", mesh->material->albedo);
 		shader->setFloat3("material.specular", Vec3(0.0f));
 

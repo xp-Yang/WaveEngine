@@ -154,9 +154,6 @@ struct RenderSourceData {
         render_skybox_node.mesh.reset();
         picked_ids.clear();
     }
-
-    std::vector<std::shared_ptr<Mesh>> gcode_meshes;
-    bool gcode_meshes_dirty{ false };
 };
 
 #endif // !RenderSourceData_hpp

@@ -5,6 +5,7 @@
 #include "Render/RHI/Viewport.hpp"
 
 #include "Gcode/ImGuiSlider.hpp"
+#include "Gcode/ImGuiGcodeLegend.hpp"
 
 enum CanvasType : unsigned int {
     Main,
@@ -45,6 +46,7 @@ protected:
 };
 
 class ImGuiSlider;
+class GcodeLegend;
 class Mesh;
 class PreviewCanvas : public ImGuiCanvas {
 public:
@@ -52,11 +54,11 @@ public:
     void render() override;
     ImGuiSlider* horizontal_slider() const { return m_horizontal_slider.get(); }
     ImGuiSlider* vertical_slider() const { return m_vertical_slider.get(); }
-    void on_loaded_func(std::vector<std::shared_ptr<Mesh>>);
 
 protected:
     std::unique_ptr<ImGuiSlider> m_horizontal_slider;
     std::unique_ptr<ImGuiSlider> m_vertical_slider;
+    std::unique_ptr<GcodeLegend> m_legend;
 };
 
 class PickingCanvas : public ImGuiCanvas {

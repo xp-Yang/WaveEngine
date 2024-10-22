@@ -192,10 +192,4 @@ void RenderSystem::updateRenderSourceData()
     m_render_source_data->render_camera->rightDirection = camera.getRightDirection();
 
     m_initialized = true;
-
-    if (m_gcode_viewer->valid() && m_gcode_viewer->dirty()) {
-        m_render_source_data->gcode_meshes = m_gcode_viewer->meshes();
-        m_render_source_data->gcode_meshes_dirty = true;
-        m_gcode_viewer->setDirty(false);
-    }
 }

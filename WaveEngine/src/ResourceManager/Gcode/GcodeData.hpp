@@ -129,7 +129,7 @@ enum class EProducer
     KissSlicer
 };
 
-enum class EMoveType : unsigned char
+enum EMoveType : uint8_t
 {
     Noop,
     Retract,

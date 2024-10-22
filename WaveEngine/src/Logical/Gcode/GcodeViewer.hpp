@@ -104,8 +104,14 @@ struct LineCollection {
 
 class GcodeViewer {
 public:
+	GcodeViewer();
+	GcodeViewer(const GcodeViewer&) = delete;
+	GcodeViewer(GcodeViewer&&) = delete;
+	GcodeViewer& operator=(const GcodeViewer&) = delete;
+	GcodeViewer& operator=(GcodeViewer&&) = delete;
+
 	void load(const GCodeProcessorResult& result);
-	const std::vector<std::shared_ptr<Mesh>>& meshes() const;
+	const std::array<std::shared_ptr<Mesh>, ExtrusionRole::erCount>& meshes() const;
 
 	void set_layer_scope(std::array<int, 2> layer_scope);
 	void set_move_scope(std::array<int, 2> move_scope);
@@ -114,13 +120,15 @@ public:
 	const std::array<int, 2>& get_move_range() const { return m_move_range; }
 
 	void set_visible(ExtrusionRole role_type, bool visible);
+	bool is_visible(ExtrusionRole role_type) const { return m_role_visible[role_type]; }
 
 	bool dirty() const { return m_dirty; }
 	void setDirty(bool dirty) { m_dirty = dirty; }
+
 	bool valid() const { return m_valid; }
 
 signals:
-	Signal<std::vector<std::shared_ptr<Mesh>>> loaded;
+	Signal<std::array<std::shared_ptr<Mesh>, ExtrusionRole::erCount>> loaded;
 
 protected:
 	void reset();
@@ -136,15 +144,12 @@ private:
 	std::array<int, 2> m_move_range;
 	std::array<int, 2> m_move_scope;
 
-	bool m_move_type_visible[static_cast<size_t>(EMoveType::Count)] = { false };
-	bool m_role_visible[static_cast<size_t>(ExtrusionRole::erCount)] = { true };
-
-	unsigned int m_line_type;
+	std::array<bool, EMoveType::Count> m_move_type_visible = {};
+	std::array<bool, ExtrusionRole::erCount> m_role_visible = {};
 	ViewType m_view_type;
 
-	std::array<LineCollection, ExtrusionRole::erCount> m_line_collections;
-	std::array<std::shared_ptr<Mesh>, ExtrusionRole::erCount> m_visual_mesh;
-	std::vector<std::shared_ptr<Mesh>> m_meshes;
+	std::array<LineCollection, ExtrusionRole::erCount> m_line_collections = {};
+	std::array<std::shared_ptr<Mesh>, ExtrusionRole::erCount> m_clipped_mesh = {};
 
 	bool m_dirty = false;
 

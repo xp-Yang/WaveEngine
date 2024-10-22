@@ -50,8 +50,6 @@ void ImGuiEditor::init(std::shared_ptr<Window> window, std::shared_ptr<RenderSys
     configUIStyle();
 
     m_scene_hierarchy_window->init();
-
-    connect(ref_render_system->gcodeViewer().get(), &(ref_render_system->gcodeViewer()->loaded), m_preview_canvas.get(), &PreviewCanvas::on_loaded_func);
 }
 
 void ImGuiEditor::onUpdate()
@@ -117,7 +115,12 @@ void ImGuiEditor::renderMenuBar()
                 auto filepath = file_dlg->OpenFile("");
                 if (filepath.find(".gcode") != std::string::npos) {
                     const GCodeProcessorResult& result = ref_scene->loadGcodeFile(filepath);
-                    ref_render_system->gcodeViewer()->load(result);
+                    if (!result.moves.empty()) {
+                        ref_render_system->gcodeViewer()->load(result);
+                        static_cast<PreviewCanvas*>(m_preview_canvas.get())->horizontal_slider()->initValueSpan(ref_render_system->gcodeViewer()->get_move_range());
+                        static_cast<PreviewCanvas*>(m_preview_canvas.get())->vertical_slider()->initValueSpan(ref_render_system->gcodeViewer()->get_layer_range());
+                    }
+                    
                 }
                 else if (!filepath.empty()) {
                     ref_scene->loadModel(filepath);

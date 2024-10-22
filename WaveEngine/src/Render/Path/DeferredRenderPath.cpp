@@ -54,6 +54,7 @@ void DeferredRenderPath::init()
     m_outline_pass->init();
     m_combine_pass->init();
 
+    static_cast<GcodeViewerPass*>(m_gcode_pass.get())->setGcodeViewer(ref_render_system->gcodeViewer().get());
     connect(ref_render_system->gcodeViewer().get(), &(ref_render_system->gcodeViewer()->loaded), static_cast<GcodeViewerPass*>(m_gcode_pass.get()), &GcodeViewerPass::reload_mesh_data);
 }
 

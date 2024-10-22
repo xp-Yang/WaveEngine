@@ -51,8 +51,9 @@ PreviewCanvas::PreviewCanvas(ImGuiEditor* parent)
 {
     m_type = CanvasType::GcodePreview;
 
-    m_horizontal_slider = (std::make_unique<ImGuiSlider>(this, Orientation::Horizontal));
-    m_vertical_slider = (std::make_unique<ImGuiSlider>(this, Orientation::Vertical));
+    m_horizontal_slider = std::make_unique<ImGuiSlider>(this, Orientation::Horizontal);
+    m_vertical_slider = std::make_unique<ImGuiSlider>(this, Orientation::Vertical);
+    m_legend = std::make_unique<GcodeLegend>(this);
 }
 
 void PreviewCanvas::render()
@@ -80,15 +81,10 @@ void PreviewCanvas::render()
 
         m_horizontal_slider->render();
         m_vertical_slider->render();
+        m_legend->render();
     }
     ImGui::End();
 
-}
-
-void PreviewCanvas::on_loaded_func(std::vector<std::shared_ptr<Mesh>>)
-{
-    m_horizontal_slider->initValueSpan(m_parent->ref_render_system->gcodeViewer()->get_move_range());
-    m_vertical_slider->initValueSpan(m_parent->ref_render_system->gcodeViewer()->get_layer_range());
 }
 
 void PickingCanvas::render()
