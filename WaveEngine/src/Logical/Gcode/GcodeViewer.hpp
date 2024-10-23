@@ -77,20 +77,21 @@ struct Layer {
 	int end_move_id;
 };
 
+struct Segment {
+	int begin_move_id;
+	int end_move_id;
+	std::shared_ptr<Mesh> mesh;
+};
+
+struct Polyline {
+	int begin_move_id = INT_MAX;
+	int end_move_id = -INT_MAX;
+	std::vector<Segment> segments;
+
+	void append_segment(const Segment& segment);
+};
+
 struct LineCollection {
-	struct Segment {
-		int begin_move_id;
-		int end_move_id;
-		std::shared_ptr<Mesh> mesh;
-	};
-
-	struct Polyline {
-		int begin_move_id = INT_MAX;
-		int end_move_id = -INT_MAX;
-		std::vector<Segment> segments;
-
-		void append_segment(const Segment& segment);
-	};
 
 	std::vector<Polyline> polylines;
 
@@ -134,6 +135,8 @@ protected:
 	void reset();
 	void parse_moves(std::vector<MoveVertex> moves);
 	std::shared_ptr<Mesh> generate_cuboid_from_move(const MoveVertex& prev_2, const MoveVertex& prev, const MoveVertex& curr, const MoveVertex& next);
+	std::shared_ptr<Mesh> generate_cuboid_from_move(const Vec3& to_prev_dir, const Vec3& to_curr_dir, const Vec3& to_next_dir, const Vec3& prev_pos, const Vec3& curr_pos, float move_width, float move_height);
+	std::vector<std::shared_ptr<Mesh>> generate_arc_from_move(const MoveVertex& prev_2, const MoveVertex& prev, const MoveVertex& curr, const MoveVertex& next);
 	void refresh();
 
 private:

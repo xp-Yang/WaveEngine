@@ -1,6 +1,6 @@
 #include "GcodeViewer.hpp"
 
-void LineCollection::Polyline::append_segment(const Segment& segment)
+void Polyline::append_segment(const Segment& segment)
 {
 	if (segment.begin_move_id < begin_move_id)
 		begin_move_id = segment.begin_move_id;
@@ -127,40 +127,76 @@ void GcodeViewer::set_visible(ExtrusionRole role_type, bool visible)
 
 std::shared_ptr<Mesh> GcodeViewer::generate_cuboid_from_move(const MoveVertex& prev_2, const MoveVertex& prev, const MoveVertex& curr, const MoveVertex& next)
 {
-	Vec3 up_dir = Vec3(0, 0, 1);
-	Vec3 down_dir = -up_dir;
 	Vec3 to_curr_dir = Math::Normalize(curr.position - prev.position);
-	Vec3 first_left_dir = Math::Normalize(Math::Cross(Vec3(0, 0, 1), to_curr_dir));
-	Vec3 second_left_dir = Math::Normalize(Math::Cross(Vec3(0, 0, 1), to_curr_dir));
+	Vec3 to_prev_dir = Vec3(0);
+	Vec3 to_next_dir = Vec3(0);
 	if (prev.type == EMoveType::Extrude) {
-		Vec3 to_prev_dir = Math::Normalize(prev.position - prev_2.position);
-		first_left_dir = Math::Cross(to_prev_dir, to_curr_dir).z >= 0 ? Math::Normalize(-to_prev_dir + to_curr_dir) : -Math::Normalize(-to_prev_dir + to_curr_dir);
+		to_prev_dir = Math::Normalize(prev.position - prev_2.position);
 	}
 	if (next.type == EMoveType::Extrude) {
-		Vec3 to_next_dir = Math::Normalize(next.position - curr.position);
-		second_left_dir = Math::Cross(to_curr_dir, to_next_dir).z >= 0 ? Math::Normalize(-to_curr_dir + to_next_dir) : -Math::Normalize(-to_curr_dir + to_next_dir);
+		to_next_dir = Math::Normalize(next.position - curr.position);
 	}
+	return generate_cuboid_from_move(to_prev_dir, to_curr_dir, to_next_dir, prev.position, curr.position, curr.width, curr.height);
+}
+
+std::shared_ptr<Mesh> GcodeViewer::generate_cuboid_from_move(const Vec3& to_prev_dir, const Vec3& to_curr_dir, const Vec3& to_next_dir, const Vec3& prev_pos, const Vec3& curr_pos, float move_width, float move_height)
+{
+	Vec3 up_dir = Vec3(0, 0, 1);
+	Vec3 down_dir = -up_dir;
+	Vec3 first_left_dir = Math::Normalize(Math::Cross(Vec3(0, 0, 1), to_curr_dir));
+	Vec3 second_left_dir = Math::Normalize(Math::Cross(Vec3(0, 0, 1), to_curr_dir));
+	if (to_prev_dir != Vec3(0))
+		first_left_dir = Math::Cross(to_prev_dir, to_curr_dir).z >= 0 ? Math::Normalize(-to_prev_dir + to_curr_dir) : -Math::Normalize(-to_prev_dir + to_curr_dir);
+	if (to_next_dir != Vec3(0))
+		second_left_dir = Math::Cross(to_curr_dir, to_next_dir).z >= 0 ? Math::Normalize(-to_curr_dir + to_next_dir) : -Math::Normalize(-to_curr_dir + to_next_dir);
 	Vec3 first_right_dir = -first_left_dir;
 	Vec3 second_right_dir = -second_left_dir;
 
 	Vec3 orthogonal_left_dir = Math::Normalize(Math::Cross(up_dir, to_curr_dir));
 
-	float half_width = curr.width / 2.0f;
-	float half_height = curr.height / 2.0f;
+	float half_width = move_width / 2.0f;
+	float half_height = move_height / 2.0f;
 	float first_width = half_width / (Math::Dot(first_left_dir, orthogonal_left_dir) / (Math::Length(first_left_dir) * Math::Length(orthogonal_left_dir)));
 	float second_width = half_width / (Math::Dot(second_left_dir, orthogonal_left_dir) / (Math::Length(second_left_dir) * Math::Length(orthogonal_left_dir)));
-	
+
 	std::array<Vec3, 8> vertices_positions;
-	vertices_positions[0] = prev.position + first_width * first_left_dir;
-	vertices_positions[1] = prev.position + half_height * down_dir;
-	vertices_positions[2] = prev.position + first_width * first_right_dir;
-	vertices_positions[3] = prev.position + half_height * up_dir;
-	vertices_positions[4] = curr.position + half_height * up_dir;
-	vertices_positions[5] = curr.position + second_width * second_right_dir;
-	vertices_positions[6] = curr.position + half_height * down_dir;
-	vertices_positions[7] = curr.position + second_width * second_left_dir;
+	vertices_positions[0] = prev_pos + first_width * first_left_dir;
+	vertices_positions[1] = prev_pos + half_height * down_dir;
+	vertices_positions[2] = prev_pos + first_width * first_right_dir;
+	vertices_positions[3] = prev_pos + half_height * up_dir;
+	vertices_positions[4] = curr_pos + half_height * up_dir;
+	vertices_positions[5] = curr_pos + second_width * second_right_dir;
+	vertices_positions[6] = curr_pos + half_height * down_dir;
+	vertices_positions[7] = curr_pos + second_width * second_left_dir;
 
 	return Mesh::create_vertex_normal_cuboid_mesh(vertices_positions);
+}
+
+std::vector<std::shared_ptr<Mesh>> GcodeViewer::generate_arc_from_move(const MoveVertex& prev_2, const MoveVertex& prev, const MoveVertex& curr, const MoveVertex& next)
+{
+	std::vector<std::shared_ptr<Mesh>> res;
+	size_t loop_num = curr.is_arc_move_with_interpolation_points() ? curr.interpolation_points.size() : 0;
+	for (size_t i = 0; i < loop_num + 1; i++) {
+		const Vec3f& prev_pos = (i == 0 ? prev.position : curr.interpolation_points[i - 1]);
+		const Vec3f& curr_pos = (i == loop_num ? curr.position : curr.interpolation_points[i]);
+
+		Vec3 to_curr_dir = Math::Normalize(curr_pos - prev_pos);
+		Vec3 to_prev_dir = Vec3(0);
+		Vec3 to_next_dir = Vec3(0);
+		if (i == 0) {
+			if (prev.type == EMoveType::Extrude) {
+				to_prev_dir = Math::Normalize(prev.position - prev_2.position);
+			}
+		}
+		if (i == loop_num) {
+			if (next.type == EMoveType::Extrude) {
+				to_next_dir = Math::Normalize(next.position - curr.position);
+			}
+		}
+
+		res.push_back(generate_cuboid_from_move(to_prev_dir, to_curr_dir, to_next_dir, prev_pos, curr_pos, curr.width, curr.height));
+	}
+	return res;
 }
 
 void GcodeViewer::parse_moves(std::vector<MoveVertex> moves)
@@ -188,20 +224,43 @@ void GcodeViewer::parse_moves(std::vector<MoveVertex> moves)
 				m_layers.back().end_move_id = move_id;
 
 			// parse segment
-			LineCollection::Segment segment;
-			segment.begin_move_id = move_id - 1;
-			segment.end_move_id = move_id;
-			segment.mesh = generate_cuboid_from_move(prev_2, prev, curr, next);
 
-			ExtrusionRole curr_role = curr.extrusion_role;
-			if (prev_role != curr_role) {
-				prev_role = curr_role;
-				LineCollection::Polyline polyline;
-				polyline.append_segment(segment);
-				m_line_collections[curr_role].append_polyline(polyline);
+			if (curr.is_arc_move_with_interpolation_points()) {
+				std::vector<std::shared_ptr<Mesh>> seg_meshes = generate_arc_from_move(prev_2, prev, curr, next);
+				for (int mesh_id = 0; mesh_id < seg_meshes.size(); mesh_id++) {
+					Segment segment;
+					segment.begin_move_id = move_id - 1;
+					segment.end_move_id = move_id;
+					segment.mesh = seg_meshes[mesh_id];
+
+					ExtrusionRole curr_role = curr.extrusion_role;
+					if (prev_role != curr_role) {
+						prev_role = curr_role;
+						Polyline polyline;
+						polyline.append_segment(segment);
+						m_line_collections[curr_role].append_polyline(polyline);
+					}
+					else {
+						m_line_collections[curr_role].polylines.back().append_segment(segment);
+					}
+				}
 			}
 			else {
-				m_line_collections[curr_role].polylines.back().append_segment(segment);
+				Segment segment;
+				segment.begin_move_id = move_id - 1;
+				segment.end_move_id = move_id;
+				segment.mesh = generate_cuboid_from_move(prev_2, prev, curr, next);
+
+				ExtrusionRole curr_role = curr.extrusion_role;
+				if (prev_role != curr_role) {
+					prev_role = curr_role;
+					Polyline polyline;
+					polyline.append_segment(segment);
+					m_line_collections[curr_role].append_polyline(polyline);
+				}
+				else {
+					m_line_collections[curr_role].polylines.back().append_segment(segment);
+				}
 			}
 		}
 
