@@ -127,6 +127,8 @@ void GcodeViewer::set_visible(ExtrusionRole role_type, bool visible)
 
 std::shared_ptr<Mesh> GcodeViewer::generate_cuboid_from_move(const MoveVertex& prev_2, const MoveVertex& prev, const MoveVertex& curr, const MoveVertex& next)
 {
+	Vec3 up_dir = Vec3(0, 0, 1);
+	Vec3 down_dir = -up_dir;
 	Vec3 to_curr_dir = Math::Normalize(curr.position - prev.position);
 	Vec3 first_left_dir = Math::Normalize(Math::Cross(Vec3(0, 0, 1), to_curr_dir));
 	Vec3 second_left_dir = Math::Normalize(Math::Cross(Vec3(0, 0, 1), to_curr_dir));
@@ -138,22 +140,25 @@ std::shared_ptr<Mesh> GcodeViewer::generate_cuboid_from_move(const MoveVertex& p
 		Vec3 to_next_dir = Math::Normalize(next.position - curr.position);
 		second_left_dir = Math::Cross(to_curr_dir, to_next_dir).z >= 0 ? Math::Normalize(-to_curr_dir + to_next_dir) : -Math::Normalize(-to_curr_dir + to_next_dir);
 	}
-
-	Vec3 up_dir = Vec3(0, 0, 1);
-	Vec3 down_dir = -up_dir;
-
 	Vec3 first_right_dir = -first_left_dir;
 	Vec3 second_right_dir = -second_left_dir;
 
+	Vec3 orthogonal_left_dir = Math::Normalize(Math::Cross(up_dir, to_curr_dir));
+
+	float half_width = curr.width / 2.0f;
+	float half_height = curr.height / 2.0f;
+	float first_width = half_width / (Math::Dot(first_left_dir, orthogonal_left_dir) / (Math::Length(first_left_dir) * Math::Length(orthogonal_left_dir)));
+	float second_width = half_width / (Math::Dot(second_left_dir, orthogonal_left_dir) / (Math::Length(second_left_dir) * Math::Length(orthogonal_left_dir)));
+	
 	std::array<Vec3, 8> vertices_positions;
-	vertices_positions[0] = prev.position + (curr.width / 2.0f) * first_left_dir;
-	vertices_positions[1] = prev.position + (curr.height / 2.0f) * down_dir;
-	vertices_positions[2] = prev.position + (curr.width / 2.0f) * first_right_dir;
-	vertices_positions[3] = prev.position + (curr.height / 2.0f) * up_dir;
-	vertices_positions[4] = curr.position + (curr.height / 2.0f) * up_dir;
-	vertices_positions[5] = curr.position + (curr.width / 2.0f) * second_right_dir;
-	vertices_positions[6] = curr.position + (curr.height / 2.0f) * down_dir;
-	vertices_positions[7] = curr.position + (curr.width / 2.0f) * second_left_dir;
+	vertices_positions[0] = prev.position + first_width * first_left_dir;
+	vertices_positions[1] = prev.position + half_height * down_dir;
+	vertices_positions[2] = prev.position + first_width * first_right_dir;
+	vertices_positions[3] = prev.position + half_height * up_dir;
+	vertices_positions[4] = curr.position + half_height * up_dir;
+	vertices_positions[5] = curr.position + second_width * second_right_dir;
+	vertices_positions[6] = curr.position + half_height * down_dir;
+	vertices_positions[7] = curr.position + second_width * second_left_dir;
 
 	return Mesh::create_vertex_normal_cuboid_mesh(vertices_positions);
 }

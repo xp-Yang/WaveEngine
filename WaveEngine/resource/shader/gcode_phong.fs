@@ -43,5 +43,4 @@ void main()
 
     vec3 result = ambient_light + lightingByDirectionalLight;
     outColor = vec4(result, 1.0);
-    outColor = vec4(diffuse_coef, 1.0);
 }
