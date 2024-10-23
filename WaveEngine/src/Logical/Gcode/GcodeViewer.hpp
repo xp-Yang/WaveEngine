@@ -91,7 +91,7 @@ struct Polyline {
 	void append_segment(const Segment& segment);
 };
 
-struct LineCollection {
+struct LinesBatch {
 
 	std::vector<Polyline> polylines;
 
@@ -151,7 +151,7 @@ private:
 	std::array<bool, ExtrusionRole::erCount> m_role_visible = {};
 	ViewType m_view_type;
 
-	std::array<LineCollection, ExtrusionRole::erCount> m_line_collections = {};
+	std::array<LinesBatch, ExtrusionRole::erCount> m_lines_batches = {};
 	std::array<std::shared_ptr<Mesh>, ExtrusionRole::erCount> m_clipped_mesh = {};
 
 	bool m_dirty = false;

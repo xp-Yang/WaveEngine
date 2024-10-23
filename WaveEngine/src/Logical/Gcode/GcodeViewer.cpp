@@ -11,12 +11,12 @@ void Polyline::append_segment(const Segment& segment)
 	segments.push_back(segment);
 }
 
-void LineCollection::append_polyline(const Polyline& polyline)
+void LinesBatch::append_polyline(const Polyline& polyline)
 {
 	polylines.push_back(polyline);
 }
 
-int LineCollection::calculate_index_offset_of(int move_id) const
+int LinesBatch::calculate_index_offset_of(int move_id) const
 {
 	int index_offset = 0;
 	int single_segment_indices_count = 36;
@@ -39,7 +39,7 @@ int LineCollection::calculate_index_offset_of(int move_id) const
 	return index_offset;
 }
 
-int LineCollection::calculate_reverse_index_offset_of(int move_id) const
+int LinesBatch::calculate_reverse_index_offset_of(int move_id) const
 {
 	int index_offset = 0;
 	int single_segment_indices_count = 36;
@@ -79,7 +79,7 @@ void GcodeViewer::reset()
 	m_move_range = {};
 	m_move_scope = {};
 
-	m_line_collections = {};
+	m_lines_batches = {};
 	m_clipped_mesh = {};
 
 	m_dirty = false;
@@ -179,8 +179,8 @@ std::vector<std::shared_ptr<Mesh>> GcodeViewer::generate_arc_from_move(const Mov
 	for (size_t i = 0; i < loop_num + 1; i++) {
 		const Vec3f& prev_pos = (i == 0 ? prev.position : curr.interpolation_points[i - 1]);
 		const Vec3f& curr_pos = (i == loop_num ? curr.position : curr.interpolation_points[i]);
-
 		Vec3 to_curr_dir = Math::Normalize(curr_pos - prev_pos);
+
 		Vec3 to_prev_dir = Vec3(0);
 		Vec3 to_next_dir = Vec3(0);
 		if (i == 0) {
@@ -188,11 +188,20 @@ std::vector<std::shared_ptr<Mesh>> GcodeViewer::generate_arc_from_move(const Mov
 				to_prev_dir = Math::Normalize(prev.position - prev_2.position);
 			}
 		}
+		else if (i == 1)
+			to_prev_dir = Math::Normalize(curr.interpolation_points[0] - prev.position);
+		else
+			to_prev_dir = Math::Normalize(curr.interpolation_points[i - 1] - curr.interpolation_points[i - 2]);
+
 		if (i == loop_num) {
 			if (next.type == EMoveType::Extrude) {
 				to_next_dir = Math::Normalize(next.position - curr.position);
 			}
 		}
+		else if (i == loop_num - 1)
+			to_next_dir = Math::Normalize(curr.position - curr.interpolation_points[loop_num - 1]);
+		else
+			to_next_dir = Math::Normalize(curr.interpolation_points[i + 1] - curr.interpolation_points[i]);
 
 		res.push_back(generate_cuboid_from_move(to_prev_dir, to_curr_dir, to_next_dir, prev_pos, curr_pos, curr.width, curr.height));
 	}
@@ -238,10 +247,10 @@ void GcodeViewer::parse_moves(std::vector<MoveVertex> moves)
 						prev_role = curr_role;
 						Polyline polyline;
 						polyline.append_segment(segment);
-						m_line_collections[curr_role].append_polyline(polyline);
+						m_lines_batches[curr_role].append_polyline(polyline);
 					}
 					else {
-						m_line_collections[curr_role].polylines.back().append_segment(segment);
+						m_lines_batches[curr_role].polylines.back().append_segment(segment);
 					}
 				}
 			}
@@ -256,10 +265,10 @@ void GcodeViewer::parse_moves(std::vector<MoveVertex> moves)
 					prev_role = curr_role;
 					Polyline polyline;
 					polyline.append_segment(segment);
-					m_line_collections[curr_role].append_polyline(polyline);
+					m_lines_batches[curr_role].append_polyline(polyline);
 				}
 				else {
-					m_line_collections[curr_role].polylines.back().append_segment(segment);
+					m_lines_batches[curr_role].polylines.back().append_segment(segment);
 				}
 			}
 		}
@@ -272,21 +281,21 @@ void GcodeViewer::parse_moves(std::vector<MoveVertex> moves)
 	m_move_range = { m_layers[m_layer_scope[1]].begin_move_id, m_layers[m_layer_scope[1]].end_move_id };
 	m_move_scope = m_move_range;
 
-	for (auto& collection : m_line_collections) {
+	for (auto& batch : m_lines_batches) {
 		std::vector<std::shared_ptr<Mesh>> can_merge_meshes;
-		can_merge_meshes.reserve((m_line_collections.size() * m_line_collections.front().polylines.size()));
-		for (const auto& polyline : collection.polylines) {
+		can_merge_meshes.reserve((m_lines_batches.size() * m_lines_batches.front().polylines.size()));
+		for (const auto& polyline : batch.polylines) {
 			for (const auto& seg : polyline.segments) {
 				if (seg.mesh)
 					can_merge_meshes.push_back(seg.mesh);
 			}
 		}
 		if (!can_merge_meshes.empty())
-			collection.merged_mesh = Mesh::merge(can_merge_meshes);
+			batch.merged_mesh = Mesh::merge(can_merge_meshes);
 	}
 
 	for (int role_type = ExtrusionRole::erNone + 1; role_type < ExtrusionRole::erCount; role_type++) {
-		if (!m_line_collections[role_type].empty()) {
+		if (!m_lines_batches[role_type].empty()) {
 			m_role_visible[role_type] = true;
 		}
 	}
@@ -301,17 +310,17 @@ void GcodeViewer::refresh()
 	end_move_id = end_move_id > begin_move_id ? end_move_id : begin_move_id + 1;
 
 	for (int role_type = ExtrusionRole::erNone + 1; role_type < ExtrusionRole::erCount; role_type++) {
-		const auto& collection = m_line_collections[role_type];
-		if (collection.empty() || !m_role_visible[role_type])
+		const auto& batch = m_lines_batches[role_type];
+		if (batch.empty() || !m_role_visible[role_type])
 			continue;
 
-		int begin_index_offset = collection.calculate_index_offset_of(begin_move_id);
-		int end_index_offset = collection.calculate_reverse_index_offset_of(end_move_id);
+		int begin_index_offset = batch.calculate_index_offset_of(begin_move_id);
+		int end_index_offset = batch.calculate_reverse_index_offset_of(end_move_id);
 
-		auto old_indices = collection.merged_mesh->indices;
+		auto old_indices = batch.merged_mesh->indices;
 		old_indices.erase(old_indices.begin(), old_indices.begin() + begin_index_offset);
 		old_indices.erase(old_indices.end() - end_index_offset, old_indices.end());
-		m_clipped_mesh[role_type] = std::make_shared<Mesh>(*collection.merged_mesh);
+		m_clipped_mesh[role_type] = std::make_shared<Mesh>(*batch.merged_mesh);
 		m_clipped_mesh[role_type]->indices = old_indices;
 		m_clipped_mesh[role_type]->material = std::make_shared<Material>();
 		m_clipped_mesh[role_type]->material->albedo = Vec3(Extrusion_Role_Colors[role_type]);
