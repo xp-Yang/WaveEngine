@@ -96,7 +96,7 @@ struct LineCollection {
 
 	std::shared_ptr<Mesh> merged_mesh;
 
-	bool empty() const { return polylines.empty(); }
+	bool empty() const { return polylines.empty() || (merged_mesh.get() == nullptr); }
 	void append_polyline(const Polyline& polyline);
 	int calculate_index_offset_of(int move_id) const;
 	int calculate_reverse_index_offset_of(int move_id) const;
@@ -133,7 +133,7 @@ signals:
 protected:
 	void reset();
 	void parse_moves(std::vector<MoveVertex> moves);
-	std::shared_ptr<Mesh> generate_cuboid_from_move(const MoveVertex& prev, const MoveVertex& curr);
+	std::shared_ptr<Mesh> generate_cuboid_from_move(const MoveVertex& prev_2, const MoveVertex& prev, const MoveVertex& curr, const MoveVertex& next);
 	void refresh();
 
 private:

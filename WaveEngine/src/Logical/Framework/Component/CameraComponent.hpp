@@ -27,8 +27,7 @@ struct CameraComponent : public Component {
 
 	float originFov = Math::deg2rad(45.0f); //ÊúÖ±fov
 
-	float zoom = 1.0f;
-	float fov = originFov / zoom;
+	float fov = originFov;
 	float nearPlane = 0.1f;
 	float farPlane = 1000.0f;
 	Vec3 direction = Math::Normalize(Vec3(0.0f, -0.6f, -0.8f));

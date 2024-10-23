@@ -9,6 +9,7 @@
 CameraManipulator::CameraManipulator(CameraComponent& camera)
     : main_camera(camera)
 {
+    m_goal_fov = main_camera.originFov;
 }
 
 void CameraManipulator::syncContext(const Viewport& viewport)
@@ -141,13 +142,9 @@ void CameraManipulator::orbitRotate(Vec3 start, Vec3 end)
 void CameraManipulator::onMouseWheelUpdate(double yoffset, double mouse_x, double mouse_y)
 {
     if (main_camera.zoom_mode == ZoomMode::ZoomToCenter) {
-        main_camera.zoom += ZoomUnit * (float)yoffset;
-        if (main_camera.zoom < 0.1f)
-            main_camera.zoom = 0.1f;
-
-        m_goal_fov = main_camera.originFov / main_camera.zoom;
-        if (m_goal_fov <= Math::deg2rad(1.0f))
-            m_goal_fov = Math::deg2rad(1.0f);
+        m_goal_fov = 2 * atan(tan(m_goal_fov / 2.f) / (1 + ZoomUnit * (float)yoffset));
+        if (m_goal_fov <= Math::deg2rad(0.01f))
+            m_goal_fov = Math::deg2rad(0.01f);
         if (m_goal_fov >= Math::deg2rad(135.0f))
             m_goal_fov = Math::deg2rad(135.0f);
 
@@ -168,20 +165,20 @@ void CameraManipulator::onMouseWheelUpdate(double yoffset, double mouse_x, doubl
 
         if (yoffset == 0.0)
             return;
-        // 1. first translate to mouse_3d_pos
-        main_camera.pos += displacement;
-        float old_zoom = main_camera.zoom;
+        //// 1. first translate to mouse_3d_pos
+        //main_camera.pos += displacement;
+        //float old_zoom = main_camera.zoom;
 
-        // 2. set zoom
-        main_camera.zoom += ZoomUnit * (float)yoffset;
-        if (main_camera.zoom < 0.1f)
-            main_camera.zoom = 0.1f;
+        //// 2. set zoom
+        //main_camera.zoom += ZoomUnit * (float)yoffset;
+        //if (main_camera.zoom < 0.1f)
+        //    main_camera.zoom = 0.1f;
 
-        main_camera.fov = main_camera.originFov / main_camera.zoom;
-        if (main_camera.fov <= Math::deg2rad(1.0f))
-            main_camera.fov = Math::deg2rad(1.0f);
-        if (main_camera.fov >= Math::deg2rad(135.0f))
-            main_camera.fov = Math::deg2rad(135.0f);
+        //main_camera.fov = main_camera.originFov / main_camera.zoom;
+        //if (main_camera.fov <= Math::deg2rad(0.01f))
+        //    main_camera.fov = Math::deg2rad(0.01f);
+        //if (main_camera.fov >= Math::deg2rad(135.0f))
+        //    main_camera.fov = Math::deg2rad(135.0f);
 
         // 3. second translate back to original pos
         //main_camera.pos -= displacement * (old_zoom / main_camera.zoom);

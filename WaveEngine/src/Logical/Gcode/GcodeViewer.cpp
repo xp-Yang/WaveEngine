@@ -125,33 +125,46 @@ void GcodeViewer::set_visible(ExtrusionRole role_type, bool visible)
 	//update_moves_slider();
 }
 
-std::shared_ptr<Mesh> GcodeViewer::generate_cuboid_from_move(const MoveVertex& prev, const MoveVertex& curr)
+std::shared_ptr<Mesh> GcodeViewer::generate_cuboid_from_move(const MoveVertex& prev_2, const MoveVertex& prev, const MoveVertex& curr, const MoveVertex& next)
 {
-	Vec3 dir = Math::Normalize(curr.position - prev.position);
-	Vec3 left_dir = Math::Cross(Vec3(0, 0, 1), dir);
-	Vec3 right_dir = -left_dir;
-	Vec3 up_dir = Math::Cross(dir, left_dir);
+	Vec3 to_curr_dir = Math::Normalize(curr.position - prev.position);
+	Vec3 first_left_dir = Math::Normalize(Math::Cross(Vec3(0, 0, 1), to_curr_dir));
+	Vec3 second_left_dir = Math::Normalize(Math::Cross(Vec3(0, 0, 1), to_curr_dir));
+	if (prev.type == EMoveType::Extrude) {
+		Vec3 to_prev_dir = Math::Normalize(prev.position - prev_2.position);
+		first_left_dir = Math::Cross(to_prev_dir, to_curr_dir).z >= 0 ? Math::Normalize(-to_prev_dir + to_curr_dir) : -Math::Normalize(-to_prev_dir + to_curr_dir);
+	}
+	if (next.type == EMoveType::Extrude) {
+		Vec3 to_next_dir = Math::Normalize(next.position - curr.position);
+		second_left_dir = Math::Cross(to_curr_dir, to_next_dir).z >= 0 ? Math::Normalize(-to_curr_dir + to_next_dir) : -Math::Normalize(-to_curr_dir + to_next_dir);
+	}
+
+	Vec3 up_dir = Vec3(0, 0, 1);
 	Vec3 down_dir = -up_dir;
 
+	Vec3 first_right_dir = -first_left_dir;
+	Vec3 second_right_dir = -second_left_dir;
+
 	std::array<Vec3, 8> vertices_positions;
-	vertices_positions[0] = prev.position + (prev.width / 2.0f) * left_dir;
-	vertices_positions[1] = prev.position + (prev.height / 2.0f) * down_dir;
-	vertices_positions[2] = prev.position + (prev.width / 2.0f) * right_dir;
-	vertices_positions[3] = prev.position + (prev.height / 2.0f) * up_dir;
-	vertices_positions[4] = curr.position + (prev.height / 2.0f) * up_dir;
-	vertices_positions[5] = curr.position + (prev.width / 2.0f) * right_dir;
-	vertices_positions[6] = curr.position + (prev.height / 2.0f) * down_dir;
-	vertices_positions[7] = curr.position + (prev.width / 2.0f) * left_dir;
+	vertices_positions[0] = prev.position + (curr.width / 2.0f) * first_left_dir;
+	vertices_positions[1] = prev.position + (curr.height / 2.0f) * down_dir;
+	vertices_positions[2] = prev.position + (curr.width / 2.0f) * first_right_dir;
+	vertices_positions[3] = prev.position + (curr.height / 2.0f) * up_dir;
+	vertices_positions[4] = curr.position + (curr.height / 2.0f) * up_dir;
+	vertices_positions[5] = curr.position + (curr.width / 2.0f) * second_right_dir;
+	vertices_positions[6] = curr.position + (curr.height / 2.0f) * down_dir;
+	vertices_positions[7] = curr.position + (curr.width / 2.0f) * second_left_dir;
 
 	return Mesh::create_vertex_normal_cuboid_mesh(vertices_positions);
 }
 
 void GcodeViewer::parse_moves(std::vector<MoveVertex> moves)
 {
-	int move_id = 1;
+	int move_id = 2;
 	int point_count = 0;
 	ExtrusionRole prev_role = ExtrusionRole::erNone;
-	for (size_t i = 1; i < moves.size() - 1; i++) {
+	for (size_t i = 2; i < moves.size() - 1; i++) {
+		const MoveVertex& prev_2 = moves[i - 2];
 		const MoveVertex& prev = moves[i - 1];
 		const MoveVertex& curr = moves[i];
 		const MoveVertex& next = moves[i + 1];
@@ -171,9 +184,9 @@ void GcodeViewer::parse_moves(std::vector<MoveVertex> moves)
 
 			// parse segment
 			LineCollection::Segment segment;
-			segment.begin_move_id = move_id;
+			segment.begin_move_id = move_id - 1;
 			segment.end_move_id = move_id;
-			segment.mesh = generate_cuboid_from_move(prev, curr);
+			segment.mesh = generate_cuboid_from_move(prev_2, prev, curr, next);
 
 			ExtrusionRole curr_role = curr.extrusion_role;
 			if (prev_role != curr_role) {
@@ -200,10 +213,12 @@ void GcodeViewer::parse_moves(std::vector<MoveVertex> moves)
 		can_merge_meshes.reserve((m_line_collections.size() * m_line_collections.front().polylines.size()));
 		for (const auto& polyline : collection.polylines) {
 			for (const auto& seg : polyline.segments) {
-				can_merge_meshes.push_back(seg.mesh);
+				if (seg.mesh)
+					can_merge_meshes.push_back(seg.mesh);
 			}
 		}
-		collection.merged_mesh = Mesh::merge(can_merge_meshes);
+		if (!can_merge_meshes.empty())
+			collection.merged_mesh = Mesh::merge(can_merge_meshes);
 	}
 
 	for (int role_type = ExtrusionRole::erNone + 1; role_type < ExtrusionRole::erCount; role_type++) {

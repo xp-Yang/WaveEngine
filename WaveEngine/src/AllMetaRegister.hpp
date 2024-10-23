@@ -97,7 +97,6 @@ inline void allMetaRegister()
 	registerField(&::CameraComponent::mode, "mode");
 	registerField(&::CameraComponent::projection_mode, "projection_mode");
 	registerField(&::CameraComponent::zoom_mode, "zoom_mode");
-	registerField(&::CameraComponent::zoom, "zoom");
 	registerField(&::CameraComponent::originFov, "originFov");
 	registerField(&::CameraComponent::fov, "fov");
 	registerField(&::CameraComponent::nearPlane, "nearPlane");
