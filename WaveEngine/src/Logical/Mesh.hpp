@@ -36,6 +36,7 @@ struct Mesh {
 
 	Mesh() = delete;
 	Mesh(const std::vector<Vertex>& vertices, const std::vector<int>& indices);
+	Mesh(const std::vector<Vertex>& vertices, const std::vector<int>& indices, std::shared_ptr<Material> material_);
 	//Mesh(const std::vector<Triangle>& triangles);
 	~Mesh() { reset(); }
 

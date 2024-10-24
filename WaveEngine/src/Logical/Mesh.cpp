@@ -8,6 +8,13 @@ Mesh::Mesh(const std::vector<Vertex>& vertices, const std::vector<int>& indices)
 {
 }
 
+Mesh::Mesh(const std::vector<Vertex>& vertices, const std::vector<int>& indices, std::shared_ptr<Material> material_)
+    : vertices(vertices)
+    , indices(indices)
+    , material(material_)
+{
+}
+
 void Mesh::reset()
 {
     vertices.clear();

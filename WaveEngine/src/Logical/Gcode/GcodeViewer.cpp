@@ -40,15 +40,15 @@ int LinesBatch::calculate_index_offset_of(int move_id) const
 	int single_segment_indices_count = 36;
 	for (int i = 0; i < polylines.size(); i++) {
 		const auto& polyline = polylines[i];
-		if (polyline.end_move_id < move_id) {
+		if (polyline.end_move_id <= move_id) {
 			index_offset += polyline.segments.size() * single_segment_indices_count;
 			continue;
 		}
-		if (polyline.begin_move_id <= move_id && move_id <= polyline.end_move_id) {
+		if (polyline.begin_move_id < move_id && move_id <= polyline.end_move_id) {
 			for (int j = 0; j < polyline.segments.size(); j++) {
 				const auto& segment = polyline.segments[j];
-				if (segment.begin_move_id <= move_id && move_id <= segment.end_move_id) {
-					index_offset += j * single_segment_indices_count;
+				if (move_id == segment.end_move_id) {
+					index_offset += (j + 1) * single_segment_indices_count;
 					return index_offset;
 				}
 			}
@@ -63,15 +63,15 @@ int LinesBatch::calculate_reverse_index_offset_of(int move_id) const
 	int single_segment_indices_count = 36;
 	for (int i = 0; i < polylines.size(); i++) {
 		const auto& polyline = polylines[polylines.size() - 1 - i];
-		if (move_id < polyline.begin_move_id) {
+		if (move_id <= polyline.begin_move_id) {
 			index_offset += polyline.segments.size() * single_segment_indices_count;
 			continue;
 		}
-		if (polyline.begin_move_id <= move_id && move_id <= polyline.end_move_id) {
+		if (polyline.begin_move_id <= move_id && move_id < polyline.end_move_id) {
 			for (int j = 0; j < polyline.segments.size(); j++) {
 				const auto& segment = polyline.segments[polyline.segments.size() - 1 - j];
-				if (segment.begin_move_id <= move_id && move_id <= segment.end_move_id) {
-					index_offset += j * single_segment_indices_count;
+				if (segment.begin_move_id == move_id) {
+					index_offset += (j + 1) * single_segment_indices_count;
 					return index_offset;
 				}
 			}
@@ -193,14 +193,11 @@ std::vector<std::shared_ptr<Mesh>> GcodeViewer::generate_arc_from_move(const Mov
 
 void GcodeViewer::parse_moves(std::vector<MoveVertex> moves)
 {
-	int move_id = 2;
 	int point_count = 0;
 	ExtrusionRole prev_role = ExtrusionRole::erNone;
-	for (size_t i = 2; i < moves.size() - 1; i++) {
-		const MoveVertex& prev_2 = moves[i - 2];
-		const MoveVertex& prev = moves[i - 1];
-		const MoveVertex& curr = moves[i];
-		const MoveVertex& next = moves[i + 1];
+	for (size_t move_id = 1; move_id < moves.size() - 1; move_id++) {
+		const MoveVertex& prev = moves[move_id - 1];
+		const MoveVertex& curr = moves[move_id];
 		if (prev.position == curr.position) {
 			point_count++;
 			continue;
@@ -214,7 +211,7 @@ void GcodeViewer::parse_moves(std::vector<MoveVertex> moves)
 			float last_height = m_layers.empty() ? -FLT_MAX : m_layers.back().height;
 			float curr_height = curr.position.z;
 			if (last_height < curr_height)
-				m_layers.emplace_back(curr.position.z, move_id, move_id);
+				m_layers.emplace_back(curr.position.z, move_id - 1, move_id);
 			else
 				m_layers.back().end_move_id = move_id;
 
@@ -258,8 +255,6 @@ void GcodeViewer::parse_moves(std::vector<MoveVertex> moves)
 				}
 			}
 		}
-
-		move_id++;
 	}
 
 	m_layer_range = { 0, (int)m_layers.size() - 1 };
@@ -303,12 +298,10 @@ void GcodeViewer::refresh()
 		int begin_index_offset = batch.calculate_index_offset_of(begin_move_id);
 		int end_index_offset = batch.calculate_reverse_index_offset_of(end_move_id);
 
-		auto old_indices = batch.merged_mesh->indices;
-		old_indices.erase(old_indices.begin(), old_indices.begin() + begin_index_offset);
-		old_indices.erase(old_indices.end() - end_index_offset, old_indices.end());
-		m_clipped_mesh[role_type] = std::make_shared<Mesh>(*batch.merged_mesh);
-		m_clipped_mesh[role_type]->indices = old_indices;
-		m_clipped_mesh[role_type]->material = std::make_shared<Material>();
+		auto clipped_indices = batch.merged_mesh->indices;
+		clipped_indices.erase(clipped_indices.begin(), clipped_indices.begin() + begin_index_offset);
+		clipped_indices.erase(clipped_indices.end() - end_index_offset, clipped_indices.end());
+		m_clipped_mesh[role_type] = std::make_shared<Mesh>(batch.merged_mesh->vertices, clipped_indices, std::make_shared<Material>());
 		m_clipped_mesh[role_type]->material->albedo = Vec3(Extrusion_Role_Colors[role_type]);
 	}
 
