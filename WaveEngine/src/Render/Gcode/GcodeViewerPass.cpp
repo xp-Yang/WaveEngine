@@ -2,14 +2,6 @@
 
 #include <glad/glad.h>// TODO remove
 
-static Color4 IntToColor(int color) {
-	float r = ((color >> 24) & 0x000000FF) / 255.0f;
-	float g = ((color >> 16) & 0x000000FF) / 255.0f;
-	float b = ((color >> 8) & 0x000000FF) / 255.0f;
-	float a = ((color >> 0) & 0x000000FF) / 255.0f;
-	return Color4(r, g, b, a);
-}
-
 GcodeViewerPass::GcodeViewerPass()
 {
 }

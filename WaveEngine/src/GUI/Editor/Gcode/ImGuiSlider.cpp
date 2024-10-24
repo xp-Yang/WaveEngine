@@ -97,6 +97,8 @@ void ImGuiSlider::initValueSpan(std::array<int, 2> span)
 void ImGuiSlider::SetLowerValue(const int lower_val)
 {
     m_value_scope[0] = lower_val;
+    if (lower_val > m_value_scope[1])
+        m_value_scope[1] = lower_val;
 
     if (m_parent->parent()->ref_render_system->gcodeViewer()->valid()) {
         if (m_orientation == Orientation::Vertical) {
@@ -111,6 +113,8 @@ void ImGuiSlider::SetLowerValue(const int lower_val)
 void ImGuiSlider::SetHigherValue(const int higher_val)
 {
     m_value_scope[1] = higher_val;
+    if (higher_val < m_value_scope[0])
+        m_value_scope[0] = higher_val;
 
     if (m_parent->parent()->ref_render_system->gcodeViewer()->valid()) {
         if (m_orientation == Orientation::Vertical) {

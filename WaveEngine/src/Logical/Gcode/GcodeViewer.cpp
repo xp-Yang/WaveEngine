@@ -119,6 +119,7 @@ const std::array<std::shared_ptr<Mesh>, ExtrusionRole::erCount>& GcodeViewer::me
 
 void GcodeViewer::set_layer_scope(std::array<int, 2> layer_scope)
 {
+	assert(layer_scope[1] >= layer_scope[0]);
 	m_layer_scope = layer_scope;
 
 	m_move_range[0] = m_layers[m_layer_scope[1]].begin_move_id;
@@ -130,6 +131,7 @@ void GcodeViewer::set_layer_scope(std::array<int, 2> layer_scope)
 
 void GcodeViewer::set_move_scope(std::array<int, 2> move_scope)
 {
+	assert(move_scope[1] >= move_scope[0]);
 	m_move_scope[0] = std::max(move_scope[0], m_move_range[0]);
 	m_move_scope[1] = std::min(move_scope[1], m_move_range[1]);
 
@@ -195,10 +197,11 @@ void GcodeViewer::parse_moves(std::vector<MoveVertex> moves)
 {
 	int point_count = 0;
 	ExtrusionRole prev_role = ExtrusionRole::erNone;
-	for (size_t move_id = 1; move_id < moves.size() - 1; move_id++) {
+	for (size_t move_id = 1; move_id < moves.size(); move_id++) {
 		const MoveVertex& prev = moves[move_id - 1];
 		const MoveVertex& curr = moves[move_id];
 		if (prev.position == curr.position) {
+			// seam or spit or ...
 			point_count++;
 			continue;
 		}
@@ -216,7 +219,6 @@ void GcodeViewer::parse_moves(std::vector<MoveVertex> moves)
 				m_layers.back().end_move_id = move_id;
 
 			// parse segment
-
 			if (curr.is_arc_move_with_interpolation_points()) {
 				std::vector<std::shared_ptr<Mesh>> seg_meshes = generate_arc_from_move(prev, curr);
 				for (int mesh_id = 0; mesh_id < seg_meshes.size(); mesh_id++) {
@@ -288,7 +290,7 @@ void GcodeViewer::refresh()
 {
 	int begin_move_id = m_layers[m_layer_scope[0]].begin_move_id;
 	int end_move_id = m_move_scope[1];
-	end_move_id = end_move_id > begin_move_id ? end_move_id : begin_move_id + 1;
+	assert(begin_move_id <= end_move_id);
 
 	for (int role_type = ExtrusionRole::erNone + 1; role_type < ExtrusionRole::erCount; role_type++) {
 		const auto& batch = m_lines_batches[role_type];
