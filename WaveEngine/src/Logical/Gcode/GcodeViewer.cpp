@@ -13,6 +13,7 @@ void Polyline::append_segment(const Segment& segment)
 		const auto& last_segment = segments.back();
 		corner_segment.begin_move_id = last_segment.end_move_id;
 		corner_segment.end_move_id = segment.begin_move_id;
+		assert(corner_segment.begin_move_id == corner_segment.end_move_id);
 		std::array<Vec3, 8> vertices_positions;
 		vertices_positions[0] = last_segment.mesh->vertices[7].position;
 		vertices_positions[1] = last_segment.mesh->vertices[6].position;
@@ -70,8 +71,8 @@ int LinesBatch::calculate_reverse_index_offset_of(int move_id) const
 		if (polyline.begin_move_id <= move_id && move_id < polyline.end_move_id) {
 			for (int j = 0; j < polyline.segments.size(); j++) {
 				const auto& segment = polyline.segments[polyline.segments.size() - 1 - j];
-				if (segment.begin_move_id == move_id) {
-					index_offset += (j + 1) * single_segment_indices_count;
+				if (segment.end_move_id == move_id) {
+					index_offset += j * single_segment_indices_count;
 					return index_offset;
 				}
 			}
@@ -200,15 +201,17 @@ void GcodeViewer::parse_moves(std::vector<MoveVertex> moves)
 	for (size_t move_id = 1; move_id < moves.size(); move_id++) {
 		const MoveVertex& prev = moves[move_id - 1];
 		const MoveVertex& curr = moves[move_id];
+
+		if (curr.type != EMoveType::Extrude) {
+			prev_role = ExtrusionRole::erNone;
+		}
+
 		if (prev.position == curr.position) {
 			// seam or spit or ...
 			point_count++;
 			continue;
 		}
 
-		if (curr.type != EMoveType::Extrude) {
-			prev_role = ExtrusionRole::erNone;
-		}
 		if (curr.type == EMoveType::Extrude) {
 			// parse layers
 			float last_height = m_layers.empty() ? -FLT_MAX : m_layers.back().height;
@@ -221,11 +224,13 @@ void GcodeViewer::parse_moves(std::vector<MoveVertex> moves)
 			// parse segment
 			if (curr.is_arc_move_with_interpolation_points()) {
 				std::vector<std::shared_ptr<Mesh>> seg_meshes = generate_arc_from_move(prev, curr);
-				for (int mesh_id = 0; mesh_id < seg_meshes.size(); mesh_id++) {
+				for (int i = 0; i < seg_meshes.size(); i++) {
 					Segment segment;
 					segment.begin_move_id = move_id - 1;
-					segment.end_move_id = move_id;
-					segment.mesh = seg_meshes[mesh_id];
+					segment.end_move_id = move_id - 1;
+					if (i == seg_meshes.size() - 1)
+						segment.end_move_id = move_id;
+					segment.mesh = seg_meshes[i];
 
 					ExtrusionRole curr_role = curr.extrusion_role;
 					if (prev_role != curr_role) {
