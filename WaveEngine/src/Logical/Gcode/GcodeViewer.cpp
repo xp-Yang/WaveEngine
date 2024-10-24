@@ -8,6 +8,24 @@ void Polyline::append_segment(const Segment& segment)
 	if (segment.end_move_id > end_move_id)
 		end_move_id = segment.end_move_id;
 
+	if (!segments.empty()) {
+		Segment corner_segment;
+		const auto& last_segment = segments.back();
+		corner_segment.begin_move_id = last_segment.end_move_id;
+		corner_segment.end_move_id = segment.begin_move_id;
+		std::array<Vec3, 8> vertices_positions;
+		vertices_positions[0] = last_segment.mesh->vertices[7].position;
+		vertices_positions[1] = last_segment.mesh->vertices[6].position;
+		vertices_positions[2] = last_segment.mesh->vertices[5].position;
+		vertices_positions[3] = last_segment.mesh->vertices[4].position;
+		vertices_positions[4] = segment.mesh->vertices[3].position;
+		vertices_positions[5] = segment.mesh->vertices[2].position;
+		vertices_positions[6] = segment.mesh->vertices[1].position;
+		vertices_positions[7] = segment.mesh->vertices[0].position;
+		corner_segment.mesh = Mesh::create_vertex_normal_cuboid_mesh(vertices_positions);
+		segments.push_back(corner_segment);
+	}
+
 	segments.push_back(segment);
 }
 
@@ -125,30 +143,18 @@ void GcodeViewer::set_visible(ExtrusionRole role_type, bool visible)
 	//update_moves_slider();
 }
 
-std::shared_ptr<Mesh> GcodeViewer::generate_cuboid_from_move(const MoveVertex& prev_2, const MoveVertex& prev, const MoveVertex& curr, const MoveVertex& next)
+std::shared_ptr<Mesh> GcodeViewer::generate_cuboid_from_move(const MoveVertex& prev, const MoveVertex& curr)
 {
 	Vec3 to_curr_dir = Math::Normalize(curr.position - prev.position);
-	Vec3 to_prev_dir = Vec3(0);
-	Vec3 to_next_dir = Vec3(0);
-	if (prev.type == EMoveType::Extrude) {
-		to_prev_dir = Math::Normalize(prev.position - prev_2.position);
-	}
-	if (next.type == EMoveType::Extrude) {
-		to_next_dir = Math::Normalize(next.position - curr.position);
-	}
-	return generate_cuboid_from_move(to_prev_dir, to_curr_dir, to_next_dir, prev.position, curr.position, curr.width, curr.height);
+	return generate_cuboid_from_move(to_curr_dir, prev.position, curr.position, curr.width, curr.height);
 }
 
-std::shared_ptr<Mesh> GcodeViewer::generate_cuboid_from_move(const Vec3& to_prev_dir, const Vec3& to_curr_dir, const Vec3& to_next_dir, const Vec3& prev_pos, const Vec3& curr_pos, float move_width, float move_height)
+std::shared_ptr<Mesh> GcodeViewer::generate_cuboid_from_move(const Vec3& to_curr_dir, const Vec3& prev_pos, const Vec3& curr_pos, float move_width, float move_height)
 {
 	Vec3 up_dir = Vec3(0, 0, 1);
 	Vec3 down_dir = -up_dir;
 	Vec3 first_left_dir = Math::Normalize(Math::Cross(Vec3(0, 0, 1), to_curr_dir));
 	Vec3 second_left_dir = Math::Normalize(Math::Cross(Vec3(0, 0, 1), to_curr_dir));
-	if (to_prev_dir != Vec3(0))
-		first_left_dir = Math::Cross(to_prev_dir, to_curr_dir).z >= 0 ? Math::Normalize(-to_prev_dir + to_curr_dir) : -Math::Normalize(-to_prev_dir + to_curr_dir);
-	if (to_next_dir != Vec3(0))
-		second_left_dir = Math::Cross(to_curr_dir, to_next_dir).z >= 0 ? Math::Normalize(-to_curr_dir + to_next_dir) : -Math::Normalize(-to_curr_dir + to_next_dir);
 	Vec3 first_right_dir = -first_left_dir;
 	Vec3 second_right_dir = -second_left_dir;
 
@@ -172,7 +178,7 @@ std::shared_ptr<Mesh> GcodeViewer::generate_cuboid_from_move(const Vec3& to_prev
 	return Mesh::create_vertex_normal_cuboid_mesh(vertices_positions);
 }
 
-std::vector<std::shared_ptr<Mesh>> GcodeViewer::generate_arc_from_move(const MoveVertex& prev_2, const MoveVertex& prev, const MoveVertex& curr, const MoveVertex& next)
+std::vector<std::shared_ptr<Mesh>> GcodeViewer::generate_arc_from_move(const MoveVertex& prev, const MoveVertex& curr)
 {
 	std::vector<std::shared_ptr<Mesh>> res;
 	size_t loop_num = curr.is_arc_move_with_interpolation_points() ? curr.interpolation_points.size() : 0;
@@ -180,30 +186,7 @@ std::vector<std::shared_ptr<Mesh>> GcodeViewer::generate_arc_from_move(const Mov
 		const Vec3f& prev_pos = (i == 0 ? prev.position : curr.interpolation_points[i - 1]);
 		const Vec3f& curr_pos = (i == loop_num ? curr.position : curr.interpolation_points[i]);
 		Vec3 to_curr_dir = Math::Normalize(curr_pos - prev_pos);
-
-		Vec3 to_prev_dir = Vec3(0);
-		Vec3 to_next_dir = Vec3(0);
-		if (i == 0) {
-			if (prev.type == EMoveType::Extrude) {
-				to_prev_dir = Math::Normalize(prev.position - prev_2.position);
-			}
-		}
-		else if (i == 1)
-			to_prev_dir = Math::Normalize(curr.interpolation_points[0] - prev.position);
-		else
-			to_prev_dir = Math::Normalize(curr.interpolation_points[i - 1] - curr.interpolation_points[i - 2]);
-
-		if (i == loop_num) {
-			if (next.type == EMoveType::Extrude) {
-				to_next_dir = Math::Normalize(next.position - curr.position);
-			}
-		}
-		else if (i == loop_num - 1)
-			to_next_dir = Math::Normalize(curr.position - curr.interpolation_points[loop_num - 1]);
-		else
-			to_next_dir = Math::Normalize(curr.interpolation_points[i + 1] - curr.interpolation_points[i]);
-
-		res.push_back(generate_cuboid_from_move(to_prev_dir, to_curr_dir, to_next_dir, prev_pos, curr_pos, curr.width, curr.height));
+		res.push_back(generate_cuboid_from_move(to_curr_dir, prev_pos, curr_pos, curr.width, curr.height));
 	}
 	return res;
 }
@@ -223,6 +206,9 @@ void GcodeViewer::parse_moves(std::vector<MoveVertex> moves)
 			continue;
 		}
 
+		if (curr.type != EMoveType::Extrude) {
+			prev_role = ExtrusionRole::erNone;
+		}
 		if (curr.type == EMoveType::Extrude) {
 			// parse layers
 			float last_height = m_layers.empty() ? -FLT_MAX : m_layers.back().height;
@@ -235,7 +221,7 @@ void GcodeViewer::parse_moves(std::vector<MoveVertex> moves)
 			// parse segment
 
 			if (curr.is_arc_move_with_interpolation_points()) {
-				std::vector<std::shared_ptr<Mesh>> seg_meshes = generate_arc_from_move(prev_2, prev, curr, next);
+				std::vector<std::shared_ptr<Mesh>> seg_meshes = generate_arc_from_move(prev, curr);
 				for (int mesh_id = 0; mesh_id < seg_meshes.size(); mesh_id++) {
 					Segment segment;
 					segment.begin_move_id = move_id - 1;
@@ -258,7 +244,7 @@ void GcodeViewer::parse_moves(std::vector<MoveVertex> moves)
 				Segment segment;
 				segment.begin_move_id = move_id - 1;
 				segment.end_move_id = move_id;
-				segment.mesh = generate_cuboid_from_move(prev_2, prev, curr, next);
+				segment.mesh = generate_cuboid_from_move(prev, curr);
 
 				ExtrusionRole curr_role = curr.extrusion_role;
 				if (prev_role != curr_role) {
