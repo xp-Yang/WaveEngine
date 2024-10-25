@@ -41,7 +41,7 @@ void GcodeViewerPass::reload_mesh_data(std::array<LinesBatch, ExtrusionRole::erC
 		unsigned int IBO = 0;
 		glGenBuffers(1, &IBO);
 		glBindBuffer(GL_ARRAY_BUFFER, IBO);
-		glBufferData(GL_ARRAY_BUFFER, mesh->indices.size() * sizeof(unsigned int), &(mesh->indices[0]), GL_DYNAMIC_DRAW);
+		glBufferData(GL_ARRAY_BUFFER, mesh->indices.size() * sizeof(int), &(mesh->indices[0]), GL_DYNAMIC_DRAW);
 		m_IBOs.push_back(IBO);
 
 		unsigned int VAO = 0;
@@ -63,24 +63,24 @@ void GcodeViewerPass::reload_mesh_data(std::array<LinesBatch, ExtrusionRole::erC
 
 void GcodeViewerPass::draw()
 {
-	if (m_gcode_viewer->dirty()) {
-		for (int i = 0; i < m_gcode_viewer->index_offsets().size(); i++) {
-			const auto& mesh = m_gcode_viewer->linesBatches()[i].merged_mesh;
-			if (!mesh || mesh->indices.empty())
-				continue;
-			auto index_offset = m_gcode_viewer->index_offsets()[i];
-			int start_offset = index_offset.first;
-			int size = index_offset.second - index_offset.first;
-			glDeleteBuffers(1, &m_IBOs[i]);
-			glGenBuffers(1, &m_IBOs[i]);
-			glBindBuffer(GL_ARRAY_BUFFER, m_IBOs[i]);
-			glBufferData(GL_ARRAY_BUFFER, size * sizeof(int), &(mesh->indices[0]) + start_offset, GL_DYNAMIC_DRAW);
+	//if (m_gcode_viewer->dirty()) {
+	//	for (int i = 0; i < m_gcode_viewer->index_offsets().size(); i++) {
+	//		const auto& mesh = m_gcode_viewer->linesBatches()[i].merged_mesh;
+	//		if (!mesh || mesh->indices.empty())
+	//			continue;
+	//		auto index_offset = m_gcode_viewer->index_offsets()[i];
+	//		int start_offset = index_offset.first;
+	//		int size = index_offset.second - index_offset.first;
+	//		glDeleteBuffers(1, &m_IBOs[i]);
+	//		glGenBuffers(1, &m_IBOs[i]);
+	//		glBindBuffer(GL_ARRAY_BUFFER, m_IBOs[i]);
+	//		glBufferData(GL_ARRAY_BUFFER, size * sizeof(int), &(mesh->indices[0]) + start_offset, GL_DYNAMIC_DRAW);
 
-			glBindVertexArray(m_VAOs[i]);
-			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_IBOs[i]);
-		}
-		m_gcode_viewer->setDirty(false);
-	}
+	//		glBindVertexArray(m_VAOs[i]);
+	//		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_IBOs[i]);
+	//	}
+	//	m_gcode_viewer->setDirty(false);
+	//}
 
 	m_input_passes[0]->getFrameBuffer()->bind();
 
@@ -102,7 +102,12 @@ void GcodeViewerPass::draw()
 		shader->setFloat3("material.diffuse", Vec3(m_colors[i]));
 		shader->setFloat3("material.specular", Vec3(0.2f));
 
-		m_rhi->drawIndexed(m_VAOs[i], m_gcode_viewer->index_offsets()[i].second - m_gcode_viewer->index_offsets()[i].first);
+		const auto& index_offset = m_gcode_viewer->index_offsets()[i];
+		int start_offset = index_offset.first;
+		int size = index_offset.second - index_offset.first;
+		glBindVertexArray(m_VAOs[i]);
+		glDrawElements(GL_TRIANGLES, size, GL_UNSIGNED_INT, (const void*)(start_offset * sizeof(int)));
+		glBindVertexArray(0);
 	}
 	shader->stop_using();
 }
