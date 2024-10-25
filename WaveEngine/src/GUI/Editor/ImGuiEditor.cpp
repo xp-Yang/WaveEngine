@@ -11,7 +11,7 @@
 #include "GUI/FileDialog.hpp"
 #include "Gui/Window.hpp"
 #include "Render/RenderSystem.hpp"
-#include "Logical/FrameWork/Scene.hpp"
+#include "Logical/FrameWork/World/Scene.hpp"
 
 ImGuiEditor::ImGuiEditor()
     : m_main_canvas(std::make_unique<MainCanvas>(this))

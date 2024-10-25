@@ -34,7 +34,7 @@ void Polyline::append_segment(const Segment& segment)
 			-2, 1, 2, -2, 2, -3,//об
 			0, -1, -4, 0, -4, 3,//ио
 		};
-		corner_segment.mesh = std::make_shared<SimpleMesh>(std::vector<Vertex>(), indices);
+		corner_segment.mesh = std::make_shared<SimpleMesh>(std::vector<SimpleVertex>(), indices);
 		segments.push_back(corner_segment);
 	}
 

@@ -10,7 +10,7 @@
 #endif
 
 #include "Render/RenderSystem.hpp"
-#include "Logical/Framework/Scene.hpp"
+#include "Logical/Framework/World/Scene.hpp"
 
 void MainCanvas::render()
 {

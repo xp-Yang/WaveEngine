@@ -4,7 +4,7 @@
 #include "Path/DeferredRenderPath.hpp"
 #include "Path/RayTracingRenderPath.hpp"
 
-#include <Logical/Framework/Scene.hpp>
+#include <Logical/Framework/World/Scene.hpp>
 
 RenderSystem::RenderSystem()
 {

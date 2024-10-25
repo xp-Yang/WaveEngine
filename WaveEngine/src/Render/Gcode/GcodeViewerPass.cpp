@@ -22,6 +22,7 @@ void GcodeViewerPass::reload_mesh_data(std::array<LinesBatch, ExtrusionRole::erC
 	m_VBOs.clear();
 	m_IBOs.clear();
 	m_colors.clear();
+
 	for (int i = 0; i < lines_batches.size(); i++) {
 		const auto& mesh = lines_batches[i].merged_mesh;
 		if (!mesh || mesh->indices.empty()) {
@@ -35,7 +36,7 @@ void GcodeViewerPass::reload_mesh_data(std::array<LinesBatch, ExtrusionRole::erC
 		unsigned int VBO = 0;
 		glGenBuffers(1, &VBO);
 		glBindBuffer(GL_ARRAY_BUFFER, VBO);
-		glBufferData(GL_ARRAY_BUFFER, mesh->vertices.size() * sizeof(Vertex), &(mesh->vertices[0]), GL_STATIC_DRAW);
+		glBufferData(GL_ARRAY_BUFFER, mesh->vertices.size() * sizeof(SimpleVertex), &(mesh->vertices[0]), GL_STATIC_DRAW);
 		m_VBOs.push_back(VBO);
 
 		unsigned int IBO = 0;
@@ -49,12 +50,10 @@ void GcodeViewerPass::reload_mesh_data(std::array<LinesBatch, ExtrusionRole::erC
 		glBindVertexArray(VAO);
 		glBindBuffer(GL_ARRAY_BUFFER, VBO);
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, IBO);
-		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)0);
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(SimpleVertex), (GLvoid*)0);
 		glEnableVertexAttribArray(0);
-		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, normal));
+		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(SimpleVertex), (void*)offsetof(SimpleVertex, normal));
 		glEnableVertexAttribArray(1);
-		glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, texture_uv));
-		glEnableVertexAttribArray(2);
 		m_VAOs.push_back(VAO);
 
 		m_colors.push_back(Extrusion_Role_Colors[i]);

@@ -3,7 +3,7 @@
 #include <imgui.h>
 
 #include "ImGuiEditor.hpp"
-#include "Logical/FrameWork/Scene.hpp"
+#include "Logical/FrameWork/World/Scene.hpp"
 
 void ImGuiContextMenu::render()
 {

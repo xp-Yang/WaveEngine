@@ -3,7 +3,7 @@
 #if ENABLE_ECS
 #include "Logical/Framework/ECS/Components.hpp"
 #else
-#include "Logical/Framework/Scene.hpp"
+#include "Logical/Framework/World/Scene.hpp"
 #endif
 
 CameraManipulator::CameraManipulator(CameraComponent& camera)

@@ -2,7 +2,7 @@
 #define Application_hpp
 
 #include "Window.hpp"
-#include "Logical/FrameWork/Scene.hpp"
+#include "Logical/FrameWork/World/Scene.hpp"
 #include "Render/RenderSystem.hpp"
 #include "Editor/ImGuiEditor.hpp"
 #include "Editor/ImGuiInput.hpp"
@@ -21,10 +21,6 @@ public:
 	void run();
 	void init();
 	void shutdown();
-	Window* window() const { return m_window.get();	}
-	Scene* scene() const { return m_scene.get(); }
-	RenderSystem* renderSystem() const { return m_render_system.get(); }
-	ImGuiEditor* editor() const { return m_editor.get(); }
 
 private:
 	Application();

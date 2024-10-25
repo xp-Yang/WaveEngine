@@ -216,8 +216,6 @@ void Scene::init()
 
 #endif // ENABLE_ECS
 
-	m_skybox = std::make_shared<Skybox>();
-
 	m_light_manager = std::make_shared<LightManager>();
 	m_light_manager->init();
 

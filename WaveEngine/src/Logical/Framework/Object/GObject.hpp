@@ -1,7 +1,7 @@
 #ifndef GObject_hpp
 #define GObject_hpp
 
-#include "Logical/Framework/IDAllocator.hpp"
+#include "Logical/Framework/World/IDAllocator.hpp"
 #if !ENABLE_ECS
 #include "Logical/Framework/Component/CameraComponent.hpp"
 #include "Logical/Framework/Component/MeshComponent.hpp"

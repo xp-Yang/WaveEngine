@@ -10,7 +10,7 @@
 #include "Logical/Framework/ECS/Components.hpp"
 #endif
 
-#include "Logical/Framework/Scene.hpp"
+#include "Logical/Framework/World/Scene.hpp"
 
 namespace Meta {
 

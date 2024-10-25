@@ -3,7 +3,7 @@
 
 #include <imgui.h>
 
-#include "Logical/Framework/Scene.hpp"
+#include "Logical/Framework/World/Scene.hpp"
 #include "Render/RenderSystem.hpp"
 #include "ImGuiEditor.hpp"
 

@@ -1,7 +1,7 @@
 #include "ImGuiToolbar.hpp"
 #include "ImGuiCanvas.hpp"
 #include "Logical/Texture.hpp"
-#include "Logical/Framework/Scene.hpp"
+#include "Logical/Framework/World/Scene.hpp"
 #include "Render/RenderSourceData.hpp"
 
 #include <imgui.h>

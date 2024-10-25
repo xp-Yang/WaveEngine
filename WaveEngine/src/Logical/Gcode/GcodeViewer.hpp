@@ -2,7 +2,7 @@
 #define GcodeViewer_hpp
 
 #include "ResourceManager/Gcode/GcodeResultData.hpp"
-#include "Logical/Mesh.hpp"
+#include "SimpleMesh.hpp"
 
 enum LineType : unsigned int {
 	// EXTRUDE TYPE

@@ -2,7 +2,7 @@
 #define LightManager_hpp
 
 #include "Core/Math/Math.hpp"
-#include "Logical/Framework/IDAllocator.hpp"
+#include "Logical/Framework/World/IDAllocator.hpp"
 
 class LightID : public IDAllocator<LightID> {
 public:

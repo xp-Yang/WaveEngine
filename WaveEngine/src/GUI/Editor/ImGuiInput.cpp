@@ -2,7 +2,7 @@
 #include "ImGuiEditor.hpp"
 #include "GUI/Window.hpp"
 #include "Render/RenderSystem.hpp"
-#include "Logical/FrameWork/Scene.hpp"
+#include "Logical/FrameWork/World/Scene.hpp"
 #include <imgui.h>
 // TODO remove
 #include <glad/glad.h>

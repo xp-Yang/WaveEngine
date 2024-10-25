@@ -13,12 +13,12 @@ Application& Application::get()
 }
 
 void Application::run() {
-	Timer fps_timer;
-	fps_timer.start();
+	//Timer fps_timer;
+	//fps_timer.start();
 	while (!m_window->shouldClose()) {
-		double duration = fps_timer.duration();
-		if (duration >= MILLISECONDS_PER_FRAME) {
-			fps_timer.restart();
+		//double duration = fps_timer.duration();
+		//if (duration >= MILLISECONDS_PER_FRAME) {
+			//fps_timer.restart();
 			m_editor->beginFrame();
 			// logical
 			m_gui_input->onUpdate();
@@ -29,9 +29,9 @@ void Application::run() {
 			m_editor->onUpdate();
 			m_editor->endFrame();
 			m_window->swapBuffer();
-		}
+		//}
 	}
-	fps_timer.stop();
+	//fps_timer.stop();
 }
 
 void Application::init()

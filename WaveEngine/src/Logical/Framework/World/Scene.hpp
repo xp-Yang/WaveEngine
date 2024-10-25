@@ -8,7 +8,6 @@
 #include "Logical/Framework/Object/GObject.hpp"
 #include "Logical/Framework/Component/Component.hpp"
 #include "Logical/Framework/World/LightManager.hpp"
-#include "Logical/Framework/World/Skybox.hpp"
 #endif
 
 #include "Core/Signal/Signal.hpp"
@@ -34,7 +33,6 @@ public:
 	std::shared_ptr<Light> getPickedLight() const { return m_picked_light; }
 	const std::vector<std::shared_ptr<GObject>>& getObjects() const { return m_objects; }
 	std::shared_ptr<LightManager> getLightManager() const { return m_light_manager; }
-	std::shared_ptr<Skybox> getSkybox() const { return m_skybox; }
 
 	CameraComponent& getMainCamera() {
 		static CameraComponent* camera = new CameraComponent(nullptr);
@@ -54,7 +52,6 @@ private:
 #else
 	std::vector<std::shared_ptr<GObject>> m_objects;
 	std::shared_ptr<LightManager> m_light_manager;
-	std::shared_ptr<Skybox> m_skybox;
 	std::vector<std::shared_ptr<GObject>> m_picked_objects;
 	std::shared_ptr<Light> m_picked_light;
 #endif
