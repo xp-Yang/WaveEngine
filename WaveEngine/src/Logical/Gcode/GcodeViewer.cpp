@@ -46,60 +46,38 @@ void LinesBatch::append_polyline(const Polyline& polyline)
 	polylines.push_back(polyline);
 }
 
-int LinesBatch::calculate_begin_index_offset_of(int move_id) const
+int LinesBatch::calculate_index_offset_of(int move_id) const
 {
+	// debug
+	//int single_segment_indices_count = 36;
+	//int total_indices_count = 0;
+	//for (int i = 0; i < polylines.size(); i++) {
+	//	const auto& polyline = polylines[i];
+	//	for (int j = 0; j < polyline.segments.size(); j++) {
+	//		total_indices_count += single_segment_indices_count;
+	//	}
+	//}
+
 	int single_segment_indices_count = 36;
 
-	int index_offset = 0;
+	int offset = 0;
 	for (int i = 0; i < polylines.size(); i++) {
 		const auto& polyline = polylines[i];
 		if (polyline.end_move_id <= move_id) {
-			index_offset += polyline.segments.size() * single_segment_indices_count;
+			offset += polyline.segments.size();
 			continue;
 		}
 		if (polyline.begin_move_id < move_id && move_id <= polyline.end_move_id) {
 			for (int j = 0; j < polyline.segments.size(); j++) {
 				const auto& segment = polyline.segments[j];
 				if (move_id == segment.end_move_id) {
-					index_offset += (j + 1) * single_segment_indices_count;
-					return index_offset;
+					offset += (j + 1);
+					return offset * single_segment_indices_count;
 				}
 			}
 		}
 	}
-	return index_offset;
-}
-
-int LinesBatch::calculate_end_index_offset_of(int move_id) const
-{
-	int single_segment_indices_count = 36;
-
-	int total_indices_count = 0;
-	for (int i = 0; i < polylines.size(); i++) {
-		const auto& polyline = polylines[i];
-		for (int j = 0; j < polyline.segments.size(); j++) {
-			total_indices_count += single_segment_indices_count;
-		}
-	}
-
-	int index_offset = 0;
-	for (int i = 0; i < polylines.size(); i++) {
-		const auto& polyline = polylines[polylines.size() - 1 - i];
-		if (move_id <= polyline.begin_move_id) {
-			index_offset += polyline.segments.size() * single_segment_indices_count;
-			continue;
-		}
-		if (polyline.begin_move_id <= move_id && move_id < polyline.end_move_id) {
-			for (int j = 0; j < polyline.segments.size(); j++) {
-				const auto& segment = polyline.segments[polyline.segments.size() - 1 - j];
-				if (segment.end_move_id == move_id) {
-					index_offset += j * single_segment_indices_count;
-					return index_offset;
-				}
-			}
-		}
-	}
-	return total_indices_count - index_offset;
+	return offset * single_segment_indices_count;
 }
 
 GcodeViewer::GcodeViewer()
@@ -330,8 +308,8 @@ void GcodeViewer::clipping_indices()
 		if (batch.empty() || !m_role_visible[role_type])
 			continue;
 
-		int begin_index_offset = batch.calculate_begin_index_offset_of(begin_move_id);
-		int end_index_offset = batch.calculate_end_index_offset_of(end_move_id);
+		int begin_index_offset = batch.calculate_index_offset_of(begin_move_id);
+		int end_index_offset = batch.calculate_index_offset_of(end_move_id);
 
 		m_clipped_indices[role_type] = std::make_pair(begin_index_offset, end_index_offset);
 	}

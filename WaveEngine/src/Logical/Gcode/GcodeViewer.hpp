@@ -100,8 +100,7 @@ struct LinesBatch {
 
 	bool empty() const { return polylines.empty() || (merged_mesh.get() == nullptr); }
 	void append_polyline(const Polyline& polyline);
-	int calculate_begin_index_offset_of(int move_id) const;
-	int calculate_end_index_offset_of(int move_id) const;
+	int calculate_index_offset_of(int move_id) const;
 };
 
 class GcodeViewer {

@@ -95,9 +95,6 @@ void GcodeViewerPass::draw()
 	shader->setMatrix("view", 1, m_render_source_data->view_matrix);
 	shader->setMatrix("projection", 1, m_render_source_data->proj_matrix);
 	for (int i = 0; i < m_VAOs.size(); i++) {
-		//const auto& mesh = m_gcode_viewer->linesBatches()[i].merged_mesh;
-		//if (!mesh || mesh->indices.empty())
-		//	continue;
 		if (m_VAOs[i] == 0)
 			continue;
 
@@ -105,7 +102,7 @@ void GcodeViewerPass::draw()
 		shader->setFloat3("material.diffuse", Vec3(m_colors[i]));
 		shader->setFloat3("material.specular", Vec3(0.2f));
 
-		m_rhi->drawIndexed(m_VAOs[i], /*mesh->indices.size()*/m_gcode_viewer->index_offsets()[i].second - m_gcode_viewer->index_offsets()[i].first);
+		m_rhi->drawIndexed(m_VAOs[i], m_gcode_viewer->index_offsets()[i].second - m_gcode_viewer->index_offsets()[i].first);
 	}
 	shader->stop_using();
 }
