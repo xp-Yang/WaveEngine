@@ -321,7 +321,7 @@ void GcodeViewer::refresh()
 			int begin_index_offset = batch.calculate_index_offset_of(begin_move_id);
 			int end_index_offset = batch.calculate_index_offset_of(end_move_id);
 			batch.colored_indices_interval = std::make_pair(begin_index_offset, end_index_offset);
-			batch.colorless_indices_interval = {};// std::make_pair(begin_index_offset, end_index_offset);
+			batch.colorless_indices_interval = {};
 		}
 	}
 	else {

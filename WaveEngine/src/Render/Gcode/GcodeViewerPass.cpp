@@ -63,25 +63,6 @@ void GcodeViewerPass::reload_mesh_data(std::array<LinesBatch, ExtrusionRole::erC
 
 void GcodeViewerPass::draw()
 {
-	//if (m_gcode_viewer->dirty()) {
-	//	for (int i = 0; i < m_gcode_viewer->index_offsets().size(); i++) {
-	//		const auto& mesh = m_gcode_viewer->linesBatches()[i].merged_mesh;
-	//		if (!mesh || mesh->indices.empty())
-	//			continue;
-	//		auto index_offset = m_gcode_viewer->index_offsets()[i];
-	//		int start_offset = index_offset.first;
-	//		int size = index_offset.second - index_offset.first;
-	//		glDeleteBuffers(1, &m_IBOs[i]);
-	//		glGenBuffers(1, &m_IBOs[i]);
-	//		glBindBuffer(GL_ARRAY_BUFFER, m_IBOs[i]);
-	//		glBufferData(GL_ARRAY_BUFFER, size * sizeof(int), &(mesh->indices[0]) + start_offset, GL_DYNAMIC_DRAW);
-
-	//		glBindVertexArray(m_VAOs[i]);
-	//		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_IBOs[i]);
-	//	}
-	//	m_gcode_viewer->setDirty(false);
-	//}
-
 	m_input_passes[0]->getFrameBuffer()->bind();
 
 	Mat4 light_ref_matrix = m_render_source_data->render_directional_light_data_list.front().lightProjMatrix *
