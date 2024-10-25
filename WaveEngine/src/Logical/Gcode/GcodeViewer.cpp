@@ -110,6 +110,12 @@ void GcodeViewer::load(const GCodeProcessorResult& result)
 	parse_moves(result.moves);
 	m_valid = true;
 	emit loaded(m_lines_batches);
+
+	// already send vertices and indices data to gpu.
+	// release the meshes
+	for (auto& batch : m_lines_batches) {
+		batch.merged_mesh.reset();
+	}
 }
 
 void GcodeViewer::set_layer_scope(std::array<int, 2> layer_scope)
