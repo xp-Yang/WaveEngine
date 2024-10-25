@@ -14,16 +14,27 @@ void Polyline::append_segment(const Segment& segment)
 		corner_segment.begin_move_id = last_segment.end_move_id;
 		corner_segment.end_move_id = segment.begin_move_id;
 		assert(corner_segment.begin_move_id == corner_segment.end_move_id);
-		std::array<Vec3, 8> vertices_positions;
-		vertices_positions[0] = last_segment.mesh->vertices[7].position;
-		vertices_positions[1] = last_segment.mesh->vertices[6].position;
-		vertices_positions[2] = last_segment.mesh->vertices[5].position;
-		vertices_positions[3] = last_segment.mesh->vertices[4].position;
-		vertices_positions[4] = segment.mesh->vertices[3].position;
-		vertices_positions[5] = segment.mesh->vertices[2].position;
-		vertices_positions[6] = segment.mesh->vertices[1].position;
-		vertices_positions[7] = segment.mesh->vertices[0].position;
-		corner_segment.mesh = Mesh::create_vertex_normal_cuboid_mesh(vertices_positions);
+
+		//std::array<Vec3, 8> vertices_positions;
+		//vertices_positions[0] = last_segment.mesh->vertices[7].position;
+		//vertices_positions[1] = last_segment.mesh->vertices[6].position;
+		//vertices_positions[2] = last_segment.mesh->vertices[5].position;
+		//vertices_positions[3] = last_segment.mesh->vertices[4].position;
+		//vertices_positions[4] = segment.mesh->vertices[3].position;
+		//vertices_positions[5] = segment.mesh->vertices[2].position;
+		//vertices_positions[6] = segment.mesh->vertices[1].position;
+		//vertices_positions[7] = segment.mesh->vertices[0].position;
+		//corner_segment.mesh = Mesh::create_vertex_normal_cuboid_mesh(vertices_positions);
+
+		std::vector<int> indices = {
+			-1, -2, -3, -1, -3, -4,//前
+			3, 2, 1, 3, 1, 0,//后
+			0, 1, -2, 0, -2, -1,//左
+			-4, -3, 2, -4, 2, 3,//右
+			-2, 1, 2, -2, 2, -3,//下
+			0, -1, -4, 0, -4, 3,//上
+		};
+		corner_segment.mesh = std::make_shared<SimpleMesh>(std::vector<Vertex>(), indices);
 		segments.push_back(corner_segment);
 	}
 
@@ -35,10 +46,11 @@ void LinesBatch::append_polyline(const Polyline& polyline)
 	polylines.push_back(polyline);
 }
 
-int LinesBatch::calculate_index_offset_of(int move_id) const
+int LinesBatch::calculate_begin_index_offset_of(int move_id) const
 {
-	int index_offset = 0;
 	int single_segment_indices_count = 36;
+
+	int index_offset = 0;
 	for (int i = 0; i < polylines.size(); i++) {
 		const auto& polyline = polylines[i];
 		if (polyline.end_move_id <= move_id) {
@@ -58,10 +70,19 @@ int LinesBatch::calculate_index_offset_of(int move_id) const
 	return index_offset;
 }
 
-int LinesBatch::calculate_reverse_index_offset_of(int move_id) const
+int LinesBatch::calculate_end_index_offset_of(int move_id) const
 {
-	int index_offset = 0;
 	int single_segment_indices_count = 36;
+
+	int total_indices_count = 0;
+	for (int i = 0; i < polylines.size(); i++) {
+		const auto& polyline = polylines[i];
+		for (int j = 0; j < polyline.segments.size(); j++) {
+			total_indices_count += single_segment_indices_count;
+		}
+	}
+
+	int index_offset = 0;
 	for (int i = 0; i < polylines.size(); i++) {
 		const auto& polyline = polylines[polylines.size() - 1 - i];
 		if (move_id <= polyline.begin_move_id) {
@@ -78,7 +99,7 @@ int LinesBatch::calculate_reverse_index_offset_of(int move_id) const
 			}
 		}
 	}
-	return index_offset;
+	return total_indices_count - index_offset;
 }
 
 GcodeViewer::GcodeViewer()
@@ -99,7 +120,7 @@ void GcodeViewer::reset()
 	m_move_scope = {};
 
 	m_lines_batches = {};
-	m_clipped_mesh = {};
+	m_clipped_indices = {};
 
 	m_dirty = false;
 	m_valid = false;
@@ -110,12 +131,7 @@ void GcodeViewer::load(const GCodeProcessorResult& result)
 	reset();
 	parse_moves(result.moves);
 	m_valid = true;
-	emit loaded(m_clipped_mesh);
-}
-
-const std::array<std::shared_ptr<Mesh>, ExtrusionRole::erCount>& GcodeViewer::meshes() const
-{
-	return m_clipped_mesh;
+	emit loaded(m_lines_batches);
 }
 
 void GcodeViewer::set_layer_scope(std::array<int, 2> layer_scope)
@@ -142,17 +158,18 @@ void GcodeViewer::set_move_scope(std::array<int, 2> move_scope)
 void GcodeViewer::set_visible(ExtrusionRole role_type, bool visible)
 {
 	m_role_visible[role_type] = visible;
+	clipping_indices();
 	m_dirty = true;
-	//update_moves_slider();
+	//update the horizontal slider
 }
 
-std::shared_ptr<Mesh> GcodeViewer::generate_cuboid_from_move(const MoveVertex& prev, const MoveVertex& curr)
+std::shared_ptr<SimpleMesh> GcodeViewer::generate_cuboid_from_move(const MoveVertex& prev, const MoveVertex& curr)
 {
 	Vec3 to_curr_dir = Math::Normalize(curr.position - prev.position);
 	return generate_cuboid_from_move(to_curr_dir, prev.position, curr.position, curr.width, curr.height);
 }
 
-std::shared_ptr<Mesh> GcodeViewer::generate_cuboid_from_move(const Vec3& to_curr_dir, const Vec3& prev_pos, const Vec3& curr_pos, float move_width, float move_height)
+std::shared_ptr<SimpleMesh> GcodeViewer::generate_cuboid_from_move(const Vec3& to_curr_dir, const Vec3& prev_pos, const Vec3& curr_pos, float move_width, float move_height)
 {
 	Vec3 up_dir = Vec3(0, 0, 1);
 	Vec3 down_dir = -up_dir;
@@ -178,12 +195,12 @@ std::shared_ptr<Mesh> GcodeViewer::generate_cuboid_from_move(const Vec3& to_curr
 	vertices_positions[6] = curr_pos + half_height * down_dir;
 	vertices_positions[7] = curr_pos + second_width * second_left_dir;
 
-	return Mesh::create_vertex_normal_cuboid_mesh(vertices_positions);
+	return SimpleMesh::create_vertex_normal_cuboid_mesh(vertices_positions);
 }
 
-std::vector<std::shared_ptr<Mesh>> GcodeViewer::generate_arc_from_move(const MoveVertex& prev, const MoveVertex& curr)
+std::vector<std::shared_ptr<SimpleMesh>> GcodeViewer::generate_arc_from_move(const MoveVertex& prev, const MoveVertex& curr)
 {
-	std::vector<std::shared_ptr<Mesh>> res;
+	std::vector<std::shared_ptr<SimpleMesh>> res;
 	size_t loop_num = curr.is_arc_move_with_interpolation_points() ? curr.interpolation_points.size() : 0;
 	for (size_t i = 0; i < loop_num + 1; i++) {
 		const Vec3f& prev_pos = (i == 0 ? prev.position : curr.interpolation_points[i - 1]);
@@ -208,6 +225,7 @@ void GcodeViewer::parse_moves(std::vector<MoveVertex> moves)
 
 		if (prev.position == curr.position) {
 			// seam or spit or ...
+			// skip segment generation for these moves
 			point_count++;
 			continue;
 		}
@@ -223,7 +241,7 @@ void GcodeViewer::parse_moves(std::vector<MoveVertex> moves)
 
 			// parse segment
 			if (curr.is_arc_move_with_interpolation_points()) {
-				std::vector<std::shared_ptr<Mesh>> seg_meshes = generate_arc_from_move(prev, curr);
+				std::vector<std::shared_ptr<SimpleMesh>> seg_meshes = generate_arc_from_move(prev, curr);
 				for (int i = 0; i < seg_meshes.size(); i++) {
 					Segment segment;
 					segment.begin_move_id = move_id - 1;
@@ -270,16 +288,17 @@ void GcodeViewer::parse_moves(std::vector<MoveVertex> moves)
 	m_move_scope = m_move_range;
 
 	for (auto& batch : m_lines_batches) {
-		std::vector<std::shared_ptr<Mesh>> can_merge_meshes;
+		std::vector<std::shared_ptr<SimpleMesh>> can_merge_meshes;
 		can_merge_meshes.reserve((m_lines_batches.size() * m_lines_batches.front().polylines.size()));
-		for (const auto& polyline : batch.polylines) {
-			for (const auto& seg : polyline.segments) {
+		for (auto& polyline : batch.polylines) {
+			for (auto& seg : polyline.segments) {
 				if (seg.mesh)
-					can_merge_meshes.push_back(seg.mesh);
+					can_merge_meshes.push_back(std::move(seg.mesh));
 			}
 		}
-		if (!can_merge_meshes.empty())
-			batch.merged_mesh = Mesh::merge(can_merge_meshes);
+		if (!can_merge_meshes.empty()) {
+			batch.merged_mesh = SimpleMesh::merge(can_merge_meshes);
+		}
 	}
 
 	for (int role_type = ExtrusionRole::erNone + 1; role_type < ExtrusionRole::erCount; role_type++) {
@@ -293,6 +312,15 @@ void GcodeViewer::parse_moves(std::vector<MoveVertex> moves)
 
 void GcodeViewer::refresh()
 {
+	clipping_indices();
+	coloring();
+
+	m_dirty = true;
+}
+
+void GcodeViewer::clipping_indices()
+{
+	m_clipped_indices = {};
 	int begin_move_id = m_layers[m_layer_scope[0]].begin_move_id;
 	int end_move_id = m_move_scope[1];
 	assert(begin_move_id <= end_move_id);
@@ -302,15 +330,33 @@ void GcodeViewer::refresh()
 		if (batch.empty() || !m_role_visible[role_type])
 			continue;
 
-		int begin_index_offset = batch.calculate_index_offset_of(begin_move_id);
-		int end_index_offset = batch.calculate_reverse_index_offset_of(end_move_id);
+		int begin_index_offset = batch.calculate_begin_index_offset_of(begin_move_id);
+		int end_index_offset = batch.calculate_end_index_offset_of(end_move_id);
 
-		auto clipped_indices = batch.merged_mesh->indices;
-		clipped_indices.erase(clipped_indices.begin(), clipped_indices.begin() + begin_index_offset);
-		clipped_indices.erase(clipped_indices.end() - end_index_offset, clipped_indices.end());
-		m_clipped_mesh[role_type] = std::make_shared<Mesh>(batch.merged_mesh->vertices, clipped_indices, std::make_shared<Material>());
-		m_clipped_mesh[role_type]->material->albedo = Vec3(Extrusion_Role_Colors[role_type]);
+		m_clipped_indices[role_type] = std::make_pair(begin_index_offset, end_index_offset);
 	}
+}
 
-	m_dirty = true;
+void GcodeViewer::coloring()
+{
+	//m_visual_meshes.clear();
+	//int end_move_id = m_move_scope[1];
+	//if (end_move_id == m_layers[m_layer_scope[1]].end_move_id) {
+	//	for (int role_type = ExtrusionRole::erNone + 1; role_type < ExtrusionRole::erCount; role_type++) {
+	//		if (!m_clipped_mesh[role_type] || m_clipped_mesh[role_type]->indices.empty())
+	//			continue;
+	//		std::shared_ptr<Material> material = std::make_shared<Material>();
+	//		material->albedo = Vec3(Extrusion_Role_Colors[role_type]);
+	//		m_visual_meshes.push_back(std::make_shared<Mesh>(m_clipped_mesh[role_type], material));
+	//	}
+	//}
+	//else {
+	//	for (int role_type = ExtrusionRole::erNone + 1; role_type < ExtrusionRole::erCount; role_type++) {
+	//		if (!m_clipped_mesh[role_type] || m_clipped_mesh[role_type]->indices.empty())
+	//			continue;
+	//		std::shared_ptr<Material> material = std::make_shared<Material>();
+	//		material->albedo = Vec3(Silent_Color);
+	//		m_visual_meshes.push_back(std::make_shared<Mesh>(m_clipped_mesh[role_type], material));
+	//	}
+	//}
 }

@@ -23,22 +23,45 @@ struct Triangle {
 	std::array<Vertex, 3> vertices;
 };
 
+struct SimpleMesh {
+	SimpleMesh(const std::vector<Vertex>& vertices, const std::vector<int>& indices) : vertices(vertices), indices(indices) {}
+	SimpleMesh(SimpleMesh&& other) {
+		vertices = std::move(other.vertices);
+		indices = std::move(other.indices);
+	}
+	SimpleMesh& operator=(SimpleMesh&& other) {
+		vertices = std::move(other.vertices);
+		indices = std::move(other.indices);
+		return *this;
+	}
+
+	void reset() { 
+		vertices.clear();
+		indices.clear();
+		vertices.shrink_to_fit();
+		indices.shrink_to_fit();
+	}
+
+	std::vector<Vertex> vertices;
+	std::vector<int> indices;
+
+	static std::shared_ptr<SimpleMesh> create_vertex_normal_cuboid_mesh(const std::array<Vec3, 8> vertex_positions);
+	static std::shared_ptr<SimpleMesh> merge(const std::vector<std::shared_ptr<SimpleMesh>>& meshes);
+};
+
 struct Mesh {
 	static std::shared_ptr<Mesh> create_cube_mesh();
 	static std::shared_ptr<Mesh> create_cuboid_mesh(const std::array<Vec3, 8> vertex_positions);
-	static std::shared_ptr<Mesh> create_vertex_normal_cuboid_mesh(const std::array<Vec3, 8> vertex_positions);
 	static std::shared_ptr<Mesh> create_icosphere_mesh(float radius, int regression_depth);
 	static std::shared_ptr<Mesh> create_quad_mesh(const Point3& origin, const Vec3& positive_dir_u, const Vec3& positive_dir_v);
 	static std::shared_ptr<Mesh> create_complex_quad_mesh(const Vec2& size);
 	static std::shared_ptr<Mesh> create_screen_mesh();
 
-	static std::shared_ptr<Mesh> merge(const std::vector<std::shared_ptr<Mesh>>& meshes);
-
 	Mesh() = delete;
 	Mesh(const std::vector<Vertex>& vertices, const std::vector<int>& indices);
 	Mesh(const std::vector<Vertex>& vertices, const std::vector<int>& indices, std::shared_ptr<Material> material_);
+	Mesh(std::shared_ptr<SimpleMesh> simple_mesh, std::shared_ptr<Material> material_);
 	//Mesh(const std::vector<Triangle>& triangles);
-	~Mesh() { reset(); }
 
 	void reset();
 

@@ -54,8 +54,8 @@ void DeferredRenderPath::init()
     m_outline_pass->init();
     m_combine_pass->init();
 
-    static_cast<GcodeViewerPass*>(m_gcode_pass.get())->setGcodeViewer(ref_render_system->gcodeViewer().get());
-    connect(ref_render_system->gcodeViewer().get(), &(ref_render_system->gcodeViewer()->loaded), static_cast<GcodeViewerPass*>(m_gcode_pass.get()), &GcodeViewerPass::reload_mesh_data);
+    //static_cast<GcodeViewerPass*>(m_gcode_pass.get())->setGcodeViewer(ref_render_system->gcodeViewer().get());
+    //connect(ref_render_system->gcodeViewer().get(), &(ref_render_system->gcodeViewer()->loaded), static_cast<GcodeViewerPass*>(m_gcode_pass.get()), &GcodeViewerPass::reload_mesh_data);
 }
 
 void DeferredRenderPath::prepareRenderSourceData(const std::shared_ptr<RenderSourceData>& render_source_data)
@@ -143,8 +143,8 @@ void DeferredRenderPath::render()
         m_wireframe_pass->draw();
     }
 
-    m_gcode_pass->setInputPasses({ main_light_pass }); // draw above the main light pass framebuffer
-    m_gcode_pass->draw();
+    //m_gcode_pass->setInputPasses({ main_light_pass }); // draw above the main light pass framebuffer
+    //m_gcode_pass->draw();
 
     m_outline_pass->setInputPasses({ main_light_pass }); // draw above the main light pass framebuffer
     m_outline_pass->draw();

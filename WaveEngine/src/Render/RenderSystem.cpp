@@ -31,7 +31,7 @@ void RenderSystem::init(std::shared_ptr<Scene> scene)
     m_ray_tracing_path->prepareRenderSourceData(m_render_source_data);
     m_ray_tracing_path->init();
 
-    setRenderPathType(RenderPathType::Deferred);
+    setRenderPathType(RenderPathType::Forward);
 }
 
 RenderPathType RenderSystem::getRenderPathType()

@@ -10,17 +10,25 @@ void GcodeViewerPass::init()
 {
 }
 
-void GcodeViewerPass::reload_mesh_data(std::array<std::shared_ptr<Mesh>, ExtrusionRole::erCount> gcode_meshes)
+void GcodeViewerPass::reload_mesh_data(std::array<LinesBatch, ExtrusionRole::erCount> lines_batches)
 {
+	for (int i = 0; i < m_VAOs.size(); i++) {
+		// delete all the gl buffer
+		glDeleteVertexArrays(1, &m_VAOs[i]);
+		glDeleteBuffers(1, &m_VBOs[i]);
+		glDeleteBuffers(1, &m_IBOs[i]);
+	}
 	m_VAOs.clear();
 	m_VBOs.clear();
 	m_IBOs.clear();
-	for (int i = 0; i < gcode_meshes.size(); i++) {
-		const auto& mesh = gcode_meshes[i];
+	m_colors.clear();
+	for (int i = 0; i < lines_batches.size(); i++) {
+		const auto& mesh = lines_batches[i].merged_mesh;
 		if (!mesh || mesh->indices.empty()) {
 			m_VAOs.push_back(0);
 			m_VBOs.push_back(0);
 			m_IBOs.push_back(0);
+			m_colors.push_back({});
 			continue;
 		}
 
@@ -32,8 +40,6 @@ void GcodeViewerPass::reload_mesh_data(std::array<std::shared_ptr<Mesh>, Extrusi
 
 		unsigned int IBO = 0;
 		glGenBuffers(1, &IBO);
-		//glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_IBO);
-		//glBufferData(GL_ELEMENT_ARRAY_BUFFER, mesh_data->indices().size() * sizeof(unsigned int), &(mesh_data->indices()[0]), GL_STATIC_DRAW);
 		glBindBuffer(GL_ARRAY_BUFFER, IBO);
 		glBufferData(GL_ARRAY_BUFFER, mesh->indices.size() * sizeof(unsigned int), &(mesh->indices[0]), GL_DYNAMIC_DRAW);
 		m_IBOs.push_back(IBO);
@@ -50,19 +56,28 @@ void GcodeViewerPass::reload_mesh_data(std::array<std::shared_ptr<Mesh>, Extrusi
 		glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, texture_uv));
 		glEnableVertexAttribArray(2);
 		m_VAOs.push_back(VAO);
+
+		m_colors.push_back(Extrusion_Role_Colors[i]);
 	}
 }
 
 void GcodeViewerPass::draw()
 {
 	if (m_gcode_viewer->dirty()) {
-		for (int i = 0; i < m_gcode_viewer->meshes().size(); i++) {
-			const auto& mesh = m_gcode_viewer->meshes()[i];
+		for (int i = 0; i < m_gcode_viewer->index_offsets().size(); i++) {
+			const auto& mesh = m_gcode_viewer->linesBatches()[i].merged_mesh;
 			if (!mesh || mesh->indices.empty())
 				continue;
-
+			auto index_offset = m_gcode_viewer->index_offsets()[i];
+			int start_offset = index_offset.first;
+			int size = index_offset.second - index_offset.first;
+			glDeleteBuffers(1, &m_IBOs[i]);
+			glGenBuffers(1, &m_IBOs[i]);
 			glBindBuffer(GL_ARRAY_BUFFER, m_IBOs[i]);
-			glBufferData(GL_ARRAY_BUFFER, mesh->indices.size() * sizeof(unsigned int), &(mesh->indices[0]), GL_DYNAMIC_DRAW);
+			glBufferData(GL_ARRAY_BUFFER, size * sizeof(int), &(mesh->indices[0]) + start_offset, GL_DYNAMIC_DRAW);
+
+			glBindVertexArray(m_VAOs[i]);
+			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_IBOs[i]);
 		}
 		m_gcode_viewer->setDirty(false);
 	}
@@ -79,18 +94,18 @@ void GcodeViewerPass::draw()
 	shader->setMatrix("model", 1, Math::Rotate(-0.5 * Math::Constant::PI, Vec3(1, 0, 0)) * Math::Scale(Vec3(50.0f / 256.0f)) * Math::Translate(Vec3(-128.0f, -128.0f, 0.0f)));
 	shader->setMatrix("view", 1, m_render_source_data->view_matrix);
 	shader->setMatrix("projection", 1, m_render_source_data->proj_matrix);
-	for (int i = 0; i < m_gcode_viewer->meshes().size(); i++) {
-		const auto& mesh = m_gcode_viewer->meshes()[i];
-		if (!mesh || mesh->indices.empty())
-			continue;
-		if (!m_gcode_viewer->is_visible(ExtrusionRole(i)))
+	for (int i = 0; i < m_VAOs.size(); i++) {
+		//const auto& mesh = m_gcode_viewer->linesBatches()[i].merged_mesh;
+		//if (!mesh || mesh->indices.empty())
+		//	continue;
+		if (m_VAOs[i] == 0)
 			continue;
 
 		shader->setFloat("material.ambient", 0.2f);
-		shader->setFloat3("material.diffuse", mesh->material->albedo);
+		shader->setFloat3("material.diffuse", Vec3(m_colors[i]));
 		shader->setFloat3("material.specular", Vec3(0.2f));
 
-		m_rhi->drawIndexed(m_VAOs[i], mesh->indices.size());
+		m_rhi->drawIndexed(m_VAOs[i], /*mesh->indices.size()*/m_gcode_viewer->index_offsets()[i].second - m_gcode_viewer->index_offsets()[i].first);
 	}
 	shader->stop_using();
 }

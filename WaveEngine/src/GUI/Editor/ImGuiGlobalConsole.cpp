@@ -71,18 +71,18 @@ void ImGuiGlobalConsole::render() {
         //    ImGui::EndCombo();
         //}
         //ImGui::SameLine();
-        static unsigned int shadow_curr_item = 0;
-        if (ImGui::BeginCombo("Shadow Map Resolution", (std::to_string((int)std::pow(4, shadow_curr_item)) + "x").c_str())) {
-            for (int i = 0; i < 3; i++) {
-                bool selected = shadow_curr_item == i;
-                std::string label = std::to_string((int)std::pow(4, i)) + "x";
-                if (ImGui::Selectable(label.c_str(), selected)) {
-                    shadow_curr_item = i;
-                    render_params.shadow_map_sample_count = (int)std::pow(4, i);
-                }
-            }
-            ImGui::EndCombo();
-        }
+        //static unsigned int shadow_curr_item = 0;
+        //if (ImGui::BeginCombo("Shadow Map Resolution", (std::to_string((int)std::pow(4, shadow_curr_item)) + "x").c_str())) {
+        //    for (int i = 0; i < 3; i++) {
+        //        bool selected = shadow_curr_item == i;
+        //        std::string label = std::to_string((int)std::pow(4, i)) + "x";
+        //        if (ImGui::Selectable(label.c_str(), selected)) {
+        //            shadow_curr_item = i;
+        //            render_params.shadow_map_sample_count = (int)std::pow(4, i);
+        //        }
+        //    }
+        //    ImGui::EndCombo();
+        //}
         ImGui::PopItemWidth();
         ImGui::SameLine();
     }

@@ -56,6 +56,8 @@ inline const std::vector<Color4> Extrusion_Role_Colors{
 	{ 0.37f, 0.82f, 0.58f, 1.0f },   // erMixed
 };
 
+inline const Color4 Silent_Color = { 0.2f, 0.2f, 0.2f, 1.0f };
+
 enum class ViewType {
 	LINE_TYPE,
 	FILAMENT,
@@ -80,7 +82,7 @@ struct Layer {
 struct Segment {
 	int begin_move_id;
 	int end_move_id;
-	std::shared_ptr<Mesh> mesh;
+	std::shared_ptr<SimpleMesh> mesh;
 };
 
 struct Polyline {
@@ -92,15 +94,14 @@ struct Polyline {
 };
 
 struct LinesBatch {
-
 	std::vector<Polyline> polylines;
 
-	std::shared_ptr<Mesh> merged_mesh;
+	std::shared_ptr<SimpleMesh> merged_mesh;
 
 	bool empty() const { return polylines.empty() || (merged_mesh.get() == nullptr); }
 	void append_polyline(const Polyline& polyline);
-	int calculate_index_offset_of(int move_id) const;
-	int calculate_reverse_index_offset_of(int move_id) const;
+	int calculate_begin_index_offset_of(int move_id) const;
+	int calculate_end_index_offset_of(int move_id) const;
 };
 
 class GcodeViewer {
@@ -112,7 +113,9 @@ public:
 	GcodeViewer& operator=(GcodeViewer&&) = delete;
 
 	void load(const GCodeProcessorResult& result);
-	const std::array<std::shared_ptr<Mesh>, ExtrusionRole::erCount>& meshes() const;
+
+	const std::array<LinesBatch, ExtrusionRole::erCount>& linesBatches() const { return m_lines_batches; }
+	const std::array<std::pair<int, int>, ExtrusionRole::erCount>& index_offsets() const { return m_clipped_indices; }
 
 	void set_layer_scope(std::array<int, 2> layer_scope);
 	void set_move_scope(std::array<int, 2> move_scope);
@@ -129,15 +132,17 @@ public:
 	bool valid() const { return m_valid; }
 
 signals:
-	Signal<std::array<std::shared_ptr<Mesh>, ExtrusionRole::erCount>> loaded;
+	Signal<std::array<LinesBatch, ExtrusionRole::erCount>> loaded;
 
 protected:
 	void reset();
 	void parse_moves(std::vector<MoveVertex> moves);
-	std::shared_ptr<Mesh> generate_cuboid_from_move(const MoveVertex& prev, const MoveVertex& curr);
-	std::shared_ptr<Mesh> generate_cuboid_from_move(const Vec3& to_curr_dir, const Vec3& prev_pos, const Vec3& curr_pos, float move_width, float move_height);
-	std::vector<std::shared_ptr<Mesh>> generate_arc_from_move(const MoveVertex& prev, const MoveVertex& curr);
+	std::shared_ptr<SimpleMesh> generate_cuboid_from_move(const MoveVertex& prev, const MoveVertex& curr);
+	std::shared_ptr<SimpleMesh> generate_cuboid_from_move(const Vec3& to_curr_dir, const Vec3& prev_pos, const Vec3& curr_pos, float move_width, float move_height);
+	std::vector<std::shared_ptr<SimpleMesh>> generate_arc_from_move(const MoveVertex& prev, const MoveVertex& curr);
 	void refresh();
+	void clipping_indices();
+	void coloring();
 
 private:
 	std::vector<Layer> m_layers;
@@ -152,7 +157,7 @@ private:
 	ViewType m_view_type;
 
 	std::array<LinesBatch, ExtrusionRole::erCount> m_lines_batches = {};
-	std::array<std::shared_ptr<Mesh>, ExtrusionRole::erCount> m_clipped_mesh = {};
+	std::array<std::pair<int, int>, ExtrusionRole::erCount> m_clipped_indices = {};
 
 	bool m_dirty = false;
 
