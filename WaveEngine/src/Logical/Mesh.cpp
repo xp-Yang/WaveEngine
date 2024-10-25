@@ -39,6 +39,9 @@ std::shared_ptr<SimpleMesh> SimpleMesh::merge(const std::vector<std::shared_ptr<
 {
     std::vector<Vertex> vertices;
     std::vector<int> indices;
+    vertices.reserve(8 * meshes.size());
+    indices.reserve(36 * meshes.size());
+
 
     for (auto& mesh : meshes) {
         vertices.insert(vertices.end(), mesh->vertices.begin(), mesh->vertices.end());

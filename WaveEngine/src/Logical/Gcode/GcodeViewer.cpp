@@ -180,6 +180,7 @@ std::vector<std::shared_ptr<SimpleMesh>> GcodeViewer::generate_arc_from_move(con
 {
 	std::vector<std::shared_ptr<SimpleMesh>> res;
 	size_t loop_num = curr.is_arc_move_with_interpolation_points() ? curr.interpolation_points.size() : 0;
+	res.reserve(loop_num + 1);
 	for (size_t i = 0; i < loop_num + 1; i++) {
 		const Vec3f& prev_pos = (i == 0 ? prev.position : curr.interpolation_points[i - 1]);
 		const Vec3f& curr_pos = (i == loop_num ? curr.position : curr.interpolation_points[i]);
@@ -267,7 +268,13 @@ void GcodeViewer::parse_moves(std::vector<MoveVertex> moves)
 
 	for (auto& batch : m_lines_batches) {
 		std::vector<std::shared_ptr<SimpleMesh>> can_merge_meshes;
-		can_merge_meshes.reserve((m_lines_batches.size() * m_lines_batches.front().polylines.size()));
+		int capacity = 0;
+		for (auto& polyline : batch.polylines) {
+			for (auto& seg : polyline.segments) {
+				capacity++;
+			}
+		}
+		can_merge_meshes.reserve(capacity);
 		for (auto& polyline : batch.polylines) {
 			for (auto& seg : polyline.segments) {
 				if (seg.mesh)
