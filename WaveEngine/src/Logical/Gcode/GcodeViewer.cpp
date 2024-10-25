@@ -98,7 +98,6 @@ void GcodeViewer::reset()
 	m_move_scope = {};
 
 	m_lines_batches = {};
-	m_clipped_indices = {};
 
 	m_dirty = false;
 	m_valid = false;
@@ -142,8 +141,14 @@ void GcodeViewer::set_move_scope(std::array<int, 2> move_scope)
 void GcodeViewer::set_visible(ExtrusionRole role_type, bool visible)
 {
 	m_role_visible[role_type] = visible;
-	clipping_indices();
-	m_dirty = true;
+	if (!visible) {
+		m_lines_batches[role_type].colored_indices_interval = {};
+		m_lines_batches[role_type].colorless_indices_interval = {};
+		m_dirty = true;
+	}
+	else {
+		refresh();
+	}
 	//update the horizontal slider
 }
 
@@ -303,51 +308,40 @@ void GcodeViewer::parse_moves(std::vector<MoveVertex> moves)
 
 void GcodeViewer::refresh()
 {
-	clipping_indices();
-	coloring();
-
-	m_dirty = true;
-}
-
-void GcodeViewer::clipping_indices()
-{
-	m_clipped_indices = {};
 	int begin_move_id = m_layers[m_layer_scope[0]].begin_move_id;
 	int end_move_id = m_move_scope[1];
 	assert(begin_move_id <= end_move_id);
 
-	for (int role_type = ExtrusionRole::erNone + 1; role_type < ExtrusionRole::erCount; role_type++) {
-		const auto& batch = m_lines_batches[role_type];
-		if (batch.empty() || !m_role_visible[role_type])
-			continue;
+	if (end_move_id == m_layers[m_layer_scope[1]].end_move_id) {
+		for (int role_type = ExtrusionRole::erNone + 1; role_type < ExtrusionRole::erCount; role_type++) {
+			auto& batch = m_lines_batches[role_type];
+			if (batch.empty() || !m_role_visible[role_type])
+				continue;
 
-		int begin_index_offset = batch.calculate_index_offset_of(begin_move_id);
-		int end_index_offset = batch.calculate_index_offset_of(end_move_id);
-
-		m_clipped_indices[role_type] = std::make_pair(begin_index_offset, end_index_offset);
+			int begin_index_offset = batch.calculate_index_offset_of(begin_move_id);
+			int end_index_offset = batch.calculate_index_offset_of(end_move_id);
+			batch.colored_indices_interval = std::make_pair(begin_index_offset, end_index_offset);
+			batch.colorless_indices_interval = {};// std::make_pair(begin_index_offset, end_index_offset);
+		}
 	}
-}
+	else {
+		int last_layer_begin_move_id = m_layers[m_layer_scope[1]].begin_move_id;
+		int last_layer_end_move_id = end_move_id;
 
-void GcodeViewer::coloring()
-{
-	//m_visual_meshes.clear();
-	//int end_move_id = m_move_scope[1];
-	//if (end_move_id == m_layers[m_layer_scope[1]].end_move_id) {
-	//	for (int role_type = ExtrusionRole::erNone + 1; role_type < ExtrusionRole::erCount; role_type++) {
-	//		if (!m_clipped_mesh[role_type] || m_clipped_mesh[role_type]->indices.empty())
-	//			continue;
-	//		std::shared_ptr<Material> material = std::make_shared<Material>();
-	//		material->albedo = Vec3(Extrusion_Role_Colors[role_type]);
-	//		m_visual_meshes.push_back(std::make_shared<Mesh>(m_clipped_mesh[role_type], material));
-	//	}
-	//}
-	//else {
-	//	for (int role_type = ExtrusionRole::erNone + 1; role_type < ExtrusionRole::erCount; role_type++) {
-	//		if (!m_clipped_mesh[role_type] || m_clipped_mesh[role_type]->indices.empty())
-	//			continue;
-	//		std::shared_ptr<Material> material = std::make_shared<Material>();
-	//		material->albedo = Vec3(Silent_Color);
-	//		m_visual_meshes.push_back(std::make_shared<Mesh>(m_clipped_mesh[role_type], material));
-	//	}
-	//}
+		for (int role_type = ExtrusionRole::erNone + 1; role_type < ExtrusionRole::erCount; role_type++) {
+			auto& batch = m_lines_batches[role_type];
+			if (batch.empty() || !m_role_visible[role_type])
+				continue;
+
+			int begin_index_offset = batch.calculate_index_offset_of(last_layer_begin_move_id);
+			int end_index_offset = batch.calculate_index_offset_of(last_layer_end_move_id);
+			batch.colored_indices_interval = std::make_pair(begin_index_offset, end_index_offset);
+
+			begin_index_offset = batch.calculate_index_offset_of(begin_move_id);
+			end_index_offset = batch.calculate_index_offset_of(last_layer_begin_move_id);
+			batch.colorless_indices_interval = std::make_pair(begin_index_offset, end_index_offset);
+		}
+	}
+
+	m_dirty = true;
 }

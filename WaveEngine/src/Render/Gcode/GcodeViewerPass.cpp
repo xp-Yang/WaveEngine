@@ -98,16 +98,30 @@ void GcodeViewerPass::draw()
 		if (m_VAOs[i] == 0)
 			continue;
 
+		const auto& index_offset = m_gcode_viewer->colored_indices_interval(ExtrusionRole(i));
+		int start_offset = index_offset.first;
+		int size = index_offset.second - index_offset.first;
+
 		shader->setFloat("material.ambient", 0.2f);
 		shader->setFloat3("material.diffuse", Vec3(m_colors[i]));
 		shader->setFloat3("material.specular", Vec3(0.2f));
 
-		const auto& index_offset = m_gcode_viewer->index_offsets()[i];
-		int start_offset = index_offset.first;
-		int size = index_offset.second - index_offset.first;
 		glBindVertexArray(m_VAOs[i]);
 		glDrawElements(GL_TRIANGLES, size, GL_UNSIGNED_INT, (const void*)(start_offset * sizeof(int)));
 		glBindVertexArray(0);
+
+		{
+			const auto& index_offset = m_gcode_viewer->colorless_indices_interval(ExtrusionRole(i));
+			int start_offset = index_offset.first;
+			int size = index_offset.second - index_offset.first;
+			if (size > 0) {
+				shader->setFloat3("material.diffuse", Vec3(Silent_Color));
+
+				glBindVertexArray(m_VAOs[i]);
+				glDrawElements(GL_TRIANGLES, size, GL_UNSIGNED_INT, (const void*)(start_offset * sizeof(int)));
+				glBindVertexArray(0);
+			}
+		}
 	}
 	shader->stop_using();
 }

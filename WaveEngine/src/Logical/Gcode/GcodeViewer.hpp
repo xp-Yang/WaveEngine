@@ -95,10 +95,11 @@ struct Polyline {
 
 struct LinesBatch {
 	std::vector<Polyline> polylines;
-
 	std::shared_ptr<SimpleMesh> merged_mesh;
+	std::pair<int, int> colorless_indices_interval;
+	std::pair<int, int> colored_indices_interval;
 
-	bool empty() const { return polylines.empty() || (merged_mesh.get() == nullptr); }
+	bool empty() const { return polylines.empty(); }
 	void append_polyline(const Polyline& polyline);
 	int calculate_index_offset_of(int move_id) const;
 };
@@ -114,7 +115,8 @@ public:
 	void load(const GCodeProcessorResult& result);
 
 	const std::array<LinesBatch, ExtrusionRole::erCount>& linesBatches() const { return m_lines_batches; }
-	const std::array<std::pair<int, int>, ExtrusionRole::erCount>& index_offsets() const { return m_clipped_indices; }
+	std::pair<int, int> colorless_indices_interval(ExtrusionRole role_type) const { return m_lines_batches[role_type].colorless_indices_interval; }
+	std::pair<int, int> colored_indices_interval(ExtrusionRole role_type) const { return m_lines_batches[role_type].colored_indices_interval; }
 
 	void set_layer_scope(std::array<int, 2> layer_scope);
 	void set_move_scope(std::array<int, 2> move_scope);
@@ -140,8 +142,6 @@ protected:
 	std::shared_ptr<SimpleMesh> generate_cuboid_from_move(const Vec3& to_curr_dir, const Vec3& prev_pos, const Vec3& curr_pos, float move_width, float move_height);
 	std::vector<std::shared_ptr<SimpleMesh>> generate_arc_from_move(const MoveVertex& prev, const MoveVertex& curr);
 	void refresh();
-	void clipping_indices();
-	void coloring();
 
 private:
 	std::vector<Layer> m_layers;
@@ -156,7 +156,6 @@ private:
 	ViewType m_view_type;
 
 	std::array<LinesBatch, ExtrusionRole::erCount> m_lines_batches = {};
-	std::array<std::pair<int, int>, ExtrusionRole::erCount> m_clipped_indices = {};
 
 	bool m_dirty = false;
 
