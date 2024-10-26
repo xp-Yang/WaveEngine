@@ -90,7 +90,7 @@ struct Polyline {
 	int end_move_id = -INT_MAX;
 	std::vector<Segment> segments;
 
-	void append_segment(const Segment& segment);
+	void append_segment(Segment& segment);
 };
 
 struct LinesBatch {

@@ -1,6 +1,6 @@
 #include "GcodeViewer.hpp"
 
-void Polyline::append_segment(const Segment& segment)
+void Polyline::append_segment(Segment& segment)
 {
 	if (segment.begin_move_id < begin_move_id)
 		begin_move_id = segment.begin_move_id;
@@ -9,35 +9,26 @@ void Polyline::append_segment(const Segment& segment)
 		end_move_id = segment.end_move_id;
 
 	if (!segments.empty()) {
-		Segment corner_segment;
 		const auto& last_segment = segments.back();
-		corner_segment.begin_move_id = last_segment.end_move_id;
-		corner_segment.end_move_id = segment.begin_move_id;
-		assert(corner_segment.begin_move_id == corner_segment.end_move_id);
+		assert(last_segment.end_move_id == segment.begin_move_id);
 
-		//std::array<Vec3, 8> vertices_positions;
-		//vertices_positions[0] = last_segment.mesh->vertices[7].position;
-		//vertices_positions[1] = last_segment.mesh->vertices[6].position;
-		//vertices_positions[2] = last_segment.mesh->vertices[5].position;
-		//vertices_positions[3] = last_segment.mesh->vertices[4].position;
-		//vertices_positions[4] = segment.mesh->vertices[3].position;
-		//vertices_positions[5] = segment.mesh->vertices[2].position;
-		//vertices_positions[6] = segment.mesh->vertices[1].position;
-		//vertices_positions[7] = segment.mesh->vertices[0].position;
-		//corner_segment.mesh = Mesh::create_vertex_normal_cuboid_mesh(vertices_positions);
-
-		std::vector<int> indices = {
-			-1, -2, -3, -1, -3, -4,//前
-			3, 2, 1, 3, 1, 0,//后
-			0, 1, -2, 0, -2, -1,//左
-			-4, -3, 2, -4, 2, 3,//右
-			-2, 1, 2, -2, 2, -3,//下
-			0, -1, -4, 0, -4, 3,//上
-		};
-		corner_segment.mesh = std::make_shared<SimpleMesh>(std::vector<SimpleVertex>(), indices);
-		segments.push_back(corner_segment);
+		Vec3 last_segment_dir = Math::Cross((last_segment.mesh->vertices[5].position - last_segment.mesh->vertices[4].position),
+			(last_segment.mesh->vertices[6].position - last_segment.mesh->vertices[5].position));
+		bool is_turn_left = Math::Dot((segment.mesh->vertices[1].position - segment.mesh->vertices[0].position), last_segment_dir) >= 0;
+		std::vector<int> indices;
+		indices.reserve(6);
+		if (is_turn_left) {
+			indices = { -3, 2, -4, -2, 2, -3 };
+		}
+		else {
+			indices = { -1, -4, 0, -2, -1, 0 };
+		}
+		// debug: turn off the corner faces filling
+		// indices = { 0, 0, 0, 0, 0, 0 };
+		segment.mesh->indices.reserve(segment.mesh->indices.size() + indices.size());
+		segment.mesh->indices.insert(segment.mesh->indices.begin(), indices.begin(), indices.end());
 	}
-
+	
 	segments.push_back(segment);
 }
 
@@ -48,23 +39,26 @@ void LinesBatch::append_polyline(const Polyline& polyline)
 
 int LinesBatch::calculate_index_offset_of(int move_id) const
 {
-	// debug
-	//int single_segment_indices_count = 36;
-	//int total_indices_count = 0;
+	// debug statistics
+	//int total_segment_count = 0;
 	//for (int i = 0; i < polylines.size(); i++) {
 	//	const auto& polyline = polylines[i];
 	//	for (int j = 0; j < polyline.segments.size(); j++) {
-	//		total_indices_count += single_segment_indices_count;
+	//		total_segment_count++;
 	//	}
 	//}
 
-	int single_segment_indices_count = 36;
+	// if with corner, single_segment_indices_count == 42. if without corner, single_segment_indices_count == 36,
+	int single_segment_indices_count = 42;
+	int corner_indices_count = 6;
 
 	int offset = 0;
+	int repeated_counting_corners = 0;
 	for (int i = 0; i < polylines.size(); i++) {
 		const auto& polyline = polylines[i];
 		if (polyline.end_move_id <= move_id) {
 			offset += polyline.segments.size();
+			repeated_counting_corners++;
 			continue;
 		}
 		if (polyline.begin_move_id < move_id && move_id <= polyline.end_move_id) {
@@ -72,12 +66,13 @@ int LinesBatch::calculate_index_offset_of(int move_id) const
 				const auto& segment = polyline.segments[j];
 				if (move_id == segment.end_move_id) {
 					offset += (j + 1);
-					return offset * single_segment_indices_count;
+					repeated_counting_corners++;
+					return offset * (single_segment_indices_count) - repeated_counting_corners * corner_indices_count;
 				}
 			}
 		}
 	}
-	return offset * single_segment_indices_count;
+	return offset * (single_segment_indices_count) - repeated_counting_corners * corner_indices_count;
 }
 
 GcodeViewer::GcodeViewer()
@@ -162,27 +157,21 @@ std::shared_ptr<SimpleMesh> GcodeViewer::generate_cuboid_from_move(const Vec3& t
 {
 	Vec3 up_dir = Vec3(0, 0, 1);
 	Vec3 down_dir = -up_dir;
-	Vec3 first_left_dir = Math::Normalize(Math::Cross(Vec3(0, 0, 1), to_curr_dir));
-	Vec3 second_left_dir = Math::Normalize(Math::Cross(Vec3(0, 0, 1), to_curr_dir));
-	Vec3 first_right_dir = -first_left_dir;
-	Vec3 second_right_dir = -second_left_dir;
-
-	Vec3 orthogonal_left_dir = Math::Normalize(Math::Cross(up_dir, to_curr_dir));
+	Vec3 left_dir = Math::Normalize(Math::Cross(up_dir, to_curr_dir));
+	Vec3 right_dir = -left_dir;
 
 	float half_width = move_width / 2.0f;
 	float half_height = move_height / 2.0f;
-	float first_width = half_width / (Math::Dot(first_left_dir, orthogonal_left_dir) / (Math::Length(first_left_dir) * Math::Length(orthogonal_left_dir)));
-	float second_width = half_width / (Math::Dot(second_left_dir, orthogonal_left_dir) / (Math::Length(second_left_dir) * Math::Length(orthogonal_left_dir)));
 
 	std::array<Vec3, 8> vertices_positions;
-	vertices_positions[0] = prev_pos + first_width * first_left_dir;
+	vertices_positions[0] = prev_pos + half_width * left_dir;
 	vertices_positions[1] = prev_pos + half_height * down_dir;
-	vertices_positions[2] = prev_pos + first_width * first_right_dir;
+	vertices_positions[2] = prev_pos + half_width * right_dir;
 	vertices_positions[3] = prev_pos + half_height * up_dir;
 	vertices_positions[4] = curr_pos + half_height * up_dir;
-	vertices_positions[5] = curr_pos + second_width * second_right_dir;
+	vertices_positions[5] = curr_pos + half_width * right_dir;
 	vertices_positions[6] = curr_pos + half_height * down_dir;
-	vertices_positions[7] = curr_pos + second_width * second_left_dir;
+	vertices_positions[7] = curr_pos + half_width * left_dir;
 
 	return SimpleMesh::create_vertex_normal_cuboid_mesh(vertices_positions);
 }
