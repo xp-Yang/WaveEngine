@@ -42,7 +42,8 @@ public:
 	Vec3 rayCastPlaneZero(double mouse_x, double mouse_y);
 
 	inline static const float CameraMovementSpeed = 20.0f;
-	inline static const float Sensitivity = 0.01f;
+	inline static const float RatationSensitivity = 0.01f;
+	inline static const float PanSensitivity = 0.135f;
 	inline static const float ZoomUnit = 0.1f;
 
 protected:

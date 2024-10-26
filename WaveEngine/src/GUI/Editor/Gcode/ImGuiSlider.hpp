@@ -24,26 +24,23 @@ public:
 
     int    GetMinValue() const { return m_value_range[0]; }
     int    GetMaxValue() const { return m_value_range[1]; }
-    double GetMinLayerValue() { return m_layer_values.empty() ? 0. : m_layer_values[m_value_range[0]]; }
-    double GetMaxLayerValue() { return m_layer_values.empty() ? 0. : m_layer_values[m_value_range[1]]; }
     int    GetLowerValue() const { return m_value_scope[0]; }
     int    GetHigherValue() const { return m_value_scope[1]; }
-    double GetLowerLayerValue() { return m_layer_values.empty() ? 0. : m_layer_values[m_value_scope[0]]; }
-    double GetHigherLayerValue() { return m_layer_values.empty() ? 0. : m_layer_values[m_value_scope[1]]; }
+    //double GetMinLayerValue() { return m_layer_values.empty() ? 0. : m_layer_values[m_value_range[0]]; }
+    //double GetMaxLayerValue() { return m_layer_values.empty() ? 0. : m_layer_values[m_value_range[1]]; }
+    //double GetLowerLayerValue() { return m_layer_values.empty() ? 0. : m_layer_values[m_value_scope[0]]; }
+    //double GetHigherLayerValue() { return m_layer_values.empty() ? 0. : m_layer_values[m_value_scope[1]]; }
 
     void initValueSpan(std::array<int, 2> span);
     void SetLowerValue(const int lower_val);
     void SetHigherValue(const int higher_val);
-    void SetSliderLayerValues(const std::vector<double>& values) { m_layer_values = values; }
+    //void SetSliderLayerValues(const std::vector<double>& values) { m_layer_values = values; }
 
     Orientation orientation() const { return m_orientation; }
     bool is_one_layer() const { return m_is_one_layer; }
-    bool is_lower_at_min() const { return m_value_scope[0] == m_value_range[0]; }
-    bool is_higher_at_max() const { return m_value_scope[1] == m_value_range[1]; }
-    bool is_full_span() const { return this->is_lower_at_min() && this->is_higher_at_max(); }
-
-    void on_mouse_wheel();
     bool switch_one_layer_mode() { m_is_one_layer = !m_is_one_layer; }
+
+    void on_mouse_wheel(const ImVec2& slider_pos, const ImVec2& slider_size);
 
     bool render();
 

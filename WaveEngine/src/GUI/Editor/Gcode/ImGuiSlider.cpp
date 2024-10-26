@@ -126,35 +126,24 @@ void ImGuiSlider::SetHigherValue(const int higher_val)
     }
 }
 
-void ImGuiSlider::on_mouse_wheel()
+void ImGuiSlider::on_mouse_wheel(const ImVec2& slider_pos, const ImVec2& slider_size)
 {
-    auto moves_slider_window = ImGui::FindWindowByName("moves_slider");
-    auto layers_slider_window = ImGui::FindWindowByName("laysers_slider");
-    if (!moves_slider_window || !layers_slider_window) {
-        assert(false); // "Couldn't find slider window";
-        return;
-    }
-
-    float wheel = 0.0f;
-    //wheel = evt.GetWheelRotation() > 0 ? 1.0f : -1.0f;
+    ImGuiIO& io = ImGui::GetIO();
+    float wheel = io.MouseWheel;
     if (wheel == 0.0f)
         return;
 
     ImVec2 mouse_pos = ImGui::GetMousePos();
-    if (m_orientation == Orientation::Horizontal) {
-        if (mouse_pos.x > moves_slider_window->Pos.x &&
-            mouse_pos.x < moves_slider_window->Pos.x + moves_slider_window->Size.x &&
-            mouse_pos.y > moves_slider_window->Pos.y &&
-            mouse_pos.y < moves_slider_window->Pos.y + moves_slider_window->Size.y) {
+    if (mouse_pos.x > slider_pos.x &&
+        mouse_pos.x < slider_pos.x + slider_size.x &&
+        mouse_pos.y > slider_pos.y &&
+        mouse_pos.y < slider_pos.y + slider_size.y) {
+
+        if (m_orientation == Orientation::Horizontal) {
             const int new_pos = GetHigherValue() + wheel;
             SetHigherValue(new_pos);
         }
-    }
-    else {
-        if (mouse_pos.x > layers_slider_window->Pos.x &&
-            mouse_pos.x < layers_slider_window->Pos.x + layers_slider_window->Size.x &&
-            mouse_pos.y > layers_slider_window->Pos.y &&
-            mouse_pos.y < layers_slider_window->Pos.y + layers_slider_window->Size.y) {
+        else {
             if (is_one_layer()) {
                 const int new_pos = GetHigherValue() + wheel;
                 SetHigherValue(new_pos);
@@ -191,7 +180,8 @@ bool ImGuiSlider::render()
 
     if (m_orientation == Orientation::Horizontal) {
         ImVec2 size = ImVec2(0.6f * canvas_width, HORIZONTAL_SLIDER_WINDOW_HEIGHT);
-        ImGui::SetNextWindowPos(canvas_pos + ImVec2(0.2f * canvas_width, canvas_height - HORIZONTAL_SLIDER_WINDOW_HEIGHT));
+        ImVec2 pos = canvas_pos + ImVec2(0.2f * canvas_width, canvas_height - HORIZONTAL_SLIDER_WINDOW_HEIGHT);
+        ImGui::SetNextWindowPos(pos);
         ImGui::BeginChild("moves_slider", size, 0, windows_flag);
         int value = GetHigherValue();
         if (horizontal_slider("moves_slider", &value, GetMinValue(), GetMaxValue(), size)) {
@@ -199,10 +189,13 @@ bool ImGuiSlider::render()
             SetHigherValue(value);
         }
         ImGui::EndChild();
+
+        on_mouse_wheel(pos, size);
     }
     else {
         ImVec2 size = ImVec2(VERTICAL_SLIDER_WINDOW_WIDTH, 0.7f * canvas_height);
-        ImGui::SetNextWindowPos(canvas_pos + ImVec2(canvas_width - VERTICAL_SLIDER_WINDOW_WIDTH, 0.15f * canvas_height));
+        ImVec2 pos = canvas_pos + ImVec2(canvas_width - VERTICAL_SLIDER_WINDOW_WIDTH, 0.15f * canvas_height);
+        ImGui::SetNextWindowPos(pos);
         ImGui::BeginChild("laysers_slider", size, 0, windows_flag);
 
         int higher_value = GetHigherValue();
@@ -220,6 +213,8 @@ bool ImGuiSlider::render()
             result = true;
         }
         ImGui::EndChild();
+
+        on_mouse_wheel(pos, size);
     }
 
     ImGui::PopStyleVar(3);

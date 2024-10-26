@@ -65,21 +65,19 @@ void CameraManipulator::onKeyUpdate(int key, float frame_time)
 
 void CameraManipulator::onMouseUpdate(double delta_x, double delta_y, MouseButton mouse_button)
 {
-    // Viewing Style 转方向，并且相机位置也转动，聚焦于(0, 0, 0)点
-
     if (main_camera.mode == Mode::Orbit) {
         if (mouse_button == MouseButton::Left) {
-            // TODO 框选
+            // TODO
         }
         if (mouse_button == MouseButton::Right) {
-            auto rotate_Y = Math::Rotate(-(float)(0.3f * delta_x * Sensitivity), global_up);
+            auto rotate_Y = Math::Rotate(-(float)(0.3f * delta_x * RatationSensitivity), global_up);
             main_camera.pos = rotate_Y * Vec4(main_camera.pos, 1.0f);
             main_camera.direction = rotate_Y * Vec4(main_camera.direction, 1.0f);
             main_camera.direction = Math::Normalize(main_camera.direction);
             main_camera.upDirection = Vec3(rotate_Y * Vec4(main_camera.upDirection, 1.0f));
 
             auto camera_right = main_camera.getRightDirection();
-            auto rotate_x = Math::Rotate((float)(0.3f * delta_y * Sensitivity), camera_right);
+            auto rotate_x = Math::Rotate((float)(0.3f * delta_y * RatationSensitivity), camera_right);
             main_camera.pos = rotate_x * Vec4(main_camera.pos, 1.0f);
             main_camera.direction = rotate_x * Vec4(main_camera.direction, 1.0f);
             main_camera.upDirection = Vec3(rotate_x * Vec4(main_camera.upDirection, 1.0f));
@@ -87,23 +85,23 @@ void CameraManipulator::onMouseUpdate(double delta_x, double delta_y, MouseButto
             main_camera.view = Math::LookAt(main_camera.pos, main_camera.pos + main_camera.direction, main_camera.upDirection);
         }
         else if (mouse_button == MouseButton::Middle) {
-            main_camera.pos += -(float)(delta_x * Sensitivity) * main_camera.getRightDirection();
-            main_camera.pos += -(float)(delta_y * Sensitivity) * main_camera.upDirection;
+            float coef = tan(main_camera.fov / 2.0f) / tan(main_camera.originFov / 2.0f);
+            main_camera.pos += -(float)(delta_x * PanSensitivity) * coef * main_camera.getRightDirection();
+            main_camera.pos += -(float)(delta_y * PanSensitivity) * coef * main_camera.upDirection;
 
             main_camera.view = Math::LookAt(main_camera.pos, main_camera.pos + main_camera.direction, main_camera.upDirection);
         }
     }
 
     if (main_camera.mode == Mode::FPS) {
-        // FPS style 自己不动，只转方向
         if (mouse_button == MouseButton::Left) {
             // get pitch
-            main_camera.fps_params.pitch += delta_y * Sensitivity;
+            main_camera.fps_params.pitch += delta_y * RatationSensitivity;
             // get yaw
-            main_camera.fps_params.yaw += delta_x * Sensitivity;
+            main_camera.fps_params.yaw += delta_x * RatationSensitivity;
 
             // make sure that when pitch is out of bounds, screen doesn't get flipped
-            // 使用欧拉角导致的问题：在极点发生死锁，yaw和roll重合，失去了一个自由度
+            // Euler angle problem:
             if (main_camera.fps_params.pitch > 89.0f)
                 main_camera.fps_params.pitch = 89.0f;
             if (main_camera.fps_params.pitch < -89.0f)
@@ -125,7 +123,7 @@ void CameraManipulator::onMouseUpdate(double delta_x, double delta_y, MouseButto
 
 void CameraManipulator::orbitRotate(Vec3 start, Vec3 end)
 {
-    // 计算旋转角度角度
+    // 计算旋转角度
     float angle = acos(fmin(1.0f, Math::Dot(start, end)));
     // 计算旋转轴
     Vec3 rotate_axis = Math::Normalize(Math::Cross(start, end));

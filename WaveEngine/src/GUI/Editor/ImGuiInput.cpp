@@ -72,6 +72,9 @@ bool GUIInput::refreshState()
 
 bool GUIInput::onUpdate()
 {
+	m_camera_manipulator->syncContext(ref_editor->getMainViewport());
+	m_camera_manipulator->onUpdate();
+
 	if (!refreshState()) {
 		return false;
 	}
@@ -82,9 +85,6 @@ bool GUIInput::onUpdate()
 			ref_editor->popUpMenu();
 		}
 	}
-
-	m_camera_manipulator->syncContext(ref_editor->getMainViewport());
-	m_camera_manipulator->onUpdate();
 
 	if (m_mouse_state == MouseState::Dragging) {
 		m_camera_manipulator->onMouseUpdate(m_delta_mouse_x, m_delta_mouse_y, m_mouse_button);
