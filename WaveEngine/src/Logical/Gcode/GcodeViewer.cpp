@@ -1,35 +1,29 @@
 #include "GcodeViewer.hpp"
 
-void Polyline::append_segment(Segment& segment)
+void Polyline::append_segment(const Segment& segment)
 {
-	if (segment.begin_move_id < begin_move_id)
-		begin_move_id = segment.begin_move_id;
+	if (segment.end_move_id - 1 < begin_move_id)
+		begin_move_id = segment.end_move_id - 1;
 
 	if (segment.end_move_id > end_move_id)
 		end_move_id = segment.end_move_id;
 
 	if (!segments.empty()) {
-		const auto& last_segment = segments.back();
-		assert(last_segment.end_move_id == segment.begin_move_id);
-
-		Vec3 last_segment_dir = Math::Cross((last_segment.mesh->vertices[5].position - last_segment.mesh->vertices[4].position),
-			(last_segment.mesh->vertices[6].position - last_segment.mesh->vertices[5].position));
+		auto& last_segment = segments.back();
+		assert(last_segment.end_move_id == segment.end_move_id - 1);
+		Vec3 last_segment_dir = last_segment.mesh->vertices[4].position - last_segment.mesh->vertices[0].position;
 		bool is_turn_left = Math::Dot((segment.mesh->vertices[1].position - segment.mesh->vertices[0].position), last_segment_dir) >= 0;
-		std::vector<int> indices;
-		indices.reserve(6);
-		if (is_turn_left) {
-			indices = { -3, 2, -4, -2, 2, -3 };
-		}
-		else {
-			indices = { -1, -4, 0, -2, -1, 0 };
-		}
+		std::vector<int> indices = is_turn_left ? std::vector<int>{ 6, 10, 7, 5, 10, 6 } : std::vector<int>{ 4, 7, 8, 5, 4, 8 };
 		// debug: turn off the corner faces filling
 		// indices = { 0, 0, 0, 0, 0, 0 };
-		segment.mesh->indices.reserve(segment.mesh->indices.size() + indices.size());
-		segment.mesh->indices.insert(segment.mesh->indices.begin(), indices.begin(), indices.end());
+		last_segment.mesh->indices.reserve(last_segment.mesh->indices.size() + indices.size());
+		last_segment.mesh->indices.insert(last_segment.mesh->indices.end(), indices.begin(), indices.end());
+		last_segment.index_offset = last_segment.mesh->indices.size();
+		index_offset += 6;
 	}
-	
+
 	segments.push_back(segment);
+	index_offset += segment.index_offset;
 }
 
 void LinesBatch::append_polyline(const Polyline& polyline)
@@ -37,7 +31,7 @@ void LinesBatch::append_polyline(const Polyline& polyline)
 	polylines.push_back(polyline);
 }
 
-int LinesBatch::calculate_index_offset_of(int move_id) const
+int LinesBatch::calculate_index_offset_of(int move_id, bool begin) const
 {
 	// debug statistics
 	//int total_segment_count = 0;
@@ -48,31 +42,24 @@ int LinesBatch::calculate_index_offset_of(int move_id) const
 	//	}
 	//}
 
-	// if with corner, single_segment_indices_count == 42. if without corner, single_segment_indices_count == 36,
-	int single_segment_indices_count = 42;
-	int corner_indices_count = 6;
-
-	int offset = 0;
-	int repeated_counting_corners = 0;
+	int index_offset = 0;
 	for (int i = 0; i < polylines.size(); i++) {
 		const auto& polyline = polylines[i];
 		if (polyline.end_move_id <= move_id) {
-			offset += polyline.segments.size();
-			repeated_counting_corners++;
+			index_offset += polyline.index_offset;
 			continue;
 		}
 		if (polyline.begin_move_id < move_id && move_id <= polyline.end_move_id) {
 			for (int j = 0; j < polyline.segments.size(); j++) {
 				const auto& segment = polyline.segments[j];
-				if (move_id == segment.end_move_id) {
-					offset += (j + 1);
-					repeated_counting_corners++;
-					return offset * (single_segment_indices_count) - repeated_counting_corners * corner_indices_count;
-				}
+				if (segment.end_move_id <= move_id)
+					index_offset += segment.index_offset;
+				else
+					return (begin || segment.end_move_id == polyline.end_move_id) ? index_offset : index_offset - 6;
 			}
 		}
 	}
-	return offset * (single_segment_indices_count) - repeated_counting_corners * corner_indices_count;
+	return index_offset;
 }
 
 GcodeViewer::GcodeViewer()
@@ -149,50 +136,67 @@ void GcodeViewer::set_visible(ExtrusionRole role_type, bool visible)
 
 std::shared_ptr<SimpleMesh> GcodeViewer::generate_cuboid_from_move(const MoveVertex& prev, const MoveVertex& curr)
 {
-	Vec3 to_curr_dir = Math::Normalize(curr.position - prev.position);
-	return generate_cuboid_from_move(to_curr_dir, prev.position, curr.position, curr.width, curr.height);
-}
-
-std::shared_ptr<SimpleMesh> GcodeViewer::generate_cuboid_from_move(const Vec3& to_curr_dir, const Vec3& prev_pos, const Vec3& curr_pos, float move_width, float move_height)
-{
 	Vec3 up_dir = Vec3(0, 0, 1);
-	Vec3 down_dir = -up_dir;
+	Vec3 to_curr_dir = Math::Normalize(curr.position - prev.position);
 	Vec3 left_dir = Math::Normalize(Math::Cross(up_dir, to_curr_dir));
-	Vec3 right_dir = -left_dir;
 
-	float half_width = move_width / 2.0f;
-	float half_height = move_height / 2.0f;
+	std::array<Vec3, 2> face_center_pos;
+	Vec3 face_left_vec;
+	Vec3 face_up_vec;
+	float half_width = curr.width / 2.0f;
+	float half_height = curr.height / 2.0f;
+	face_center_pos[0] = prev.position;
+	face_center_pos[1] = curr.position;
+	face_left_vec = half_width * left_dir;
+	face_up_vec = half_height * up_dir;
 
-	std::array<Vec3, 8> vertices_positions;
-	vertices_positions[0] = prev_pos + half_width * left_dir;
-	vertices_positions[1] = prev_pos + half_height * down_dir;
-	vertices_positions[2] = prev_pos + half_width * right_dir;
-	vertices_positions[3] = prev_pos + half_height * up_dir;
-	vertices_positions[4] = curr_pos + half_height * up_dir;
-	vertices_positions[5] = curr_pos + half_width * right_dir;
-	vertices_positions[6] = curr_pos + half_height * down_dir;
-	vertices_positions[7] = curr_pos + half_width * left_dir;
-
-	return SimpleMesh::create_vertex_normal_cuboid_mesh(vertices_positions);
+	return SimpleMesh::create_vertex_normal_cuboid_mesh(face_center_pos, face_left_vec, face_up_vec);
 }
 
-std::vector<std::shared_ptr<SimpleMesh>> GcodeViewer::generate_arc_from_move(const MoveVertex& prev, const MoveVertex& curr)
+std::shared_ptr<SimpleMesh> GcodeViewer::generate_arc_from_move(const MoveVertex& prev, const MoveVertex& curr)
 {
-	std::vector<std::shared_ptr<SimpleMesh>> res;
 	size_t loop_num = curr.is_arc_move_with_interpolation_points() ? curr.interpolation_points.size() : 0;
-	res.reserve(loop_num + 1);
-	for (size_t i = 0; i < loop_num + 1; i++) {
-		const Vec3f& prev_pos = (i == 0 ? prev.position : curr.interpolation_points[i - 1]);
-		const Vec3f& curr_pos = (i == loop_num ? curr.position : curr.interpolation_points[i]);
-		Vec3 to_curr_dir = Math::Normalize(curr_pos - prev_pos);
-		res.push_back(generate_cuboid_from_move(to_curr_dir, prev_pos, curr_pos, curr.width, curr.height));
+	assert(loop_num > 0);
+	Vec3 up_dir = Vec3(0, 0, 1);
+	float half_width = curr.width / 2.0f;
+	float half_height = curr.height / 2.0f;
+
+	std::vector<Vec3> face_center_pos;
+	std::vector<Vec3> face_left_vec;
+	std::vector<Vec3> face_up_vec;
+	face_center_pos.reserve(loop_num + 2);
+	face_left_vec.reserve(loop_num + 2);
+	face_up_vec.reserve(loop_num + 2);
+
+	face_center_pos.push_back(prev.position);
+	face_left_vec.push_back(half_width * Math::Normalize(Math::Cross(up_dir, Math::Normalize(curr.interpolation_points[0] - prev.position))));
+	face_up_vec.push_back(half_height * up_dir);
+	for (size_t i = 0; i < loop_num; i++) {
+		const Vec3f& sub_prev_pos = (i == 0 ? prev.position : curr.interpolation_points[i - 1]);
+		const Vec3f& sub_curr_pos = curr.interpolation_points[i];
+		Vec3 to_curr_dir = Math::Normalize(sub_curr_pos - sub_prev_pos);
+		Vec3 left_dir = Math::Normalize(Math::Cross(up_dir, to_curr_dir));
+		face_center_pos.push_back(sub_curr_pos);
+		// debug:
+		//Vec3 to_next_dir = Vec3(0);
+		//if (i == loop_num - 1)
+		//	to_next_dir = Math::Normalize(curr.position - curr.interpolation_points[loop_num - 1]);
+		//else
+		//	to_next_dir = Math::Normalize(curr.interpolation_points[i + 1] - curr.interpolation_points[i]);
+		//Vec3 corrected_left_dir = Math::Cross(to_curr_dir, to_next_dir).z >= 0 ? Math::Normalize(-to_curr_dir + to_next_dir) : -Math::Normalize(-to_curr_dir + to_next_dir);
+		//float corrected_width = half_width / (Math::Dot(corrected_left_dir, left_dir) / (Math::Length(corrected_left_dir) * Math::Length(left_dir)));
+		//face_left_vec.push_back(corrected_width * corrected_left_dir);
+		face_left_vec.push_back(half_width * left_dir);
+		face_up_vec.push_back(half_height * up_dir);
 	}
-	return res;
+	face_center_pos.push_back(curr.position);
+	face_left_vec.push_back(half_width * Math::Normalize(Math::Cross(up_dir, Math::Normalize(curr.position - curr.interpolation_points[loop_num - 1]))));
+	face_up_vec.push_back(half_height * up_dir);
+	return SimpleMesh::create_vertex_normal_arc_mesh(face_center_pos, face_left_vec, face_up_vec);
 }
 
 void GcodeViewer::parse_moves(std::vector<MoveVertex> moves)
 {
-	int point_count = 0;
 	ExtrusionRole prev_role = ExtrusionRole::erNone;
 	for (size_t move_id = 1; move_id < moves.size(); move_id++) {
 		const MoveVertex& prev = moves[move_id - 1];
@@ -205,7 +209,6 @@ void GcodeViewer::parse_moves(std::vector<MoveVertex> moves)
 		if (prev.position == curr.position) {
 			// seam or spit or ...
 			// skip segment generation for these moves
-			point_count++;
 			continue;
 		}
 
@@ -219,44 +222,19 @@ void GcodeViewer::parse_moves(std::vector<MoveVertex> moves)
 				m_layers.back().end_move_id = move_id;
 
 			// parse segment
-			if (curr.is_arc_move_with_interpolation_points()) {
-				std::vector<std::shared_ptr<SimpleMesh>> seg_meshes = generate_arc_from_move(prev, curr);
-				for (int i = 0; i < seg_meshes.size(); i++) {
-					Segment segment;
-					segment.begin_move_id = move_id - 1;
-					segment.end_move_id = move_id - 1;
-					if (i == seg_meshes.size() - 1)
-						segment.end_move_id = move_id;
-					segment.mesh = seg_meshes[i];
-
-					ExtrusionRole curr_role = curr.extrusion_role;
-					if (prev_role != curr_role) {
-						prev_role = curr_role;
-						Polyline polyline;
-						polyline.append_segment(segment);
-						m_lines_batches[curr_role].append_polyline(polyline);
-					}
-					else {
-						m_lines_batches[curr_role].polylines.back().append_segment(segment);
-					}
-				}
+			Segment segment;
+			segment.end_move_id = move_id;
+			segment.mesh = curr.is_arc_move_with_interpolation_points() ? generate_arc_from_move(prev, curr) : generate_cuboid_from_move(prev, curr);
+			segment.index_offset = segment.mesh->indices.size();
+			ExtrusionRole curr_role = curr.extrusion_role;
+			if (prev_role != curr_role) {
+				prev_role = curr_role;
+				Polyline polyline;
+				polyline.append_segment(segment);
+				m_lines_batches[curr_role].append_polyline(polyline);
 			}
 			else {
-				Segment segment;
-				segment.begin_move_id = move_id - 1;
-				segment.end_move_id = move_id;
-				segment.mesh = generate_cuboid_from_move(prev, curr);
-
-				ExtrusionRole curr_role = curr.extrusion_role;
-				if (prev_role != curr_role) {
-					prev_role = curr_role;
-					Polyline polyline;
-					polyline.append_segment(segment);
-					m_lines_batches[curr_role].append_polyline(polyline);
-				}
-				else {
-					m_lines_batches[curr_role].polylines.back().append_segment(segment);
-				}
+				m_lines_batches[curr_role].polylines.back().append_segment(segment);
 			}
 		}
 	}
@@ -307,8 +285,8 @@ void GcodeViewer::refresh()
 			if (batch.empty() || !m_role_visible[role_type])
 				continue;
 
-			int begin_index_offset = batch.calculate_index_offset_of(begin_move_id);
-			int end_index_offset = batch.calculate_index_offset_of(end_move_id);
+			int begin_index_offset = batch.calculate_index_offset_of(begin_move_id, true);
+			int end_index_offset = batch.calculate_index_offset_of(end_move_id, false);
 			batch.colored_indices_interval = std::make_pair(begin_index_offset, end_index_offset);
 			batch.colorless_indices_interval = {};
 		}
@@ -322,12 +300,12 @@ void GcodeViewer::refresh()
 			if (batch.empty() || !m_role_visible[role_type])
 				continue;
 
-			int begin_index_offset = batch.calculate_index_offset_of(last_layer_begin_move_id);
-			int end_index_offset = batch.calculate_index_offset_of(last_layer_end_move_id);
+			int begin_index_offset = batch.calculate_index_offset_of(last_layer_begin_move_id, true);
+			int end_index_offset = batch.calculate_index_offset_of(last_layer_end_move_id, false);
 			batch.colored_indices_interval = std::make_pair(begin_index_offset, end_index_offset);
 
-			begin_index_offset = batch.calculate_index_offset_of(begin_move_id);
-			end_index_offset = batch.calculate_index_offset_of(last_layer_begin_move_id);
+			begin_index_offset = batch.calculate_index_offset_of(begin_move_id, true);
+			end_index_offset = batch.calculate_index_offset_of(last_layer_begin_move_id, false);
 			batch.colorless_indices_interval = std::make_pair(begin_index_offset, end_index_offset);
 		}
 	}

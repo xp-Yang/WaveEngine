@@ -79,20 +79,29 @@ struct Layer {
 	int end_move_id;
 };
 
+// A Segment corresponds to one move
+// For non-arc, a segment corresponds to a cuboid + corner face filling
+// For an arc, a segment corresponds to an entire arc
 struct Segment {
-	int begin_move_id;
+	// begin_move_id == end_move_id - 1
+	//int begin_move_id;
 	int end_move_id;
 	std::shared_ptr<SimpleMesh> mesh;
+	// persist index_offset because the mesh will be released after send its data to gpu.
+	int index_offset = 0;
 };
 
+// Polyline is a set of continuous Segment
 struct Polyline {
 	int begin_move_id = INT_MAX;
 	int end_move_id = -INT_MAX;
 	std::vector<Segment> segments;
+	int index_offset = 0;
 
-	void append_segment(Segment& segment);
+	void append_segment(const Segment& segment);
 };
 
+// LinesBatch is a set of Polyline that can be rendered in one batch, i.e. a set of Polyline with the same color.
 struct LinesBatch {
 	std::vector<Polyline> polylines;
 	std::shared_ptr<SimpleMesh> merged_mesh;
@@ -101,7 +110,7 @@ struct LinesBatch {
 
 	bool empty() const { return polylines.empty(); }
 	void append_polyline(const Polyline& polyline);
-	int calculate_index_offset_of(int move_id) const;
+	int calculate_index_offset_of(int move_id, bool begin) const;
 };
 
 class GcodeViewer {
@@ -139,8 +148,7 @@ protected:
 	void reset();
 	void parse_moves(std::vector<MoveVertex> moves);
 	std::shared_ptr<SimpleMesh> generate_cuboid_from_move(const MoveVertex& prev, const MoveVertex& curr);
-	std::shared_ptr<SimpleMesh> generate_cuboid_from_move(const Vec3& to_curr_dir, const Vec3& prev_pos, const Vec3& curr_pos, float move_width, float move_height);
-	std::vector<std::shared_ptr<SimpleMesh>> generate_arc_from_move(const MoveVertex& prev, const MoveVertex& curr);
+	std::shared_ptr<SimpleMesh> generate_arc_from_move(const MoveVertex& prev, const MoveVertex& curr);
 	void refresh();
 
 private:
