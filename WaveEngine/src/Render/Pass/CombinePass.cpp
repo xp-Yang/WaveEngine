@@ -7,7 +7,7 @@ CombinePass::CombinePass()
 
 void CombinePass::init()
 {
-	RhiTexture* color_texture = m_rhi->newTexture(RhiTexture::Format::RGB16F, Vec2(DEFAULT_RENDER_RESOLUTION_X, DEFAULT_RENDER_RESOLUTION_Y));
+	RhiTexture* color_texture = m_rhi->newTexture(RhiTexture::Format::RGB8, Vec2(DEFAULT_RENDER_RESOLUTION_X, DEFAULT_RENDER_RESOLUTION_Y));
 	RhiTexture* depth_texture = m_rhi->newTexture(RhiTexture::Format::DEPTH, Vec2(DEFAULT_RENDER_RESOLUTION_X, DEFAULT_RENDER_RESOLUTION_Y));
 	color_texture->create();
 	depth_texture->create();
@@ -22,35 +22,28 @@ void CombinePass::init()
 	m_default_framebuffer = std::unique_ptr<RhiFrameBuffer>(default_fb);
 }
 
-//void CombinePass::prepare(FrameBuffer* framebuffer)
-//{
-	// ÓÃÀ´downSampleµÄ
-//	//framebuffer->blitColorMapTo(m_framebuffer.get());
-//	//m_lighted_map = m_framebuffer->getFirstAttachmentOf(AttachmentType::RGBA).getMap();
-//	m_lighted_map = framebuffer->getFirstAttachmentOf(AttachmentType::RGB16F).getMap();
-//}
-
 void CombinePass::draw()
 {
 	m_framebuffer->bind();
 	m_framebuffer->clear();
 
 	// post processing
-	static RenderShaderObject* combine_shader = RenderShaderObject::getShaderObject(ShaderType::CombineShader);
-	unsigned int default_map = RenderTextureData::defaultTexture().id;
-	combine_shader->start_using();
-	m_lighted_map = m_input_passes[0]->getFrameBuffer()->colorAttachmentAt(0)->texture()->id();
-	combine_shader->setTexture("Texture", 0, m_lighted_map);
-	if (m_input_passes.size() > 1) {
-		m_blurred_bright_map = m_input_passes[1]->getFrameBuffer()->colorAttachmentAt(0)->texture()->id();
-		combine_shader->setTexture("bloomMap", 1, m_blurred_bright_map);
-	}
-	else
-		combine_shader->setTexture("bloomMap", 1, default_map);
+	//static RenderShaderObject* combine_shader = RenderShaderObject::getShaderObject(ShaderType::CombineShader);
+	//unsigned int default_map = RenderTextureData::defaultTexture().id;
+	//combine_shader->start_using();
+	//auto lighted_map = m_input_passes[0]->getFrameBuffer()->colorAttachmentAt(0)->texture()->id();
+	//combine_shader->setTexture("Texture", 0, lighted_map);
+	//if (m_input_passes.size() > 1) {
+	//	auto blurred_bright_map = m_input_passes[1]->getFrameBuffer()->colorAttachmentAt(0)->texture()->id();
+	//	combine_shader->setTexture("bloomMap", 1, blurred_bright_map);
+	//}
+	//else
+	//	combine_shader->setTexture("bloomMap", 1, default_map);
 
-	m_rhi->drawIndexed(m_render_source_data->screen_quad->getVAO(), m_render_source_data->screen_quad->indicesCount());
+	//m_rhi->drawIndexed(m_render_source_data->screen_quad->getVAO(), m_render_source_data->screen_quad->indicesCount());
 
 	// pristine grid
+	m_input_passes[0]->getFrameBuffer()->blitTo(m_framebuffer.get(), RhiTexture::Format::RGB8); //downSample if msaa
 	m_input_passes[0]->getFrameBuffer()->blitTo(m_framebuffer.get(), RhiTexture::Format::DEPTH);
 	static RenderShaderObject* grid_shader = RenderShaderObject::getShaderObject(ShaderType::PristineGridShader);
 	grid_shader->start_using();

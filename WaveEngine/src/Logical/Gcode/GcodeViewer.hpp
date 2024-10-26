@@ -56,7 +56,7 @@ inline const std::vector<Color4> Extrusion_Role_Colors{
 	{ 0.37f, 0.82f, 0.58f, 1.0f },   // erMixed
 };
 
-inline const Color4 Silent_Color = { 0.2f, 0.2f, 0.2f, 1.0f };
+inline const Color4 Silent_Color = { 0.12f, 0.12f, 0.12f, 1.0f };
 
 enum class ViewType {
 	LINE_TYPE,

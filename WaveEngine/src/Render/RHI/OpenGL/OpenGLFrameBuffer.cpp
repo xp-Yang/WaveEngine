@@ -28,13 +28,19 @@ bool OpenGLFrameBuffer::create()
     RhiTexture* depth_stencil_texture = m_depthStencilAttachment.texture();
     if (depth_stencil_texture) {
         unsigned int depthStencilTextureID = depth_stencil_texture->id();
-        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_TEXTURE_2D, depthStencilTextureID, 0);
+        if (depth_stencil_texture->sampleCount() > 1)
+            glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_TEXTURE_2D_MULTISAMPLE, depthStencilTextureID, 0);
+        else
+            glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_TEXTURE_2D, depthStencilTextureID, 0);
     }
 
     RhiTexture* depth_texture = m_depthAttachment.texture();
     if (depth_texture) {
         unsigned int depthTextureID = depth_texture->id();
-        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depthTextureID, 0);
+        if (depth_texture->sampleCount() > 1)
+            glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D_MULTISAMPLE, depthTextureID, 0);
+        else
+            glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depthTextureID, 0);
     }
 
     if (color_attachment_size > 1) { //有2个及以上

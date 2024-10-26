@@ -64,5 +64,5 @@ void BloomPass::blur()
     }
     blur_shader->stop_using();
 
-    m_pingpong_framebuffer->blitTo(m_framebuffer.get());
+    m_pingpong_framebuffer->blitTo(m_framebuffer.get(), RhiTexture::Format::RGB16F);
 }

@@ -218,7 +218,7 @@ public:
     virtual void bind() = 0;
     virtual void unBind() = 0;
     virtual void clear(Color4 clear_color = Color4(0.f, 0.f, 0.f, 1.0f)) = 0;
-    virtual void blitTo(RhiFrameBuffer* dest, RhiTexture::Format format = RhiTexture::Format::RGB16F) = 0;
+    virtual void blitTo(RhiFrameBuffer* dest, RhiTexture::Format format = RhiTexture::Format::RGBA16F) = 0;
 
 protected:
     RhiFrameBuffer() = default;
