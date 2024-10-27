@@ -32,8 +32,8 @@ public:
     //double GetHigherLayerValue() { return m_layer_values.empty() ? 0. : m_layer_values[m_value_scope[1]]; }
 
     void initValueSpan(std::array<int, 2> span);
-    void SetLowerValue(const int lower_val);
-    void SetHigherValue(const int higher_val);
+    void SetLowerValue(int lower_val);
+    void SetHigherValue(int higher_val);
     //void SetSliderLayerValues(const std::vector<double>& values) { m_layer_values = values; }
 
     Orientation orientation() const { return m_orientation; }

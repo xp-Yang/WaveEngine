@@ -18,7 +18,7 @@ ForwardRenderPath::ForwardRenderPath(RenderSystem* render_system) {
     m_skybox_pass = std::make_unique<SkyBoxPass>();
     m_outline_pass = std::make_unique<OutlinePass>();
     m_gcode_pass = std::make_unique<GcodeViewerPass>();
-    m_gcode_instancing_pass = std::make_unique<Instance::GcodeViewerInstancingPass>();
+    //m_gcode_instancing_pass = std::make_unique<Instance::GcodeViewerInstancingPass>();
     m_combine_pass = std::make_unique<CombinePass>();
 
     ref_render_system = render_system;
@@ -32,14 +32,14 @@ void ForwardRenderPath::init()
     m_skybox_pass->init();
     m_outline_pass->init();
     m_gcode_pass->init();
-    m_gcode_instancing_pass->init();
+    //m_gcode_instancing_pass->init();
     m_combine_pass->init();
 
     static_cast<GcodeViewerPass*>(m_gcode_pass.get())->setGcodeViewer(ref_render_system->gcodeViewer().get());
     connect(ref_render_system->gcodeViewer().get(), &(ref_render_system->gcodeViewer()->loaded), static_cast<GcodeViewerPass*>(m_gcode_pass.get()), &GcodeViewerPass::reload_mesh_data);
     
-    static_cast<Instance::GcodeViewerInstancingPass*>(m_gcode_instancing_pass.get())->setGcodeViewer(ref_render_system->gcodeViewerInstancing().get());
-    connect(ref_render_system->gcodeViewerInstancing().get(), &(ref_render_system->gcodeViewerInstancing()->loaded), static_cast<Instance::GcodeViewerInstancingPass*>(m_gcode_instancing_pass.get()), &Instance::GcodeViewerInstancingPass::reload_mesh_data);
+    //static_cast<Instance::GcodeViewerInstancingPass*>(m_gcode_instancing_pass.get())->setGcodeViewer(ref_render_system->gcodeViewerInstancing().get());
+    //connect(ref_render_system->gcodeViewerInstancing().get(), &(ref_render_system->gcodeViewerInstancing()->loaded), static_cast<Instance::GcodeViewerInstancingPass*>(m_gcode_instancing_pass.get()), &Instance::GcodeViewerInstancingPass::reload_mesh_data);
 }
 
 void ForwardRenderPath::prepareRenderSourceData(const std::shared_ptr<RenderSourceData>& render_source_data)
@@ -50,7 +50,7 @@ void ForwardRenderPath::prepareRenderSourceData(const std::shared_ptr<RenderSour
     m_skybox_pass->prepareRenderSourceData(render_source_data);
     m_outline_pass->prepareRenderSourceData(render_source_data);
     m_gcode_pass->prepareRenderSourceData(render_source_data);
-    m_gcode_instancing_pass->prepareRenderSourceData(render_source_data);
+    //m_gcode_instancing_pass->prepareRenderSourceData(render_source_data);
     m_combine_pass->prepareRenderSourceData(render_source_data);
 }
 

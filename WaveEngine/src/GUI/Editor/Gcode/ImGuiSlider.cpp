@@ -94,8 +94,12 @@ void ImGuiSlider::initValueSpan(std::array<int, 2> span)
     m_value_scope = m_value_range;
 }
 
-void ImGuiSlider::SetLowerValue(const int lower_val)
+void ImGuiSlider::SetLowerValue(int lower_val)
 {
+    lower_val = lower_val < m_value_range[0] ? m_value_range[0] :
+        lower_val > m_value_range[1] ? m_value_range[1] :
+        lower_val;
+
     m_value_scope[0] = lower_val;
     if (lower_val > m_value_scope[1])
         m_value_scope[1] = lower_val;
@@ -119,8 +123,11 @@ void ImGuiSlider::SetLowerValue(const int lower_val)
     }
 }
 
-void ImGuiSlider::SetHigherValue(const int higher_val)
+void ImGuiSlider::SetHigherValue(int higher_val)
 {
+    higher_val = higher_val < m_value_range[0] ? m_value_range[0] :
+        higher_val > m_value_range[1] ? m_value_range[1] :
+        higher_val;
     m_value_scope[1] = higher_val;
     if (higher_val < m_value_scope[0])
         m_value_scope[0] = higher_val;
