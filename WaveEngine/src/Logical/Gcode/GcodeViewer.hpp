@@ -39,6 +39,7 @@ inline const std::vector<Color4> Extrusion_Role_Colors{
 	{ 1.00f, 0.90f, 0.30f, 1.0f },   // erPerimeter
 	{ 1.00f, 0.49f, 0.22f, 1.0f },   // erExternalPerimeter
 	{ 0.12f, 0.12f, 1.00f, 1.0f },   // erOverhangPerimeter
+	{ 0.69f, 0.19f, 0.16f, 1.0f },   // erInternalInfill
 	{ 0.59f, 0.33f, 0.80f, 1.0f },   // erSolidInfill
 	{ 0.94f, 0.25f, 0.25f, 1.0f },   // erTopSolidInfill
 	{ 0.40f, 0.36f, 0.78f, 1.0f },   // erBottomSurface
@@ -53,7 +54,6 @@ inline const std::vector<Color4> Extrusion_Role_Colors{
 	{ 0.70f, 0.89f, 0.67f, 1.0f },   // erWipeTower
 	{ 0.37f, 0.82f, 0.58f, 1.0f },   // erCustom
 	{ 0.37f, 0.82f, 0.58f, 1.0f },   // erMixed
-	{ 0.69f, 0.19f, 0.16f, 1.0f },   // erInternalInfill
 };
 
 inline const Color4 Silent_Color = { 0.12f, 0.12f, 0.12f, 1.0f };

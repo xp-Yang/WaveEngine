@@ -150,6 +150,7 @@ enum ExtrusionRole : uint8_t {
     erPerimeter,
     erExternalPerimeter,
     erOverhangPerimeter,
+    erInternalInfill,
     erSolidInfill,
     erTopSolidInfill,
     erBottomSurface,
@@ -165,7 +166,6 @@ enum ExtrusionRole : uint8_t {
     erCustom,
     // Extrusion role for a collection with multiple extrusion roles.
     erMixed,
-    erInternalInfill,
     erCount
 };
 

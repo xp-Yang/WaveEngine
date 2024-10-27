@@ -83,6 +83,9 @@ void GcodeViewerPass::draw()
 		if (m_VAOs[i] == 0)
 			continue;
 
+		if (i == ExtrusionRole::erInternalInfill)
+			continue;
+
 		const auto& index_offset = m_gcode_viewer->colored_indices_interval(ExtrusionRole(i));
 		int start_offset = index_offset.first;
 		int size = index_offset.second - index_offset.first;
@@ -97,6 +100,28 @@ void GcodeViewerPass::draw()
 			if (size > 0) {
 				shader->setFloat3("material.diffuse", Vec3(Silent_Color));
 				glBindVertexArray(m_VAOs[i]);
+				glDrawElements(GL_TRIANGLES, size, GL_UNSIGNED_INT, (const void*)(start_offset * sizeof(int)));
+			}
+		}
+	}
+	// render ExtrusionRole::erInternalInfill in the final
+	if (m_VAOs.size() == ExtrusionRole::erCount &&
+		m_VAOs[ExtrusionRole::erInternalInfill] != 0)
+	{
+		const auto& index_offset = m_gcode_viewer->colored_indices_interval(ExtrusionRole::erInternalInfill);
+		int start_offset = index_offset.first;
+		int size = index_offset.second - index_offset.first;
+		shader->setFloat3("material.diffuse", Vec3(m_colors[ExtrusionRole::erInternalInfill]));
+		glBindVertexArray(m_VAOs[ExtrusionRole::erInternalInfill]);
+		glDrawElements(GL_TRIANGLES, size, GL_UNSIGNED_INT, (const void*)(start_offset * sizeof(int)));
+
+		{
+			const auto& index_offset = m_gcode_viewer->colorless_indices_interval(ExtrusionRole::erInternalInfill);
+			int start_offset = index_offset.first;
+			int size = index_offset.second - index_offset.first;
+			if (size > 0) {
+				shader->setFloat3("material.diffuse", Vec3(Silent_Color));
+				glBindVertexArray(m_VAOs[ExtrusionRole::erInternalInfill]);
 				glDrawElements(GL_TRIANGLES, size, GL_UNSIGNED_INT, (const void*)(start_offset * sizeof(int)));
 			}
 		}
