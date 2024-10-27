@@ -13,6 +13,7 @@ enum class ShaderType {
 	BlinnPhongShader,
 	PBRShader,
 	GcodeShader,
+	GcodeInstancingShader,
 	OneColorShader,
 	SkyboxShader,
 	NormalShader,

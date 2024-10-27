@@ -66,6 +66,8 @@ void ImGuiEditor::onUpdate()
     m_context_menu->render();
     m_scene_hierarchy_window->render();
     m_global_console_window->render();
+
+    ref_render_system->showMainCanvas(isInMainCanvas());
 }
 
 void ImGuiEditor::beginFrame()
@@ -104,6 +106,11 @@ void ImGuiEditor::popUpMenu()
     m_context_menu->popUp(context);
 }
 
+bool ImGuiEditor::isInMainCanvas() const
+{
+    return !m_main_canvas->getImGuiWindow()->SkipItems;
+}
+
 void ImGuiEditor::renderMenuBar()
 {
     if (ImGui::BeginMenuBar())
@@ -119,6 +126,10 @@ void ImGuiEditor::renderMenuBar()
                         ref_render_system->gcodeViewer()->load(result);
                         static_cast<PreviewCanvas*>(m_preview_canvas.get())->horizontal_slider()->initValueSpan(ref_render_system->gcodeViewer()->get_move_range());
                         static_cast<PreviewCanvas*>(m_preview_canvas.get())->vertical_slider()->initValueSpan(ref_render_system->gcodeViewer()->get_layer_range());
+
+                        //ref_render_system->gcodeViewerInstancing()->load(result);
+                        //static_cast<PreviewCanvas*>(m_preview_canvas.get())->horizontal_slider()->initValueSpan(ref_render_system->gcodeViewerInstancing()->get_move_range());
+                        //static_cast<PreviewCanvas*>(m_preview_canvas.get())->vertical_slider()->initValueSpan(ref_render_system->gcodeViewerInstancing()->get_layer_range());
                     }
                     
                 }

@@ -24,8 +24,8 @@ void MainCanvas::render()
     static ImGuiWindowFlags window_flags = 0;
     ImGui::SetNextWindowSize(ImVec2(1280, 720), ImGuiCond_Appearing);
     if (ImGui::Begin("MainCanvas", nullptr, window_flags | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoBackground)) {
-        ImGuiWindow* window = ImGui::GetCurrentWindow();
-        bool hovered_window = ImGui::IsWindowHovered() && ImGui::IsMouseHoveringRect(window->InnerRect.Min, window->InnerRect.Max);
+        m_imgui_window = ImGui::GetCurrentWindow();
+        bool hovered_window = ImGui::IsWindowHovered() && ImGui::IsMouseHoveringRect(m_imgui_window->InnerRect.Min, m_imgui_window->InnerRect.Max);
         window_flags = hovered_window ? ImGuiWindowFlags_NoMove : 0;
         ImVec2 window_pos = ImGui::GetWindowPos();
         ImVec2 window_size = ImGui::GetWindowSize();
@@ -62,8 +62,8 @@ void PreviewCanvas::render()
     static ImGuiWindowFlags window_flags = 0;
     ImGui::SetNextWindowSize(ImVec2(1280, 720), ImGuiCond_Appearing);
     if (ImGui::Begin("PreviewCanvas", nullptr, window_flags | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoBackground)) {
-        ImGuiWindow* window = ImGui::GetCurrentWindow();
-        bool hovered_window = ImGui::IsWindowHovered() && ImGui::IsMouseHoveringRect(window->InnerRect.Min, window->InnerRect.Max);
+        m_imgui_window = ImGui::GetCurrentWindow();
+        bool hovered_window = ImGui::IsWindowHovered() && ImGui::IsMouseHoveringRect(m_imgui_window->InnerRect.Min, m_imgui_window->InnerRect.Max);
         window_flags = hovered_window ? ImGuiWindowFlags_NoMove : 0;
         ImVec2 window_pos = ImGui::GetWindowPos();
         ImVec2 window_size = ImGui::GetWindowSize();
@@ -92,7 +92,7 @@ void PickingCanvas::render()
     auto render_system = m_parent->ref_render_system;
     ImGui::SetNextWindowSize(ImVec2(1280, 720), ImGuiCond_Appearing);
     if (ImGui::Begin("PickingCanvas", nullptr, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoBackground)) {
-        ImGuiWindow* window = ImGui::GetCurrentWindow();
+        m_imgui_window = ImGui::GetCurrentWindow();
         ImVec2 window_pos = ImGui::GetWindowPos();
         ImVec2 window_size = ImGui::GetWindowSize();
         ImVec2 content_size = ImGui::GetContentRegionAvail();
@@ -108,7 +108,7 @@ void ShadowCanvas::render()
     auto render_system = m_parent->ref_render_system;
     ImGui::SetNextWindowSize(ImVec2(1280, 720), ImGuiCond_Appearing);
     if (ImGui::Begin("ShadowCanvas", nullptr, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoBackground)) {
-        ImGuiWindow* window = ImGui::GetCurrentWindow();
+        m_imgui_window = ImGui::GetCurrentWindow();
         ImVec2 window_pos = ImGui::GetWindowPos();
         ImVec2 window_size = ImGui::GetWindowSize();
         ImVec2 content_size = ImGui::GetContentRegionAvail();
@@ -124,7 +124,7 @@ void GBufferCanvas::render()
     auto render_system = m_parent->ref_render_system;
     ImGui::SetNextWindowSize(ImVec2(1280, 720), ImGuiCond_Appearing);
     if (ImGui::Begin("GBufferCanvas", nullptr, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoBackground)) {
-        ImGuiWindow* window = ImGui::GetCurrentWindow();
+        m_imgui_window = ImGui::GetCurrentWindow();
         ImVec2 window_pos = ImGui::GetWindowPos();
         ImVec2 window_size = ImGui::GetWindowSize();
         ImVec2 content_pos = ImGui::GetWindowContentRegionMin();
@@ -149,7 +149,7 @@ void LightingCanvas::render()
     auto render_system = m_parent->ref_render_system;
     ImGui::SetNextWindowSize(ImVec2(1280, 720), ImGuiCond_Appearing);
     if (ImGui::Begin("LightingCanvas", nullptr, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoBackground)) {
-        ImGuiWindow* window = ImGui::GetCurrentWindow();
+        m_imgui_window = ImGui::GetCurrentWindow();
         ImVec2 window_pos = ImGui::GetWindowPos();
         ImVec2 window_size = ImGui::GetWindowSize();
         ImVec2 content_size = ImGui::GetContentRegionAvail();
@@ -165,7 +165,7 @@ void BloomCanvas::render()
     auto render_system = m_parent->ref_render_system;
     ImGui::SetNextWindowSize(ImVec2(1280, 720), ImGuiCond_Appearing);
     if (ImGui::Begin("BloomCanvas", nullptr, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoBackground)) {
-        ImGuiWindow* window = ImGui::GetCurrentWindow();
+        m_imgui_window = ImGui::GetCurrentWindow();
         ImVec2 window_pos = ImGui::GetWindowPos();
         ImVec2 window_size = ImGui::GetWindowSize();
         ImVec2 content_size = ImGui::GetContentRegionAvail();

@@ -43,6 +43,9 @@ void MeshForwardLightingPass::draw()
     Vec3 light_direction = m_render_source_data->render_directional_light_data_list.front().direction;
     Vec4 light_color = m_render_source_data->render_directional_light_data_list.front().color;
 
+    RhiFrameBuffer* shadow_framebuffer = m_input_passes[0]->getFrameBuffer();
+    m_shadow_map = shadow_framebuffer->depthAttachment()->texture()->id();
+
     static RenderShaderObject* pbr_shader = RenderShaderObject::getShaderObject(ShaderType::PBRShader);
     static RenderShaderObject* blinn_phong_shader = RenderShaderObject::getShaderObject(ShaderType::BlinnPhongShader);
     RenderShaderObject* shader = m_pbr ? pbr_shader : blinn_phong_shader;

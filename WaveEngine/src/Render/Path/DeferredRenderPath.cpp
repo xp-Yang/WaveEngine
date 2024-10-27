@@ -8,7 +8,6 @@
 #include "../Pass/GBufferPass.hpp"
 #include "../Pass/DeferredLightingPass.hpp"
 #include "../Pass/TransparentPass.hpp"
-#include "../Gcode/GcodeViewerPass.hpp"
 #include "../Pass/SkyBoxPass.hpp"
 #include "../Pass/BloomPass.hpp"
 #include "../Pass/PickingPass.hpp"
@@ -28,7 +27,6 @@ DeferredRenderPath::DeferredRenderPath(RenderSystem* render_system)
     m_gbuffer_pass = std::make_unique<GBufferPass>();
     m_lighting_pass = std::make_unique<DeferredLightingPass>();
     m_transparent_pass = std::make_unique<TransparentPass>();
-    m_gcode_pass = std::make_unique<GcodeViewerPass>();
     m_skybox_pass = std::make_unique<SkyBoxPass>();
     m_bloom_pass = std::make_unique<BloomPass>();
     m_outline_pass = std::make_unique<OutlinePass>();
@@ -48,14 +46,10 @@ void DeferredRenderPath::init()
     m_gbuffer_pass->init();
     m_lighting_pass->init();
     m_transparent_pass->init();
-    m_gcode_pass->init();
     m_skybox_pass->init();
     m_bloom_pass->init();
     m_outline_pass->init();
     m_combine_pass->init();
-
-    //static_cast<GcodeViewerPass*>(m_gcode_pass.get())->setGcodeViewer(ref_render_system->gcodeViewer().get());
-    //connect(ref_render_system->gcodeViewer().get(), &(ref_render_system->gcodeViewer()->loaded), static_cast<GcodeViewerPass*>(m_gcode_pass.get()), &GcodeViewerPass::reload_mesh_data);
 }
 
 void DeferredRenderPath::prepareRenderSourceData(const std::shared_ptr<RenderSourceData>& render_source_data)
@@ -69,7 +63,6 @@ void DeferredRenderPath::prepareRenderSourceData(const std::shared_ptr<RenderSou
     m_gbuffer_pass->prepareRenderSourceData(render_source_data);
     m_lighting_pass->prepareRenderSourceData(render_source_data);
     m_transparent_pass->prepareRenderSourceData(render_source_data);
-    m_gcode_pass->prepareRenderSourceData(render_source_data);
     m_skybox_pass->prepareRenderSourceData(render_source_data);
     m_bloom_pass->prepareRenderSourceData(render_source_data);
     m_outline_pass->prepareRenderSourceData(render_source_data);
@@ -142,9 +135,6 @@ void DeferredRenderPath::render()
         m_wireframe_pass->setInputPasses({ main_light_pass }); // draw above the main light pass framebuffer
         m_wireframe_pass->draw();
     }
-
-    //m_gcode_pass->setInputPasses({ main_light_pass }); // draw above the main light pass framebuffer
-    //m_gcode_pass->draw();
 
     m_outline_pass->setInputPasses({ main_light_pass }); // draw above the main light pass framebuffer
     m_outline_pass->draw();

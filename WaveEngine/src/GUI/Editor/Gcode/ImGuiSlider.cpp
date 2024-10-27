@@ -108,6 +108,15 @@ void ImGuiSlider::SetLowerValue(const int lower_val)
         else
             m_parent->parent()->ref_render_system->gcodeViewer()->set_move_scope(m_value_scope);
     }
+
+    if (m_parent->parent()->ref_render_system->gcodeViewerInstancing()->valid()) {
+        if (m_orientation == Orientation::Vertical) {
+            m_parent->parent()->ref_render_system->gcodeViewerInstancing()->set_layer_scope(m_value_scope);
+            static_cast<PreviewCanvas*>(m_parent)->horizontal_slider()->initValueSpan(m_parent->parent()->ref_render_system->gcodeViewerInstancing()->get_move_range());
+        }
+        else
+            m_parent->parent()->ref_render_system->gcodeViewerInstancing()->set_move_scope(m_value_scope);
+    }
 }
 
 void ImGuiSlider::SetHigherValue(const int higher_val)
@@ -123,6 +132,15 @@ void ImGuiSlider::SetHigherValue(const int higher_val)
         }
         else
             m_parent->parent()->ref_render_system->gcodeViewer()->set_move_scope(m_value_scope);
+    }
+
+    if (m_parent->parent()->ref_render_system->gcodeViewerInstancing()->valid()) {
+        if (m_orientation == Orientation::Vertical) {
+            m_parent->parent()->ref_render_system->gcodeViewerInstancing()->set_layer_scope(m_value_scope);
+            static_cast<PreviewCanvas*>(m_parent)->horizontal_slider()->initValueSpan(m_parent->parent()->ref_render_system->gcodeViewerInstancing()->get_move_range());
+        }
+        else
+            m_parent->parent()->ref_render_system->gcodeViewerInstancing()->set_move_scope(m_value_scope);
     }
 }
 

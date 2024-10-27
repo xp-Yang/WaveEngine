@@ -17,7 +17,10 @@ protected:
     std::unique_ptr<RenderPass> m_picking_pass;
     std::unique_ptr<RenderPass> m_shadow_pass;
     std::unique_ptr<RenderPass> m_main_camera_pass;
+    std::unique_ptr<RenderPass> m_skybox_pass;
+    std::unique_ptr<RenderPass> m_outline_pass;
     std::unique_ptr<RenderPass> m_gcode_pass;
+    std::unique_ptr<RenderPass> m_gcode_instancing_pass;
     std::unique_ptr<RenderPass> m_combine_pass;
 
     RenderSystem* ref_render_system{ nullptr };

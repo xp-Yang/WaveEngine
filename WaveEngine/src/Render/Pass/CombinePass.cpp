@@ -42,9 +42,10 @@ void CombinePass::draw()
 
 	//m_rhi->drawIndexed(m_render_source_data->screen_quad->getVAO(), m_render_source_data->screen_quad->indicesCount());
 
-	// pristine grid
 	m_input_passes[0]->getFrameBuffer()->blitTo(m_framebuffer.get(), RhiTexture::Format::RGB8); //downSample if msaa
 	m_input_passes[0]->getFrameBuffer()->blitTo(m_framebuffer.get(), RhiTexture::Format::DEPTH);
+
+	// pristine grid
 	static RenderShaderObject* grid_shader = RenderShaderObject::getShaderObject(ShaderType::PristineGridShader);
 	grid_shader->start_using();
 	grid_shader->setMatrix("view", 1, m_render_source_data->view_matrix);

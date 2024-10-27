@@ -18,6 +18,7 @@ void RenderSystem::init(std::shared_ptr<Scene> scene)
     m_render_source_data = std::make_shared<RenderSourceData>();
 
     m_gcode_viewer = std::make_shared<GcodeViewer>();
+    m_gcode_viewer_instancing = std::make_shared<Instance::GcodeViewerInstancing>();
 
     m_forward_path = std::make_shared<ForwardRenderPath>(this);
     m_forward_path->prepareRenderSourceData(m_render_source_data);

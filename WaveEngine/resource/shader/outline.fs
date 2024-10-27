@@ -33,9 +33,9 @@ void main()
 
     float edge = sqrt(dot(horizontal, horizontal) + dot(vertical, vertical));
 
-    if (fwidth(edge) <= 0)
+    if (fwidth(edge) == 0)
         discard;
     
-    outColor = vec4(1.0, 1.0, 1.0, 1.0);
+    outColor = vec4(vec3(1.0), 1.0);
     gl_FragDepth = texture(objDepthMap, fragUV).r;
 }

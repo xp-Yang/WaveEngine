@@ -179,6 +179,10 @@ RenderShaderObject* RenderShaderObject::getShaderObject(const ShaderType& type)
         Shader shader = Shader{ resource_dir + "/shader/gcode.vs", resource_dir + "/shader/gcode.fs" };
         return new RenderShaderObject(shader);
     }
+    case ShaderType::GcodeInstancingShader: {
+        Shader shader = Shader{ resource_dir + "/shader/gcodeInstancing.vs", resource_dir + "/shader/gcodeInstancing.fs" };
+        return new RenderShaderObject(shader);
+    }
     case ShaderType::SkyboxShader: {
         Shader shader = Shader{ resource_dir + "/shader/skybox.vs", resource_dir + "/shader/skybox.fs" };
         return new RenderShaderObject(shader);

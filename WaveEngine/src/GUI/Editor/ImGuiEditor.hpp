@@ -21,6 +21,7 @@ public:
 	void endFrame();
 	Viewport getMainViewport() const;
 	void popUpMenu();
+	bool isInMainCanvas() const;
 
 protected:
 	void renderMenuBar();

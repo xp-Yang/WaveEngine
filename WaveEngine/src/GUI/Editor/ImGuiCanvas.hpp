@@ -27,12 +27,14 @@ public:
     Viewport getViewport() const { return m_viewport; }
     CanvasType type() const { return m_type; }
     ImGuiEditor* parent() const { return m_parent; }
+    ImGuiWindow* getImGuiWindow() const { return m_imgui_window; }
 
 protected:
     CanvasType m_type;
     Viewport m_viewport;
 
     ImGuiEditor* m_parent;
+    ImGuiWindow* m_imgui_window;
 };
 
 class ImGuiToolbar;

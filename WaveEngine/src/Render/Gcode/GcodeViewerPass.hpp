@@ -6,7 +6,6 @@
 
 class GcodeViewerPass : public RenderPass {
 public:
-	GcodeViewerPass();
 	void init() override;
 	void draw() override;
 	void setGcodeViewer(GcodeViewer* gcode_viewer) { m_gcode_viewer = gcode_viewer; }
