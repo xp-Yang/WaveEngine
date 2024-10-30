@@ -133,6 +133,8 @@ public:
 	const std::array<int, 2>& get_layer_range() const { return m_layer_range; }
 	const std::array<int, 2>& get_move_range() const { return m_move_range; }
 
+	const std::vector<Layer>& get_layers() const { return m_layers; }
+
 	void set_visible(ExtrusionRole role_type, bool visible);
 	bool is_visible(ExtrusionRole role_type) const { return m_role_visible[role_type]; }
 

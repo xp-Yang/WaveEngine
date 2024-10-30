@@ -79,6 +79,10 @@ void GcodeViewerPass::draw()
 	shader->setMatrix("projection", 1, m_render_source_data->proj_matrix);
 	shader->setFloat("material.ambient", 0.2f);
 	shader->setFloat3("material.specular", Vec3(0.2f));
+	float layer_height = (m_gcode_viewer && m_gcode_viewer->get_layers().size() > 0) ?
+		m_gcode_viewer->get_layers().back().height / m_gcode_viewer->get_layers().size() : 1.0f;
+	layer_height *= 50.0f / 256.0f;
+	shader->setFloat("layerHeight", layer_height);
 	for (int i = 0; i < m_VAOs.size(); i++) {
 		if (m_VAOs[i] == 0)
 			continue;
