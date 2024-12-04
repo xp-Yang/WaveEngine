@@ -31,5 +31,4 @@ target_compile_definitions(WaveRuntime PUBLIC ASSET_DIR="${ENGINE_ASSET_DIR}")
 target_compile_definitions(WaveRuntime PUBLIC ENABLE_ECS=false)
 target_compile_definitions(WaveRuntime PUBLIC NO_TITLE_BAR=false)
 
-file(COPY ${PROJECT_SOURCE_DIR}/imgui.ini DESTINATION ${CMAKE_BINARY_DIR}/test)
 #set_target_properties(MyTarget PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)

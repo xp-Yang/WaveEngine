@@ -23,6 +23,22 @@ void ImGuiDebugWindow::render()
     ImGui::Begin("Debug Window", nullptr, 
         ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoBringToFrontOnFocus);
     ImGuiID debug_dock_id = ImGui::GetID("Debug Dock");
+    if (!ImGui::DockBuilderGetNode(debug_dock_id))
+    {
+        ImGui::DockBuilderRemoveNode(debug_dock_id);
+        ImGui::DockBuilderAddNode(debug_dock_id, ImGuiDockNodeFlags_DockSpace);
+        ImGui::DockBuilderSetNodePos(debug_dock_id, ImGui::GetCurrentWindow()->Pos);
+        ImGui::DockBuilderSetNodeSize(debug_dock_id, ImGui::GetCurrentWindow()->Size);
+
+        ImGui::DockBuilderDockWindow("Main Camera Info", debug_dock_id);
+        ImGui::DockBuilderDockWindow("ShadowCanvas", debug_dock_id);
+        ImGui::DockBuilderDockWindow("PickingCanvas", debug_dock_id);
+        ImGui::DockBuilderDockWindow("GBufferCanvas", debug_dock_id);
+        ImGui::DockBuilderDockWindow("LightingCanvas", debug_dock_id);
+        ImGui::DockBuilderDockWindow("BloomCanvas", debug_dock_id);
+
+        ImGui::DockBuilderFinish(debug_dock_id);
+    }
     ImGui::DockSpace(debug_dock_id);
     ImGui::End();
 

@@ -189,6 +189,27 @@ void ImGuiEditor::renderEmptyMainDockerSpaceWindow()
     ImGui::SetNextWindowViewport(viewport->ID);
     ImGui::Begin("WaveEngine", nullptr, window_flags);
     ImGuiID main_dock_id = ImGui::GetID("Main Dock");
+    if (!ImGui::DockBuilderGetNode(main_dock_id))
+    {
+        ImGui::DockBuilderRemoveNode(main_dock_id);
+        ImGui::DockBuilderAddNode(main_dock_id, ImGuiDockNodeFlags_DockSpace);
+        ImGui::DockBuilderSetNodePos(main_dock_id, viewport->WorkPos);
+        ImGui::DockBuilderSetNodeSize(main_dock_id, viewport->WorkSize);
+
+        ImGuiID other;
+        ImGuiID bottom;
+        ImGui::DockBuilderSplitNode(main_dock_id, ImGuiDir_Down, 0.25f, &bottom, &other);
+        ImGuiID left;
+        ImGuiID right;
+        ImGui::DockBuilderSplitNode(other, ImGuiDir_Left, 0.30f, &left, &right);
+
+        ImGui::DockBuilderDockWindow("Scene Hierarchy", left);
+        ImGui::DockBuilderDockWindow("Console", bottom);
+        ImGui::DockBuilderDockWindow("MainCanvas", right);
+        ImGui::DockBuilderDockWindow("PreviewCanvas", right);
+
+        ImGui::DockBuilderFinish(main_dock_id);
+    }
     ImGui::DockSpace(main_dock_id);
     renderMenuBar();
     ImGui::End();
