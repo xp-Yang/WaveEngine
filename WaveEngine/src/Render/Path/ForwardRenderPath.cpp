@@ -58,10 +58,13 @@ void ForwardRenderPath::render()
 {
     auto render_params = ref_render_system->renderParams();
 
+    // TODO samples更改了，重新初始化整个path，重新创建相关的RenderPass。
+    //configShadowMapSamples(render_params.shadow_map_sample_count);
+    //configSamples(render_params.msaa_sample_count);
+    
     if (ref_render_system->isMainCanvasShowing()) {
         m_picking_pass->draw();
         if (render_params.shadow) {
-            static_cast<ShadowPass*>(m_shadow_pass.get())->configSamples(render_params.shadow_map_sample_count);
             m_shadow_pass->draw();
         }
         else {
@@ -70,7 +73,6 @@ void ForwardRenderPath::render()
         m_main_camera_pass->setInputPasses({ m_shadow_pass.get() });
         static_cast<MeshForwardLightingPass*>(m_main_camera_pass.get())->enablePBR(render_params.pbr);
         static_cast<MeshForwardLightingPass*>(m_main_camera_pass.get())->enableReflection(render_params.reflection);
-        static_cast<MeshForwardLightingPass*>(m_main_camera_pass.get())->configSamples(render_params.msaa_sample_count);
         static_cast<MeshForwardLightingPass*>(m_main_camera_pass.get())->setCubeMaps(static_cast<ShadowPass*>(m_shadow_pass.get())->getCubeMaps());
         m_main_camera_pass->draw();
         if (render_params.skybox) {

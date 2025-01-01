@@ -1,4 +1,6 @@
 #include "CombinePass.hpp"
+// TODO remove
+#include <glad/glad.h>
 
 CombinePass::CombinePass()
 {
@@ -27,23 +29,33 @@ void CombinePass::draw()
 	m_framebuffer->bind();
 	m_framebuffer->clear();
 
-	// post processing
-	//static RenderShaderObject* combine_shader = RenderShaderObject::getShaderObject(ShaderType::CombineShader);
-	//unsigned int default_map = RenderTextureData::defaultTexture().id;
-	//combine_shader->start_using();
-	//auto lighted_map = m_input_passes[0]->getFrameBuffer()->colorAttachmentAt(0)->texture()->id();
-	//combine_shader->setTexture("Texture", 0, lighted_map);
-	//if (m_input_passes.size() > 1) {
-	//	auto blurred_bright_map = m_input_passes[1]->getFrameBuffer()->colorAttachmentAt(0)->texture()->id();
-	//	combine_shader->setTexture("bloomMap", 1, blurred_bright_map);
-	//}
-	//else
-	//	combine_shader->setTexture("bloomMap", 1, default_map);
-
-	//m_rhi->drawIndexed(m_render_source_data->screen_quad->getVAO(), m_render_source_data->screen_quad->indicesCount());
-
 	m_input_passes[0]->getFrameBuffer()->blitTo(m_framebuffer.get(), RhiTexture::Format::RGB8); //downSample if msaa
 	m_input_passes[0]->getFrameBuffer()->blitTo(m_framebuffer.get(), RhiTexture::Format::DEPTH);
+
+	glDepthMask(GL_FALSE);
+
+	// post processing
+	static RenderShaderObject* combine_shader = RenderShaderObject::getShaderObject(ShaderType::CombineShader);
+	unsigned int default_map = RenderTextureData::defaultTexture().id;
+	combine_shader->start_using();
+	auto lighted_map = m_framebuffer->colorAttachmentAt(0)->texture()->id();
+	combine_shader->setTexture("Texture", 0, lighted_map);
+	if (m_input_passes.size() > 1) {
+		auto blurred_bright_map = m_input_passes[1]->getFrameBuffer()->colorAttachmentAt(0)->texture()->id();
+		combine_shader->setTexture("bloomMap", 1, blurred_bright_map);
+	}
+	else
+		combine_shader->setTexture("bloomMap", 1, default_map);
+	m_rhi->drawIndexed(m_render_source_data->screen_quad->getVAO(), m_render_source_data->screen_quad->indicesCount());
+
+	
+	// fxaa
+	static RenderShaderObject* fxaa_shader = RenderShaderObject::getShaderObject(ShaderType::FXAAShader);
+	fxaa_shader->start_using();
+	auto color_map = m_framebuffer->colorAttachmentAt(0)->texture()->id();
+	fxaa_shader->setTexture("mainTexture", 0, color_map);
+	m_rhi->drawIndexed(m_render_source_data->screen_quad->getVAO(), m_render_source_data->screen_quad->indicesCount());
+
 
 	// pristine grid
 	static RenderShaderObject* grid_shader = RenderShaderObject::getShaderObject(ShaderType::PristineGridShader);
@@ -52,6 +64,8 @@ void CombinePass::draw()
 	grid_shader->setMatrix("proj", 1, m_render_source_data->proj_matrix);
 	m_rhi->drawIndexed(m_render_source_data->screen_quad->getVAO(), m_render_source_data->screen_quad->indicesCount());
 	grid_shader->stop_using();
+
+	glDepthMask(GL_TRUE);
 
 	m_default_framebuffer->bind();
 	m_default_framebuffer->clear(Color4(0.45f, 0.55f, 0.60f, 1.00f));

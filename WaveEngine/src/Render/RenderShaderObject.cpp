@@ -228,6 +228,14 @@ RenderShaderObject* RenderShaderObject::getShaderObject(const ShaderType& type)
         Shader shader = Shader{ resource_dir + "/shader/instancing.vs", resource_dir + "/shader/instancing.fs" };
         return new RenderShaderObject(shader);
     }
+    case ShaderType::BillBoardShader: {
+        Shader shader = Shader{ resource_dir + "/shader/billBoard.vs", resource_dir + "/shader/billBoard.fs" };
+        return new RenderShaderObject(shader);
+    }
+    case ShaderType::FXAAShader: {
+        Shader shader = Shader{ resource_dir + "/shader/screenQuad.vs", resource_dir + "/shader/fxaa.fs" };
+        return new RenderShaderObject(shader);
+    }
     default:
         break;
     }

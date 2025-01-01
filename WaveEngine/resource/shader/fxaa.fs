@@ -1,9 +1,9 @@
 #version 330
 
+in vec2 fragUV;
 out vec4 outColor;
 
 uniform sampler2D mainTexture;
-uniform vec2 resolution;
 
 
 float calcLuminance(vec4 color) {
@@ -44,20 +44,12 @@ vec2 calcEdgeNormal(float N_luma, float W_luma, float S_luma, float E_luma, floa
 
 
 void main() {
-	vec2 texSize = textureSize(mainTexture, 0);
-	vec2 st = gl_FragCoord.xy/resolution;
-	if (resolution.x > resolution.y) {
-		st.x *= resolution.x / resolution.y;
-		st.x /= texSize.x / texSize.y;
-	}
-	else {
-		st.y *= resolution.y / resolution.x;
-		st.y /= texSize.y / texSize.x;
-	}
-	vec4 N = texture(mainTexture, vec2(st.x, st.y + dFdy(st.y)));
-	vec4 S = texture(mainTexture, vec2(st.x, st.y - dFdy(st.y)));
-	vec4 W = texture(mainTexture, vec2(st.x - dFdx(st.x), st.y));
-	vec4 E = texture(mainTexture, vec2(st.x + dFdx(st.x), st.y));
+	vec2 tex_offset = 1.0 / textureSize(mainTexture, 0);
+	vec2 st = fragUV;
+	vec4 N = texture(mainTexture, vec2(st.x, st.y + tex_offset.y));
+	vec4 S = texture(mainTexture, vec2(st.x, st.y - tex_offset.y));
+	vec4 W = texture(mainTexture, vec2(st.x - tex_offset.x, st.y));
+	vec4 E = texture(mainTexture, vec2(st.x + tex_offset.x, st.y));
 	vec4 M = texture(mainTexture, st);
 	float N_luma = calcLuminance(N);
 	float W_luma = calcLuminance(W);
@@ -67,9 +59,7 @@ void main() {
 	
 	float contrast = calcContrast(N_luma, W_luma, S_luma, E_luma, M_luma);
 	if (contrast < 0.05) {
-		outColor = M;
-		return;
-		//discard;
+		discard;
 	}
 
 	vec2 normal = calcEdgeNormal(N_luma, W_luma, S_luma, E_luma, M_luma);
@@ -77,7 +67,7 @@ void main() {
 	float expect_luma = (N_luma + W_luma + S_luma + M_luma) * 0.25;
 	float luma_delta = abs(M_luma - expect_luma);
 	float blend = luma_delta / contrast;
-	//color = texture(mainTexture, st + normal * blend * vec2(dFdx(st.x), dFdy(st.y)));
+	//color = texture(mainTexture, st + normal * blend * tex_offset);
 	if (normal.x > 0)
 		color = mix(M,E,blend);
 	if (normal.x < 0)
@@ -87,6 +77,7 @@ void main() {
 	if (normal.y < 0)
 		color = mix(M,S,blend);
 	outColor = color;
+	outColor = (N + S + W + E + M) / 5.0;
 	//outColor = M;
 	//outColor = vec4(vec3(contrast), 1.0);
 }

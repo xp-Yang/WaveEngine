@@ -29,18 +29,6 @@ void ShadowPass::init()
     glReadBuffer(GL_NONE);
 }
 
-void ShadowPass::configSamples(int samples)
-{
-    return;
-    //TODO
-    //config FrameBuffer
-    //m_framebuffer->bind();
-    //m_framebuffer->setSamples(samples);
-
-    //glBindTexture(GL_TEXTURE_2D, m_framebuffer->getFirstAttachmentOf(AttachmentType::DEPTH).getMap());
-    //glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, samples * m_framebuffer->getWidth(), samples * m_framebuffer->getHeight(), 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
-}
-
 void ShadowPass::draw() {
     drawDirectionalLightShadowMap();
     drawPointLightShadowMap();

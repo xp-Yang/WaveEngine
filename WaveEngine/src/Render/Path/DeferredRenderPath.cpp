@@ -89,7 +89,6 @@ void DeferredRenderPath::render()
     }
     else {
         if (render_params.shadow) {
-            //static_cast<ShadowPass*>(m_shadow_pass.get())->configSamples(render_params.shadow_map_sample_count);
             m_shadow_pass->draw();
         }
         else

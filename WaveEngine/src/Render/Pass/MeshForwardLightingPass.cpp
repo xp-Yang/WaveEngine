@@ -25,13 +25,6 @@ void MeshForwardLightingPass::enablePBR(bool pbr)
     m_pbr = pbr;
 }
 
-void MeshForwardLightingPass::configSamples(int samples)
-{
-    //config FrameBuffer
-    m_framebuffer->bind();
-    //m_framebuffer->setSamples(samples);
-}
-
 void MeshForwardLightingPass::draw()
 {
     m_framebuffer->bind();
