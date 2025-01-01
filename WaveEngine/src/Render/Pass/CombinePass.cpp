@@ -50,12 +50,13 @@ void CombinePass::draw()
 
 	
 	// fxaa
-	static RenderShaderObject* fxaa_shader = RenderShaderObject::getShaderObject(ShaderType::FXAAShader);
-	fxaa_shader->start_using();
-	auto color_map = m_framebuffer->colorAttachmentAt(0)->texture()->id();
-	fxaa_shader->setTexture("mainTexture", 0, color_map);
-	m_rhi->drawIndexed(m_render_source_data->screen_quad->getVAO(), m_render_source_data->screen_quad->indicesCount());
-
+	if (m_fxaa) {
+		static RenderShaderObject* fxaa_shader = RenderShaderObject::getShaderObject(ShaderType::FXAAShader);
+		fxaa_shader->start_using();
+		auto color_map = m_framebuffer->colorAttachmentAt(0)->texture()->id();
+		fxaa_shader->setTexture("mainTexture", 0, color_map);
+		m_rhi->drawIndexed(m_render_source_data->screen_quad->getVAO(), m_render_source_data->screen_quad->indicesCount());
+	}
 
 	// pristine grid
 	static RenderShaderObject* grid_shader = RenderShaderObject::getShaderObject(ShaderType::PristineGridShader);
@@ -69,4 +70,9 @@ void CombinePass::draw()
 
 	m_default_framebuffer->bind();
 	m_default_framebuffer->clear(Color4(0.45f, 0.55f, 0.60f, 1.00f));
+}
+
+void CombinePass::enableFXAA(bool enable)
+{
+	m_fxaa = enable;
 }

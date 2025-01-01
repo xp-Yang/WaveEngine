@@ -15,18 +15,21 @@ enum class RenderPathType {
 
 struct RenderParams {
     int     msaa_sample_count = 1;
+    int     shadow_map_sample_count = 1;
+    bool    fxaa = true;
+
     bool    skybox = false;
     bool    shadow = true;
-    int     shadow_map_sample_count = 1;
 
     bool    reflection = false;
+    bool    wireframe = false;
     bool    normal_debug = false;
     bool    bloom = false;
-    bool    wireframe = false;
-    bool    checkerboard = false;
-    bool    pbr = true;
     bool    hdr = true;
     bool    gamma = true;
+
+    bool    checkerboard = false;
+    bool    pbr = true;
     //int     pixelate_level = 1;
 };
 

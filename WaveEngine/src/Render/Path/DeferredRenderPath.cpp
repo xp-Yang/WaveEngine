@@ -139,6 +139,7 @@ void DeferredRenderPath::render()
     m_outline_pass->draw();
 
     combine_pass->setInputPasses(combine_input_passes);
+    combine_pass->enableFXAA(render_params.fxaa);
     combine_pass->draw();
 }
 

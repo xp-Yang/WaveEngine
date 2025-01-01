@@ -58,7 +58,7 @@ void main() {
 	float M_luma = calcLuminance(M);
 	
 	float contrast = calcContrast(N_luma, W_luma, S_luma, E_luma, M_luma);
-	if (contrast < 0.05) {
+	if (contrast < 0.15) {
 		discard;
 	}
 

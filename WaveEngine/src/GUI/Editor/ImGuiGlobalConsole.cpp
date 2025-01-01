@@ -86,6 +86,7 @@ void ImGuiGlobalConsole::render() {
         ImGui::PopItemWidth();
         ImGui::SameLine();
     }
+    ImGui::Checkbox("fxaa", &render_params.fxaa); ImGui::SameLine();
     ImGui::Checkbox("skybox", &render_params.skybox); ImGui::SameLine();
     ImGui::Checkbox("shadow", &render_params.shadow); ImGui::SameLine();
     //ImGui::Checkbox("reflection", &render_params.reflection); ImGui::SameLine();

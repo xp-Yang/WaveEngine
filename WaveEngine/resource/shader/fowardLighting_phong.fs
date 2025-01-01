@@ -4,8 +4,8 @@
 #include "BlinnPhong.h"
 
 in VS_OUT {
-    vec3 fragWorldPos;          //涓栫晫鍧愭爣
-    vec3 fragWorldNormal;       //涓栫晫鍧愭爣
+    vec3 fragWorldPos;          //世界坐标
+    vec3 fragWorldNormal;       //世界坐标
     vec2 fragUV;
 } fs_in;
 

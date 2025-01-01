@@ -15,7 +15,7 @@ uniform DirectionalLight directionalLight;
 uniform sampler2D shadow_map;
 uniform mat4 lightSpaceMatrix;
 
-// TODO shaderé‡Œæ€Žä¹ˆç”¨åŠ¨æ€æ•°ç»„
+// TODO shaderÀïÔõÃ´ÓÃ¶¯Ì¬Êý×é
 const int MAX_POINT_LIGHTS_COUNT = 8;
 uniform int point_lights_size;
 uniform PointLight pointLights[MAX_POINT_LIGHTS_COUNT];
@@ -25,9 +25,9 @@ const float gamma = 2.2;
 
 float ShadowCalculation(vec4 fragPosLightSpace, sampler2D shadow_map)
 {
-    // 1.è¿˜åœ¨è£å‰ªç©ºé—´ï¼Œæ‰§è¡Œé€è§†é™¤æ³•ï¼Œå˜æ¢åˆ°NDCç©ºé—´
+    // 1.»¹ÔÚ²Ã¼ô¿Õ¼ä£¬Ö´ÐÐÍ¸ÊÓ³ý·¨£¬±ä»»µ½NDC¿Õ¼ä
     vec3 projCoords = fragPosLightSpace.xyz / fragPosLightSpace.w;
-    // 2.å˜æ¢åˆ°[0,1]çš„èŒƒå›´, ä¾¿äºŽé‡‡æ ·
+    // 2.±ä»»µ½[0,1]µÄ·¶Î§, ±ãÓÚ²ÉÑù
     projCoords = projCoords * 0.5 + 0.5;
     // if(projCoords.z > 1.0)
     //     return 1.0;
@@ -35,7 +35,7 @@ float ShadowCalculation(vec4 fragPosLightSpace, sampler2D shadow_map)
     float bias = 0.005;
     //float bias = max(0.05 * (1.0 - dot(normal, lightDir)), 0.005);
     float closestDepth = texture(shadow_map, projCoords.xy).r;
-    // æ£€æŸ¥å½“å‰ç‰‡æ®µæ˜¯å¦åœ¨é˜´å½±ä¸­
+    // ¼ì²éµ±Ç°Æ¬¶ÎÊÇ·ñÔÚÒõÓ°ÖÐ
     float shadowFactor = projCoords.z - closestDepth > bias ? 0.5 : 1.0;
 
     return shadowFactor;

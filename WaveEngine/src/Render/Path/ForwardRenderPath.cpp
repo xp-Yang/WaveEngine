@@ -83,15 +83,15 @@ void ForwardRenderPath::render()
         m_outline_pass->setInputPasses({ m_main_camera_pass.get()}); // draw above the main light pass framebuffer
         m_outline_pass->draw();
         m_combine_pass->setInputPasses({ m_main_camera_pass.get() });
-        m_combine_pass->draw();
     }
     else {
         m_gcode_pass->draw();
         m_combine_pass->setInputPasses({ m_gcode_pass.get() });
         //m_gcode_instancing_pass->draw();
         //m_combine_pass->setInputPasses({ m_gcode_instancing_pass.get() });
-        m_combine_pass->draw();
     }
+    static_cast<CombinePass*>(m_combine_pass.get())->enableFXAA(render_params.fxaa);
+    m_combine_pass->draw();
 }
 
 unsigned int ForwardRenderPath::getPickingFBO()

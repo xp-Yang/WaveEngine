@@ -5,7 +5,7 @@ in vec2 fragUV;
 
 struct Camera {
     vec3 pos;
-    float distance; // åˆ°æ­¤å¤„å‡å®šçš„å¹³é¢çš„è·ç¦»ï¼Œå®é™…ä¸Šæ˜¯ä»»æ„å€¼éƒ½å¯ä»¥ã€‚å°„çº¿æ–¹å‘ç”±fovå’Œaspect_ratioå†³å®š
+    float distance; // µ½´Ë´¦¼Ù¶¨µÄÆ½ÃæµÄ¾àÀë£¬Êµ¼ÊÉÏÊÇÈÎÒâÖµ¶¼¿ÉÒÔ¡£ÉäÏß·½ÏòÓÉfovºÍaspect_ratio¾ö¶¨
     float fov;
     float aspect_ratio;
     vec3 front;
@@ -48,7 +48,7 @@ float rand() {
 vec3 randomUnitVec() {
     while (true) {
         vec3 unit_cube = 2.0 * vec3(rand(), rand(), rand()) - vec3(1, 1, 1);
-        if (dot(unit_cube, unit_cube) < 1.0f) { //ä¸ºäº†å‡åŒ€åˆ†å¸ƒï¼Œå¦åˆ™å½’ä¸€åŒ–åæ²¿ç«‹æ–¹ä½“å¯¹è§’çº¿çš„æŠ½æ ·æ¯”è¾ƒå¤š
+        if (dot(unit_cube, unit_cube) < 1.0f) { //ÎªÁË¾ùÔÈ·Ö²¼£¬·ñÔò¹éÒ»»¯ºóÑØÁ¢·½Ìå¶Ô½ÇÏßµÄ³éÑù±È½Ï¶à
             return normalize(unit_cube);
         }
     }
@@ -60,14 +60,14 @@ vec3 getPointOnUnitSphere(vec3 plane_point, vec3 normal) {
     float h = sqrt(1 - r_square);
     return plane_point + h * normal;
 }
- // å•ä½åœ†å†…çš„ç‚¹æŒ‰æè½´å‡åŒ€åˆ†å¸ƒ(éå‡åŒ€åˆ†å¸ƒ)
+ // µ¥Î»Ô²ÄÚµÄµã°´¼«Öá¾ùÔÈ·Ö²¼(·Ç¾ùÔÈ·Ö²¼)
 vec2 randomInUnitCircleByPolar() {
     float r = rand();
     float theta = 2 * 3.14159 * rand();
     return vec2(r * cos(theta), r * sin(theta));
 }
 vec3 randomLambertianDistribution(vec3 normal) {
-    // 1. æ„é€ åˆ‡å¹³é¢
+    // 1. ¹¹ÔìÇĞÆ½Ãæ
     vec3 up = vec3(0, 1, 0);
     vec3 local_u;
     if (normal == up)
@@ -76,12 +76,12 @@ vec3 randomLambertianDistribution(vec3 normal) {
         local_u = cross(normal, up);
     vec3 local_v = cross(normal, local_u);
 
-    // 2. åœ¨åˆ‡å¹³é¢çš„å•ä½åœ†å†…å‡åŒ€å–ç‚¹
+    // 2. ÔÚÇĞÆ½ÃæµÄµ¥Î»Ô²ÄÚ¾ùÔÈÈ¡µã
     vec3 random_plane_point;
     vec2 coef = randomInUnitCircleByPolar();
     random_plane_point = coef.x * local_u + coef.y * local_v;
 
-    // 3. å°†ç‚¹æ˜ å°„å›çƒé¢
+    // 3. ½«µãÓ³Éä»ØÇòÃæ
     return getPointOnUnitSphere(random_plane_point, normal);
 }
 
@@ -127,17 +127,17 @@ struct HitResult{
 
     bool is_metal;
 };
-// ä¸€æ¬¡ç¢°æ’ï¼ˆæ— åå°„ï¼‰
+// Ò»´ÎÅö×²£¨ÎŞ·´Éä£©
 HitResult hitOnce(Ray ray, Sphere[3] sphereList){
-    //åˆå§‹åŒ–æœ€è¿‘çš„è§£
+    //³õÊ¼»¯×î½üµÄ½â
     valid_range = 999999;
-    //æ±‚æœ€è¿‘çš„ç‚¹
+    //Çó×î½üµÄµã
     HitResult result;
     result.hit = false;
     float root;
     int closest_id;
     for(int i = 0; i < 3; i++){
-        //æ±‚æ ¹ï¼š çº¿-çƒ
+        //Çó¸ù£º Ïß-Çò
         root = hitSphere(ray, sphereList[i]);
         if(root > 0.0f){
             valid_range = root;
@@ -154,8 +154,8 @@ HitResult hitOnce(Ray ray, Sphere[3] sphereList){
 		result.albedo = sphereList[closest_id].albedo;
 		result.fuzzy = sphereList[closest_id].fuzzy;
 		result.is_metal = sphereList[closest_id].is_metal;
-        //é€’å½’æŸ¥çœ‹èƒ½ä¸èƒ½å†hitã€‚
-        //GLSLä¸èƒ½é€’å½’ï¼Œåœ¨ä¸Šä¸€å±‚å¾ªç¯
+        //µİ¹é²é¿´ÄÜ²»ÄÜÔÙhit¡£
+        //GLSL²»ÄÜµİ¹é£¬ÔÚÉÏÒ»²ãÑ­»·
     }
     return result;
 }
@@ -189,9 +189,9 @@ vec3 shading(Ray ray, Sphere[3] sphereList) {
 }
 
 void main() {
-    //åˆå§‹åŒ–éšæœºç§å­
+    //³õÊ¼»¯Ëæ»úÖÖ×Ó
     wseed = uint(randOrigin * (fragUV.x * fragUV.y));
-    //1. æ„é€ ray
+    //1. ¹¹Ôìray
 	Ray ray;
 	ray.origin = camera.pos;
 
@@ -199,7 +199,7 @@ void main() {
     float height = width / camera.aspect_ratio;
     vec3 leftbottom = camera.pos + camera.distance * camera.front - width / 2.0 * camera.right - height / 2.0 * camera.up;
 	ray.direction = normalize(leftbottom + (fragUV.x * width) * camera.right + (fragUV.y * height) * camera.up - camera.pos);
-    //2. æ„é€ sphere
+    //2. ¹¹Ôìsphere
     Sphere[3] sphereList;
         Sphere sphere0;
     sphere0.origin = vec3(-5.0, 4.0, -1.0);

@@ -4,8 +4,8 @@
 #include "BRDF.h"
 
 in VS_OUT {
-    vec3 fragWorldPos;          //ä¸–ç•Œåæ ‡
-    vec3 fragWorldNormal;       //å±€éƒ¨åæ ‡
+    vec3 fragWorldPos;          //ÊÀ½ç×ø±ê
+    vec3 fragWorldNormal;       //¾Ö²¿×ø±ê
     vec2 fragUV;
 } fs_in;
 

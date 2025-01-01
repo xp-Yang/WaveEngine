@@ -3,8 +3,8 @@ layout (triangles) in;
 layout (line_strip, max_vertices = 6) out;
 
 in VS_OUT {
-    vec3 fragWorldPos;          //ä¸–ç•Œåæ ‡
-    vec3 fragWorldNormal;       //ä¸–ç•Œåæ ‡
+    vec3 fragWorldPos;          //ÊÀ½ç×ø±ê
+    vec3 fragWorldNormal;       //ÊÀ½ç×ø±ê
     vec2 fragUV;
 } gs_in[];
 
@@ -16,9 +16,9 @@ void GenerateLine(int index)
     const float MAGNITUDE = 0.2;
     gl_Position = gl_in[index].gl_Position;
     EmitVertex();
-    // TODO è¿™2ç§çš„åŒºåˆ«ï¼Ÿ
-    gl_Position = gl_in[index].gl_Position + vec4(mat3(projection) * mat3(view) * gs_in[index].fragWorldNormal, 0.0) * MAGNITUDE; // projectionä¸¢å¤±ç¬¬å››è¡Œï¼Œç›¸å½“äºå°‘åšäº†ä¸€éƒ¨åˆ†é€è§†é™¤æ³•
-    // ç›¸å½“äºvsä¸­gl_Positionä¸ä¹˜å˜æ¢çŸ©é˜µï¼Œåˆ°gsä¸­å…ˆåŠ ä¸Šnormalï¼Œå†ä¸€èµ·ä¹˜ä¸ŠpvmçŸ©é˜µï¼š
+    // TODO Õâ2ÖÖµÄÇø±ğ£¿
+    gl_Position = gl_in[index].gl_Position + vec4(mat3(projection) * mat3(view) * gs_in[index].fragWorldNormal, 0.0) * MAGNITUDE; // projection¶ªÊ§µÚËÄĞĞ£¬Ïàµ±ÓÚÉÙ×öÁËÒ»²¿·ÖÍ¸ÊÓ³ı·¨
+    // Ïàµ±ÓÚvsÖĞgl_Position²»³Ë±ä»»¾ØÕó£¬µ½gsÖĞÏÈ¼ÓÉÏnormal£¬ÔÙÒ»Æğ³ËÉÏpvm¾ØÕó£º
     gl_Position = gl_in[index].gl_Position + projection * view * vec4(gs_in[index].fragWorldNormal * MAGNITUDE, 0.0); // vec4(gs_in[index].fragWorldNormal, 0.0) == normalize(model * vec4(gs_in[index].modelNormal, 0.0))
     EmitVertex();
     EndPrimitive();

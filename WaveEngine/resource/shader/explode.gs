@@ -3,14 +3,14 @@ layout (triangles) in;
 layout (triangle_strip, max_vertices = 3) out;
 
 in VS_OUT {
-    vec3 fragWorldPos;          //ä¸–ç•Œåæ ‡
-    vec3 fragWorldNormal;       //ä¸–ç•Œåæ ‡
+    vec3 fragWorldPos;          //ÊÀ½ç×ø±ê
+    vec3 fragWorldNormal;       //ÊÀ½ç×ø±ê
     vec2 fragUV;
 } gs_in[];
 
 out GS_OUT{
-    vec3 fragWorldPos;          //ä¸–ç•Œåæ ‡
-    vec3 fragWorldNormal;       //ä¸–ç•Œåæ ‡
+    vec3 fragWorldPos;          //ÊÀ½ç×ø±ê
+    vec3 fragWorldNormal;       //ÊÀ½ç×ø±ê
     vec2 fragUV;
 } gs_out;
 
@@ -35,8 +35,8 @@ void main() {
     //vec3 normal = GetNormal();
     vec3 normal = (gs_in[0].fragWorldNormal + gs_in[1].fragWorldNormal + gs_in[2].fragWorldNormal) / 3;
 
-    //è¾“å…¥çš„gs_in[0].pass_posä¸ºä¸–ç•Œåæ ‡
-    //è¾“å…¥å’Œè¾“å‡ºçš„gl_Positionä¸ºè£å‰ªç©ºé—´åæ ‡
+    //ÊäÈëµÄgs_in[0].pass_posÎªÊÀ½ç×ø±ê
+    //ÊäÈëºÍÊä³öµÄgl_PositionÎª²Ã¼ô¿Õ¼ä×ø±ê
     gl_Position = projectionView * explode(gs_in[0].fragWorldPos, normal);
     gs_out.fragUV = gs_in[0].fragUV;
     gs_out.fragWorldNormal = gs_in[0].fragWorldNormal;
