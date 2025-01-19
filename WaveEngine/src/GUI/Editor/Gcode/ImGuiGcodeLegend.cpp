@@ -3,6 +3,8 @@
 #include "../ImGuiEditor.hpp"
 #include "Render/RenderSystem.hpp"
 #include "Logical/Gcode/GcodeViewer.hpp"
+#include "Logical/Framework/World/Scene.hpp"
+#include "GlobalContext.hpp"
 
 static const std::array<std::string, ExtrusionRole::erCount> role_labels = {
     ("Undefined"),
@@ -73,7 +75,7 @@ void GcodeLegend::render()
                 ImGui::GetColorU32({ color[0], color[1], color[2], color[3] }));
         };
 
-        std::shared_ptr<GcodeViewer> gcode_viewer = m_parent->parent()->ref_render_system->gcodeViewer();
+        std::shared_ptr<GcodeViewer> gcode_viewer = g_context.scene->gcodeViewer();
         for (size_t i = 1; i < ExtrusionRole::erCount; ++i) {
             append_item(Extrusion_Role_Colors[i], role_labels[i],
                 gcode_viewer->is_visible(ExtrusionRole(i)),

@@ -17,7 +17,9 @@ public:
 	enum class Type {
 		ZPre,
 		Picking,
+		SkyBox,
 		Shadow,
+		Forward,
 		GBuffer,
 		DeferredLighting,
 		Transparent,
@@ -32,22 +34,23 @@ public:
 		Normal,
 	};
 
-	RenderPass() = default;
+	RenderPass() : m_rhi(RenderSourceData::rhi) {}
 	RenderPass(const RenderPass&) = delete;
 	RenderPass& operator=(const RenderPass&) = delete;
 	virtual ~RenderPass() = default;
-	virtual void init() = 0;
 	virtual void draw() = 0;
 	virtual void clear() {
 		m_framebuffer->bind();
 		m_framebuffer->clear();
 	};
 	void prepareRenderSourceData(const std::shared_ptr<RenderSourceData>& render_source_data) { 
-		m_rhi = RenderSourceData::rhi;
 		m_render_source_data = render_source_data;
 	}
 	void setInputPasses(const std::vector<RenderPass*>& input_passes) { m_input_passes = input_passes; }
 	RhiFrameBuffer* getFrameBuffer() const { return m_framebuffer.get(); };
+
+protected:
+	virtual void init() = 0;
 
 protected:
 	std::shared_ptr<Rhi> m_rhi;

@@ -8,8 +8,7 @@ class Light;
 class ImGuiEditor;
 class ImGuiSceneHierarchy {
 public:
-	ImGuiSceneHierarchy(ImGuiEditor* parent) : m_parent(parent) {}
-	void init();
+	ImGuiSceneHierarchy(ImGuiEditor* parent);
 	void render();
 
 protected:

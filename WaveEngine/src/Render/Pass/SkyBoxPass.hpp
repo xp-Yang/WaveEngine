@@ -6,8 +6,10 @@
 class SkyBoxPass : public RenderPass {
 public:
     SkyBoxPass();
-    void init() override;
     void draw() override;
+
+protected:
+    void init();
 };
 
 #endif // !SkyBoxPass_hpp

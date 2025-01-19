@@ -3,6 +3,7 @@
 ZPrePass::ZPrePass()
 {
     m_type = RenderPass::Type::ZPre;
+    init();
 }
 
 void ZPrePass::init()

@@ -6,8 +6,10 @@
 class PickingPass : public RenderPass {
 public:
     PickingPass();
-    void init() override;
     void draw() override;
+
+protected:
+    void init() override;
 
 private:
     unsigned int m_fbo = 0;

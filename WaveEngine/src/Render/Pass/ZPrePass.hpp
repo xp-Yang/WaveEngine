@@ -6,8 +6,10 @@
 class ZPrePass : public RenderPass {
 public:
     ZPrePass();
-    void init() override;
     void draw() override;
+
+protected:
+    void init() override;
 };
 
 #endif // !ZPrePass_hpp

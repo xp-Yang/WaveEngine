@@ -81,7 +81,7 @@ public:
 
 class LightManager {
 public:
-	void init();
+	LightManager();
 	std::shared_ptr<DirectionalLight> mainDirectionalLight() const {
 		return std::dynamic_pointer_cast<DirectionalLight>(m_lights[0]);
 	}

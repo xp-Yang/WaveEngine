@@ -1,5 +1,10 @@
 #include "RayTracingPass.hpp"
 
+RayTracingPass::RayTracingPass()
+{
+	init();
+}
+
 void RayTracingPass::init()
 {
 	RhiTexture* color_texture = m_rhi->newTexture(RhiTexture::Format::RGB16F, Vec2(DEFAULT_RENDER_RESOLUTION_X, DEFAULT_RENDER_RESOLUTION_Y));

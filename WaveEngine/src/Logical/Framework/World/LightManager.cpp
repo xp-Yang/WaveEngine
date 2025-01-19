@@ -1,6 +1,6 @@
 #include "LightManager.hpp"
 
-void LightManager::init()
+LightManager::LightManager()
 {
 	addDirectionalLight();
 

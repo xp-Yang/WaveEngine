@@ -6,10 +6,12 @@
 class DeferredLightingPass : public RenderPass {
 public:
     DeferredLightingPass();
-    void init() override;
     void draw() override;
     void enablePBR(bool enable);
     void setCubeMaps(const std::vector<unsigned int>& cube_maps) { m_cube_maps = cube_maps; }
+
+protected:
+    void init() override;
 
 private:
     bool m_pbr = false;

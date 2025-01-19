@@ -7,10 +7,10 @@ class BloomPass : public RenderPass
 {
 public:
 	BloomPass();
-	void init() override;
 	void draw() override;
 
 protected:
+	void init() override;
 	void extractBright();
 	void blur();
 

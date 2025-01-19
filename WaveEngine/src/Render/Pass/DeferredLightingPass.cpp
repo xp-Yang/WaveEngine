@@ -3,6 +3,7 @@
 DeferredLightingPass::DeferredLightingPass()
 {
 	m_type = RenderPass::Type::DeferredLighting;
+	init();
 }
 
 void DeferredLightingPass::init()

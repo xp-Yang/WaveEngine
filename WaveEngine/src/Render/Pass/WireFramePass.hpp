@@ -7,8 +7,10 @@ class WireFramePass : public RenderPass
 {
 public:
 	WireFramePass();
-	void init() override;
 	void draw() override;
+
+protected:
+	void init();
 };
 
 #endif

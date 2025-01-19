@@ -5,6 +5,7 @@
 SkyBoxPass::SkyBoxPass()
 {
     m_type = RenderPass::Type::Transparent;
+    init();
 }
 
 void SkyBoxPass::init()

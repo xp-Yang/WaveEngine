@@ -6,12 +6,12 @@
 class ShadowPass : public RenderPass {
 public:
     ShadowPass();
-    void init() override;
     void draw() override;
     void clear() override;
     const std::vector<unsigned int>& getCubeMaps() const { return m_cube_maps; }
 
 protected:
+    void init() override;
     void drawDirectionalLightShadowMap();
     void drawPointLightShadowMap();
 

@@ -12,6 +12,7 @@
 #include "Gui/Window.hpp"
 #include "Render/RenderSystem.hpp"
 #include "Logical/FrameWork/World/Scene.hpp"
+#include "GlobalContext.hpp"
 
 ImGuiEditor::ImGuiEditor()
     : m_main_canvas(std::make_unique<MainCanvas>(this))
@@ -21,21 +22,6 @@ ImGuiEditor::ImGuiEditor()
     , m_global_console_window(std::make_unique<ImGuiGlobalConsole>(this))
     , m_debug_window(std::make_unique<ImGuiDebugWindow>(this))
 {
-}
-
-ImGuiEditor::~ImGuiEditor()
-{
-    ImGui_ImplOpenGL3_Shutdown();
-    ImGui_ImplGlfw_Shutdown();
-    ImGui::DestroyContext();
-}
-
-void ImGuiEditor::init(std::shared_ptr<Window> window, std::shared_ptr<RenderSystem> render_system, std::shared_ptr<Scene> scene)
-{
-    ref_window = window;
-    ref_render_system = render_system;
-    ref_scene = scene;
-
     if (!ImGui::GetCurrentContext() || !ImGui::GetCurrentContext()->Initialized) {
         // setup imgui
         IMGUI_CHECKVERSION();
@@ -43,13 +29,18 @@ void ImGuiEditor::init(std::shared_ptr<Window> window, std::shared_ptr<RenderSys
         ImGuiIO& io = ImGui::GetIO();
         io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;         // Enable Docking
         io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;       // Enable Multi-Viewport / Platform Windows
-        ImGui_ImplGlfw_InitForOpenGL((GLFWwindow*)ref_window->getNativeWindowHandle(), true);
+        ImGui_ImplGlfw_InitForOpenGL((GLFWwindow*)g_context.window->getNativeWindowHandle(), true);
         ImGui_ImplOpenGL3_Init("#version 430");
     }
 
     configUIStyle();
+}
 
-    m_scene_hierarchy_window->init();
+ImGuiEditor::~ImGuiEditor()
+{
+    ImGui_ImplOpenGL3_Shutdown();
+    ImGui_ImplGlfw_Shutdown();
+    ImGui::DestroyContext();
 }
 
 void ImGuiEditor::onUpdate()
@@ -66,8 +57,6 @@ void ImGuiEditor::onUpdate()
     m_context_menu->render();
     m_scene_hierarchy_window->render();
     m_global_console_window->render();
-
-    ref_render_system->showMainCanvas(isInMainCanvas());
 }
 
 void ImGuiEditor::beginFrame()
@@ -100,14 +89,16 @@ Viewport ImGuiEditor::getMainViewport() const
 
 void ImGuiEditor::popUpMenu()
 {
-    ContextType context = ref_scene->getPickedObjects().empty() ? 
-        (ref_scene->getPickedLight().get() == nullptr ? ContextType::Void : ContextType::Light) :
+    ContextType context = g_context.scene->getPickedObjects().empty() ? 
+        (g_context.scene->getPickedLight().get() == nullptr ? ContextType::Void : ContextType::Light) :
         ContextType::Object;
     m_context_menu->popUp(context);
 }
 
 bool ImGuiEditor::isInMainCanvas() const
 {
+    if (!m_main_canvas->getImGuiWindow())
+        return true;
     return !m_main_canvas->getImGuiWindow()->SkipItems;
 }
 
@@ -118,27 +109,27 @@ void ImGuiEditor::renderMenuBar()
         if (ImGui::BeginMenu("File"))
         {
             if (ImGui::MenuItem("Open", "Ctrl+O")) {
-                FileDialog* file_dlg = ref_window->createFileDialog();
+                FileDialog* file_dlg = g_context.window->createFileDialog();
                 auto filepath = file_dlg->OpenFile("");
                 if (filepath.find(".gcode") != std::string::npos) {
-                    const GCodeProcessorResult& result = ref_scene->loadGcodeFile(filepath);
+                    const GCodeProcessorResult& result = g_context.scene->loadGcodeFile(filepath);
                     if (!result.moves.empty()) {
-                        ref_render_system->gcodeViewer()->load(result);
-                        static_cast<PreviewCanvas*>(m_preview_canvas.get())->horizontal_slider()->initValueSpan(ref_render_system->gcodeViewer()->get_move_range());
-                        static_cast<PreviewCanvas*>(m_preview_canvas.get())->vertical_slider()->initValueSpan(ref_render_system->gcodeViewer()->get_layer_range());
+                        g_context.scene->gcodeViewer()->load(result);
+                        static_cast<PreviewCanvas*>(m_preview_canvas.get())->horizontal_slider()->initValueSpan(g_context.scene->gcodeViewer()->get_move_range());
+                        static_cast<PreviewCanvas*>(m_preview_canvas.get())->vertical_slider()->initValueSpan(g_context.scene->gcodeViewer()->get_layer_range());
 
-                        //ref_render_system->gcodeViewerInstancing()->load(result);
-                        //static_cast<PreviewCanvas*>(m_preview_canvas.get())->horizontal_slider()->initValueSpan(ref_render_system->gcodeViewerInstancing()->get_move_range());
-                        //static_cast<PreviewCanvas*>(m_preview_canvas.get())->vertical_slider()->initValueSpan(ref_render_system->gcodeViewerInstancing()->get_layer_range());
+                        //g_context.scene->gcodeViewerInstancing()->load(result);
+                        //static_cast<PreviewCanvas*>(m_preview_canvas.get())->horizontal_slider()->initValueSpan(g_context.scene->gcodeViewerInstancing()->get_move_range());
+                        //static_cast<PreviewCanvas*>(m_preview_canvas.get())->vertical_slider()->initValueSpan(g_context.scene->gcodeViewerInstancing()->get_layer_range());
                     }
                     
                 }
                 else if (!filepath.empty()) {
-                    ref_scene->loadModel(filepath);
+                    g_context.scene->loadModel(filepath);
                 }
             }
             if (ImGui::MenuItem("Save As..", "Ctrl+S")) {
-                FileDialog* file_dlg = ref_window->createFileDialog();
+                FileDialog* file_dlg = g_context.window->createFileDialog();
                 auto filepath = file_dlg->SaveFile("");
                 // TODO
             }
@@ -175,7 +166,7 @@ void ImGuiEditor::renderEmptyMainDockerSpaceWindow()
     renderMenuBar();
     ImGui::End();
     if (!show) {
-        glfwSetWindowShouldClose((GLFWwindow*)ref_window->getNativeWindowHandle(), true);
+        glfwSetWindowShouldClose((GLFWwindow*)g_context.window->getNativeWindowHandle(), true);
     }
 #else
     ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_MenuBar |

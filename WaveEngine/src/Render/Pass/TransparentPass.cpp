@@ -5,6 +5,7 @@
 TransparentPass::TransparentPass()
 {
     m_type = RenderPass::Type::Transparent;
+    init();
 }
 
 void TransparentPass::init()

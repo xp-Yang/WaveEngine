@@ -6,10 +6,13 @@
 
 class GcodeViewerPass : public RenderPass {
 public:
-	void init() override;
+	GcodeViewerPass();
 	void draw() override;
 	void setGcodeViewer(GcodeViewer* gcode_viewer) { m_gcode_viewer = gcode_viewer; }
 	void reload_mesh_data(std::array<LinesBatch, ExtrusionRole::erCount> lines_batches);
+
+protected:
+	void init() override;
 
 private:
 	std::vector<unsigned int> m_VAOs;

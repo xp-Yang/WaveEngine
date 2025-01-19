@@ -33,8 +33,8 @@ protected:
     CanvasType m_type;
     Viewport m_viewport;
 
-    ImGuiEditor* m_parent;
-    ImGuiWindow* m_imgui_window;
+    ImGuiEditor* m_parent{ nullptr };
+    ImGuiWindow* m_imgui_window{ nullptr };
 };
 
 class ImGuiToolbar;

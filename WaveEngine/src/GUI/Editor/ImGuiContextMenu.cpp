@@ -4,6 +4,7 @@
 
 #include "ImGuiEditor.hpp"
 #include "Logical/FrameWork/World/Scene.hpp"
+#include "GlobalContext.hpp"
 
 void ImGuiContextMenu::render()
 {
@@ -24,7 +25,7 @@ void ImGuiContextMenu::render()
         }
 
         if (m_context == ContextType::Object) {
-            auto& context_objs = m_parent->ref_scene->getPickedObjects();
+            auto& context_objs = g_context.scene->getPickedObjects();
             bool obj_visible = (*context_objs.begin())->visible();
             if (ImGui::MenuItem("Visible", "", obj_visible, true)) {
                 (*context_objs.begin())->setVisible(!obj_visible);

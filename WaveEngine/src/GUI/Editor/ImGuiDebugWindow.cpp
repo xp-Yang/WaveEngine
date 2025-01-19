@@ -6,6 +6,7 @@
 #include "Logical/Framework/World/Scene.hpp"
 #include "Render/RenderSystem.hpp"
 #include "ImGuiEditor.hpp"
+#include "GlobalContext.hpp"
 
 ImGuiDebugWindow::ImGuiDebugWindow(ImGuiEditor* parent)
     : m_parent(parent)
@@ -49,7 +50,7 @@ void ImGuiDebugWindow::render()
     m_bloom_canvas->render();
 
     ImGui::Begin("Main Camera Info", nullptr, ImGuiWindowFlags_NoCollapse);
-    auto& camera = m_parent->ref_scene->getMainCamera();
+    auto& camera = g_context.scene->getMainCamera();
     ImGui::NewLine();
     ImGui::Text("view matrix:");
     std::string test_view = Utils::mat4ToStr(camera.view);
@@ -66,6 +67,5 @@ void ImGuiDebugWindow::render()
     ImGui::Text("camera direction:");
     std::string test_camera_dir = Utils::vec3ToStr(camera.direction);
     ImGui::Text(test_camera_dir.c_str());
-
     ImGui::End();
 }

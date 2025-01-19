@@ -3,6 +3,7 @@
 OutlinePass::OutlinePass()
 {
     m_type = RenderPass::Type::Outline;
+    init();
 }
 
 void OutlinePass::init()

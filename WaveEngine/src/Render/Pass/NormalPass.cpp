@@ -3,6 +3,7 @@
 NormalPass::NormalPass()
 {
     m_type = RenderPass::Type::Normal;
+    init();
 }
 
 void NormalPass::init()

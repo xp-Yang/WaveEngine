@@ -3,6 +3,7 @@
 GBufferPass::GBufferPass()
 {
     m_type = RenderPass::Type::GBuffer;
+    init();
 }
 
 void GBufferPass::init()

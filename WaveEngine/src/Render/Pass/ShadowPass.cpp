@@ -5,6 +5,7 @@
 ShadowPass::ShadowPass()
 {
     m_type = RenderPass::Type::Shadow;
+    init();
 }
 
 void ShadowPass::init()

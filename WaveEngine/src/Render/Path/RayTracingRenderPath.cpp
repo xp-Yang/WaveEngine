@@ -9,12 +9,6 @@ RayTracingRenderPath::RayTracingRenderPath()
     m_combine_pass = std::make_unique<CombinePass>();
 }
 
-void RayTracingRenderPath::init()
-{
-    m_ray_tracing_pass->init();
-    m_combine_pass->init();
-}
-
 void RayTracingRenderPath::prepareRenderSourceData(const std::shared_ptr<RenderSourceData>& render_source_data)
 {
     m_ray_tracing_pass->prepareRenderSourceData(render_source_data);

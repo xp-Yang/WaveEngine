@@ -5,11 +5,14 @@
 
 class MeshForwardLightingPass : public RenderPass {
 public:
-    void init() override;
+    MeshForwardLightingPass();
     void enableReflection(bool reflection);
     void enablePBR(bool pbr);
     void draw() override;
     void setCubeMaps(const std::vector<unsigned int>& cube_maps) { m_cube_maps = cube_maps; }
+
+protected:
+    void init() override;
 
 private:
     unsigned int m_shadow_map = 0;

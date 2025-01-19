@@ -10,7 +10,7 @@ class ImGuiEditor;
 class PickSolver;
 class GUIInput {
 public:
-	void init(std::shared_ptr<ImGuiEditor> editor);
+	GUIInput(std::shared_ptr<ImGuiEditor> editor);
 	bool onUpdate();
 
 protected:

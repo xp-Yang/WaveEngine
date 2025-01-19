@@ -11,6 +11,11 @@
 
 static const std::string resource_dir = RESOURCE_DIR;
 
+Scene::Scene()
+{
+	init();
+}
+
 void Scene::load()
 {
 }
@@ -217,7 +222,6 @@ void Scene::init()
 #endif // ENABLE_ECS
 
 	m_light_manager = std::make_shared<LightManager>();
-	m_light_manager->init();
 
 	//size_t cubes_count = 9;
 	//size_t row_count = std::sqrt(cubes_count);
@@ -291,6 +295,8 @@ void Scene::init()
 		//auto bunny_transform = bunny_obj->getComponent<TransformComponent>();
 		//bunny_transform->scale = Vec3(75.0f);
 	}
+
+	m_gcode_viewer = std::make_shared<GcodeViewer>();
 }
 
 void Scene::onUpdate(float delta_time)

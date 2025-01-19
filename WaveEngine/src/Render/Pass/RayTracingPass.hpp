@@ -5,8 +5,11 @@
 
 class RayTracingPass : public RenderPass {
 public:
-    void init() override;
+    RayTracingPass();
     void draw() override;
+
+protected:
+    void init() override;
 };
 
 #endif

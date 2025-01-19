@@ -1,5 +1,9 @@
 #include "MeshForwardLightingPass.hpp"
 
+MeshForwardLightingPass::MeshForwardLightingPass() {
+    init();
+}
+
 void MeshForwardLightingPass::init()
 {
     RhiTexture* color_texture = m_rhi->newTexture(RhiTexture::Format::RGB8, Vec2(DEFAULT_RENDER_RESOLUTION_X, DEFAULT_RENDER_RESOLUTION_Y), 4);

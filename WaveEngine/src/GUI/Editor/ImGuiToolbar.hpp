@@ -13,8 +13,7 @@ class Scene;
 class ImGuiCanvas;
 class ImGuiToolbar {
 public:
-    ImGuiToolbar(ImGuiCanvas* parent);
-    void init(std::shared_ptr<Scene> scene);
+    ImGuiToolbar(ImGuiCanvas* parent, std::shared_ptr<Scene> scene);
     void render();
 
 protected:

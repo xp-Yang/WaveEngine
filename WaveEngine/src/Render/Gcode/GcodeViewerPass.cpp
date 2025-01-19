@@ -2,6 +2,10 @@
 
 #include <glad/glad.h>// TODO remove
 
+GcodeViewerPass::GcodeViewerPass() {
+	init();
+}
+
 void GcodeViewerPass::init()
 {
 	RhiTexture* color_texture = m_rhi->newTexture(RhiTexture::Format::RGB8, Vec2(DEFAULT_RENDER_RESOLUTION_X, DEFAULT_RENDER_RESOLUTION_Y), 4);

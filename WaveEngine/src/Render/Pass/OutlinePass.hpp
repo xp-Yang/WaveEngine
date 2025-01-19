@@ -7,8 +7,10 @@ class OutlinePass : public RenderPass
 {
 public:
 	OutlinePass();
-	void init() override;
 	void draw() override;
+
+protected:
+	void init() override;
 
 protected:
 	std::unique_ptr<RhiFrameBuffer> m_source_framebuffer;

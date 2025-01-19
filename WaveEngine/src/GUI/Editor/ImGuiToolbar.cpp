@@ -8,8 +8,9 @@
 #include <imgui_internal.h>
 #include <ImGuizmo.h>
 
-ImGuiToolbar::ImGuiToolbar(ImGuiCanvas* parent)
+ImGuiToolbar::ImGuiToolbar(ImGuiCanvas* parent, std::shared_ptr<Scene> scene)
     : m_parent(parent)
+    , ref_scene(scene)
 {
     auto tranlate_icon = std::make_shared<Texture>(TextureType::Custom, std::string(RESOURCE_DIR) + "/images/toolbar_translation.png", false);
     auto rotate_icon = std::make_shared<Texture>(TextureType::Custom, std::string(RESOURCE_DIR) + "/images/toolbar_rotate.png", false);
@@ -18,11 +19,6 @@ ImGuiToolbar::ImGuiToolbar(ImGuiCanvas* parent)
     m_tranlate_icon_id = RenderTextureData(tranlate_icon).id;
     m_rotate_icon_id = RenderTextureData(rotate_icon).id;
     m_scale_icon_id = RenderTextureData(scale_icon).id;
-}
-
-void ImGuiToolbar::init(std::shared_ptr<Scene> scene)
-{
-    ref_scene = scene;
 }
 
 void ImGuiToolbar::render()

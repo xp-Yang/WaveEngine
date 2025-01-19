@@ -6,8 +6,10 @@
 class TransparentPass : public RenderPass {
 public:
     TransparentPass();
-    void init() override;
     void draw() override;
+
+protected:
+    void init();
 };
 
 #endif // !TransparentPass_hpp

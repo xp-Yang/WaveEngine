@@ -11,16 +11,15 @@
 
 #include "Render/RenderSystem.hpp"
 #include "Logical/Framework/World/Scene.hpp"
+#include "GlobalContext.hpp"
 
 void MainCanvas::render()
 {
     if (!m_toolbar) {
-        auto scene = m_parent->ref_scene;
-        m_toolbar = new ImGuiToolbar(this);
-        m_toolbar->init(scene);
+        m_toolbar = new ImGuiToolbar(this, g_context.scene);
     }
 
-    auto render_system = m_parent->ref_render_system;
+    auto render_system = g_context.render_system;
     static ImGuiWindowFlags window_flags = 0;
     ImGui::SetNextWindowSize(ImVec2(1280, 720), ImGuiCond_Appearing);
     if (ImGui::Begin("MainCanvas", nullptr, window_flags | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoBackground)) {
@@ -58,7 +57,7 @@ PreviewCanvas::PreviewCanvas(ImGuiEditor* parent)
 
 void PreviewCanvas::render()
 {
-    auto render_system = m_parent->ref_render_system;
+    auto render_system = g_context.render_system;
     static ImGuiWindowFlags window_flags = 0;
     ImGui::SetNextWindowSize(ImVec2(1280, 720), ImGuiCond_Appearing);
     if (ImGui::Begin("PreviewCanvas", nullptr, window_flags | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoBackground)) {
@@ -84,12 +83,11 @@ void PreviewCanvas::render()
         m_legend->render();
     }
     ImGui::End();
-
 }
 
 void PickingCanvas::render()
 {
-    auto render_system = m_parent->ref_render_system;
+    auto render_system = g_context.render_system;
     ImGui::SetNextWindowSize(ImVec2(1280, 720), ImGuiCond_Appearing);
     if (ImGui::Begin("PickingCanvas", nullptr, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoBackground)) {
         m_imgui_window = ImGui::GetCurrentWindow();
@@ -105,7 +103,7 @@ void PickingCanvas::render()
 
 void ShadowCanvas::render()
 {
-    auto render_system = m_parent->ref_render_system;
+    auto render_system = g_context.render_system;
     ImGui::SetNextWindowSize(ImVec2(1280, 720), ImGuiCond_Appearing);
     if (ImGui::Begin("ShadowCanvas", nullptr, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoBackground)) {
         m_imgui_window = ImGui::GetCurrentWindow();
@@ -121,7 +119,7 @@ void ShadowCanvas::render()
 
 void GBufferCanvas::render()
 {
-    auto render_system = m_parent->ref_render_system;
+    auto render_system = g_context.render_system;
     ImGui::SetNextWindowSize(ImVec2(1280, 720), ImGuiCond_Appearing);
     if (ImGui::Begin("GBufferCanvas", nullptr, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoBackground)) {
         m_imgui_window = ImGui::GetCurrentWindow();
@@ -146,7 +144,7 @@ void GBufferCanvas::render()
 
 void LightingCanvas::render()
 {
-    auto render_system = m_parent->ref_render_system;
+    auto render_system = g_context.render_system;
     ImGui::SetNextWindowSize(ImVec2(1280, 720), ImGuiCond_Appearing);
     if (ImGui::Begin("LightingCanvas", nullptr, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoBackground)) {
         m_imgui_window = ImGui::GetCurrentWindow();
@@ -162,7 +160,7 @@ void LightingCanvas::render()
 
 void BloomCanvas::render()
 {
-    auto render_system = m_parent->ref_render_system;
+    auto render_system = g_context.render_system;
     ImGui::SetNextWindowSize(ImVec2(1280, 720), ImGuiCond_Appearing);
     if (ImGui::Begin("BloomCanvas", nullptr, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoBackground)) {
         m_imgui_window = ImGui::GetCurrentWindow();

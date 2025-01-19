@@ -5,6 +5,7 @@
 CombinePass::CombinePass()
 {
 	m_type = RenderPass::Type::Combined;
+	init();
 }
 
 void CombinePass::init()

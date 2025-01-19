@@ -3,6 +3,7 @@
 BloomPass::BloomPass()
 {
     m_type = RenderPass::Type::Bloom;
+    init();
 }
 
 void BloomPass::init()

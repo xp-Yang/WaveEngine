@@ -7,10 +7,13 @@
 namespace Instance {
 class GcodeViewerInstancingPass : public RenderPass {
 public:
-	void init() override;
+	GcodeViewerInstancingPass();
 	void draw() override;
 	void setGcodeViewer(GcodeViewerInstancing* gcode_viewer) { m_gcode_viewer = gcode_viewer; }
 	void reload_mesh_data(std::array<LinesBatch, ExtrusionRole::erCount> lines_batches);
+
+protected:
+	void init() override;
 
 private:
 	std::vector<unsigned int> m_VAOs;

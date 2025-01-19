@@ -7,8 +7,10 @@ class CheckerBoardPass : public RenderPass
 {
 public:
 	CheckerBoardPass();
-	void init() override;
 	void draw() override;
+
+protected:
+	void init() override;
 };
 
 #endif

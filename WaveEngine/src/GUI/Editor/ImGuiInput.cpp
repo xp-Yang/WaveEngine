@@ -3,15 +3,16 @@
 #include "GUI/Window.hpp"
 #include "Render/RenderSystem.hpp"
 #include "Logical/FrameWork/World/Scene.hpp"
+#include "GlobalContext.hpp"
 #include <imgui.h>
 // TODO remove
 #include <glad/glad.h>
 
-void GUIInput::init(std::shared_ptr<ImGuiEditor> editor)
+GUIInput::GUIInput(std::shared_ptr<ImGuiEditor> editor)
+	: ref_editor(editor)
+	, m_pick_solver(std::make_unique<PickSolver>(editor))
+	, m_camera_manipulator(std::make_shared<CameraManipulator>(g_context.scene->getMainCamera()))
 {
-	ref_editor = editor;
-	m_camera_manipulator = std::make_shared<CameraManipulator>(ref_editor->ref_scene->getMainCamera());
-	m_pick_solver = std::make_unique<PickSolver>(editor);
 }
 
 bool GUIInput::refreshState()
@@ -117,8 +118,8 @@ Vec2 GUIInput::mapToMainCanvasWindow(const Vec2& value)
 	auto main_viewport = ref_editor->getMainViewport();
 	pos.x -= main_viewport.x;
 	pos.y -= main_viewport.y;
-	pos.x *= ref_editor->ref_window->getWidth() / main_viewport.width;
-	pos.y *= ref_editor->ref_window->getHeight() / main_viewport.height;
+	pos.x *= g_context.window->getWidth() / main_viewport.width;
+	pos.y *= g_context.window->getHeight() / main_viewport.height;
 	return pos;
 }
 
@@ -135,17 +136,17 @@ void PickSolver::onPicking(float mouse_x, float mouse_y, bool retain_old)
 	y = DEFAULT_WINDOW_HEIGHT - y;
 
 	unsigned char data[4] = { 0,0,0,0 };
-	unsigned int frame_buffer_id = ref_editor->ref_render_system->getPickingFBO();
+	unsigned int frame_buffer_id = g_context.render_system->getPickingFBO();
 	glBindFramebuffer(GL_FRAMEBUFFER, frame_buffer_id);
 	glReadBuffer(GL_COLOR_ATTACHMENT0);
 	glReadPixels(x, y, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, data);
 	int picked_id = (int)data[0] + (((int)data[1]) << 8) + (((int)data[2]) << 16);
-	const auto& scene_objects = ref_editor->ref_scene->getObjects();
+	const auto& scene_objects = g_context.scene->getObjects();
 	auto it = std::find_if(scene_objects.begin(), scene_objects.end(), [picked_id](const std::shared_ptr<GObject>& obj) {
 		return obj->ID().id == picked_id;
 		});
 	if (it != scene_objects.end())
-		emit pickedChanged({ (*it)->ID() }, retain_old ? std::vector<GObjectID>() : ref_editor->ref_scene->getPickedObjectIDs());
+		emit pickedChanged({ (*it)->ID() }, retain_old ? std::vector<GObjectID>() : g_context.scene->getPickedObjectIDs());
 
 	Logger::debug("PickSolver::onPicking(), picking({}, {}), mouse({}, {}), picked_id:{}", x, y, mouse_x, mouse_y, picked_id);
 }
@@ -153,5 +154,5 @@ void PickSolver::onPicking(float mouse_x, float mouse_y, bool retain_old)
 PickSolver::PickSolver(std::shared_ptr<ImGuiEditor> editor)
 	: ref_editor(editor)
 {
-	connect(this, &pickedChanged, ref_editor->ref_scene.get(), &Scene::onPickedChanged);
+	connect(this, &pickedChanged, g_context.scene.get(), &Scene::onPickedChanged);
 }

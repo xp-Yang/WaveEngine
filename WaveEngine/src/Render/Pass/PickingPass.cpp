@@ -3,6 +3,7 @@
 PickingPass::PickingPass()
 {
     m_type = RenderPass::Type::Picking;
+    init();
 }
 
 void PickingPass::init()

@@ -3,6 +3,7 @@
 WireFramePass::WireFramePass()
 {
     m_type = RenderPass::Type::WireFrame;
+    init();
 }
 
 void WireFramePass::init()

@@ -7,8 +7,10 @@ class NormalPass : public RenderPass
 {
 public:
 	NormalPass();
-	void init() override;
 	void draw() override;
+
+protected:
+	void init();
 };
 
 #endif

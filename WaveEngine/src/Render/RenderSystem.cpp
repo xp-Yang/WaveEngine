@@ -9,67 +9,19 @@
 RenderSystem::RenderSystem()
 {
     RenderSourceData::initRHI();
-}
-
-void RenderSystem::init(std::shared_ptr<Scene> scene)
-{
-    m_scene = scene;
 
     m_render_source_data = std::make_shared<RenderSourceData>();
 
-    m_gcode_viewer = std::make_shared<GcodeViewer>();
-    m_gcode_viewer_instancing = std::make_shared<Instance::GcodeViewerInstancing>();
-
     m_forward_path = std::make_shared<ForwardRenderPath>(this);
-    m_forward_path->prepareRenderSourceData(m_render_source_data);
-    m_forward_path->init();
-
     m_deferred_path = std::make_shared<DeferredRenderPath>(this);
-    m_deferred_path->prepareRenderSourceData(m_render_source_data);
-    m_deferred_path->init();
 
-    m_ray_tracing_path = std::make_shared<RayTracingRenderPath>();
-    m_ray_tracing_path->prepareRenderSourceData(m_render_source_data);
-    m_ray_tracing_path->init();
-
-    setRenderPathType(RenderPathType::Forward);
-}
-
-RenderPathType RenderSystem::getRenderPathType()
-{
-    return m_path_type;
-}
-
-void RenderSystem::setRenderPathType(RenderPathType type)
-{
-    m_path_type = type;
-
-    switch (m_path_type)
-    {
-    case RenderPathType::Forward:
-        m_curr_path = m_forward_path;
-        break;
-    case RenderPathType::Deferred:
-        m_curr_path = m_deferred_path;
-        break;
-    case RenderPathType::RayTracing:
-        m_curr_path = m_ray_tracing_path;
-        break;
-    default:
-        break;
-    }
+    m_render_params.render_path_type = RenderPathType::Forward;
+    m_curr_path = m_forward_path;
 }
 
 RenderParams& RenderSystem::renderParams()
 {
     return m_render_params;
-}
-
-void RenderSystem::onUpdate()
-{
-    updateRenderSourceData();
-
-    m_curr_path->render();
 }
 
 unsigned int RenderSystem::getPickingFBO()
@@ -83,7 +35,26 @@ unsigned int RenderSystem::renderPassTexture(RenderPass::Type render_pass_type)
     return texture ? texture->id() : 0;
 }
 
-void RenderSystem::updateRenderSourceData()
+void RenderSystem::onUpdate(std::shared_ptr<Scene> scene)
+{
+    switch (m_render_params.render_path_type)
+    {
+    case RenderPathType::Forward:
+        m_curr_path = m_forward_path;
+        break;
+    case RenderPathType::Deferred:
+        m_curr_path = m_deferred_path;
+        break;
+    default:
+        break;
+    }
+
+    updateRenderSourceData(scene);
+    m_curr_path->prepareRenderSourceData(m_render_source_data);
+    m_curr_path->render();
+}
+
+void RenderSystem::updateRenderSourceData(std::shared_ptr<Scene> scene)
 {
     if (!m_initialized) {
         std::shared_ptr<Mesh> screen_quad_sub_mesh;
@@ -92,13 +63,13 @@ void RenderSystem::updateRenderSourceData()
     }
 
     if (!m_initialized) {
-        const auto& dir_light = m_scene->getLightManager()->mainDirectionalLight();
+        const auto& dir_light = scene->getLightManager()->mainDirectionalLight();
         m_render_source_data->render_directional_light_data_list.emplace_back(
             RenderDirectionalLightData{ dir_light->luminousColor, dir_light->direction,
             dir_light->lightViewMatrix(), dir_light->lightProjMatrix() });
     }
 
-    const auto& point_lights = m_scene->getLightManager()->pointLights();
+    const auto& point_lights = scene->getLightManager()->pointLights();
     struct inst_data {
         Mat4 inst_matrix;
         Color4 inst_color;
@@ -148,7 +119,7 @@ void RenderSystem::updateRenderSourceData()
         m_render_source_data->render_skybox_node.mesh = std::make_shared<RenderMeshData>(skybox_mesh);
     }
 
-    const auto& objects = m_scene->getObjects();
+    const auto& objects = scene->getObjects();
     for (const auto& object : objects) {
         auto& sub_meshes = object->getComponent<MeshComponent>()->sub_meshes;
         auto& model_matrix = object->getComponent<TransformComponent>()->transform();
@@ -175,11 +146,11 @@ void RenderSystem::updateRenderSourceData()
 
     // picked
     m_render_source_data->picked_ids.clear();
-    for (const auto& object : m_scene->getPickedObjects()) {
+    for (const auto& object : scene->getPickedObjects()) {
         m_render_source_data->picked_ids.push_back(object->ID());
     }
 
-    CameraComponent& camera = m_scene->getMainCamera();
+    CameraComponent& camera = scene->getMainCamera();
     m_render_source_data->camera_position = camera.pos;
     m_render_source_data->view_matrix = camera.view;
     m_render_source_data->proj_matrix = camera.projection;
