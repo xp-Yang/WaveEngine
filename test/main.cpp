@@ -2,7 +2,7 @@
 
 int main()
 {
-    auto& app = GetApp();
+    auto& app = Application::get();
     app.init();
     app.run();
     app.shutdown();
@@ -11,7 +11,7 @@ int main()
 
 int WinMain()
 {
-    auto& app = GetApp();
+    auto& app = Application::get();
     app.init();
     app.run();
     app.shutdown();
