@@ -1,5 +1,4 @@
 #include "GlobalContext.hpp"
-
 #include "GUI/Window.hpp"
 #include "Logical/FrameWork/World/Scene.hpp"
 #include "Render/RenderSystem.hpp"
@@ -16,6 +15,7 @@ GlobalContext::GlobalContext()
 	render_system = std::make_shared<RenderSystem>();
 	gui_editor = std::make_shared<ImGuiEditor>();
 	gui_input = std::make_shared<GUIInput>(gui_editor);
+	animation_system = std::make_shared<AnimationSystem>();
 }
 
 GlobalContext::~GlobalContext()

@@ -1,84 +1,6 @@
-#include "Scene.hpp"
+#include "cubetest.hpp"
 
-#include "Logical/Framework/Component/CameraComponent.hpp"
-#include "Logical/Framework/Component/MeshComponent.hpp"
-#include "Logical/Framework/Component/TransformComponent.hpp"
-
-#include "ResourceManager/ResourceImporter.hpp"
-#include "ResourceManager/Gcode/GcodeImporter.hpp"
-
-#include "Core/Logger/Logger.hpp"
-
-static const std::string resource_dir = RESOURCE_DIR;
-
-Scene::Scene()
-{
-	init();
-}
-
-void Scene::load()
-{
-}
-
-void Scene::save()
-{
-}
-
-GObject* Scene::loadModel(const std::string& filepath)
-{
-	ResourceImporter model_importer;
-	model_importer.load(filepath);
-	std::vector<int> obj_sub_meshes_idx = model_importer.getSubMeshesIds();
-	if (obj_sub_meshes_idx.empty()) {
-		//Logger::error("Model datas is empty. File loading fails. Please check if the filepath is all English.");
-		return nullptr;
-	}
-	std::string name = filepath.substr(filepath.find_last_of("/\\") + 1, filepath.find_last_of('.') - filepath.find_last_of("/\\") - 1);
-
-#if ENABLE_ECS
-	auto& world = ecs::World::get();
-	auto entity = world.create_entity();
-	world.addComponent<ecs::NameComponent>(entity).name = name;
-	world.addComponent<TransformComponent>(entity);
-	world.addComponent<ExplosionComponent>(entity);
-	auto& renderable = world.addComponent<ecs::RenderableComponent>(entity);
-	for (int idx : obj_sub_meshes_idx) {
-		renderable.sub_meshes.push_back(Mesh{ idx, MeshFileRef{ MeshFileType::OBJ, filepath}, {}, Mat4(1.0f) });
-	}
-	auto res = GObject::create(nullptr, entity);
-#else
-	auto res = GObject::create(nullptr, name);
-	res->addComponent<TransformComponent>();
-	MeshComponent& mesh = res->addComponent<MeshComponent>();
-	for (int idx : obj_sub_meshes_idx) {
-		std::shared_ptr<Mesh> sub_mesh = model_importer.meshOfNode(idx);
-		mesh.sub_meshes.push_back(sub_mesh);
-	}
-	m_objects.push_back(std::shared_ptr<GObject>(res));
-#endif
-
-	return res;
-}
-
-GCodeProcessorResult Scene::loadGcodeFile(const std::string& filepath)
-{
-	GCodeProcessor gcode_importer;
-	gcode_importer.process_file(filepath);
-	GCodeProcessorResult&& result = std::move(gcode_importer.extract_result());
-	return result;
-}
-
-std::vector<GObjectID> Scene::getPickedObjectIDs() const
-{
-	std::vector<GObjectID> res(m_picked_objects.size());
-	std::transform(m_picked_objects.begin(), m_picked_objects.end(), res.begin(), [](const std::shared_ptr<GObject>& obj) {
-		return obj->ID();
-		});
-	return res;
-}
-
-void Scene::init()
-{
+void Cubetest::init() {
 #if ENABLE_ECS
 	auto& world = ecs::World::get();
 	auto root_entity = world.create_entity();
@@ -221,49 +143,43 @@ void Scene::init()
 
 #endif // ENABLE_ECS
 
-	m_light_manager = std::make_shared<LightManager>();
+	size_t cubes_count = 9;
+	size_t row_count = std::sqrt(cubes_count);
+	size_t col_count = cubes_count / row_count;
+	for (int i = 0; i < cubes_count; i++) {
+		GObject* cube_obj = GObject::create(nullptr, "Cube");
+		MeshComponent& mesh = cube_obj->addComponent<MeshComponent>();
+		std::shared_ptr<Mesh> cube_sub_mesh = Mesh::create_cube_mesh();
+		std::shared_ptr<Material> cube_material = Material::create_complete_default_material();
+		cube_material->albedo = Vec3(1.0f);
+		cube_material->metallic = 1.0;
+		cube_material->roughness = 0.5;
+		cube_material->ao = 0.01;
+		cube_sub_mesh->material = cube_material;
+		mesh.sub_meshes.push_back(cube_sub_mesh);
+		TransformComponent& transform = cube_obj->addComponent<TransformComponent>();
+		transform.translation = { 1.5f * (i % col_count), 0.5f + 1.5f * (i / row_count), -10.0f };
+		m_objects.push_back(std::shared_ptr<GObject>(cube_obj));
+	}
 
-	//size_t cubes_count = 9;
-	//size_t row_count = std::sqrt(cubes_count);
-	//size_t col_count = cubes_count / row_count;
-	//for (int i = 0; i < cubes_count; i++) {
-	//	GObject* cube_obj = GObject::create(nullptr, "Cube");
-	//	MeshComponent& mesh = cube_obj->addComponent<MeshComponent>();
-	//	std::shared_ptr<Mesh> cube_sub_mesh = Mesh::create_cube_mesh();
-	//	std::shared_ptr<Material> cube_material = Material::create_complete_default_material();
-	//	cube_material->albedo = Vec3(1.0f);
-	//	cube_material->metallic = 1.0;
-	//	cube_material->roughness = 0.5;
-	//	cube_material->ao = 0.01;
-	//	cube_sub_mesh->material = cube_material;
-	//	mesh.sub_meshes.push_back(cube_sub_mesh);
-
-	//	TransformComponent& transform = cube_obj->addComponent<TransformComponent>();
-	//	transform.translation = { 1.5f * (i % col_count), 0.5f + 1.5f * (i / row_count), -10.0f };
-
-	//	m_objects.push_back(std::shared_ptr<GObject>(cube_obj));
-	//}
-
-	//size_t spheres_count = 4;
-	//size_t s_row_count = std::sqrt(spheres_count);
-	//size_t s_col_count = spheres_count / s_row_count;
-	//for (int i = 0; i < spheres_count; i++) {
-	//	auto sphere_obj = GObject::create(nullptr, "Sphere");
-	//	MeshComponent& mesh = sphere_obj->addComponent<MeshComponent>();
-	//	std::shared_ptr<Mesh> sphere_sub_mesh = Mesh::create_icosphere_mesh(0.5f, 4);
-	//	std::shared_ptr<Material> sphere_material = Material::create_complete_default_material();
-	//	sphere_material->albedo = Vec3(1.0f);
-	//	sphere_material->metallic = 1.0;
-	//	sphere_material->roughness = 0.5;
-	//	sphere_material->ao = 0.01;
-	//	sphere_sub_mesh->material = sphere_material;
-	//	mesh.sub_meshes.push_back(sphere_sub_mesh);
-
-	//	TransformComponent& transform = sphere_obj->addComponent<TransformComponent>();
-	//	transform.translation = { 1.5f * (i % s_col_count), 0.5f + 1.5f * (i / s_row_count), -5.0f };
-
-	//	m_objects.push_back(std::shared_ptr<GObject>(sphere_obj));
-	//}
+	size_t spheres_count = 4;
+	size_t s_row_count = std::sqrt(spheres_count);
+	size_t s_col_count = spheres_count / s_row_count;
+	for (int i = 0; i < spheres_count; i++) {
+		auto sphere_obj = GObject::create(nullptr, "Sphere");
+		MeshComponent& mesh = sphere_obj->addComponent<MeshComponent>();
+		std::shared_ptr<Mesh> sphere_sub_mesh = Mesh::create_icosphere_mesh(0.5f, 4);
+		std::shared_ptr<Material> sphere_material = Material::create_complete_default_material();
+		sphere_material->albedo = Vec3(1.0f);
+		sphere_material->metallic = 1.0;
+		sphere_material->roughness = 0.5;
+		sphere_material->ao = 0.01;
+		sphere_sub_mesh->material = sphere_material;
+		mesh.sub_meshes.push_back(sphere_sub_mesh);
+		TransformComponent& transform = sphere_obj->addComponent<TransformComponent>();
+		transform.translation = { 1.5f * (i % s_col_count), 0.5f + 1.5f * (i / s_row_count), -5.0f };
+		m_objects.push_back(std::shared_ptr<GObject>(sphere_obj));
+	}
 
 	{
 		GObject* plane_obj = GObject::create(nullptr, "Ground");
@@ -276,10 +192,8 @@ void Scene::init()
 		plane_material->ao = 0.01;
 		plane_sub_mesh->material = plane_material;
 		plane_mesh.sub_meshes.push_back(plane_sub_mesh);
-
 		TransformComponent& plane_transform = plane_obj->addComponent<TransformComponent>();
 		plane_transform.scale = Vec3(50.0f, 1.f, 50.0f);
-
 		m_objects.push_back(std::shared_ptr<GObject>(plane_obj));
 	}
 
@@ -294,42 +208,5 @@ void Scene::init()
 		//GObject* bunny_obj = loadModel(resource_dir + "/model/bunny.obj");
 		//auto bunny_transform = bunny_obj->getComponent<TransformComponent>();
 		//bunny_transform->scale = Vec3(75.0f);
-	}
-
-	m_gcode_viewer = std::make_shared<GcodeViewer>();
-}
-
-void Scene::onUpdate(float delta_time)
-{
-	for (const auto& obj : m_objects) {
-		obj->tick(delta_time);
-	}
-}
-
-void Scene::onPickedChanged(std::vector<GObjectID> added, std::vector<GObjectID> removed)
-{
-	m_picked_light.reset();
-	m_picked_objects.erase(std::remove_if(m_picked_objects.begin(), m_picked_objects.end(), [removed](const std::shared_ptr<GObject>& obj) {
-		return std::find(removed.begin(), removed.end(), obj->ID()) != removed.end();
-		}), m_picked_objects.end());
-	for (const auto& obj : m_objects) {
-		if (std::find(added.begin(), added.end(), obj->ID()) != added.end()) {
-			m_picked_objects.push_back(obj);
-			Logger::debug("Scene::onPickedChanged(), added obj: {} {}", obj->ID().id, obj->name());
-		}
-	}
-}
-
-void Scene::onPickedChanged(LightID light_id)
-{
-	m_picked_light.reset();
-	m_picked_objects.clear();
-	const std::vector<std::shared_ptr<Light>>& lights = m_light_manager->lights();
-	auto it = std::find_if(lights.begin(), lights.end(), [light_id](const std::shared_ptr<Light>& light) {
-		return light->ID() == light_id;
-		});
-	if (it != lights.end()) {
-		m_picked_light = *it;
-		Logger::debug("Scene::onPickedChanged(), light: {} {}", m_picked_light->ID().id, m_picked_light->name());
 	}
 }

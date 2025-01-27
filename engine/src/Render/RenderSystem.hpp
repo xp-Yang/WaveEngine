@@ -1,7 +1,6 @@
 #ifndef RenderSystem_hpp
 #define RenderSystem_hpp
 
-#include "Core/Signal/Signal.hpp"
 #include "RenderParams.hpp"
 #include "Path/RenderPath.hpp"
 

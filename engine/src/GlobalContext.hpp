@@ -18,6 +18,7 @@ struct GlobalContext {
     std::shared_ptr<Scene> scene{ nullptr };
     std::shared_ptr<RenderSystem> render_system{ nullptr };
     std::shared_ptr<Window> window{ nullptr };
+    std::shared_ptr<AnimationSystem> animation_system{ nullptr };
 };
 
 extern GlobalContext g_context;
