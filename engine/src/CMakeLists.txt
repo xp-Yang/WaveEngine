@@ -1,5 +1,9 @@
 set(WAVE_LIB_NAME WaveRuntime)
 
+set(BASE_INCLUDE_DIR ${ENGINE_SRC_DIR}/Base/include)
+set(LOGICAL_INCLUDE_DIR ${ENGINE_SRC_DIR}/Logical/include)
+set(GUI_INCLUDE_DIR ${ENGINE_SRC_DIR}/GUI/include)
+
 file(GLOB_RECURSE SRC_FILES "${ENGINE_SRC_DIR}/*.cpp" "${ENGINE_SRC_DIR}/*.c")
 file(GLOB_RECURSE HEAD_FILES "${ENGINE_SRC_DIR}/*.hpp" "${ENGINE_SRC_DIR}/*.h" "${ENGINE_INCLUDE_DIR}/*.hpp" "${ENGINE_INCLUDE_DIR}/*.h")
 file(GLOB_RECURSE RC_FILES "${ENGINE_RESOURCE_DIR}/*.*")
@@ -18,16 +22,24 @@ target_sources(${WAVE_LIB_NAME} PRIVATE ${RC_FILES})
 
 target_include_directories(${WAVE_LIB_NAME}
 	PUBLIC ${ENGINE_INCLUDE_DIR}
-	PUBLIC ${ENGINE_SRC_DIR})
+	PUBLIC ${BASE_INCLUDE_DIR}
+	PUBLIC ${LOGICAL_INCLUDE_DIR}
+	PUBLIC ${GUI_INCLUDE_DIR}
+	PRIVATE ${ENGINE_SRC_DIR})
 
 target_link_libraries(${WAVE_LIB_NAME} 
-	PUBLIC glad
-	PUBLIC imgui
-	PUBLIC stb
+	PRIVATE glad
+	PRIVATE imgui
+	PRIVATE stb
 	PUBLIC spdlog
 	PUBLIC json11
 	PUBLIC glm
-	PUBLIC glfw
-	PUBLIC assimp)
+	PRIVATE glfw
+	PRIVATE assimp)
 
+#通过宏定义告诉程序resource目录
+target_compile_definitions(WaveRuntime PUBLIC RESOURCE_DIR="${ENGINE_RESOURCE_DIR}")
+target_compile_definitions(WaveRuntime PUBLIC ASSET_DIR="${ENGINE_ASSET_DIR}")
+target_compile_definitions(WaveRuntime PUBLIC ENABLE_ECS=false)
+target_compile_definitions(WaveRuntime PUBLIC NO_TITLE_BAR=false)
 target_compile_features(${WAVE_LIB_NAME} PRIVATE cxx_std_17)

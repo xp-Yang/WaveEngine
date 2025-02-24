@@ -1,7 +1,7 @@
 #ifndef Animation_hpp
 #define Animation_hpp
 
-#include "Core/Math/Math.hpp"
+#include "Base/Math/Math.hpp"
 #include "Bone.hpp"
 #include "ResourceManager/ResourceImporter.hpp"
 

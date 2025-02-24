@@ -1,7 +1,7 @@
 #ifndef ImGuiContextMenu_hpp
 #define ImGuiContextMenu_hpp
 
-#include "Core/Common.hpp"
+#include "Base/Common.hpp"
 
 enum class ContextType {
 	Void,

@@ -1,7 +1,7 @@
 #ifndef GcodeData_hpp
 #define GcodeData_hpp
 
-#include "Core/Common.hpp"
+#include "Base/Common.hpp"
 #include "fast_float/fast_float.h"
 #include <charconv>
 

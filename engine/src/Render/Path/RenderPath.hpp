@@ -1,7 +1,7 @@
 #ifndef RenderPipeline_hpp
 #define RenderPipeline_hpp
 
-#include "Core/Common.hpp"
+#include "Base/Common.hpp"
 #include "Render/Pass/RenderPass.hpp"
 
 // Interface class

@@ -1,6 +1,6 @@
 #include "ImGuiSlider.hpp"
-#include "../ImGuiEditor.hpp"
-#include "../ImGuiCanvas.hpp"
+#include "GUI/Editor/ImGuiEditor.hpp"
+#include "GUI/Editor/ImGuiCanvas.hpp"
 #include "Render/RenderSystem.hpp"
 #include "Logical/Framework/World/Scene.hpp"
 #include "Logical/Gcode/GcodeViewer.hpp"

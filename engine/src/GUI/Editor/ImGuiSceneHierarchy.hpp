@@ -1,7 +1,7 @@
 #ifndef ImGuiSceneHierarchy_hpp
 #define ImGuiSceneHierarchy_hpp
 
-#include "Core/Common.hpp"
+#include "Base/Common.hpp"
 
 class GObject;
 class Light;

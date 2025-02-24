@@ -1,8 +1,8 @@
 #ifndef ImGuiCanvas_hpp
 #define ImGuiCanvas_hpp
 
-#include "Core/Common.hpp"
-#include "Render/RHI/Viewport.hpp"
+#include "Base/Common.hpp"
+#include "GUI/Viewport.hpp"
 
 #include "Gcode/ImGuiSlider.hpp"
 #include "Gcode/ImGuiGcodeLegend.hpp"

@@ -3,7 +3,7 @@
 
 // import files in formats other than WaveEngin Asset file
 
-#include "Core/Common.hpp"
+#include "Base/Common.hpp"
 
 class aiNode;
 class aiScene;

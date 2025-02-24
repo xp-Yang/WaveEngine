@@ -1,4 +1,4 @@
-#include "Material.hpp"
+#include "Logical/Material.hpp"
 
 std::shared_ptr<Material> Material::create_complete_default_material()
 {

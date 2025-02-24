@@ -1,7 +1,7 @@
 #ifndef Bone_hpp
 #define Bone_hpp
 
-#include "Core/Math/Math.hpp"
+#include "Base/Math/Math.hpp"
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>

@@ -14,5 +14,5 @@ int main()
 
 int WinMain()
 {
-    main();
+    return main();
 }

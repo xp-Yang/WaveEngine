@@ -1,7 +1,7 @@
 #ifndef AnimationSystem_hpp
 #define AnimationSystem_hpp
 
-#include "Core/Math/Math.hpp"
+#include "Base/Math/Math.hpp"
 #include "Animation.hpp"
 
 class AnimationSystem

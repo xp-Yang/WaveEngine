@@ -3,7 +3,7 @@
 #include <imgui.h>
 #include <imgui_internal.h>
 
-#include "ImGuiEditor.hpp"
+#include "GUI/Editor/ImGuiEditor.hpp"
 #include "Render/RenderSystem.hpp"
 #include "GlobalContext.hpp"
 

@@ -1,7 +1,7 @@
 #ifndef ImGuiGlobalConsole_hpp
 #define ImGuiGlobalConsole_hpp
 
-#include "Core/Common.hpp"
+#include "Base/Common.hpp"
 
 class ImGuiEditor;
 class ImGuiGlobalConsole {

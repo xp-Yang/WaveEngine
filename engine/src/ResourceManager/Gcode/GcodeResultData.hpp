@@ -1,7 +1,7 @@
 #ifndef GcodeResultData_hpp
 #define GcodeResultData_hpp
 
-#include "Core/Common.hpp"
+#include "Base/Common.hpp"
 #include "GcodeData.hpp"
 
 struct GCodeProcessorResult

@@ -1,7 +1,7 @@
 #ifndef SimpleMesh_hpp
 #define SimpleMesh_hpp
 
-#include <Core/Math/Math.hpp>
+#include <Base/Math/Math.hpp>
 
 struct SimpleVertex {
 	Vec3 position;

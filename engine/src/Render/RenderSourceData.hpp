@@ -1,7 +1,7 @@
 #ifndef RenderSourceData_hpp
 #define RenderSourceData_hpp
 
-#include "Core/Common.hpp"
+#include "Base/Common.hpp"
 #include "Logical/Texture.hpp"
 #include "Logical/Mesh.hpp"
 #include "Logical/Framework/Object/GObject.hpp"

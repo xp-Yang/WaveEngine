@@ -1,4 +1,4 @@
-#include "GObject.hpp"
+#include "Logical/Framework/Object/GObject.hpp"
 
 GObject* GObject::create(GObject* parent, const std::string& name)
 {

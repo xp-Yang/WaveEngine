@@ -1,9 +1,9 @@
 #ifndef CameraManipulator_hpp
 #define CameraManipulator_hpp
 
-#include "Core/Math/Math.hpp"
+#include "Base/Math/Math.hpp"
 #include "Logical/Input/InputEnums.hpp"
-#include "Render/RHI/Viewport.hpp"
+#include "GUI/Viewport.hpp"
 
 #if ENABLE_ECS
 namespace ecs {
@@ -15,23 +15,6 @@ struct CameraComponent;
 
 class CameraManipulator{
 public:
-	enum class Mode {
-		Orbit,
-		FPS,
-	};
-
-	enum class Projection {
-		Perspective,
-		Ortho,
-	};
-
-	enum class ZoomMode {
-		ZoomToCenter,
-		ZoomToMouse,
-	};
-
-	inline static Vec3 global_up = Vec3(0.0f, 1.0f, 0.0f); //vec3(0.0f, 1.0f, 0.0f) (y为上) or vec3(0.0f, 0.0f, 1.0f) (z为上)
-
 	CameraManipulator(CameraComponent& camera);
 	void syncContext(const Viewport& viewport);
 	void onUpdate();

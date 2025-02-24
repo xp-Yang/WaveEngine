@@ -1,7 +1,7 @@
 #ifndef RayCast_hpp
 #define RayCast_hpp
 
-#include "Core/Vector.hpp"
+#include "Base/Vector.hpp"
 
 class RayCast {
 public:

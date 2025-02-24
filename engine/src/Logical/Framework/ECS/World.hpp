@@ -8,7 +8,7 @@
 
 #include <assert.h>
 
-#include "Core/Signal/Signal.hpp"
+#include "Base/Signal/Signal.hpp"
 
 namespace Meta {
 namespace Register {

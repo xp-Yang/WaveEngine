@@ -2,7 +2,7 @@
 #define ImGuiInput_hpp
 
 #include "Logical/Input/InputEnums.hpp"
-#include "Core/Common.hpp"
+#include "Base/Common.hpp"
 #include "Logical/Input/CameraManipulator.hpp"
 #include <Logical/Framework/Object/GObject.hpp>
 

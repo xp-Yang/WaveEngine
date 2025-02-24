@@ -1,7 +1,7 @@
 #ifndef ImGuiToolbar_hpp
 #define ImGuiToolbar_hpp
 
-#include "Core/Common.hpp"
+#include "Base/Common.hpp"
 
 enum class ToolbarType : int {
     Translate,

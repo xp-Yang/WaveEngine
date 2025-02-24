@@ -1,5 +1,5 @@
 #include "ImGuiInput.hpp"
-#include "ImGuiEditor.hpp"
+#include "GUI/Editor/ImGuiEditor.hpp"
 #include "GUI/Window.hpp"
 #include "Render/RenderSystem.hpp"
 #include "Logical/FrameWork/World/Scene.hpp"

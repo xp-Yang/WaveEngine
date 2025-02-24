@@ -1,7 +1,7 @@
 #ifndef ImGuiSlider_hpp
 #define ImGuiSlider_hpp
 
-#include "Core/Common.hpp"
+#include "Base/Common.hpp"
 #include <imgui.h>
 #include <imgui_internal.h>
 

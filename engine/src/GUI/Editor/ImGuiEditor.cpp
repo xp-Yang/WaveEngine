@@ -1,4 +1,4 @@
-#include "ImGuiEditor.hpp"
+#include "GUI/Editor/ImGuiEditor.hpp"
 
 #include <imgui.h>
 #include <imgui_internal.h>
@@ -8,10 +8,17 @@
 
 #include <GLFW/glfw3.h>
 
+#include "GUI/Editor/ImGuiCanvas.hpp"
+#include "GUI/Editor/ImGuiContextMenu.hpp"
+#include "GUI/Editor/ImGuiSceneHierarchy.hpp"
+#include "GUI/Editor/ImGuiGlobalConsole.hpp"
+#include "GUI/Editor/ImGuiDebugWindow.hpp"
+
 #include "GUI/FileDialog.hpp"
-#include "Gui/Window.hpp"
+#include "GUI/Window.hpp"
 #include "Render/RenderSystem.hpp"
 #include "Logical/FrameWork/World/Scene.hpp"
+#include "Logical/Gcode/GcodeViewer.hpp"
 #include "GlobalContext.hpp"
 
 ImGuiEditor::ImGuiEditor()

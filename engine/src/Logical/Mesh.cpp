@@ -1,6 +1,6 @@
-#include "Mesh.hpp"
+#include "Logical/Mesh.hpp"
 
-#include "Core/Logger/Logger.hpp"
+#include "Base/Logger/Logger.hpp"
 
 Mesh::Mesh(const std::vector<Vertex>& vertices, const std::vector<int>& indices)
     : vertices(vertices)

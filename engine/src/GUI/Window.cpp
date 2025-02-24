@@ -1,4 +1,4 @@
-#include "Window.hpp"
+#include "GUI/Window.hpp"
 
 #include <GLFW/glfw3.h>
 #include "GUI/Platform/Windows/WindowsFileDialog.hpp"

@@ -116,10 +116,10 @@ struct LinesBatch {
 class GcodeViewer {
 public:
 	GcodeViewer();
-	GcodeViewer(const GcodeViewer&) = delete;
-	GcodeViewer(GcodeViewer&&) = delete;
-	GcodeViewer& operator=(const GcodeViewer&) = delete;
-	GcodeViewer& operator=(GcodeViewer&&) = delete;
+	//GcodeViewer(const GcodeViewer&) = delete;
+	//GcodeViewer(GcodeViewer&&) = delete;
+	//GcodeViewer& operator=(const GcodeViewer&) = delete;
+	//GcodeViewer& operator=(GcodeViewer&&) = delete;
 
 	void load(const GCodeProcessorResult& result);
 

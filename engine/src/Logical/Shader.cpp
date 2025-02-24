@@ -1,10 +1,10 @@
-#include "Shader.hpp"
+#include "Logical/Shader.hpp"
 
 #include <fstream>
 #include <sstream>
 
-#include "Core/Utils/Utils.hpp"
-#include "Core/Logger/Logger.hpp"
+#include "Base/Utils/Utils.hpp"
+#include "Base/Logger/Logger.hpp"
 
 class ShaderParser {
 public:

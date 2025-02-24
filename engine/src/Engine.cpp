@@ -4,6 +4,7 @@
 #include "GUI/Editor/ImGuiEditor.hpp"
 #include "GUI/Editor/ImGuiInput.hpp"
 #include "Logical/Animation/AnimationSystem.hpp"
+#include "Logical/FrameWork/World/Scene.hpp"
 #include "GlobalContext.hpp"
 #include "AllMetaRegister.hpp"
 
@@ -49,4 +50,9 @@ void Engine::init()
 void Engine::shutdown()
 {
 	g_context.window->shutdown();
+}
+
+std::shared_ptr<Scene> Engine::Scene() const
+{
+	return g_context.scene;
 }

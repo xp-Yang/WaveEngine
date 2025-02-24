@@ -1,7 +1,7 @@
 #ifndef AllSerializer_hpp
 #define AllSerializer_hpp
 
-#include "Core/Meta/Serializer.hpp"
+#include "Base/Meta/Serializer.hpp"
 
 namespace Meta {
 

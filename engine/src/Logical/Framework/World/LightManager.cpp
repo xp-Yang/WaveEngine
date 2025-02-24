@@ -1,4 +1,4 @@
-#include "LightManager.hpp"
+#include "Logical/Framework/World/LightManager.hpp"
 
 LightManager::LightManager()
 {

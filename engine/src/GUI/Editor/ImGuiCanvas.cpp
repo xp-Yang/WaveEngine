@@ -1,6 +1,6 @@
-#include "ImGuiCanvas.hpp"
-#include "ImGuiToolbar.hpp"
-#include "ImGuiEditor.hpp"
+#include "GUI/Editor/ImGuiCanvas.hpp"
+#include "GUI/Editor/ImGuiToolbar.hpp"
+#include "GUI/Editor/ImGuiEditor.hpp"
 #include <imgui.h>
 #include <imgui_internal.h>
 

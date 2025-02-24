@@ -1,7 +1,7 @@
 #ifndef ImGuiDebugWindow_hpp
 #define ImGuiDebugWindow_hpp
 
-#include "Core/Common.hpp"
+#include "Base/Common.hpp"
 
 class ImGuiCanvas;
 class ImGuiEditor;

@@ -1,11 +1,11 @@
-#include "ImGuiDebugWindow.hpp"
-#include "ImGuiCanvas.hpp"
+#include "GUI/Editor/ImGuiDebugWindow.hpp"
+#include "GUI/Editor/ImGuiCanvas.hpp"
 
 #include <imgui.h>
 
 #include "Logical/Framework/World/Scene.hpp"
 #include "Render/RenderSystem.hpp"
-#include "ImGuiEditor.hpp"
+#include "GUI/Editor/ImGuiEditor.hpp"
 #include "GlobalContext.hpp"
 
 ImGuiDebugWindow::ImGuiDebugWindow(ImGuiEditor* parent)

@@ -8,6 +8,7 @@ class ImGuiEditor;
 class Scene;
 class RenderSystem;
 class Window;
+class AnimationSystem;
 
 struct GlobalContext {
     GlobalContext();

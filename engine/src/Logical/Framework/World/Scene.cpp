@@ -1,13 +1,14 @@
-#include "Scene.hpp"
+#include "Logical/Framework/World/Scene.hpp"
 
 #include "Logical/Framework/Component/CameraComponent.hpp"
 #include "Logical/Framework/Component/MeshComponent.hpp"
 #include "Logical/Framework/Component/TransformComponent.hpp"
+#include "Logical/Gcode/GcodeViewer.hpp"
 
 #include "ResourceManager/ResourceImporter.hpp"
 #include "ResourceManager/Gcode/GcodeImporter.hpp"
 
-#include "Core/Logger/Logger.hpp"
+#include "Base/Logger/Logger.hpp"
 
 static const std::string resource_dir = RESOURCE_DIR;
 
@@ -77,6 +78,16 @@ std::vector<GObjectID> Scene::getPickedObjectIDs() const
 		return obj->ID();
 		});
 	return res;
+}
+
+void Scene::addObject(std::shared_ptr<GObject> obj)
+{
+	m_objects.push_back(std::shared_ptr<GObject>(obj));
+}
+
+std::shared_ptr<GcodeViewer> Scene::gcodeViewer() const
+{
+	return m_gcode_viewer;
 }
 
 void Scene::onPickedChanged(std::vector<GObjectID> added, std::vector<GObjectID> removed)

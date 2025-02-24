@@ -70,7 +70,7 @@ void CameraManipulator::onMouseUpdate(double delta_x, double delta_y, MouseButto
             // TODO
         }
         if (mouse_button == MouseButton::Right) {
-            auto rotate_Y = Math::Rotate(-(float)(0.3f * delta_x * RatationSensitivity), global_up);
+            auto rotate_Y = Math::Rotate(-(float)(0.3f * delta_x * RatationSensitivity), CameraComponent::global_up);
             main_camera.pos = rotate_Y * Vec4(main_camera.pos, 1.0f);
             main_camera.direction = rotate_Y * Vec4(main_camera.direction, 1.0f);
             main_camera.direction = Math::Normalize(main_camera.direction);

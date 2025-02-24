@@ -1,4 +1,9 @@
 #include "cubetest.hpp"
+#include "Engine.hpp"
+#include "Logical/Framework/World/Scene.hpp"
+#include "Logical/Framework/Object/GObject.hpp"
+#include "Logical/Mesh.hpp"
+#include "Logical/Material.hpp"
 
 void Cubetest::init() {
 #if ENABLE_ECS
@@ -143,6 +148,9 @@ void Cubetest::init() {
 
 #endif // ENABLE_ECS
 
+	auto& engine = Engine::get();
+	auto scene = engine.Scene();
+
 	size_t cubes_count = 9;
 	size_t row_count = std::sqrt(cubes_count);
 	size_t col_count = cubes_count / row_count;
@@ -159,7 +167,7 @@ void Cubetest::init() {
 		mesh.sub_meshes.push_back(cube_sub_mesh);
 		TransformComponent& transform = cube_obj->addComponent<TransformComponent>();
 		transform.translation = { 1.5f * (i % col_count), 0.5f + 1.5f * (i / row_count), -10.0f };
-		m_objects.push_back(std::shared_ptr<GObject>(cube_obj));
+		scene->addObject(std::shared_ptr<GObject>(cube_obj));
 	}
 
 	size_t spheres_count = 4;
@@ -178,7 +186,7 @@ void Cubetest::init() {
 		mesh.sub_meshes.push_back(sphere_sub_mesh);
 		TransformComponent& transform = sphere_obj->addComponent<TransformComponent>();
 		transform.translation = { 1.5f * (i % s_col_count), 0.5f + 1.5f * (i / s_row_count), -5.0f };
-		m_objects.push_back(std::shared_ptr<GObject>(sphere_obj));
+		scene->addObject(std::shared_ptr<GObject>(sphere_obj));
 	}
 
 	{
@@ -194,11 +202,11 @@ void Cubetest::init() {
 		plane_mesh.sub_meshes.push_back(plane_sub_mesh);
 		TransformComponent& plane_transform = plane_obj->addComponent<TransformComponent>();
 		plane_transform.scale = Vec3(50.0f, 1.f, 50.0f);
-		m_objects.push_back(std::shared_ptr<GObject>(plane_obj));
+		scene->addObject(std::shared_ptr<GObject>(plane_obj));
 	}
 
 	{
-		//GObject* nano_suit = loadModel(resource_dir + "/model/nanosuit/nanosuit.obj");
+		//GObject* nano_suit = scene->loadModel(resource_dir + "/model/nanosuit/nanosuit.obj");
 		//nano_suit->getComponent<TransformComponent>()->scale = Vec3(0.3f);
 
 		//GObject* vampire = loadModel(resource_dir + "/model/vampire/dancing_vampire.dae");

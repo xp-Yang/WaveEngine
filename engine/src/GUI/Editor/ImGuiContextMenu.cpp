@@ -2,7 +2,7 @@
 
 #include <imgui.h>
 
-#include "ImGuiEditor.hpp"
+#include "GUI/Editor/ImGuiEditor.hpp"
 #include "Logical/FrameWork/World/Scene.hpp"
 #include "GlobalContext.hpp"
 

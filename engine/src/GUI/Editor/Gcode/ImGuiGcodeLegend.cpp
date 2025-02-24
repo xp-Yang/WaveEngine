@@ -1,6 +1,6 @@
 #include "ImGuiGcodeLegend.hpp"
-#include "../ImGuiCanvas.hpp"
-#include "../ImGuiEditor.hpp"
+#include "GUI/Editor/ImGuiCanvas.hpp"
+#include "GUI/Editor/ImGuiEditor.hpp"
 #include "Render/RenderSystem.hpp"
 #include "Logical/Gcode/GcodeViewer.hpp"
 #include "Logical/Framework/World/Scene.hpp"
