@@ -77,3 +77,4 @@ vec3 BRDF(vec3  L,
 
     return color;
 }
+#line 1

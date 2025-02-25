@@ -72,3 +72,4 @@ vec3 GammaCorrection(vec3 color)
 	vec3 res = pow(color, vec3(1.0 / gamma)); 
 	return res;
 }
+#line 1

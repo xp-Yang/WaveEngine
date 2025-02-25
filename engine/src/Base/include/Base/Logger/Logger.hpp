@@ -1,109 +1,107 @@
 #ifndef Logger_hpp
 #define Logger_hpp
 
-#include "spdlog/spdlog.h"
-#include <spdlog/common.h>
+#include <memory>
+#include <string>
 
+#include "spdlog/spdlog.h"
 #include "spdlog/sinks/basic_file_sink.h"
 #include "spdlog/sinks/stdout_color_sinks.h"
 
 namespace Logger {
 
 template<typename... Args>
-void trace(spdlog::string_view_t fmt, const Args &... args)
+void trace(const char* fmt, const Args &... args)
 {
-	Logger::get().m_logger->trace(fmt, args...);
+    Logger::get().trace(fmt, args...);
 }
 
 template<typename... Args>
-void debug(spdlog::string_view_t fmt, const Args &... args)
+void debug(const char* fmt, const Args &... args)
 {
-	Logger::get().m_logger->debug(fmt, args...);
+    Logger::get().debug(fmt, args...);
 }
 
 template<typename... Args>
-void info(spdlog::string_view_t fmt, const Args &... args)
+void info(const char* fmt, const Args &... args)
 {
-	Logger::get().m_logger->info(fmt, args...);
+    Logger::get().info(fmt, args...);
 }
 
 template<typename... Args>
-void error(spdlog::string_view_t fmt, const Args &... args)
+void error(const char* fmt, const Args &... args)
 {
-	Logger::get().m_logger->error(fmt, args...);
+    Logger::get().error(fmt, args...);
 }
+
 
 class Logger {
 public:
-	enum OutputMode {
-		opm_None,
-		opm_File = 1,
-		opm_Console = 2,
-	};
+    static Logger& get() {
+        static Logger instance;
+        return instance;
+    }
 
-	enum Level : int {
-		Trace,
-		Info,
-		Debug,
-		Warning,
-		Error,
-	};
+    void setLogDirectory(const std::string& dir) {
+        m_directory = dir;
+    }
 
-	static Logger& get() {
-		static Logger& logger = createLogger(OutputMode::opm_Console);
-		return logger;
-	}
+    template<typename... Args>
+    void trace(const char* fmt, const Args&... args) { m_logger->trace(fmt, args...); }
+    
+    template<typename... Args>
+    void debug(const char* fmt, const Args&... args) { m_logger->debug(fmt, args...); }
+    
+    template<typename... Args>
+    void info(const char* fmt, const Args&... args) { m_logger->info(fmt, args...); }
+    
+    template<typename... Args>
+    void warning(const char* fmt, const Args&... args) { m_logger->warning(fmt, args...); }
 
-	static Logger& createLogger(int output);
-
-	void setLogDirectory(const std::string& dir);
-
-	void setLevel(Level level);
-
-protected:
-	virtual void create() = 0;
-	void init_filepath();
+    template<typename... Args>
+    void error(const char* fmt, const Args&... args) { m_logger->error(fmt, args...); }
 
 protected:
-	template<typename... Args>
-	friend void trace(spdlog::string_view_t fmt, const Args &... args);
-	template<typename... Args>
-	friend void debug(spdlog::string_view_t fmt, const Args &... args);
-	template<typename... Args>
-	friend void info(spdlog::string_view_t fmt, const Args &... args);
-	template<typename... Args>
-	friend void error(spdlog::string_view_t fmt, const Args &... args);
+    void initFilepath() {
+        struct tm* cur_time;
+        time_t local_time;
+        time(&local_time);
+        cur_time = localtime(&local_time);
 
-	std::shared_ptr<spdlog::logger> m_logger;
-	std::string m_directory;
-	std::string m_full_filepath;
-	OutputMode m_output_mode;
+        /* 通过时间命名日志文件 */
+        char filepath[256];
+        strftime(filepath, 100, "%Y-%m-%d_%H-%M-%S.log", cur_time);
+
+        /* log file name, does not contain file path */
+        std::string log_filepath = std::string(filepath);
+
+        /* 日志文件全路径 */
+        m_full_filepath = m_directory + log_filepath;
+
+        /* 记录日志创建时间，在通过时间长度控制日志文件大小时，该成员变量会被使用 */
+        //logger_create_time = local_time;
+    }
+
+    void initLogger() {
+        initFilepath();
+        std::vector<spdlog::sink_ptr> sinks;
+        auto console_sink = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
+        console_sink->set_pattern("[%Y-%m-%d %T]%^[%l]%$ %v");
+        sinks.push_back(console_sink);
+        auto file_sink = std::make_shared<spdlog::sinks::basic_file_sink_mt>(m_full_filepath.c_str(), true);
+        file_sink->set_pattern("[%Y-%m-%d %T]%^%^[%l]%$%$ %v");
+        sinks.push_back(file_sink);
+        m_logger = std::make_shared<spdlog::logger>("multi_sink", begin(sinks), end(sinks));
+        spdlog::register_logger(m_logger);
+    }
+
+private:
+    Logger() = default;
+    std::shared_ptr<spdlog::logger> m_logger;
+    std::string m_directory;
+    std::string m_full_filepath;
 };
 
-class FileLogger : public Logger {
-public:
-	FileLogger();
-
-protected:
-	void create() override;
-};
-
-class ConsoleLogger : public Logger {
-public:
-	ConsoleLogger();
-
-protected:
-	void create() override;
-};
-
-class MultiLogger : public Logger {
-public:
-	MultiLogger();
-
-protected:
-	void create() override;
-};
-
-}
+} // namespace Logger
 
 #endif

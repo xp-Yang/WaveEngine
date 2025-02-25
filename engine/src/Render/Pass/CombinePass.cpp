@@ -1,6 +1,5 @@
 #include "CombinePass.hpp"
-// TODO remove
-#include <glad/glad.h>
+#include <glad/glad.h> // TODO remove
 
 CombinePass::CombinePass()
 {

@@ -1,6 +1,5 @@
 #include "ShadowPass.hpp"
-// TODO remove
-#include <glad/glad.h>
+#include <glad/glad.h> // TODO remove
 
 ShadowPass::ShadowPass()
 {

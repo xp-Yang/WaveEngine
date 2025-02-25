@@ -11,3 +11,4 @@ vec3 BlinnPhong(vec3 light_color, vec3 n, vec3 v, vec3 l, vec3 diffuse_coef, vec
 
     return diffuse_light + specular_light;
 }
+#line 1
