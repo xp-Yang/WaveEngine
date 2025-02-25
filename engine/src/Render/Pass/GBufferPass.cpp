@@ -37,8 +37,9 @@ void GBufferPass::draw()
     m_framebuffer->bind();
     m_framebuffer->clear();
 
-    static RenderShaderObject* g_shader = RenderShaderObject::getShaderObject(ShaderType::GBufferShader);
-
+    static RenderShaderObject* g_pbr_shader = RenderShaderObject::getShaderObject(ShaderType::GBufferShader);
+    static RenderShaderObject* g_phong_shader = RenderShaderObject::getShaderObject(ShaderType::GBufferPhongShader);
+    RenderShaderObject* g_shader = m_pbr ? g_pbr_shader : g_phong_shader;
     g_shader->start_using();
     g_shader->setMatrix("view", 1, m_render_source_data->view_matrix);
     g_shader->setMatrix("projection", 1, m_render_source_data->proj_matrix);

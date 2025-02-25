@@ -92,11 +92,12 @@ protected:
         file_sink->set_pattern("[%Y-%m-%d %T]%^%^[%l]%$%$ %v");
         sinks.push_back(file_sink);
         m_logger = std::make_shared<spdlog::logger>("multi_sink", begin(sinks), end(sinks));
+        m_logger->set_level(spdlog::level::trace);
         spdlog::register_logger(m_logger);
     }
 
 private:
-    Logger() = default;
+    Logger() { initLogger(); }
     std::shared_ptr<spdlog::logger> m_logger;
     std::string m_directory;
     std::string m_full_filepath;

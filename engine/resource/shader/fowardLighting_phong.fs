@@ -10,7 +10,6 @@ in VS_OUT {
 } fs_in;
 
 struct Material {
-    float ambient;
     sampler2D diffuse_map;
     sampler2D specular_map;
     sampler2D normal_map;
@@ -30,8 +29,6 @@ void main()
     vec3 diffuse_coef = vec3(texture(material.diffuse_map, fs_in.fragUV));
     vec3 specular_coef = vec3(texture(material.specular_map, fs_in.fragUV));
 
-    vec3 ambient_light = vec3(material.ambient);
-	
     // Directional Light Source:
 	vec3 lightDir = normalize(directionalLight.direction);
 	vec3 lightingByDirectionalLight = BlinnPhong(directionalLight.color.xyz, normal, view_direction, -lightDir, diffuse_coef, specular_coef);
@@ -47,6 +44,6 @@ void main()
     vec4 fragPosLightSpace = lightSpaceMatrix * vec4(fs_in.fragWorldPos, 1.0);
     float shadowFactor = ShadowCalculation(fragPosLightSpace, shadow_map);       
     
-    vec3 result = ambient_light + shadowFactor * lightingByDirectionalLight + lightingByPointLight;
+    vec3 result = shadowFactor * lightingByDirectionalLight + lightingByPointLight;
     outColor = vec4(result, 1.0);
 }

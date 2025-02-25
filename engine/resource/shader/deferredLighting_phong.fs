@@ -13,7 +13,7 @@ uniform sampler2D gSpecular;
 
 uniform vec3 cameraPos;
 
-layout (location = 0) out vec4 FragColor;
+out vec4 outColor;
 
 void main()
 {             
@@ -25,15 +25,14 @@ void main()
 
     if (Normal.xyz == vec3(0.0)){
         // return if sample the blank area in GBuffer
-        FragColor = vec4(0.046, 0.046, 0.046, 1.0);
-        return;
+        discard;
     }
     
     vec3 viewDir = normalize(cameraPos - Position);
 
     // Directional Light Source:
     vec3 lightDir = normalize(directionalLight.direction);
-    vec3 lightingByDirectionalLight = BlinnPhong(directionalLight.color.xyz * 0.0157, Normal, viewDir, -lightDir, Diffuse, Specular);
+    vec3 lightingByDirectionalLight = BlinnPhong(directionalLight.color.xyz, Normal, viewDir, -lightDir, Diffuse, Specular);
     // Directional Light Shadow:
     vec4 fragPosLightSpace = lightSpaceMatrix * vec4(Position, 1.0);
     float shadowFactor = ShadowCalculation(fragPosLightSpace, shadow_map);
@@ -53,5 +52,5 @@ void main()
         lightingByPointLight += lightingByPointLights[i];
     }
 
-    FragColor = vec4(lightingByDirectionalLight + lightingByPointLight, 1.0);
+    outColor = vec4(lightingByDirectionalLight + lightingByPointLight, 1.0);
 }

@@ -134,7 +134,7 @@ void GBufferCanvas::render()
             ImVec2 child_content_pos = ImVec2(content_pos.x + content_size.x / 2.0f * col, content_pos.y + content_size.y / 2.0f * row);
             ImVec2 child_content_size = content_size / 2.0f;
             ImGui::SetCursorPos(child_content_pos);
-            ImTextureID tex_id = (ImTextureID)(begin_tex_id++);
+            ImTextureID tex_id = (ImTextureID)(begin_tex_id+i);
             ImGui::Image(tex_id, child_content_size, ImVec2(0, 1), ImVec2(1, 0));
         }
         setViewPort({ (int)window_pos.x, (int)window_pos.y, (int)window_size.x, (int)window_size.y });

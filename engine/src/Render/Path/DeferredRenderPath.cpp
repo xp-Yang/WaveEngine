@@ -48,50 +48,49 @@ void DeferredRenderPath::render()
     std::vector<RenderPass*> combine_input_passes;
     RenderPass* main_light_pass;
 
-    if (render_params.effect_params.checkerboard) {
-        m_render_passes[RenderPass::Type::CheckerBoard]->draw();
-        combine_input_passes = { m_render_passes[RenderPass::Type::CheckerBoard].get()};
-        main_light_pass = m_render_passes[RenderPass::Type::CheckerBoard].get();
+    if (render_params.shadow_params.enable) {
+        m_render_passes[RenderPass::Type::Shadow]->draw();
+    }
+    else
+        m_render_passes[RenderPass::Type::Shadow]->clear();
+
+    auto gbuffer_pass = static_cast<GBufferPass*>(m_render_passes[RenderPass::Type::GBuffer].get());
+    gbuffer_pass->enablePBR(render_params.material_model == MaterialModel::PBR);
+    gbuffer_pass->draw();
+
+    auto lighting_pass = static_cast<DeferredLightingPass*>(m_render_passes[RenderPass::Type::DeferredLighting].get());
+    lighting_pass->enablePBR(render_params.material_model == MaterialModel::PBR);
+    lighting_pass->setCubeMaps(static_cast<ShadowPass*>(m_render_passes[RenderPass::Type::Shadow].get())->getCubeMaps());
+    lighting_pass->setInputPasses({ m_render_passes[RenderPass::Type::GBuffer].get(), m_render_passes[RenderPass::Type::Shadow].get() });
+    lighting_pass->draw();
+
+    if (render_params.effect_params.skybox) {
+        auto skybox_pass = static_cast<SkyBoxPass*>(m_render_passes[RenderPass::Type::SkyBox].get());
+        skybox_pass->setInputPasses({ m_render_passes[RenderPass::Type::DeferredLighting].get() }); // draw above the lighting pass framebuffer
+        skybox_pass->draw();
+    }
+
+    auto transparent_pass = static_cast<TransparentPass*>(m_render_passes[RenderPass::Type::Transparent].get());
+    transparent_pass->setInputPasses({ m_render_passes[RenderPass::Type::DeferredLighting].get() }); // draw above the lighting pass framebuffer
+    transparent_pass->draw();
+
+    if (render_params.post_processing_params.bloom) {
+        m_render_passes[RenderPass::Type::Bloom]->setInputPasses({ m_render_passes[RenderPass::Type::DeferredLighting].get() }); // need extract bright
+        m_render_passes[RenderPass::Type::Bloom]->draw();
     }
     else {
-        if (render_params.shadow_params.enable) {
-            m_render_passes[RenderPass::Type::Shadow]->draw();
-        }
-        else
-            m_render_passes[RenderPass::Type::Shadow]->clear();
-
-        auto gbuffer_pass = static_cast<GBufferPass*>(m_render_passes[RenderPass::Type::GBuffer].get());
-        gbuffer_pass->enablePBR(render_params.material_model == MaterialModel::PBR);
-        gbuffer_pass->draw();
-
-        auto lighting_pass = static_cast<DeferredLightingPass*>(m_render_passes[RenderPass::Type::DeferredLighting].get());
-        lighting_pass->enablePBR(render_params.material_model == MaterialModel::PBR);
-        lighting_pass->setCubeMaps(static_cast<ShadowPass*>(m_render_passes[RenderPass::Type::Shadow].get())->getCubeMaps());
-        lighting_pass->setInputPasses({ m_render_passes[RenderPass::Type::GBuffer].get(), m_render_passes[RenderPass::Type::Shadow].get() });
-        lighting_pass->draw();
-
-        if (render_params.effect_params.skybox) {
-            auto skybox_pass = static_cast<SkyBoxPass*>(m_render_passes[RenderPass::Type::SkyBox].get());
-            skybox_pass->setInputPasses({ m_render_passes[RenderPass::Type::DeferredLighting].get() }); // draw above the lighting pass framebuffer
-            skybox_pass->draw();
-        }
-
-        auto transparent_pass = static_cast<TransparentPass*>(m_render_passes[RenderPass::Type::Transparent].get());
-        transparent_pass->setInputPasses({ m_render_passes[RenderPass::Type::DeferredLighting].get() }); // draw above the lighting pass framebuffer
-        transparent_pass->draw();
-
-        if (render_params.post_processing_params.bloom) {
-            m_render_passes[RenderPass::Type::Bloom]->setInputPasses({ m_render_passes[RenderPass::Type::DeferredLighting].get() }); // need extract bright
-            m_render_passes[RenderPass::Type::Bloom]->draw();
-        }
-        else {
-            m_render_passes[RenderPass::Type::Bloom]->clear();
-        }
-
-        combine_input_passes = { m_render_passes[RenderPass::Type::DeferredLighting].get(), m_render_passes[RenderPass::Type::Bloom].get() };
-        main_light_pass = m_render_passes[RenderPass::Type::DeferredLighting].get();
+        m_render_passes[RenderPass::Type::Bloom]->clear();
     }
 
+    combine_input_passes = { m_render_passes[RenderPass::Type::DeferredLighting].get(), m_render_passes[RenderPass::Type::Bloom].get() };
+    main_light_pass = m_render_passes[RenderPass::Type::DeferredLighting].get();
+
+
+    if (render_params.effect_params.checkerboard) {
+        m_render_passes[RenderPass::Type::CheckerBoard]->draw();
+        combine_input_passes = { m_render_passes[RenderPass::Type::CheckerBoard].get() };
+        main_light_pass = m_render_passes[RenderPass::Type::CheckerBoard].get();
+    }
     if (render_params.effect_params.show_normal) {
         m_render_passes[RenderPass::Type::Normal]->setInputPasses({ main_light_pass }); // draw above the main light pass framebuffer
         m_render_passes[RenderPass::Type::Normal]->draw();
