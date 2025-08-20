@@ -5,7 +5,6 @@
 #include <algorithm>
 #include <initializer_list>
 #include "Base/Math/Math.hpp"
-#include "Base/Meta/Meta.hpp"
 #include "Base/Meta/Serializer.hpp"
 #include "Base/Signal/Signal.hpp"
 #include "Base/Utils/Utils.hpp"

@@ -44,7 +44,7 @@ void Engine::run() {
 
 void Engine::init()
 {
-	Meta::Register::allMetaRegister();
+	Meta::Registration::allMetaRegister();
 }
 
 void Engine::shutdown()

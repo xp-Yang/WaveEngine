@@ -14,7 +14,7 @@ public:
 protected:
 	void renderNodes(const std::vector<GObject*>& nodes);
 	void renderNodes(const std::vector<Light*>& nodes);
-	void renderReflectionWidget(Meta::DynamicReflectionInstance& refl_instance);
+	void renderReflectionWidget(Meta::Instance& refl_instance);
 
 private:
 	std::unordered_map<std::string, std::function<void(std::string, void*)>> m_widget_creator;

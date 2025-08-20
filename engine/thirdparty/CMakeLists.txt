@@ -27,6 +27,12 @@ add_library(json11 ${THIRD_PARTY_DIR}/json11/json11.hpp ${THIRD_PARTY_DIR}/json1
 set_target_properties(json11 PROPERTIES FOLDER ${third_party_folder}/json11)
 target_include_directories(json11 PUBLIC ${THIRD_PARTY_DIR}/json11)
 
+#TinyReflection
+if(NOT TARGET TinyReflection)
+	add_subdirectory(TinyReflection)
+	set_target_properties(TinyReflection PROPERTIES FOLDER ${third_party_folder}/TinyReflection)
+endif()
+
 #spdlog
 if(NOT TARGET spdlog)
     option(SPDLOG_BUILD_EXAMPLE "" OFF)

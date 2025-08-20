@@ -13,7 +13,7 @@
 #endif
 
 namespace Meta {
-	namespace Register {
+	namespace Registration {
 		void allMetaRegister();
 	}
 }
@@ -60,7 +60,7 @@ public:
 	bool hasComponent() const {
 		for (auto& component : m_components)
 		{
-			if (component->typeName() == Meta::traits::className<T>())
+			if (component->typeName() == Meta::traits::typeName<T>())
 				return true;
 		}
 		return false;
@@ -71,7 +71,7 @@ public:
 	{
 		for (auto& component : m_components)
 		{
-			if (component->typeName() == Meta::traits::className<T>())
+			if (component->typeName() == Meta::traits::typeName<T>())
 				return static_cast<T*>(component.get());
 		}
 		return nullptr;
@@ -84,7 +84,7 @@ protected:
 	GObject(const GObject&) = delete;
 	GObject& operator=(const GObject&) = delete;
 
-	friend void Meta::Register::allMetaRegister();
+	friend void Meta::Registration::allMetaRegister();
 
 	GObject* m_parent;
 	std::vector<GObject*> m_children;

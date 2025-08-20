@@ -75,7 +75,7 @@ ImGuiSceneHierarchy::ImGuiSceneHierarchy(ImGuiEditor* parent)
             DrawVecControl("Scale", trans_ptr->scale);
         }
     };
-    m_widget_creator[Meta::traits::className<Vec3>()] = [this](const std::string& name, void* value_ptr) -> void {
+    m_widget_creator[Meta::traits::typeName<Vec3>()] = [this](const std::string& name, void* value_ptr) -> void {
         Vec3* vec_ptr = static_cast<Vec3*>(value_ptr);
         float    val[3] = { vec_ptr->x, vec_ptr->y, vec_ptr->z };
 
@@ -139,7 +139,7 @@ void ImGuiSceneHierarchy::renderNodes(const std::vector<GObject*>& nodes)
         {
             if (child_node->isLeaf()) {
                 for (auto& com : child_node->getComponents()) {
-                    auto refl = Meta::DynamicReflectionInstance(com->typeName(), com.get());
+                    auto refl = Meta::Instance(com->typeName(), com.get());
                     renderReflectionWidget(refl);
                 }
             }
@@ -186,26 +186,27 @@ void ImGuiSceneHierarchy::renderNodes(const std::vector<Light*>& nodes)
     }
 }
 
-void ImGuiSceneHierarchy::renderReflectionWidget(Meta::DynamicReflectionInstance& refl_instance)
+void ImGuiSceneHierarchy::renderReflectionWidget(Meta::Instance& inst)
 {
+    Meta::MetaType meta_type = inst.metaType();
     static ImGuiTableFlags flags = ImGuiTableFlags_Resizable | ImGuiTableFlags_NoSavedSettings;
     bool                   node_open = false;
-    node_open = ImGui::TreeNodeEx(refl_instance.className().c_str(), ImGuiTreeNodeFlags_SpanFullWidth);
+    node_open = ImGui::TreeNodeEx(meta_type.className().c_str(), ImGuiTreeNodeFlags_SpanFullWidth);
     if (node_open)
     {
-        for (int i = 0; i < refl_instance.fieldCount(); i++) {
-            auto field = refl_instance.field(i);
-            if (field.is_array) { // TODO field.is_array
+        for (int i = 0; i < meta_type.propertyCount(); i++) {
+            auto prop = meta_type.property(i);
+            if (prop.type == Meta::Property::Type::SequenceContainer) {
                 ImGui::TreePop();
                 return;
             }
-            std::string field_type_name = field.field_type_name;
-            std::string field_name = field.field_name;
-            void* var = refl_instance.getFieldValue(i);
-            if (m_widget_creator.find(field_type_name) != m_widget_creator.end())
-                m_widget_creator[field_type_name](field_name, var);
+            std::string type_name = prop.type_name;
+            std::string name = prop.name;
+            void* var = inst.getPropertyValue(i);
+            if (m_widget_creator.find(type_name) != m_widget_creator.end())
+                m_widget_creator[type_name](name, var);
             else {
-                auto child_refl = Meta::DynamicReflectionInstance(field_type_name, var);
+                auto child_refl = Meta::Instance(type_name, var);
                 renderReflectionWidget(child_refl);
             }
         }

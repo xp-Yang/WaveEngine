@@ -15,14 +15,14 @@ public:
 	template<class T>
 	static T& read(const Json& json, T* obj)
 	{
-		DynamicReflectionInstance refl_obj = obj;
+		Instance refl_obj = obj;
 		read_internal(json, refl_obj);
 		return *static_cast<T*>(refl_obj.getInstance());
 	}
 
 	template<class T>
 	static Json write(const T* obj) {
-		DynamicReflectionInstance refl_obj = obj;
+		Instance refl_obj = obj;
 		Json ret = write_internal(refl_obj);
 		return ret;
 	}
@@ -67,78 +67,80 @@ public:
 	//}
 
 protected:
-	static void read_internal(const Json& json, DynamicReflectionInstance& refl_obj) {
-		for (int i = 0; i < refl_obj.fieldCount(); i++) {
-			auto& field = refl_obj.field(i);
-			std::string field_type_name = field.field_type_name;
-			std::string field_name = field.field_name;
-			void* filed_value_ptr = (refl_obj.getFieldValue(i));
-			if (field_type_name == traits::className<char>()) {
+	static void read_internal(const Json& json, Instance& v) {
+		MetaType meta_type = v.metaType();
+		for (int i = 0; i < meta_type.propertyCount(); i++) {
+			auto& prop = meta_type.property(i);
+			std::string type_name = prop.type_name;
+			std::string name = prop.name;
+			void* filed_value_ptr = (v.getPropertyValue(i));
+			if (type_name == traits::typeName<char>()) {
 				assert(json.is_number());
 				*static_cast<char*>(filed_value_ptr) = json.number_value();
 			}
-			else if (field_type_name == traits::className<int>()) {
+			else if (type_name == traits::typeName<int>()) {
 				assert(json.is_number());
 				*static_cast<int*>(filed_value_ptr) = static_cast<int>(json.number_value());
 			}
-			else if (field_type_name == traits::className<unsigned int>()) {
+			else if (type_name == traits::typeName<unsigned int>()) {
 				assert(json.is_number());
 				*static_cast<unsigned int*>(filed_value_ptr) = static_cast<unsigned int>(json.number_value());
 			}
-			else if (field_type_name == traits::className<float>()) {
+			else if (type_name == traits::typeName<float>()) {
 				assert(json.is_number());
 				*static_cast<float*>(filed_value_ptr) = static_cast<float>(json.number_value());
 			}
-			else if (field_type_name == traits::className<double>()) {
+			else if (type_name == traits::typeName<double>()) {
 				assert(json.is_number());
 				*static_cast<double*>(filed_value_ptr) = static_cast<double>(json.number_value());
 			}
-			else if (field_type_name == traits::className<bool>()) {
+			else if (type_name == traits::typeName<bool>()) {
 				assert(json.is_bool());
 				*static_cast<bool*>(filed_value_ptr) = json.bool_value();
 			}
-			else if (field_type_name == traits::className<std::string>()) {
+			else if (type_name == traits::typeName<std::string>()) {
 				assert(json.is_string());
 				*static_cast<std::string*>(filed_value_ptr) = json.string_value();
 			}
 			else {
-				DynamicReflectionInstance field_refl_obj = DynamicReflectionInstance(field_type_name, filed_value_ptr);
-				read_internal(json[field_name], field_refl_obj);
+				Instance refl_obj = Instance(type_name, filed_value_ptr);
+				read_internal(json[name], refl_obj);
 			}
 		}
 	}
 
-	static Json write_internal(const DynamicReflectionInstance& refl_obj) {
+	static Json write_internal(const Instance& v) {
 		Json::object json_obj;
-		for (int i = 0; i < refl_obj.fieldCount(); i++) {
-			auto& field = refl_obj.field(i);
-			std::string field_type_name = field.field_type_name;
-			std::string field_name = field.field_name;
-			void* filed_value_ptr = (refl_obj.getFieldValue(i));
-			if (field_type_name == traits::className<char>()) {
-				json_obj.insert_or_assign(field_name, Json(*static_cast<char*>(filed_value_ptr)));
+		MetaType meta_type = v.metaType();
+		for (int i = 0; i < meta_type.propertyCount(); i++) {
+			auto& prop = meta_type.property(i);
+			std::string type_name = prop.type_name;
+			std::string name = prop.name;
+			void* filed_value_ptr = (v.getPropertyValue(i));
+			if (type_name == traits::typeName<char>()) {
+				json_obj.insert_or_assign(name, Json(*static_cast<char*>(filed_value_ptr)));
 			}
-			else if (field_type_name == traits::className<int>()) {
-				json_obj.insert_or_assign(field_name, Json(*static_cast<int*>(filed_value_ptr)));
+			else if (type_name == traits::typeName<int>()) {
+				json_obj.insert_or_assign(name, Json(*static_cast<int*>(filed_value_ptr)));
 			}
-			else if (field_type_name == traits::className<unsigned int>()) {
-				json_obj.insert_or_assign(field_name, Json(*static_cast<int*>(filed_value_ptr)));
+			else if (type_name == traits::typeName<unsigned int>()) {
+				json_obj.insert_or_assign(name, Json(*static_cast<int*>(filed_value_ptr)));
 			}
-			else if (field_type_name == traits::className<float>()) {
-				json_obj.insert_or_assign(field_name, Json(*static_cast<float*>(filed_value_ptr)));
+			else if (type_name == traits::typeName<float>()) {
+				json_obj.insert_or_assign(name, Json(*static_cast<float*>(filed_value_ptr)));
 			}
-			else if (field_type_name == traits::className<double>()) {
-				json_obj.insert_or_assign(field_name, Json(*static_cast<double*>(filed_value_ptr)));
+			else if (type_name == traits::typeName<double>()) {
+				json_obj.insert_or_assign(name, Json(*static_cast<double*>(filed_value_ptr)));
 			}
-			else if (field_type_name == traits::className<bool>()) {
-				json_obj.insert_or_assign(field_name, Json(*static_cast<bool*>(filed_value_ptr)));
+			else if (type_name == traits::typeName<bool>()) {
+				json_obj.insert_or_assign(name, Json(*static_cast<bool*>(filed_value_ptr)));
 			}
-			else if (field_type_name == traits::className<std::string>()) {
-				json_obj.insert_or_assign(field_name, Json(*static_cast<std::string*>(filed_value_ptr)));
+			else if (type_name == traits::typeName<std::string>()) {
+				json_obj.insert_or_assign(name, Json(*static_cast<std::string*>(filed_value_ptr)));
 			}
 			else {
-				DynamicReflectionInstance field_refl_obj = DynamicReflectionInstance(field_type_name, filed_value_ptr);
-				json_obj.insert_or_assign(field_name, write_internal(field_refl_obj));
+				Instance refl_obj = Instance(type_name, filed_value_ptr);
+				json_obj.insert_or_assign(name, write_internal(refl_obj));
 			}
 		}
 		return Json(json_obj);
@@ -165,16 +167,16 @@ private:
 //		std::cout << tab_str << "\"fields\"" << colon << open_brace_str;
 //			for (int i = 0; i < refl_obj.fieldCount(); i++) {
 //				auto& field = refl_obj.field(i);
-//				std::string_view field_type_name = field.field_type_name;
-//				std::string_view field_name = field.field_name;
-//				std::cout << tab_str << tab_str << "\"" << "<" << field_type_name << ">" << " " << field_name << "\"" << colon << " ";
+//				std::string_view type_name = field.type_name;
+//				std::string_view name = field.name;
+//				std::cout << tab_str << tab_str << "\"" << "<" << type_name << ">" << " " << name << "\"" << colon << " ";
 //				if (refl_obj.getFieldValue<Vec3>(i)) {
-//					Vec3 field_value_vec3 = *refl_obj.getFieldValue<Vec3>(i);
-//					std::cout << "\"" << field_value_vec3.x << " " << field_value_vec3.y << " " << field_value_vec3.z << "\"";
+//					Vec3 value_vec3 = *refl_obj.getFieldValue<Vec3>(i);
+//					std::cout << "\"" << value_vec3.x << " " << value_vec3.y << " " << value_vec3.z << "\"";
 //				}
 //				if (refl_obj.getFieldValue<std::string>(i)) {
-//					std::string field_value_str = *refl_obj.getFieldValue<std::string>(i);
-//					std::cout << "\"" << field_value_str << "\"";
+//					std::string value_str = *refl_obj.getFieldValue<std::string>(i);
+//					std::cout << "\"" << value_str << "\"";
 //				}
 //				std::cout << "," << crlf_str;
 //			}

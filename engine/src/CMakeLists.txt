@@ -34,6 +34,7 @@ target_link_libraries(${WAVE_LIB_NAME}
 	PUBLIC spdlog
 	PUBLIC json11
 	PUBLIC glm
+	PUBLIC TinyReflection
 	PRIVATE glfw
 	PRIVATE assimp)
 

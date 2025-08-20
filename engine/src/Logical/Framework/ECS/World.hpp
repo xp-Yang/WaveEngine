@@ -37,7 +37,7 @@ public:
     const ComponentMask& getMask() const { return m_mask; }
 
 private:
-    friend void Meta::Register::allMetaRegister();
+    friend void Meta::Registration::allMetaRegister();
 
     int m_id;
     ComponentMask m_mask;
@@ -200,7 +200,7 @@ protected:
     }
 
 private:
-    friend void Meta::Register::allMetaRegister();
+    friend void Meta::Registration::allMetaRegister();
     template<typename... ComponentTypes> friend class EnttView;
 
     std::vector<Entity> m_entities;
