@@ -6,8 +6,6 @@
 struct AnimationComponent : public Component {
 	AnimationComponent(GObject* parent) : Component(parent) {}
 
-	std::string typeName() override { return "AnimationComponent"; }
-
 };
 
 #endif // !AnimationComponent_hpp

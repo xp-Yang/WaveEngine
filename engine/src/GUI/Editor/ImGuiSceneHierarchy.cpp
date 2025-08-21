@@ -10,7 +10,7 @@
 ImGuiSceneHierarchy::ImGuiSceneHierarchy(ImGuiEditor* parent)
     : m_parent(parent)
 {
-    m_widget_creator["TransformComponent"] = [this](const std::string& name, void* value_ptr) -> void {
+    m_widget_creator[Meta::traits::typeName<TransformComponent>()] = [this](const std::string& name, void* value_ptr) -> void {
         auto DrawVecControl = [](const std::string& label, Vec3& values, float resetValue = 0.0f, float columnWidth = 100.0f)
         {
             ImGui::PushID(label.c_str());
@@ -75,6 +75,38 @@ ImGuiSceneHierarchy::ImGuiSceneHierarchy(ImGuiEditor* parent)
             DrawVecControl("Scale", trans_ptr->scale);
         }
     };
+    m_widget_creator[Meta::traits::typeName<MeshComponent>()] = [this](const std::string& name, void* value_ptr) -> void {
+        auto DrawSubMeshControl = [](const std::string& label, Mesh& sub_mesh, float columnWidth = 100.0f)
+        {
+            ImGui::PushID(label.c_str());
+
+            ImGui::Columns(2);
+            ImGui::SetColumnWidth(0, columnWidth);
+            ImGui::Text("%s", label.c_str());
+            ImGui::NextColumn();
+
+            ImGui::PushItemWidth(ImGui::CalcItemWidth());
+            ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2{ 0, 0 });
+
+            float  lineHeight = GImGui->Font->FontSize + GImGui->Style.FramePadding.y * 2.0f;
+            ImVec2 buttonSize = { lineHeight + 3.0f, lineHeight };
+
+            ImGui::Text("vertices size %s", std::to_string(sub_mesh.vertices.size()).c_str());
+
+            ImGui::Text("indices size %s", std::to_string(sub_mesh.indices.size()).c_str());
+
+            ImGui::PopStyleVar();
+            ImGui::PopItemWidth();
+
+            ImGui::Columns(1);
+            ImGui::PopID();
+        };
+
+        MeshComponent* mesh_ptr = static_cast<MeshComponent*>(value_ptr);
+        for (auto& sub_mesh : mesh_ptr->sub_meshes) {
+            DrawSubMeshControl(std::string("SubMesh id ") + std::to_string(sub_mesh->sub_mesh_idx), *sub_mesh);
+        }
+    };
     m_widget_creator[Meta::traits::typeName<Vec3>()] = [this](const std::string& name, void* value_ptr) -> void {
         Vec3* vec_ptr = static_cast<Vec3*>(value_ptr);
         float    val[3] = { vec_ptr->x, vec_ptr->y, vec_ptr->z };
@@ -88,21 +120,21 @@ ImGuiSceneHierarchy::ImGuiSceneHierarchy(ImGuiEditor* parent)
         vec_ptr->y = val[1];
         vec_ptr->z = val[2];
     };
-    m_widget_creator["bool"] = [this](const std::string& name, void* value_ptr)  -> void {
+    m_widget_creator[Meta::traits::typeName<bool>()] = [this](const std::string& name, void* value_ptr)  -> void {
         {
             std::string full_label = "##" + name;
             ImGui::Text("%s", name.c_str());
             ImGui::Checkbox(full_label.c_str(), static_cast<bool*>(value_ptr));
         }
     };
-    m_widget_creator["int"] = [this](const std::string& name, void* value_ptr) -> void {
+    m_widget_creator[Meta::traits::typeName<int>()] = [this](const std::string& name, void* value_ptr) -> void {
         {
             std::string full_label = "##" + name;
             ImGui::Text("%s", (name + ":").c_str());
             ImGui::InputInt(full_label.c_str(), static_cast<int*>(value_ptr));
         }
     };
-    m_widget_creator["float"] = [this](const std::string& name, void* value_ptr) -> void {
+    m_widget_creator[Meta::traits::typeName<float>()] = [this](const std::string& name, void* value_ptr) -> void {
         {
             std::string full_label = "##" + name;
             ImGui::Text("%s", (name + ":").c_str());
@@ -139,7 +171,7 @@ void ImGuiSceneHierarchy::renderNodes(const std::vector<GObject*>& nodes)
         {
             if (child_node->isLeaf()) {
                 for (auto& com : child_node->getComponents()) {
-                    auto refl = Meta::Instance(com->typeName(), com.get());
+                    auto refl = Meta::Instance(Meta::traits::typeName(*com), com.get());
                     renderReflectionWidget(refl);
                 }
             }
@@ -194,22 +226,34 @@ void ImGuiSceneHierarchy::renderReflectionWidget(Meta::Instance& inst)
     node_open = ImGui::TreeNodeEx(meta_type.className().c_str(), ImGuiTreeNodeFlags_SpanFullWidth);
     if (node_open)
     {
-        for (int i = 0; i < meta_type.propertyCount(); i++) {
-            auto prop = meta_type.property(i);
-            if (prop.type == Meta::Property::Type::SequenceContainer) {
-                ImGui::TreePop();
-                return;
-            }
-            std::string type_name = prop.type_name;
-            std::string name = prop.name;
-            void* var = inst.getPropertyValue(i);
-            if (m_widget_creator.find(type_name) != m_widget_creator.end())
-                m_widget_creator[type_name](name, var);
-            else {
-                auto child_refl = Meta::Instance(type_name, var);
-                renderReflectionWidget(child_refl);
-            }
-        }
+        if (m_widget_creator.find(meta_type.className()) != m_widget_creator.end())
+            m_widget_creator[meta_type.className()](meta_type.className(), inst.instance());
+
+        //for (int i = 0; i < meta_type.propertyCount(); i++) {
+        //    auto prop = meta_type.property(i);
+        //    if (prop.type == Meta::Property::Type::SequenceContainer) {
+        //        if (prop.isType<std::vector<std::shared_ptr<Mesh>>>()) {
+        //            std::vector<std::shared_ptr<Mesh>>& sub_meshes = prop.getValue<std::vector<std::shared_ptr<Mesh>>&>(inst.instance());
+        //            for (auto& sub_mesh_ptr : sub_meshes) {
+        //                std::string type_name = Meta::traits::typeName(*sub_mesh_ptr);
+        //                std::string name = std::to_string(sub_mesh_ptr->sub_mesh_idx);
+        //                if (m_widget_creator.find(type_name) != m_widget_creator.end())
+        //                    ;// m_widget_creator[type_name](name, var);
+        //            }
+        //        }
+        //        ImGui::TreePop();
+        //        return;
+        //    }
+        //    std::string type_name = prop.type_name;
+        //    std::string name = prop.name;
+        //    void* var = inst.getPropertyValue(i);
+        //    if (m_widget_creator.find(type_name) != m_widget_creator.end())
+        //        m_widget_creator[type_name](name, var);
+        //    else {
+        //        auto child_refl = Meta::Instance(type_name, var);
+        //        renderReflectionWidget(child_refl);
+        //    }
+        //}
         ImGui::TreePop();
     }
 }

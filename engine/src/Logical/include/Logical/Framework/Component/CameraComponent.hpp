@@ -25,8 +25,6 @@ struct CameraComponent : public Component {
 	CameraComponent(const CameraComponent&) = delete;
 	CameraComponent& operator=(const CameraComponent&) = delete;
 
-	std::string typeName() override { return "CameraComponent"; }
-
 	Mode mode{ Mode::Orbit };
 
 	Projection projection_mode{ Projection::Perspective };

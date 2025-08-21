@@ -16,7 +16,6 @@ struct Component {
     virtual ~Component() {}
 
     //virtual void tick(float delta_time) = 0;
-    virtual std::string typeName() { return "Component"; }
 
 public:
     GObject* parent_object; // shared_ptr 导致循环引用

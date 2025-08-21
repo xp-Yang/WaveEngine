@@ -53,7 +53,12 @@ struct Property {
 
     template<typename T>
     bool isType() {
-        return traits::typeName<T> == type_name;
+        return traits::typeName<T>() == type_name;
+    }
+
+    // TODO ¿¼ÂÇÓÃvariant°ü×°
+    void* getValue(void* instance) {
+        return reinterpret_cast<void*>(((char*)instance + offset));
     }
 
     template<typename T>
@@ -296,7 +301,7 @@ template <class T>
 inline MetaType MetaTypeOf() { return MetaType(traits::typeName<std::remove_const_t<std::remove_pointer_t<std::remove_reference_t<T>>>>()); }
 
 template <class T>
-inline MetaType MetaTypeOf(T&& obj) { return MetaTypeOf<T>(); }
+inline MetaType MetaTypeOf(T&& obj) { return MetaType(traits::typeName(std::forward<T>(obj))); }
 
 
 class Instance {
@@ -312,7 +317,7 @@ public:
 
     void* getPropertyValue(int index) const {
         auto& property = m_meta.property(index);
-        return property.getValue<void*>(m_instance);
+        return property.getValue(m_instance);
     }
     template<typename T>
     T getPropertyValue(int index) const {

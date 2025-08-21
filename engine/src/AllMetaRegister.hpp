@@ -39,15 +39,38 @@ inline void allMetaRegister()
 
 	// Mat3
 	registerClass<Mat3>();
-	// TODO
 
 	// Mat4
 	registerClass<Mat4>();
 
-	registerClass<Mesh>();
-	registerClass<Material>();
+	registerClass<Mesh>().
+		registerProperty(&Mesh::sub_mesh_idx, "sub_mesh_idx").
+		registerProperty(&Mesh::vertices, "vertices").
+		registerProperty(&Mesh::indices, "indices").
+		registerProperty(&Mesh::material, "material").
+		registerProperty(&Mesh::local_transform, "local_transform");
+	registerClass<Texture>().
+		registerProperty(&Texture::texture_type, "texture_type").
+		registerProperty(&Texture::texture_filepath, "texture_filepath").
+		registerProperty(&Texture::width, "width").
+		registerProperty(&Texture::height, "height").
+		registerProperty(&Texture::channel_count, "channel_count").
+		registerProperty(&Texture::gamma, "gamma");
+	registerClass<Material>().
+		registerProperty(&Material::albedo_texture, "albedo_texture").
+		registerProperty(&Material::metallic_texture, "metallic_texture").
+		registerProperty(&Material::roughness_texture, "roughness_texture").
+		registerProperty(&Material::ao_texture, "ao_texture").
+		registerProperty(&Material::albedo, "albedo").
+		registerProperty(&Material::metallic, "metallic").
+		registerProperty(&Material::roughness, "roughness").
+		registerProperty(&Material::ao, "ao").
+		registerProperty(&Material::diffuse_texture, "diffuse_texture").
+		registerProperty(&Material::specular_texture, "specular_texture").
+		registerProperty(&Material::normal_texture, "normal_texture").
+		registerProperty(&Material::height_texture, "height_texture").
+		registerProperty(&Material::alpha, "alpha");
 	registerClass<Shader>();
-	registerClass<Texture>();
 	registerClass<CubeTexture>();
 
 #if ENABLE_ECS
@@ -84,6 +107,7 @@ inline void allMetaRegister()
 
 	registerClass<::GObject>().
 		registerProperty(&::GObject::m_id, "m_id").
+		registerProperty(&::GObject::m_name, "m_name").
 		registerProperty(&::GObject::m_components, "m_components");
 
 	registerClass<::MeshComponent>().

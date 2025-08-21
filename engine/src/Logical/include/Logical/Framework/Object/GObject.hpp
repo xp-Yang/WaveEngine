@@ -60,7 +60,7 @@ public:
 	bool hasComponent() const {
 		for (auto& component : m_components)
 		{
-			if (component->typeName() == Meta::traits::typeName<T>())
+			if (typeid(T) == typeid(*component))
 				return true;
 		}
 		return false;
@@ -71,7 +71,7 @@ public:
 	{
 		for (auto& component : m_components)
 		{
-			if (component->typeName() == Meta::traits::typeName<T>())
+			if (typeid(T) == typeid(*component))
 				return static_cast<T*>(component.get());
 		}
 		return nullptr;
