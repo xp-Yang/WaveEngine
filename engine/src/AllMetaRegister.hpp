@@ -20,43 +20,43 @@ namespace Registration {
 inline void allMetaRegister()
 {
 	// Vec2
-	registerClass<Vec2>().
+	registerClass<Vec2>("Vec2").
 		registerProperty(&Vec2::x, "x").
 		registerProperty(&Vec2::y, "y");
 
 	// Vec3
-	registerClass<Vec3>().
+	registerClass<Vec3>("Vec3").
 		registerProperty(&Vec3::x, "x").
 		registerProperty(&Vec3::y, "y").
 		registerProperty(&Vec3::z, "z");
 
 	// Vec4
-	registerClass<Vec4>().
+	registerClass<Vec4>("Vec4").
 		registerProperty(&Vec4::x, "x").
 		registerProperty(&Vec4::y, "y").
 		registerProperty(&Vec4::z, "z").
 		registerProperty(&Vec4::w, "w");
 
 	// Mat3
-	registerClass<Mat3>();
+	registerClass<Mat3>("Mat3");
 
 	// Mat4
-	registerClass<Mat4>();
+	registerClass<Mat4>("Mat4");
 
-	registerClass<Mesh>().
+	registerClass<Mesh>("Mesh").
 		registerProperty(&Mesh::sub_mesh_idx, "sub_mesh_idx").
 		registerProperty(&Mesh::vertices, "vertices").
 		registerProperty(&Mesh::indices, "indices").
 		registerProperty(&Mesh::material, "material").
 		registerProperty(&Mesh::local_transform, "local_transform");
-	registerClass<Texture>().
+	registerClass<Texture>("Texture").
 		registerProperty(&Texture::texture_type, "texture_type").
 		registerProperty(&Texture::texture_filepath, "texture_filepath").
 		registerProperty(&Texture::width, "width").
 		registerProperty(&Texture::height, "height").
 		registerProperty(&Texture::channel_count, "channel_count").
 		registerProperty(&Texture::gamma, "gamma");
-	registerClass<Material>().
+	registerClass<Material>("Material").
 		registerProperty(&Material::albedo_texture, "albedo_texture").
 		registerProperty(&Material::metallic_texture, "metallic_texture").
 		registerProperty(&Material::roughness_texture, "roughness_texture").
@@ -70,8 +70,8 @@ inline void allMetaRegister()
 		registerProperty(&Material::normal_texture, "normal_texture").
 		registerProperty(&Material::height_texture, "height_texture").
 		registerProperty(&Material::alpha, "alpha");
-	registerClass<Shader>();
-	registerClass<CubeTexture>();
+	registerClass<Shader>("Shader");
+	registerClass<CubeTexture>("CubeTexture");
 
 #if ENABLE_ECS
 	// Name
@@ -100,25 +100,25 @@ inline void allMetaRegister()
 	registerProperty(&ecs::World::m_entities, "m_entities", true);
 	registerProperty(&ecs::World::m_component_pools, "m_component_pools", true);
 #else
-	registerClass<::GObjectID>().
+	registerClass<::GObjectID>("GObjectID").
 		registerProperty(&::GObjectID::id, "id");
 
-	registerClass<::Component>();
+	registerClass<::Component>("Component");
 
-	registerClass<::GObject>().
+	registerClass<::GObject>("GObject").
 		registerProperty(&::GObject::m_id, "m_id").
 		registerProperty(&::GObject::m_name, "m_name").
 		registerProperty(&::GObject::m_components, "m_components");
 
-	registerClass<::MeshComponent>().
+	registerClass<::MeshComponent>("MeshComponent").
 		registerProperty(&::MeshComponent::sub_meshes, "sub_meshes");
 
-	registerClass<::TransformComponent>().
+	registerClass<::TransformComponent>("TransformComponent").
 		registerProperty(&::TransformComponent::translation, "translation").
 		registerProperty(&::TransformComponent::rotation, "rotation").
 		registerProperty(&::TransformComponent::scale, "scale");
 
-	registerClass<::CameraComponent>().
+	registerClass<::CameraComponent>("CameraComponent").
 		registerProperty(&::CameraComponent::mode, "mode").
 		registerProperty(&::CameraComponent::projection_mode, "projection_mode").
 		registerProperty(&::CameraComponent::zoom_mode, "zoom_mode").
@@ -132,8 +132,8 @@ inline void allMetaRegister()
 		registerProperty(&::CameraComponent::view, "view").
 		registerProperty(&::CameraComponent::projection, "projection");
 
-	registerClass<::AnimationComponent>();
-	registerClass<::RigidComponent>();
+	registerClass<::AnimationComponent>("AnimationComponent");
+	registerClass<::RigidComponent>("RigidComponent");
 #endif
 
 }

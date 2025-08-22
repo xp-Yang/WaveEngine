@@ -10,7 +10,7 @@
 ImGuiSceneHierarchy::ImGuiSceneHierarchy(ImGuiEditor* parent)
     : m_parent(parent)
 {
-    m_widget_creator[Meta::traits::typeName<TransformComponent>()] = [this](const std::string& name, void* value_ptr) -> void {
+    m_widget_creator[Meta::MetaTypeOf<TransformComponent>().typeName()] = [this](const std::string& name, const Meta::Instance& inst) -> void {
         auto DrawVecControl = [](const std::string& label, Vec3& values, float resetValue = 0.0f, float columnWidth = 100.0f)
         {
             ImGui::PushID(label.c_str());
@@ -67,15 +67,24 @@ ImGuiSceneHierarchy::ImGuiSceneHierarchy(ImGuiEditor* parent)
             ImGui::PopID();
         };
 
+        static ImGuiTableFlags flags = ImGuiTableFlags_Resizable | ImGuiTableFlags_NoSavedSettings;
+        bool                   node_open = false;
+        node_open = ImGui::TreeNodeEx(inst.typeName().c_str(), ImGuiTreeNodeFlags_SpanFullWidth);
+        if (node_open)
         {
-            TransformComponent* trans_ptr = static_cast<TransformComponent*>(value_ptr);
-
-            DrawVecControl("Position", trans_ptr->translation);
-            DrawVecControl("Rotation", trans_ptr->rotation);
-            DrawVecControl("Scale", trans_ptr->scale);
+            Meta::MetaType meta = inst.metaType();
+            for (auto& prop : meta.properties()) {
+                if (prop.isType<Vec3>())
+                    DrawVecControl(prop.name, prop.getValue<Vec3&>(inst));
+            }
+            //TransformComponent& trans_ptr = inst.getValue<TransformComponent&>();
+            //DrawVecControl("Position", trans_ptr.translation);
+            //DrawVecControl("Rotation", trans_ptr.rotation);
+            //DrawVecControl("Scale", trans_ptr.scale);
+            ImGui::TreePop();
         }
     };
-    m_widget_creator[Meta::traits::typeName<MeshComponent>()] = [this](const std::string& name, void* value_ptr) -> void {
+    m_widget_creator[Meta::MetaTypeOf<MeshComponent>().typeName()] = [this](const std::string& name, const Meta::Instance& inst) -> void {
         auto DrawSubMeshControl = [](const std::string& label, Mesh& sub_mesh, float columnWidth = 100.0f)
         {
             ImGui::PushID(label.c_str());
@@ -102,43 +111,50 @@ ImGuiSceneHierarchy::ImGuiSceneHierarchy(ImGuiEditor* parent)
             ImGui::PopID();
         };
 
-        MeshComponent* mesh_ptr = static_cast<MeshComponent*>(value_ptr);
-        for (auto& sub_mesh : mesh_ptr->sub_meshes) {
-            DrawSubMeshControl(std::string("SubMesh id ") + std::to_string(sub_mesh->sub_mesh_idx), *sub_mesh);
+        static ImGuiTableFlags flags = ImGuiTableFlags_Resizable | ImGuiTableFlags_NoSavedSettings;
+        bool                   node_open = false;
+        node_open = ImGui::TreeNodeEx(inst.typeName().c_str(), ImGuiTreeNodeFlags_SpanFullWidth);
+        if (node_open)
+        {
+            MeshComponent& mesh_ptr = inst.getValue<MeshComponent&>();
+            for (auto& sub_mesh : mesh_ptr.sub_meshes) {
+                DrawSubMeshControl(std::string("SubMesh id ") + std::to_string(sub_mesh->sub_mesh_idx), *sub_mesh);
+            }
+
+            ImGui::TreePop();
         }
     };
-    m_widget_creator[Meta::traits::typeName<Vec3>()] = [this](const std::string& name, void* value_ptr) -> void {
-        Vec3* vec_ptr = static_cast<Vec3*>(value_ptr);
-        float    val[3] = { vec_ptr->x, vec_ptr->y, vec_ptr->z };
-
+    m_widget_creator[Meta::MetaTypeOf<Vec3>().typeName()] = [this](const std::string& name, const Meta::Instance& inst) -> void {
+        Vec3& vec = inst.getValue<Vec3&>();
+        float    val[3] = { vec.x, vec.y, vec.z };
         {
             std::string full_label = "##" + name;
             ImGui::Text("%s", (name + ":").c_str());
             ImGui::DragFloat3(full_label.c_str(), val);
         }
-        vec_ptr->x = val[0];
-        vec_ptr->y = val[1];
-        vec_ptr->z = val[2];
+        vec.x = val[0];
+        vec.y = val[1];
+        vec.z = val[2];
     };
-    m_widget_creator[Meta::traits::typeName<bool>()] = [this](const std::string& name, void* value_ptr)  -> void {
+    m_widget_creator[Meta::MetaTypeOf<bool>().typeName()] = [this](const std::string& name, const Meta::Instance& inst)  -> void {
         {
             std::string full_label = "##" + name;
             ImGui::Text("%s", name.c_str());
-            ImGui::Checkbox(full_label.c_str(), static_cast<bool*>(value_ptr));
+            ImGui::Checkbox(full_label.c_str(), &inst.getValue<bool&>());
         }
     };
-    m_widget_creator[Meta::traits::typeName<int>()] = [this](const std::string& name, void* value_ptr) -> void {
+    m_widget_creator[Meta::MetaTypeOf<int>().typeName()] = [this](const std::string& name, const Meta::Instance& inst) -> void {
         {
             std::string full_label = "##" + name;
             ImGui::Text("%s", (name + ":").c_str());
-            ImGui::InputInt(full_label.c_str(), static_cast<int*>(value_ptr));
+            ImGui::InputInt(full_label.c_str(), &inst.getValue<int&>());
         }
     };
-    m_widget_creator[Meta::traits::typeName<float>()] = [this](const std::string& name, void* value_ptr) -> void {
+    m_widget_creator[Meta::MetaTypeOf<float>().typeName()] = [this](const std::string& name, const Meta::Instance& inst) -> void {
         {
             std::string full_label = "##" + name;
             ImGui::Text("%s", (name + ":").c_str());
-            ImGui::InputFloat(full_label.c_str(), static_cast<float*>(value_ptr));
+            ImGui::InputFloat(full_label.c_str(), &inst.getValue<float&>());
         }
     };
 }
@@ -171,8 +187,9 @@ void ImGuiSceneHierarchy::renderNodes(const std::vector<GObject*>& nodes)
         {
             if (child_node->isLeaf()) {
                 for (auto& com : child_node->getComponents()) {
-                    auto refl = Meta::Instance(Meta::traits::typeName(*com), com.get());
-                    renderReflectionWidget(refl);
+                    Meta::Instance inst{ com };
+                    if (m_widget_creator.find(inst.typeName()) != m_widget_creator.end())
+                        m_widget_creator[inst.typeName()](inst.typeName(), inst);
                 }
             }
             else {
@@ -218,16 +235,15 @@ void ImGuiSceneHierarchy::renderNodes(const std::vector<Light*>& nodes)
     }
 }
 
-void ImGuiSceneHierarchy::renderReflectionWidget(Meta::Instance& inst)
+void ImGuiSceneHierarchy::renderReflectionWidget(const Meta::Instance& inst)
 {
-    Meta::MetaType meta_type = inst.metaType();
     static ImGuiTableFlags flags = ImGuiTableFlags_Resizable | ImGuiTableFlags_NoSavedSettings;
     bool                   node_open = false;
-    node_open = ImGui::TreeNodeEx(meta_type.className().c_str(), ImGuiTreeNodeFlags_SpanFullWidth);
+    node_open = ImGui::TreeNodeEx(inst.typeName().c_str(), ImGuiTreeNodeFlags_SpanFullWidth);
     if (node_open)
     {
-        if (m_widget_creator.find(meta_type.className()) != m_widget_creator.end())
-            m_widget_creator[meta_type.className()](meta_type.className(), inst.instance());
+        if (m_widget_creator.find(inst.typeName()) != m_widget_creator.end())
+            m_widget_creator[inst.typeName()](inst.typeName(), inst.instance());
 
         //for (int i = 0; i < meta_type.propertyCount(); i++) {
         //    auto prop = meta_type.property(i);

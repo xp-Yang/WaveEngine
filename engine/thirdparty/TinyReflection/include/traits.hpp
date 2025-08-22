@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <string>
+#include <regex>
 #include <map>
 #include <unordered_map>
 #include <set>
@@ -25,14 +26,7 @@ namespace traits {
 //}
 //
 //template<typename T>
-//constexpr std::string typeName2(T&& obj) noexcept {
-//    std::string_view sig = rawSignature<T>();
-//    std::string_view sig2 = rawSignature<T&&>();
-//    return typeName<T>();
-//}
-//
-//template<typename T>
-//constexpr std::string typeName2() noexcept {
+//constexpr std::string rawTypeName2() noexcept {
 //    constexpr std::string_view mark_str = "rawSignature";
 //    std::string_view sig = rawSignature<T>();
 //#if defined(__clang__)
@@ -46,30 +40,27 @@ namespace traits {
 //    sig = sig.substr(start_index);
 //    std::string name = std::string(sig.substr(0, sig.size() - 16));
 //#endif
-//    //const std::vector<std::string> class_keys = {
-//    //"struct",
-//    //"class",
-//    //"enum",
-//    //"union",
-//    //};
-//    //for (const auto& class_key : class_keys) {
-//    //    auto pos = name.find(class_key);
-//    //    if (pos != std::string::npos) {
-//    //        name = name.substr(pos + class_key.size() + 1);
-//    //    }
-//    //}
 //    return name;
 //}
 
-// typeid能正确推导多态的类型（要有虚函数）
+// typeid能正确推导多态的类型（要有虚函数），和各种引用类型
+// typeid(T).name()的结果：
+// T -> T
+// const T& -> T
+// T& -> T
+// T&& -> T
+// T* -> T * __ptrXX
+// const T* -> T const * __ptrXX
+// T* const -> T * __ptrXX
+// const T* const & -> T const * __ptrXX
 template<typename T>
-constexpr std::string typeName(T&& obj) noexcept {
-    return typeid(std::forward<T>(obj)).name();
+constexpr std::string rawTypeName() noexcept {
+    return typeid(T).name();
 }
 
 template<typename T>
-constexpr std::string typeName() noexcept {
-    return typeid(T).name();
+constexpr std::string rawTypeName(T&& obj) noexcept {
+    return typeid(obj).name();
 }
 
 
@@ -102,7 +93,26 @@ struct is_associative_container<T, std::void_t<
 template <typename T>
 struct is_sequence_container : std::conjunction<
     is_container<T>,
-    std::negation<is_associative_container<T>>> {};
+    std::negation<is_associative_container<T>>,
+    std::negation<std::is_same<T, std::string>>,
+    std::negation<std::is_same<T, std::wstring>>,
+    std::negation<std::is_same<T, std::u16string>>,
+    std::negation<std::is_same<T, std::u32string>>
+> {};
+
+template <typename T>
+constexpr bool is_container_v = is_container<T>::value;
+template <typename T>
+constexpr bool is_associative_container_v = is_associative_container<T>::value;
+template <typename T>
+constexpr bool is_sequence_container_v = is_sequence_container<T>::value;
+template <typename T>
+constexpr bool is_fundamental_v =
+    std::is_fundamental_v<T> ||
+    std::is_same_v<T, std::string> ||
+    std::is_same_v<T, std::wstring> ||
+    std::is_same_v<T, std::u16string> ||
+    std::is_same_v<T, std::u32string>;
 
 }
 

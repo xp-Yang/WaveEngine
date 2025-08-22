@@ -68,82 +68,82 @@ public:
 
 protected:
 	static void read_internal(const Json& json, Instance& v) {
-		MetaType meta_type = v.metaType();
-		for (int i = 0; i < meta_type.propertyCount(); i++) {
-			auto& prop = meta_type.property(i);
-			std::string type_name = prop.type_name;
-			std::string name = prop.name;
-			void* filed_value_ptr = (v.getPropertyValue(i));
-			if (type_name == traits::typeName<char>()) {
-				assert(json.is_number());
-				*static_cast<char*>(filed_value_ptr) = json.number_value();
-			}
-			else if (type_name == traits::typeName<int>()) {
-				assert(json.is_number());
-				*static_cast<int*>(filed_value_ptr) = static_cast<int>(json.number_value());
-			}
-			else if (type_name == traits::typeName<unsigned int>()) {
-				assert(json.is_number());
-				*static_cast<unsigned int*>(filed_value_ptr) = static_cast<unsigned int>(json.number_value());
-			}
-			else if (type_name == traits::typeName<float>()) {
-				assert(json.is_number());
-				*static_cast<float*>(filed_value_ptr) = static_cast<float>(json.number_value());
-			}
-			else if (type_name == traits::typeName<double>()) {
-				assert(json.is_number());
-				*static_cast<double*>(filed_value_ptr) = static_cast<double>(json.number_value());
-			}
-			else if (type_name == traits::typeName<bool>()) {
-				assert(json.is_bool());
-				*static_cast<bool*>(filed_value_ptr) = json.bool_value();
-			}
-			else if (type_name == traits::typeName<std::string>()) {
-				assert(json.is_string());
-				*static_cast<std::string*>(filed_value_ptr) = json.string_value();
-			}
-			else {
-				Instance refl_obj = Instance(type_name, filed_value_ptr);
-				read_internal(json[name], refl_obj);
-			}
-		}
+		//MetaType meta_type = v.metaType();
+		//for (int i = 0; i < meta_type.propertyCount(); i++) {
+		//	auto& prop = meta_type.property(i);
+		//	std::string type_name = prop.type_name;
+		//	std::string name = prop.name;
+		//	void* filed_value_ptr = (v.getPropertyValue(i));
+		//	if (type_name == traits::typeName<char>()) {
+		//		assert(json.is_number());
+		//		*static_cast<char*>(filed_value_ptr) = json.number_value();
+		//	}
+		//	else if (type_name == traits::typeName<int>()) {
+		//		assert(json.is_number());
+		//		*static_cast<int*>(filed_value_ptr) = static_cast<int>(json.number_value());
+		//	}
+		//	else if (type_name == traits::typeName<unsigned int>()) {
+		//		assert(json.is_number());
+		//		*static_cast<unsigned int*>(filed_value_ptr) = static_cast<unsigned int>(json.number_value());
+		//	}
+		//	else if (type_name == traits::typeName<float>()) {
+		//		assert(json.is_number());
+		//		*static_cast<float*>(filed_value_ptr) = static_cast<float>(json.number_value());
+		//	}
+		//	else if (type_name == traits::typeName<double>()) {
+		//		assert(json.is_number());
+		//		*static_cast<double*>(filed_value_ptr) = static_cast<double>(json.number_value());
+		//	}
+		//	else if (type_name == traits::typeName<bool>()) {
+		//		assert(json.is_bool());
+		//		*static_cast<bool*>(filed_value_ptr) = json.bool_value();
+		//	}
+		//	else if (type_name == traits::typeName<std::string>()) {
+		//		assert(json.is_string());
+		//		*static_cast<std::string*>(filed_value_ptr) = json.string_value();
+		//	}
+		//	else {
+		//		Instance refl_obj = Instance(type_name, filed_value_ptr);
+		//		read_internal(json[name], refl_obj);
+		//	}
+		//}
 	}
 
 	static Json write_internal(const Instance& v) {
-		Json::object json_obj;
-		MetaType meta_type = v.metaType();
-		for (int i = 0; i < meta_type.propertyCount(); i++) {
-			auto& prop = meta_type.property(i);
-			std::string type_name = prop.type_name;
-			std::string name = prop.name;
-			void* filed_value_ptr = (v.getPropertyValue(i));
-			if (type_name == traits::typeName<char>()) {
-				json_obj.insert_or_assign(name, Json(*static_cast<char*>(filed_value_ptr)));
-			}
-			else if (type_name == traits::typeName<int>()) {
-				json_obj.insert_or_assign(name, Json(*static_cast<int*>(filed_value_ptr)));
-			}
-			else if (type_name == traits::typeName<unsigned int>()) {
-				json_obj.insert_or_assign(name, Json(*static_cast<int*>(filed_value_ptr)));
-			}
-			else if (type_name == traits::typeName<float>()) {
-				json_obj.insert_or_assign(name, Json(*static_cast<float*>(filed_value_ptr)));
-			}
-			else if (type_name == traits::typeName<double>()) {
-				json_obj.insert_or_assign(name, Json(*static_cast<double*>(filed_value_ptr)));
-			}
-			else if (type_name == traits::typeName<bool>()) {
-				json_obj.insert_or_assign(name, Json(*static_cast<bool*>(filed_value_ptr)));
-			}
-			else if (type_name == traits::typeName<std::string>()) {
-				json_obj.insert_or_assign(name, Json(*static_cast<std::string*>(filed_value_ptr)));
-			}
-			else {
-				Instance refl_obj = Instance(type_name, filed_value_ptr);
-				json_obj.insert_or_assign(name, write_internal(refl_obj));
-			}
-		}
-		return Json(json_obj);
+		//Json::object json_obj;
+		//MetaType meta_type = v.metaType();
+		//for (int i = 0; i < meta_type.propertyCount(); i++) {
+		//	auto& prop = meta_type.property(i);
+		//	std::string type_name = prop.type_name;
+		//	std::string name = prop.name;
+		//	void* filed_value_ptr = (v.getPropertyValue(i));
+		//	if (type_name == traits::typeName<char>()) {
+		//		json_obj.insert_or_assign(name, Json(*static_cast<char*>(filed_value_ptr)));
+		//	}
+		//	else if (type_name == traits::typeName<int>()) {
+		//		json_obj.insert_or_assign(name, Json(*static_cast<int*>(filed_value_ptr)));
+		//	}
+		//	else if (type_name == traits::typeName<unsigned int>()) {
+		//		json_obj.insert_or_assign(name, Json(*static_cast<int*>(filed_value_ptr)));
+		//	}
+		//	else if (type_name == traits::typeName<float>()) {
+		//		json_obj.insert_or_assign(name, Json(*static_cast<float*>(filed_value_ptr)));
+		//	}
+		//	else if (type_name == traits::typeName<double>()) {
+		//		json_obj.insert_or_assign(name, Json(*static_cast<double*>(filed_value_ptr)));
+		//	}
+		//	else if (type_name == traits::typeName<bool>()) {
+		//		json_obj.insert_or_assign(name, Json(*static_cast<bool*>(filed_value_ptr)));
+		//	}
+		//	else if (type_name == traits::typeName<std::string>()) {
+		//		json_obj.insert_or_assign(name, Json(*static_cast<std::string*>(filed_value_ptr)));
+		//	}
+		//	else {
+		//		Instance refl_obj = Instance(type_name, filed_value_ptr);
+		//		json_obj.insert_or_assign(name, write_internal(refl_obj));
+		//	}
+		//}
+		//return Json(json_obj);
 	}
 
 private:
