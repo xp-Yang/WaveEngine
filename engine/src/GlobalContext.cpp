@@ -5,11 +5,14 @@
 #include "GUI/Editor/ImGuiEditor.hpp"
 #include "GUI/Editor/ImGuiInput.hpp"
 #include "Logical/Animation/AnimationSystem.hpp"
+#include "AllMetaRegister.hpp"
 
 GlobalContext g_context;
 
 GlobalContext::GlobalContext()
 {
+	Meta::Registration::allMetaRegister();
+
 	window = std::make_shared<Window>((int)DEFAULT_WINDOW_WIDTH, (int)DEFAULT_WINDOW_HEIGHT);
 	scene = std::make_shared<Scene>();
 	render_system = std::make_shared<RenderSystem>();

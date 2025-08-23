@@ -6,7 +6,6 @@
 #include "Logical/Animation/AnimationSystem.hpp"
 #include "Logical/FrameWork/World/Scene.hpp"
 #include "GlobalContext.hpp"
-#include "AllMetaRegister.hpp"
 
 Engine::Engine() {}
 
@@ -44,7 +43,6 @@ void Engine::run() {
 
 void Engine::init()
 {
-	Meta::Registration::allMetaRegister();
 }
 
 void Engine::shutdown()

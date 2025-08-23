@@ -10,6 +10,78 @@
 ImGuiSceneHierarchy::ImGuiSceneHierarchy(ImGuiEditor* parent)
     : m_parent(parent)
 {
+    m_widget_creator[Meta::MetaTypeOf<GObject>().typeName()] = [this](const std::string& name, const Meta::Instance& inst) -> void {
+        auto& object = inst.getValue<GObject&>();
+        GObjectID id = object.ID();
+        std::string display_text = name + " (ID: " + std::to_string(id.id) + ")";
+
+        ImGuiTreeNodeFlags node_flags = ImGuiTreeNodeFlags_SpanAvailWidth;
+        const auto& original_picked_ids = g_context.scene->getPickedObjectIDs();
+        if (std::find(original_picked_ids.begin(), original_picked_ids.end(), id) != original_picked_ids.end())
+            node_flags |= ImGuiTreeNodeFlags_Selected;
+        else
+            node_flags &= ~ImGuiTreeNodeFlags_Selected;
+
+        bool node_open = ImGui::TreeNodeEx(display_text.c_str(), node_flags);
+        if (ImGui::IsItemClicked(ImGuiMouseButton_Left)) {
+            g_context.scene->onPickedChanged({ id }, original_picked_ids);
+        }
+        if (ImGui::IsItemClicked(ImGuiMouseButton_Right)) {
+            g_context.scene->onPickedChanged({ id }, original_picked_ids);
+            m_parent->popUpMenu();
+        }
+        if (node_open)
+        {
+            if (object.isLeaf()) {
+                for (auto& com : object.getComponents()) {
+                    Meta::Instance inst{ *com };
+                    if (m_widget_creator.find(inst.typeName()) != m_widget_creator.end())
+                        m_widget_creator[inst.typeName()](inst.typeName(), inst);
+                }
+            }
+            else {
+                for (auto& child : object.children()) {
+                    Meta::Instance inst{ *child };
+                    m_widget_creator[Meta::MetaTypeOf<GObject>().typeName()](inst.typeName(), inst);
+                }
+            }
+            ImGui::TreePop();
+        }
+    };
+    m_widget_creator[Meta::MetaTypeOf<DirectionalLight>().typeName()] = [this](const std::string& name, const Meta::Instance& inst) -> void {
+        auto& light = inst.getValue<DirectionalLight&>();
+        LightID id = light.ID();
+        std::string display_text = name + " (ID: " + std::to_string(id.id) + ")";
+
+        ImGuiTreeNodeFlags node_flags = ImGuiTreeNodeFlags_SpanAvailWidth;
+        bool node_open = ImGui::TreeNodeEx(display_text.c_str(), node_flags);
+        if (node_open)
+        {
+            for (auto& prop : inst.metaType().properties()) {
+                auto& inst_ = prop.getValue(inst);
+                if (m_widget_creator.find(inst_.typeName()) != m_widget_creator.end())
+                    m_widget_creator[inst_.typeName()](prop.name, inst_);
+            }
+            ImGui::TreePop();
+        }
+    };
+    m_widget_creator[Meta::MetaTypeOf<PointLight>().typeName()] = [this](const std::string& name, const Meta::Instance& inst) -> void {
+        auto& light = inst.getValue<PointLight&>();
+        LightID id = light.ID();
+        std::string display_text = name + " (ID: " + std::to_string(id.id) + ")";
+
+        ImGuiTreeNodeFlags node_flags = ImGuiTreeNodeFlags_SpanAvailWidth;
+        bool node_open = ImGui::TreeNodeEx(display_text.c_str(), node_flags);
+        if (node_open)
+        {
+            for (auto& prop : inst.metaType().properties()) {
+                auto& inst_ = prop.getValue(inst);
+                if (m_widget_creator.find(inst_.typeName()) != m_widget_creator.end())
+                    m_widget_creator[inst_.typeName()](prop.name, inst_);
+            }
+            ImGui::TreePop();
+        }
+    };
     m_widget_creator[Meta::MetaTypeOf<TransformComponent>().typeName()] = [this](const std::string& name, const Meta::Instance& inst) -> void {
         auto DrawVecControl = [](const std::string& label, Vec3& values, float resetValue = 0.0f, float columnWidth = 100.0f)
         {
@@ -77,10 +149,6 @@ ImGuiSceneHierarchy::ImGuiSceneHierarchy(ImGuiEditor* parent)
                 if (prop.isType<Vec3>())
                     DrawVecControl(prop.name, prop.getValue<Vec3&>(inst));
             }
-            //TransformComponent& trans_ptr = inst.getValue<TransformComponent&>();
-            //DrawVecControl("Position", trans_ptr.translation);
-            //DrawVecControl("Rotation", trans_ptr.rotation);
-            //DrawVecControl("Scale", trans_ptr.scale);
             ImGui::TreePop();
         }
     };
@@ -124,6 +192,19 @@ ImGuiSceneHierarchy::ImGuiSceneHierarchy(ImGuiEditor* parent)
             ImGui::TreePop();
         }
     };
+    m_widget_creator[Meta::MetaTypeOf<Vec4>().typeName()] = [this](const std::string& name, const Meta::Instance& inst) -> void {
+        Vec4& vec = inst.getValue<Vec4&>();
+        float    val[4] = { vec.x, vec.y, vec.z, vec.w };
+        {
+            std::string full_label = "##" + name;
+            ImGui::Text("%s", (name + ":").c_str());
+            ImGui::DragFloat4(full_label.c_str(), val, 0.01f, 0.0f, 1.0f);
+        }
+        vec.x = val[0];
+        vec.y = val[1];
+        vec.z = val[2];
+        vec.w = val[3];
+    };
     m_widget_creator[Meta::MetaTypeOf<Vec3>().typeName()] = [this](const std::string& name, const Meta::Instance& inst) -> void {
         Vec3& vec = inst.getValue<Vec3&>();
         float    val[3] = { vec.x, vec.y, vec.z };
@@ -159,139 +240,30 @@ ImGuiSceneHierarchy::ImGuiSceneHierarchy(ImGuiEditor* parent)
     };
 }
 
-void ImGuiSceneHierarchy::renderNodes(const std::vector<GObject*>& nodes)
-{
-    for (int i = 0; i < nodes.size(); i++)
-    {
-        auto child_node = nodes[i];
-        GObjectID child_id = child_node->ID();
-        std::string child_name = child_node->name();
-        std::string display_text = child_name + " (ID: " + std::to_string(child_id.id) + ")";
-
-        ImGuiTreeNodeFlags node_flags = ImGuiTreeNodeFlags_SpanAvailWidth;
-        const auto& original_picked_ids = g_context.scene->getPickedObjectIDs();
-        if (std::find(original_picked_ids.begin(), original_picked_ids.end(), child_id) != original_picked_ids.end())
-            node_flags |= ImGuiTreeNodeFlags_Selected;
-        else
-            node_flags &= ~ImGuiTreeNodeFlags_Selected;
-
-        bool node_open = ImGui::TreeNodeEx((void*)(intptr_t)(i+ std::hash<std::string>()(child_name)), node_flags, display_text.c_str());
-        if (ImGui::IsItemClicked(ImGuiMouseButton_Left)) {
-            g_context.scene->onPickedChanged({ child_id }, original_picked_ids);
-        }
-        if (ImGui::IsItemClicked(ImGuiMouseButton_Right)) {
-            g_context.scene->onPickedChanged({ child_id }, original_picked_ids);
-            m_parent->popUpMenu();
-        }
-        if (node_open)
-        {
-            if (child_node->isLeaf()) {
-                for (auto& com : child_node->getComponents()) {
-                    Meta::Instance inst{ com };
-                    if (m_widget_creator.find(inst.typeName()) != m_widget_creator.end())
-                        m_widget_creator[inst.typeName()](inst.typeName(), inst);
-                }
-            }
-            else {
-                renderNodes(child_node->children());
-            }
-            ImGui::TreePop();
-        }
-    }
-}
-
-void ImGuiSceneHierarchy::renderNodes(const std::vector<Light*>& nodes)
-{
-    for (int i = 0; i < nodes.size(); i++)
-    {
-        auto child_node = nodes[i];
-        LightID child_id = child_node->ID();
-        std::string child_name = child_node->name();
-        std::string display_text = child_name + " (ID: " + std::to_string(child_id.id) + ")";
-
-        ImGuiTreeNodeFlags node_flags = ImGuiTreeNodeFlags_SpanAvailWidth;
-        if (g_context.scene->getPickedLight() && g_context.scene->getPickedLight()->ID()== child_id)
-            node_flags |= ImGuiTreeNodeFlags_Selected;
-        else
-            node_flags &= ~ImGuiTreeNodeFlags_Selected;
-
-        bool node_open = ImGui::TreeNodeEx((void*)(intptr_t)(i + std::hash<std::string>()(child_name)), node_flags, display_text.c_str());
-        if (ImGui::IsItemClicked(ImGuiMouseButton_Left)) {
-            g_context.scene->onPickedChanged(child_id);
-        }
-        if (ImGui::IsItemClicked(ImGuiMouseButton_Right)) {
-            g_context.scene->onPickedChanged(child_id);
-            m_parent->popUpMenu();
-        }
-        if (node_open)
-        {
-            // TODO light 对象也用component组合
-            //for (auto& com : child_node->getComponents()) {
-            //    auto refl = Meta::DynamicReflectionInstance(com->typeName(), com.get());
-            //    renderReflectionWidget(refl);
-            //}
-            ImGui::TreePop();
-        }
-    }
-}
-
-void ImGuiSceneHierarchy::renderReflectionWidget(const Meta::Instance& inst)
-{
-    static ImGuiTableFlags flags = ImGuiTableFlags_Resizable | ImGuiTableFlags_NoSavedSettings;
-    bool                   node_open = false;
-    node_open = ImGui::TreeNodeEx(inst.typeName().c_str(), ImGuiTreeNodeFlags_SpanFullWidth);
-    if (node_open)
-    {
-        if (m_widget_creator.find(inst.typeName()) != m_widget_creator.end())
-            m_widget_creator[inst.typeName()](inst.typeName(), inst.instance());
-
-        //for (int i = 0; i < meta_type.propertyCount(); i++) {
-        //    auto prop = meta_type.property(i);
-        //    if (prop.type == Meta::Property::Type::SequenceContainer) {
-        //        if (prop.isType<std::vector<std::shared_ptr<Mesh>>>()) {
-        //            std::vector<std::shared_ptr<Mesh>>& sub_meshes = prop.getValue<std::vector<std::shared_ptr<Mesh>>&>(inst.instance());
-        //            for (auto& sub_mesh_ptr : sub_meshes) {
-        //                std::string type_name = Meta::traits::typeName(*sub_mesh_ptr);
-        //                std::string name = std::to_string(sub_mesh_ptr->sub_mesh_idx);
-        //                if (m_widget_creator.find(type_name) != m_widget_creator.end())
-        //                    ;// m_widget_creator[type_name](name, var);
-        //            }
-        //        }
-        //        ImGui::TreePop();
-        //        return;
-        //    }
-        //    std::string type_name = prop.type_name;
-        //    std::string name = prop.name;
-        //    void* var = inst.getPropertyValue(i);
-        //    if (m_widget_creator.find(type_name) != m_widget_creator.end())
-        //        m_widget_creator[type_name](name, var);
-        //    else {
-        //        auto child_refl = Meta::Instance(type_name, var);
-        //        renderReflectionWidget(child_refl);
-        //    }
-        //}
-        ImGui::TreePop();
-    }
-}
-
 void ImGuiSceneHierarchy::render()
 {
     if (ImGui::Begin(("Scene Hierarchy"), nullptr, ImGuiWindowFlags_NoCollapse)) {
         ImGuiWindow* scene_hierarchy_window = ImGui::GetCurrentWindow();
 
         const std::vector<std::shared_ptr<Light>>& lights = g_context.scene->getLightManager()->lights();
-        std::vector<Light*> light_nodes(lights.size());
-        std::transform(lights.begin(), lights.end(), light_nodes.begin(), [](auto& light) {
-            return light.get();
-            });
-        renderNodes(light_nodes);
+        for (int i = 0; i < lights.size(); i++)
+        {
+            auto light = lights[i];
+            std::string child_name = light->name();
+            Meta::Instance inst{ *light };
+            if (m_widget_creator.find(Meta::MetaTypeOf<DirectionalLight>().typeName()) != m_widget_creator.end())
+                m_widget_creator[Meta::MetaTypeOf<DirectionalLight>().typeName()](child_name, inst);
+        }
 
         const std::vector<std::shared_ptr<GObject>>& objects = g_context.scene->getObjects();
-        std::vector<GObject*> object_nodes(objects.size());
-        std::transform(objects.begin(), objects.end(), object_nodes.begin(), [](auto& object) {
-            return object.get();
-            });
-        renderNodes(object_nodes);
+        for (int i = 0; i < objects.size(); i++)
+        {
+            auto object = objects[i];
+            std::string child_name = object->name();
+            Meta::Instance inst{ *object };
+            if (m_widget_creator.find(Meta::MetaTypeOf<GObject>().typeName()) != m_widget_creator.end())
+                m_widget_creator[Meta::MetaTypeOf<GObject>().typeName()](child_name, inst);
+        }
     }
     ImGui::End();
 }

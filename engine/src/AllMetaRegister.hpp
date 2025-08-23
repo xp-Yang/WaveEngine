@@ -134,6 +134,14 @@ inline void allMetaRegister()
 
 	registerClass<::AnimationComponent>("AnimationComponent");
 	registerClass<::RigidComponent>("RigidComponent");
+
+	registerClass<::DirectionalLight>("DirectionalLight")
+		.registerProperty(&::DirectionalLight::direction, "direction")
+		.registerProperty(&::DirectionalLight::aspectRatio, "aspectRatio")
+		.registerProperty(&::DirectionalLight::luminousColor, "luminousColor");
+	registerClass<::PointLight>("PointLight")
+		.registerProperty(&::PointLight::radius, "radius")
+		.registerProperty(&::PointLight::position, "position");
 #endif
 
 }
